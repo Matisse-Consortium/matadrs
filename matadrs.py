@@ -3,12 +3,12 @@ import time
 import datetime
 
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional
+from typing import List, Optional
 
-from do_reduction import reduction_pipeline
-from do_calibration import calibration_pipeline
-from do_average import averaging_pipeline
-from do_merge import merging_pipeline
+from libs.reduction import reduction_pipeline
+from libs.calibration import calibration_pipeline
+from libs.average import averaging_pipeline
+from libs.merge import merging_pipeline
 
 # TODO: Add functionality that clears all the paths before it write again, as to overwrite them
 
