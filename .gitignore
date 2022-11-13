@@ -1,0 +1,16 @@
+# Folders to ignore
+__pycache__/
+
+# Specific folders to ignore
+data/20190514/
+data/calib_spec_databases/
+data/cflux_calib.sof
+
+# Specific files to ignore
+libs/robust.py
+libs/avg_oifits.py
+libs/fluxcal.py
+libs/calib_BCD2.py
+libs/get_gravity_data.py
+libs/bcd_calibration.py
+libs/cflux_calibration_lmband.py
