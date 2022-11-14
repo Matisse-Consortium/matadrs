@@ -7,7 +7,6 @@ from shutil import copyfile
 from astropy.io import fits
 from typing import List, Optional
 
-"""Slight rewrite of Jozsef's code and folder wide application"""
 
 def oifits_patchwork(incoherent_file: str, coherent_file: str,
                      outfile_path: str,

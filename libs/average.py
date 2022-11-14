@@ -12,7 +12,7 @@ from plot import Plotter
 # NOTE: non chopped exposures 5-6. Do not average those together (For L-band)
 
 def single_average(root_dir: Path, mode: str,
-                   do_plots: Optional[bool] = False) -> None:
+                   do_plot: Optional[bool] = False) -> None:
         """Calls Jozsef's code and does a average over the files for one band to average
         the reduced and calibrated data
 
@@ -53,19 +53,21 @@ def single_average(root_dir: Path, mode: str,
                 print("------------------------------------------------------------")
                 fig = plt.figure()
                 ax = fig.add_subplot()
-                plot_vis = Plotter(outfile_path_vis).plot_vis(ax)
-                plt.savfig("TARGET_AVG_VIS_INT.pdf", format="pdf")
+                plot_vis = Plotter([outfile_path_vis]).plot_vis(ax)
+                plt.savefig(os.path.join(outfile_dir, "TARGET_AVG_VIS_INT.pdf"), format="pdf")
 
                 fig = plt.figure()
                 ax = fig.add_subplot()
-                plot_cphases = Plotter(outfile_path_cphases).plot_cphases(ax)
-                plt.savfig("TARGET_AVG_T3PHI_INT.pdf", format="pdf")
+                plot_cphases = Plotter([outfile_path_cphases]).plot_cphases(ax)
+                plt.savefig(os.path.join(outfile_dir, "TARGET_AVG_T3PHI_INT.pdf"), format="pdf")
+                print("Plots created!")
+                print("------------------------------------------------------------")
             print("Done!")
             print("------------------------------------------------------------")
 
 
 def averaging_pipeline(data_path: Path, stem_dir: Path,
-                       target_dir: Path, do_plots: Optional[bool] = False) -> None:
+                       target_dir: Path, do_plot: Optional[bool] = False) -> None:
         """Calls Jozsef's code sequentially to average the reduced and calibrated data
 
         Parameters
@@ -78,11 +80,11 @@ def averaging_pipeline(data_path: Path, stem_dir: Path,
         for mode in ["coherent", "incoherent"]:
             print(f"Averaging and BCD-calibration of {stem_dir} with mode={mode}")
             print("-----------------------------------------------------------")
-            single_average(root_dir, mode)
+            single_average(root_dir, mode, do_plot)
 
 
 if __name__ == "__main__":
     data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
     stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220422"
-    averaging_pipeline(data_path, stem_dir, target_dir)
+    averaging_pipeline(data_path, stem_dir, target_dir, do_plot=True)
 
