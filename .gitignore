@@ -2,8 +2,8 @@
 __pycache__/
 
 # Specific folders to ignore
-data/20190514/
-data/cflux_calib.sof
+data/
+depracated/
 
 # Specific files to ignore
 libs/robust.py
