@@ -4,22 +4,19 @@ import warnings
 from glob import glob
 from pathlib import Path
 from collections import deque
-from typing import Any, Dict, List, Union, Optional
+from typing import Optional
 
 from utils import get_path_descriptor, check_if_target
 from fluxcal import fluxcal
 
-"""Smart wrapper for Jozsef Varga's script fluxcal.py"""
-
 # Datapath to the directories to be calibrated, global variables
-CAL_DATABASE_DIR = os.path.join(os.getcwd(), "calib_spec_databases")
-CAL_DATABASE_FILES = ['vBoekelDatabase.fits', 'calib_spec_db_v10.fits',
-                      'calib_spec_db_v10_supplement.fits']
-CAL_DATABASE_PATHS = [os.path.join(CAL_DATABASE_DIR, i) for i in CAL_DATABASE_FILES]
-
-DATA_PATH = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
+DATABASE_DIR = os.path.join(os.path.dirname(__file__), "calib_spec_databases")
+DATABASE_FILES = ['vBoekelDatabase.fits', 'calib_spec_db_v10.fits',
+                  'calib_spec_db_v10_supplement.fits']
+DATABASE_PATHS = [os.path.join(DATABASE_DIR, databases) for databases in DATABASE_FILES]
 
 # TODO: Also make the CAL-CAL calibration
+
 
 def single_calibration(root_dir: Path, tar_dir: Path,
                        cal_dir: Path, mode_name: str) -> None:
@@ -63,18 +60,19 @@ def single_calibration(root_dir: Path, tar_dir: Path,
         os.makedirs(output_dir)
 
     # TODO: Fix the numbering of the (.fits)-files
-    for i, (target, calibrator) in enumerate(zip(targets, calibrators)):
+    for index, (target, calibrator) in enumerate(zip(targets, calibrators)):
         print("------------------------------------------------------------")
         print(f"Processing {os.path.basename(target)} with "\
               f"{os.path.basename(calibrator)}")
-        output_file = os.path.join(output_dir, f"TARGET_CAL_INT_000{i+1}.fits")
+        output_file = os.path.join(output_dir, f"TARGET_CAL_INT_000{index+1}.fits")
 
         fluxcal(target, calibrator, output_file,\
-                CAL_DATABASE_PATHS, mode=mode_name,
+                DATABASE_PATHS, mode=mode_name,
                 output_fig_dir=output_dir)
     print("------------------------------------------------------------")
     print("Done!")
     print("------------------------------------------------------------")
+
 
 def do_calibration(root_dir: Path, band_dir: Path,
                    mode_name: Optional[str] = "corrflux") -> None:
@@ -103,6 +101,7 @@ def do_calibration(root_dir: Path, band_dir: Path,
             warnings.warn("No 'TARGET_RAW_INT*'-files found. SKIPPED!")
             print("------------------------------------------------------------")
             continue
+
 
 def calibration_pipeline(root_dir: Path, both: Optional[bool] = True,
                          lband: Optional[bool] = False) -> None:
@@ -142,6 +141,7 @@ def calibration_pipeline(root_dir: Path, both: Optional[bool] = True,
 
 
 if __name__ == "__main__":
-    specific_path = "matisse/GTO/hd142666/PRODUCT/UTs/20220422"
-    calibration_pipeline(os.path.join(DATA_PATH, specific_path), both=True)
+    data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
+    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220422"
+    calibration_pipeline(os.path.join(data_path, stem_dir, "PRODUCTS", target_dir), both=True)
 

@@ -5,12 +5,9 @@ from glob import glob
 from pathlib import Path
 from shutil import copyfile
 from astropy.io import fits
-from typing import Any, Dict, List, Union, Optional
+from typing import List, Optional
 
 """Slight rewrite of Jozsef's code and folder wide application"""
-
-# The data path to the general data
-DATA_PATH = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
 
 def oifits_patchwork(incoherent_file: str, coherent_file: str,
                      outfile_path: str,
@@ -85,11 +82,11 @@ def oifits_patchwork(incoherent_file: str, coherent_file: str,
         del outhdul[0].header[dic['key']]
         outhdul[0].header[dic['key']] = dic['value']
 
-
     outhdul.flush()  # changes are written back to original.fits
     outhdul.close()
     inhdul.close()
     inhdul2.close()
+
 
 def single_merge(merge_dir: Path, bands: List[str]) -> None:
     """Makes a
@@ -136,6 +133,7 @@ def single_merge(merge_dir: Path, bands: List[str]) -> None:
             print("Done!")
             print("------------------------------------------------------------")
 
+
 def merging_pipeline(merge_dir: Path,
                      both: Optional[bool] = False,
                      lband: Optional[bool] = False) -> None:
@@ -158,10 +156,12 @@ def merging_pipeline(merge_dir: Path,
         bands = ["lband", "nband"]
     else:
         bands = ["lband"] if lband else ["nband"]
-
     single_merge(merge_dir, bands)
 
+
 if __name__ == "__main__":
-    specific_dir = "GTO/hd142666/PRODUCT/UTs/20190514"
-    merging_pipeline(os.path.join(DATA_PATH, specific_dir), both=True)
+    data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
+    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220422"
+    merging_pipeline(os.path.join(data_path, stem_dir, "PRODUCTS", target_dir), both=True)
+
 

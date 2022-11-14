@@ -2,13 +2,10 @@ import os
 
 from glob import glob
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from calib_BCD2 import calib_BCD
 from avg_oifits import avg_oifits
-
-# The data path to the general data
-DATA_PATH = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
 
 
 def single_average(root_dir: Path, band_dir: Path) -> None:
@@ -44,6 +41,7 @@ def single_average(root_dir: Path, band_dir: Path) -> None:
             calib_BCD(*fits_files, outfile_path_cphases, plot=False)
             print("Done!")
             print("------------------------------------------------------------")
+
 
 def averaging_pipeline(root_dir: Path,
                        both: Optional[bool] = False,
@@ -84,6 +82,7 @@ def averaging_pipeline(root_dir: Path,
 
 
 if __name__ == "__main__":
-    specific_dir = "matisse/GTO/hd142666/PRODUCT/UTs/20220422"
-    averaging_pipeline(os.path.join(DATA_PATH, specific_dir), both=True)
+    data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
+    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220420"
+    averaging_pipeline(os.path.join(data_path, stem_dir, "PRODUCTS", target_dir), both=True)
 

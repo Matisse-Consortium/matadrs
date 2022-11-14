@@ -1,19 +1,15 @@
 import os
 import time
 import datetime
-import subprocess
 
 from warnings import warn
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional
+from typing import List, Optional
 
 import mat_autoPipeline as mp
 
 # TODO: Look up high spectral binning and make savefile somehow show all
 # High spectral binning is 7, 49
-
-# The data path to the general data
-DATA_PATH = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
 
 
 def set_script_arguments(do_corr_flux: bool, array: str,
@@ -36,14 +32,12 @@ def set_script_arguments(do_corr_flux: bool, array: str,
         A string that contains the arguments, which are passed to the MATISSE-pipline
     """
     binning_L, binning_N = spectral_binning
-
     tel = 3 if array == "ATs" else 0
     flux = "corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2/" if do_corr_flux else ""
-
     paramL_lst = f"/spectralBinning={binning_L}/{flux}compensate='pb,rb,nl,if,bp,od'"
     paramN_lst = f"/replaceTel={tel}/{flux}spectralBinning={binning_N}"
-
     return paramL_lst, paramN_lst
+
 
 def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
                      array: str, mode: bool, band: str) -> None:
@@ -75,7 +69,6 @@ def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
     set_script_arguments()
     """
     start_time = time.time()
-
     path_lst = ["coherent" if mode else "incoherent", "lband" if band else "nband"]
     path = "/".join(path_lst)
     sub_dir = os.path.join(res_dir, path)
@@ -88,8 +81,8 @@ def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
         os.system(f"rm -r {os.path.join(res_dir, 'Iter1/*.rb')}")
         os.system(f"rm -r {os.path.join(sub_dir, '*.rb')}")
         print("Old (.sof)-files have been deleted!")
-    except Exception as e:
-        print(e)
+    # TODO: Make logger here
+    except Exception:
         warn(f"Removing of (.sof)- and (.rb)-files from {sub_dir} has failed!")
 
     if not os.path.exists(sub_dir):
@@ -104,15 +97,16 @@ def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
 
     try:
         os.system(f"mv -f {os.path.join(res_dir, 'Iter1/*.rb')} {sub_dir}")
-    except Exception as e:
+    # TODO: Make logger here
+    except Exception:
         print("Moving of files to {sub_dir} failed!")
-        print(e)
 
     # Takes the time at end of execution
     print("---------------------------------------------------------------------")
     print(f"Executed the {path_lst[0]} {path_lst[1]} reduction in"
           f" {datetime.timedelta(seconds=(time.time()-start_time))} hh:mm:ss")
     print("---------------------------------------------------------------------")
+
 
 def reduction_pipeline(raw_dir: Path, calib_dir: Path, res_dir: Path,
                        array: str, both: Optional[bool] = False,
@@ -140,30 +134,30 @@ def reduction_pipeline(raw_dir: Path, calib_dir: Path, res_dir: Path,
     --------
     single_reduction()
     """
+    overall_start_time = time.time()
     if both:
-        bands = [True, False]
+        band_bools = [True, False]
     else:
-        bands = [lband]
+        band_bools = [lband]
 
     if not os.path.exists(res_dir):
         os.makedirs(res_dir)
 
-    overall_start_time = time.time()
-
-    for i in [True, False]:
-        mode = "coherent" if i else "incoherent"
+    for mode_bools in [True, False]:
+        mode = "coherent" if mode_bools else "incoherent"
         print(f"Processing {mode} reduction")
         print("---------------------------------------------------------------------")
-        for j in bands:
+        for band in band_bools:
             single_reduction(raw_dir, calib_dir, res_dir, array,\
-                             mode=i, band=j)
+                             mode=mode_bools, band=band)
 
     print(f"Executed the overall reduction in"
           f" {datetime.timedelta(seconds=(time.time()-overall_start_time))} hh:mm:ss")
 
-if __name__ == "__main__":
-    specific_path = "GTO/hd142666/RAW/UTs/20220420"
-    raw_dir = calib_dir = os.path.join(DATA_PATH, specific_path)
-    res_dir = os.path.join(DATA_PATH, "GTO/hd142666/PRODUCT/UTs/20220420", "PRODUCTS")
 
+if __name__ == "__main__":
+    data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
+    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220420"
+    raw_dir = calib_dir = os.path.join(data_path, stem_dir, "RAW", target_dir)
+    res_dir = os.path.join(data_path, stem_dir, "PRODUCTS", target_dir)
     reduction_pipeline(raw_dir, calib_dir, res_dir, "UT", both=True)
