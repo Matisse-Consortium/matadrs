@@ -1,11 +1,13 @@
 import os
 import warnings
+import matplotlib.pyplot as plt
 
 from glob import glob
 from pathlib import Path
 from collections import deque
 from typing import Optional
 
+from plot import Plotter
 from utils import get_path_descriptor, check_if_target
 from fluxcal import fluxcal
 
@@ -19,7 +21,8 @@ DATABASE_PATHS = [os.path.join(DATABASE_DIR, databases) for databases in DATABAS
 
 
 def single_calibration(root_dir: Path, tar_dir: Path,
-                       cal_dir: Path, mode_name: str) -> None:
+                       cal_dir: Path, mode_name: str,
+                       do_plot: Optional[bool] = False) -> None:
     """The calibration for a target and a calibrator folder
 
     Parameters
@@ -69,13 +72,28 @@ def single_calibration(root_dir: Path, tar_dir: Path,
         fluxcal(target, calibrator, output_file,\
                 DATABASE_PATHS, mode=mode_name,
                 output_fig_dir=output_dir)
+
+    if do_plot:
+        print("------------------------------------------------------------")
+        print("Creating plots...")
+        fits_files = glob(os.path.join(output_dir, "*.fits"))
+        for fits_file in fits_files:
+            fig, (ax, bx) = plt.subplots(1, 2)
+            plot_fits = Plotter([fits_file])
+            plot_fits.plot_cphases(ax)
+            plot_fits.plot_corr_flux(bx)
+            plot_name = f"{os.path.basename(fits_file).split('.')[0]}.pdf"
+            plt.savefig(os.path.join(output_dir, plot_name), format="pdf")
+        print("Plots created!")
+
     print("------------------------------------------------------------")
     print("Done!")
     print("------------------------------------------------------------")
 
 
 def do_calibration(root_dir: Path, band_dir: Path,
-                   mode_name: Optional[str] = "corrflux") -> None:
+                   mode_name: Optional[str] = "corrflux",
+                   do_plot: Optional[bool] = False) -> None:
     """Takes two folders and calibrates their contents together
 
     Parameters
@@ -96,7 +114,8 @@ def do_calibration(root_dir: Path, band_dir: Path,
         if check_if_target(directory):
             for dir_rotated in sub_dirs_rotated:
                 single_calibration(root_dir, directory,
-                                   dir_rotated, mode_name=mode_name)
+                                   dir_rotated, mode_name=mode_name,
+                                   do_plot=do_plot)
         else:
             warnings.warn("No 'TARGET_RAW_INT*'-files found. SKIPPED!")
             print("------------------------------------------------------------")
@@ -105,13 +124,15 @@ def do_calibration(root_dir: Path, band_dir: Path,
 
 def calibration_pipeline(data_dir: Path, stem_dir: Path,
                          target_dir: Path, both: Optional[bool] = True,
-                         lband: Optional[bool] = False) -> None:
+                         lband: Optional[bool] = False,
+                         do_plot: Optional[bool] = False) -> None:
     """Does the full calibration for all of the "cal_dir" subdirectories
 
     Parameters
     ----------
-    root_dir: Path
-        The folder to be calibrated. Subdirectories will automatically be calibrated
+    data_dir: Path
+    stem_dir: Path
+    target_dir: Path
     both: bool, optional
         If both bands are to be calibrated, this has to be false for the "lband" option
         to be considered
@@ -130,7 +151,8 @@ def calibration_pipeline(data_dir: Path, stem_dir: Path,
                 print(f"Calibration of {band_dir}")
                 print(f"with mode_name={mode_name}")
                 print("------------------------------------------------------------")
-                do_calibration(root_dir, band_dir, mode_name=mode_name)
+                do_calibration(root_dir, band_dir,
+                               mode_name=mode_name, do_plot=do_plot)
     else:
         for mode, mode_name in modes.items():
             band = "lband" if lband else "nband"
@@ -138,11 +160,12 @@ def calibration_pipeline(data_dir: Path, stem_dir: Path,
             print(f"Calibration of {path}")
             print(f"with mode_name={mode_name}")
             print("------------------------------------------------------------")
-            do_calibration(root_dir, band_dir, mode_name=mode_name)
+            do_calibration(root_dir, band_dir,
+                           mode_name=mode_name, do_plot=do_plot)
 
 
 if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220422"
-    calibration_pipeline(data_dir, stem_dir, target_dir, both=True)
+    stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
+    calibration_pipeline(data_dir, stem_dir, target_dir, both=True, do_plot=True)
 
