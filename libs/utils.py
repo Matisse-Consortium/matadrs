@@ -41,13 +41,12 @@ def get_path_descriptor(root_dir: Path, descriptor: Path,
         The path for the output directory
     """
     mode_and_band = os.path.dirname(os.path.dirname(tar_dir)).split("/")[-2:]
-    mode_and_band = "/".join(mode_and_band)
     dir_name, time_stamp_sci, band = os.path.dirname(tar_dir).split('.')[:-1]
     dir_name = dir_name.split('/')[-1].replace("raw", "cal")
     time_cal = os.path.dirname(cal_dir).split('.')[-3]
     new_dir_name = '.'.join([descriptor, dir_name,
                              time_stamp_sci, band, time_cal, "rb"])
-    return os.path.join(root_dir, "calib", mode_and_band, new_dir_name)
+    return os.path.join(root_dir, "calib", mode_and_band[0], new_dir_name)
 
 
 if __name__ == "__main__":
