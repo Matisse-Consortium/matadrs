@@ -1,16 +1,11 @@
 import os
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
-from glob import glob
 from pathlib import Path
 from warnings import warn
-from astropy.io import fits
-from typing import Any, Dict, List, Optional, Union
-
-from do_readout import ReadoutFits
+from typing import List, Optional
+from readout import ReadoutFits
 
 # TODO: Make either model or fourier transform carry more info like the name of
 # the plot or similar -> Work more with classes
