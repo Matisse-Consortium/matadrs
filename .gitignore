@@ -14,3 +14,4 @@ libs/get_gravity_data.py
 libs/bcd_calibration.py
 libs/cflux_calibration_lmband.py
 libs/calib_spec_databases/
+libs/show_allred.py
