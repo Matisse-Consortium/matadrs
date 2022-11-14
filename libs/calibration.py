@@ -103,7 +103,8 @@ def do_calibration(root_dir: Path, band_dir: Path,
             continue
 
 
-def calibration_pipeline(root_dir: Path, both: Optional[bool] = True,
+def calibration_pipeline(data_dir: Path, stem_dir: Path,
+                         target_dir: Path, both: Optional[bool] = True,
                          lband: Optional[bool] = False) -> None:
     """Does the full calibration for all of the "cal_dir" subdirectories
 
@@ -118,6 +119,7 @@ def calibration_pipeline(root_dir: Path, both: Optional[bool] = True,
         If "both=False" and this is "True"", then lband will be calibrated, if
         "both=False" and this is "False", then nband will be calibrated
     """
+    root_dir = os.path.join(data_dir, stem_dir, "PRODUCTS", target_dir)
     modes, bands = {"coherent": "corrflux", "incoherent": "flux"},\
             ["lband", "nband"]
 
@@ -140,7 +142,7 @@ def calibration_pipeline(root_dir: Path, both: Optional[bool] = True,
 
 
 if __name__ == "__main__":
-    data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
+    data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
     stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220422"
-    calibration_pipeline(os.path.join(data_path, stem_dir, "PRODUCT", target_dir), both=True)
+    calibration_pipeline(data_dir, stem_dir, target_dir, both=True)
 
