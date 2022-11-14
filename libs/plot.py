@@ -20,6 +20,8 @@ from readout import ReadoutFits
 # TODO: Make single plot and multi plot decorator that can the quickly execute the plots
 # as well as store data in the class about the plot info
 
+# TODO: Make automatic plotting functionality with axarr -> take lengths for components
+
 # The data path to the general data
 DATA_PATH = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd142666/PRODUCT/UTs/20190514/"
 

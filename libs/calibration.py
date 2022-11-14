@@ -87,7 +87,7 @@ def do_calibration(root_dir: Path, band_dir: Path,
         The mode of calibration. Either "corrflux", "flux" or "both" depending
         if it is "coherent" or "incoherent". Default mode is "corrflux"
     """
-    sub_dirs = glob(os.path.join(band_dir, "*.rb"))
+    sub_dirs = glob(os.path.join(os.path.join(root_dir, band_dir), "*.rb"))
     sub_dirs.sort(key=lambda x: x.split(".")[~2])
     sub_dirs_rotated = deque(sub_dirs.copy())
     sub_dirs_rotated.rotate(1)
@@ -123,9 +123,8 @@ def calibration_pipeline(root_dir: Path, both: Optional[bool] = True,
 
     if both:
         for mode, mode_name in modes.items():
-            mode_dir = os.path.join(root_dir, mode)
             for band in bands:
-                band_dir = os.path.join(mode_dir, band)
+                band_dir = os.path.join(mode, band)
                 print(f"Calibration of {band_dir}")
                 print(f"with mode_name={mode_name}")
                 print("------------------------------------------------------------")
@@ -133,7 +132,7 @@ def calibration_pipeline(root_dir: Path, both: Optional[bool] = True,
     else:
         for mode, mode_name in modes.items():
             band = "lband" if lband else "nband"
-            band_dir = os.path.join(mode_dir, band)
+            band_dir = os.path.join(mode, band)
             print(f"Calibration of {path}")
             print(f"with mode_name={mode_name}")
             print("------------------------------------------------------------")
@@ -143,5 +142,5 @@ def calibration_pipeline(root_dir: Path, both: Optional[bool] = True,
 if __name__ == "__main__":
     data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
     stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220422"
-    calibration_pipeline(os.path.join(data_path, stem_dir, "PRODUCTS", target_dir), both=True)
+    calibration_pipeline(os.path.join(data_path, stem_dir, "PRODUCT", target_dir), both=True)
 
