@@ -6,15 +6,15 @@ import shutil
 import glob
 import numpy as np
 #from mcdb import Mcdb as mc
-from mcdb import VioletasExp as ve
-from mcdb import matutil as mu
-from mcdb import wutil as wu
-from show_allred import show_allred,show_allred_mosaic
+# from mcdb import VioletasExp as ve
+# from mcdb import matutil as mu
+# from mcdb import wutil as wu
+from show_allred import show_allred, show_allred_mosaic
 from pk2oifits import pk_2_oifits
 print(mat_autoPipeline.__file__)
 
-DATADIR = '/allegro6/matisse/varga/rawdata/'
-RESDIR_MAIN = '/allegro6/matisse/varga/matisse_red7/' #test_red
+DATADIR = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/GTO/hd142666/RAW"
+RESDIR_MAIN = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/GTO/hd142666/PRODUCTS/20190514"
 PROGRAMDIR = '/allegro6/matisse/varga/pro/'
 
 #test_red/matisse_red7: N spectralbinning_N = '7'
@@ -25,7 +25,7 @@ do_N = True
 do_reduction = True
 do_plot = True
 
-pipeline = 'ews' #'drs', 'ews' #
+pipeline = 'drs' #'drs', 'ews' #
 
 spectralbinning_L = '5' #DRS option (tried value = 5 and 10 - matisse_redM), default for LR: '1'
 spectralbinning_N = '7' #21 #DRS option, default for LR: '7' (tried value = 49 - matisse_redM and some matisse_red6)
@@ -239,4 +239,5 @@ for i in range(N_obs):
 
 print('EXTERMINATE!')
 
-
+if __name__ == "__main__":
+    help(pk_2_oifits)

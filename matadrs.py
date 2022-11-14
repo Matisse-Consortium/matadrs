@@ -12,15 +12,14 @@ from libs.merge import merging_pipeline
 
 # TODO: Add functionality that clears all the paths before it write again, as to overwrite them
 
-# The data path to the general data
-DATA_PATH = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
 
-def full_pipeline(raw_dirs: List[Path],
-                  arrays: Optional[List[str]] = [],
-                  res_dirs: Optional[List[Path]] = [],
-                  calib_dirs: Optional[List[Path]] = [],
-                  both_lst: Optional[List[bool]] = [],
-                  lbands: Optional[List[bool]] = []) -> None:
+def matadrs_pipeline(root_path: Path,
+                     raw_dirs: List[Path],
+                     arrays: Optional[List[str]] = [],
+                     res_dirs: Optional[List[Path]] = [],
+                     calib_dirs: Optional[List[Path]] = [],
+                     both_lst: Optional[List[bool]] = [],
+                     lbands: Optional[List[bool]] = []) -> None:
     """Combines all the facettes of data reduction into one executable function that takes
     a list of epochs and different datasets to be reduced via the MATISSE pipeline, then
     calibrated, merged and averaged
@@ -57,7 +56,7 @@ def full_pipeline(raw_dirs: List[Path],
     averaging_pipeline()
     """
     for i, raw_dir in enumerate(raw_dirs):
-        raw_dir = os.path.join(DATA_PATH, raw_dir)
+        raw_dir = os.path.join(root_path, raw_dir)
 
         if not arrays:
             if "ATs" in raw_dir:
@@ -86,11 +85,11 @@ def full_pipeline(raw_dirs: List[Path],
         start_time = time.time()
         print(f"Starting data improvement of {raw_dir}!")
         print("----------------------------------------------------------------------")
-#        reduction_pipeline(raw_dir, calib_dir, res_dir, array,
-#                           lband=lband, both=both)
-        calibration_pipeline(res_dir, lband=lband, both=both)
-        merging_pipeline(res_dir, lband=lband, both=both)
-        averaging_pipeline(res_dir, lband=lband, both=both)
+        reduction_pipeline(raw_dir, calib_dir, res_dir, array,
+                           lband=lband, both=both)
+        # calibration_pipeline(res_dir, lband=lband, both=both)
+        # merging_pipeline(res_dir, lband=lband, both=both)
+        # averaging_pipeline(res_dir, lband=lband, both=both)
         print("----------------------------------------------------------------------")
         print(f"Reduction, calibration, merging and averaging complete in "\
               f"{datetime.timedelta(seconds=(time.time()-start_time))} hh:mm:ss")
@@ -99,12 +98,7 @@ def full_pipeline(raw_dirs: List[Path],
 
 
 if __name__ == "__main__":
-    specific_path = "GTO/hd142666/RAW/"
-    uts = [os.path.join("UTs", i) for i in ["20190514", "20220420", "20220422"]]
-#    ats = ["medium/20190506", "medium/20220531",
-#           "medium/20220601", "small/20190323", "small/20190630"]
-#    ats = [os.path.join("ATs", i) for i in ats]
-    raw_dirs = []
-    raw_dirs.extend(uts)
-    raw_dirs = [os.path.join(specific_path, i) for i in raw_dirs]
-    full_pipeline(raw_dirs)
+    root_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd142666/RAW/"
+    uts = [os.path.join("UTs", folder) for folder in ["20190514", "20220420", "20220422"]]
+    matadrs_pipeline(root_path, uts)
+

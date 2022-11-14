@@ -1,4 +1,5 @@
 import os
+import warnings
 
 from glob import glob
 from pathlib import Path
@@ -9,7 +10,7 @@ from typing import Any, Dict, List, Union, Optional
 """Slight rewrite of Jozsef's code and folder wide application"""
 
 # The data path to the general data
-# DATA_PATH = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
+DATA_PATH = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
 
 def oifits_patchwork(incoherent_file: str, coherent_file: str,
                      outfile_path: str,
@@ -19,7 +20,7 @@ def oifits_patchwork(incoherent_file: str, coherent_file: str,
     if os.path.exists(incoherent_file):
         copyfile(incoherent_file, outfile_path)
     else:
-        raise RuntimeError('ERROR (oifits_patchwork): File not found: '+incoherent_file)
+        raise IOError('File not found: '+incoherent_file)
 
     outhdul  = fits.open(outfile_path, mode='update')
 
@@ -56,7 +57,7 @@ def oifits_patchwork(incoherent_file: str, coherent_file: str,
                 try:
                     outhdul['OI_FLUX'].data = inhdul['OI_FLUX'].data
                 except KeyError as e:
-                    pass
+                    warnings.warn("No 'oi_flux' has been found!")
 
             infile2 = coherent_file
             inhdul2 = fits.open(infile2, mode='readonly')
@@ -161,8 +162,6 @@ def merging_pipeline(merge_dir: Path,
     single_merge(merge_dir, bands)
 
 if __name__ == "__main__":
-    specific_dir = "/Users/scheuck/Documents/data/20190514"
-    # specific_dir = "GTO/hd142666/PRODUCT/UTs/20190514"
-    merging_pipeline(specific_dir)
-    # merging_pipeline(os.path.join(DATA_PATH, specific_dir), both=True)
+    specific_dir = "GTO/hd142666/PRODUCT/UTs/20190514"
+    merging_pipeline(os.path.join(DATA_PATH, specific_dir), both=True)
 
