@@ -9,8 +9,6 @@ from readout import ReadoutFits
 
 # TODO: Make either model or fourier transform carry more info like the name of
 # the plot or similar -> Work more with classes
-# TODO: Remove error bars from plots
-# TODO: Rework dump function into pickle dump
 
 # TODO: Implement plot save func
 
@@ -23,7 +21,6 @@ from readout import ReadoutFits
 # TODO: Make automatic plotting functionality with axarr -> take lengths for components
 
 # The data path to the general data
-DATA_PATH = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd142666/PRODUCT/UTs/20190514/"
 
 # Different baseline-configurations (small-, medium-, large) AT & UT.
 # Telescope names and "sta_index"
@@ -53,6 +50,9 @@ class Plotter:
                  save_path: Optional[Path] = "") -> None:
         """Initialises the class instance"""
         self.fits_files = fits_files
+        self.plot_name = "combined_files.pdf" if len(self.fits_file > 1)\
+            else f"{os.path.basename(self.fits_files[0]).split('.')[0]}.pdf"
+        self.components = []
 
         if len(self.fits_files) > 1:
             warn("There is more than one (.fits)-file detected."\
@@ -103,9 +103,10 @@ class Plotter:
             self.t3phista = self.readout.get_t3phi()[2]
 
             # Sets the descriptors of the telescopes' baselines and the closure # phases
-            self.tel_vis = np.array([("-".join([ALL_TELS[t]\
-                                         for t in duo])) for duo in self.vissta])
-            self.tel_t3phi = np.array([("-".join([ALL_TELS[t] for t in trio]))\
+            self.tel_vis = np.array([("-".join([ALL_TELS[telescope]\
+                                         for telescope in duo])) for duo in self.vissta])
+            self.tel_t3phi = np.array([("-".join([ALL_TELS[telescope]\
+                                                  for telescope in trio]))\
                                        for trio in self.t3phista])
 
             # Gets other important data
@@ -138,10 +139,11 @@ class Plotter:
             # self.baseline_distances = [np.sqrt(x**2+y**2)\
                                        # for x, y in zip(self.ucoords, self.vcoords)]
         self.wl = self.wl[self.cutoff_low:self.cutoff_high]
-        self.all_flux = [i[self.cutoff_low:self.cutoff_high] for i in self.all_flux]
-        self.all_vis = [i[self.cutoff_low: self.cutoff_high] for i in self.all_vis]
-        self.all_vis2 = [i[self.cutoff_low: self.cutoff_high] for i in self.all_vis2]
-        self.all_t3phi = [i[self.cutoff_low: self.cutoff_high] for i in self.all_t3phi]
+        self.all_flux = [flux[self.cutoff_low:self.cutoff_high] for flux in self.all_flux]
+        self.all_vis = [vis[self.cutoff_low: self.cutoff_high] for vis in self.all_vis]
+        self.all_vis2 = [vis2[self.cutoff_low: self.cutoff_high] for vis2 in self.all_vis2]
+        self.all_t3phi = [cphases[self.cutoff_low: self.cutoff_high]\
+                          for cphases in self.all_t3phi]
 
     def get_plot_lims(self, data: List):
         """Gets the low and high limit for a plot from its data
@@ -167,7 +169,7 @@ class Plotter:
                 return linestyle
 
         if all(linestyle in linestyles in already_chosen_linestyles):
-            raise RuntimeError("No linestyle to pick as too many have been picked already!")
+            raise RuntimeError("No linestyle to pick as all have been picked already!")
 
     def plot_data(self, ax, data: List, data_name: str,
                   tel_data: Optional[List] = [],
@@ -193,20 +195,20 @@ class Plotter:
             180 deg for better visualisation
         """
         already_chosen_linestyles = []
-        for i, dataset in enumerate(data):
+        for index, dataset in enumerate(data):
             if (data_name == "vis") or (data_name == "vis2")\
                or (data_name == "corr_flux"):
                 if not tel_data:
                     raise IOError("For this dataset 'tel_data' is needed!")
-                baseline = np.around(np.sqrt(self.all_ucoords[i]**2+\
-                                             self.all_vcoords[i]**2), 2)
-                pas = np.around((np.degrees(
-                    np.arctan2(self.all_vcoords[i], self.all_ucoords[i]))-90)*-1, 2)
-                label = fr"{tel_data[i]} $B_p$={baseline} m $\phi={pas}^\circ$"
+                baseline = np.around(np.sqrt(self.all_ucoords[index]**2+\
+                                             self.all_vcoords[index]**2), 2)
+                pas = np.around((np.degrees(np.arctan2(self.all_vcoords[index],
+                                                       self.all_ucoords[index]))-90)*-1, 2)
+                label = fr"{tel_data[index]} $B_p$={baseline} m $\phi={pas}^\circ$"
             elif data_name == "cphases":
                 if not tel_data:
                     raise IOError("For this dataset 'tel_data' is needed!")
-                label = tel_data[i]
+                label = tel_data[index]
             elif data_name == "flux":
                 label = None
             else:
@@ -215,14 +217,14 @@ class Plotter:
             if data_name == "cphases":
                 if unwrap:
                     dataset = np.unwrap(dataset, period=180)
-                if i % 4 == 0:
+                if index % 4 == 0:
                     linestyle = self.get_plot_linestyle(already_chosen_linestyles)
                     already_chosen_linestyles.append(linestyle)
             elif data_name == "flux":
                 linestyle = "-"
                 already_chosen_linestyles.append(linestyle)
             else:
-                if i % 6 == 0:
+                if index % 6 == 0:
                     linestyle = self.get_plot_linestyle(already_chosen_linestyles)
                     already_chosen_linestyles.append(linestyle)
 
@@ -254,61 +256,90 @@ class Plotter:
         ax.set_ylim(plot_lims)
         ax.legend(loc=2, prop={'size': 6}, ncol=ncol)
 
-    def plot_flux(self, ax) -> None:
-        """Plots the flux
+    def _make_component(self, data: List, data_name: str,
+                        tel_data: Optional[List] = [],
+                        lband: Optional[bool] = False,
+                        unwrap: Optional[bool] = False):
+        """Makes a plot component
 
         Parameters
         ----------
-        ax
-            The matplotlib axis to be used for the plot
-        """
-        self.plot_data(ax, self.all_flux, "flux")
+        data: List
+            The plots dataset
+        data_name: str
+            The name of the data to be plotted. Determines the legend- and plot labels
+        tel_data: List, optional
+            The telescops' names
+        lband: bool, optional
+            This specifies the axis used for cutoff, if set to "True" then region between
+            L&M band, which has high peaks, is ignored
+        unwrap: bool, optional
+            This can only be activated if "data_name == cphase". It unwraps the phase from
+            180 deg for better visualisation
 
-    def plot_vis(self, ax, lband: Optional[bool] = False) -> None:
+        Returns
+        -------
+        Dict
+            The component's information
+        """
+        return {"data": data, "data_name": data_name,
+                "tel_data": tel_data, "lband": lband, "unwrap": unwrap}
+
+    def plot(self, save_plt: Optional[bool] = False):
+        """Makes the plot from the components"""
+        number_of_plots = len(self.components)
+        columns = 3 if number_of_plots >= 5 else 2
+        rows = np.round(number_of_plots/3).astype(int)
+        fig, axarr = (rows, columns)
+        for i, (j, component) in zip(range(rows), enumerate(self.components)):
+            self.plot_data(axarr[i][j], *component.values())
+
+        fig.tight_layout()
+
+        if save_plt:
+            plt.savefig(os.path.join(self.save_path, self.plot_name), format="pdf")
+        else:
+            plt.show()
+
+    def add_flux(self) -> None:
+        """Plots the flux """
+        self.components.append(self._make_component(self.all_flux, "flux"))
+
+    def add_vis(self, lband: Optional[bool] = False) -> None:
         """Plots all the visibilities/correlated_fluxes
 
         Parameters
         ----------
-        ax
-            The matplotlib axis to be used for the plot
         lband: bool, optional
             This specifies the axis used for cutoff, if set to "True" then region between
             L&M band, which has high peaks, is ignored
         """
-        self.plot_data(ax, self.all_vis, "vis", self.all_tel_vis, lband)
+        self.components.append(self._make_component(self.all_vis, "vis",
+                                                    self.all_tel_vis, lband))
 
-    def plot_corr_flux(self, ax, lband: Optional[bool] = False) -> None:
+    def add_corr_fluxes(self, lband: Optional[bool] = False) -> None:
         """Plots all the visibilities/correlated_fluxes in one plot
 
         Parameters
         ----------
-        ax
-            The matplotlib axis to be used for the plot
         lband: bool, optional
             This specifies the axis used for cutoff, if set to "True" then region between
             L&M band, which has high peaks, is ignored
         """
-        self.plot_data(ax, self.all_vis, "corr_flux", self.all_tel_vis, lband)
+        self.components.append(self._make_component(self.all_vis, "corr_flux",
+                                                    self.all_tel_vis, lband))
 
-    def plot_vis2(self, ax, lband: Optional[bool] = False) -> None:
-        """Plots all the visibilities squared in one plot
+    def add_vis2(self, lband: Optional[bool] = False) -> None:
+        """Plots all the visibilities squared in one plot"""
+        self.components.append(_make_component(self.all_vis2, "vis2",
+                                               self.all_tel_vis, lband))
 
-        Parameters
-        ----------
-        ax
-            The matplotlib axis to be used for the plot
-        """
-        self.plot_data(ax, self.all_vis2, "vis2", self.all_tel_vis, lband)
-
-    def plot_cphases(self, ax,
-                     lband: Optional[bool] = False,
+    def add_cphases(self, lband: Optional[bool] = False,
                      unwrap: Optional[bool] = False) -> None:
         """Plots all the closure phases into one plot
 
         Parameters
         ----------
-        ax
-            The matplotlib axis to be used for the plot
         lband: bool, optional
             This specifies the axis used for cutoff, if set to "True" then region between
             L&M band, which has high peaks, is ignored
@@ -316,7 +347,8 @@ class Plotter:
             This can only be activated if "data_name == cphase". It unwraps the phase from
             180 deg for better visualisation
         """
-        self.plot_data(ax, self.all_t3phi, "cphases", self.all_tel_t3phi, lband, unwrap)
+        self.components.append(self._make_component(self.all_t3phi, "cphases",
+                                                    self.all_tel_t3phi, lband, unwrap))
 
     def plot_vis24baseline(self, ax, do_fit: Optional[bool] = True) -> None:
         """ Plot the mean visibility for one certain wavelength and fit it with a
@@ -532,9 +564,9 @@ def make_uv_plot(dic,ax,verbose=False,annotate=True,B_lim=(np.nan,np.nan),figsiz
 
 
 if __name__ == ('__main__'):
-    specific_path = "combined_and_averaged/split"
-    fits_files_N = ["2019-05-14T05_28_03.2019-05-14T04_52_11_cal_avg_N_cphases.fits"]
-    fits_files_N = [os.path.join(DATA_PATH, specific_path, i) for i in fits_files_N]
+    data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
+    specific_path = "matisse/GTO/hd142666/PRODUCT/UTs/20190514/"
+    fits_files_N = [""]
     plotter_N = Plotter(fits_files_N)
     fig, axarr = plt.subplots(1, 2)
     ax, bx = axarr.flatten()
