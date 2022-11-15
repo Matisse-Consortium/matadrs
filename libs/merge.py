@@ -19,9 +19,7 @@ def oifits_patchwork(incoherent_file: str, coherent_file: str, outfile_path: str
 
     outhdul  = fits.open(outfile_path, mode='update')
 
-    n_oi_types_list = len(oi_types_list)
-    for i in range(oi_types_list):
-        oi_types = oi_types_list[i]
+    for oi_types in oi_types_list:
         inhdul = fits.open(incoherent_file, mode='readonly')
 
         for oi_type in oi_types:
@@ -62,19 +60,17 @@ def oifits_patchwork(incoherent_file: str, coherent_file: str, outfile_path: str
 
             #look up visphi
             if 'visphi' in oi_types:
-                visphi = inhdul2['OI_VIS'].data['VISPHI']
-                visphierr = inhdul2['OI_VIS'].data['VISPHIERR']
                 #match station indices
-                sta_index_visamp = outhdul['OI_VIS'].data['STA_INDEX']
-                sta_index_visamp = [ list(item) for item in sta_index_visamp ]
-                sta_index_visphi = inhdul2['OI_VIS'].data['STA_INDEX']
-                sta_index_visphi = [ list(item) for item in sta_index_visphi ]
-                for k in range(len(sta_index_visamp)):
-                    for l in range(len(sta_index_visphi)):
-                        if ((sta_index_visamp[k] == sta_index_visphi[l]) \
-                            or (sta_index_visamp[k][::-1] == sta_index_visphi[l] )):
-                            outhdul['OI_VIS'].data['VISPHI'][k] = inhdul2['OI_VIS'].data['VISPHI'][l]
-                            outhdul['OI_VIS'].data['VISPHIERR'][k] = inhdul2['OI_VIS'].data['VISPHIERR'][l]
+                sta_indicies_visamp = outhdul['OI_VIS'].data['STA_INDEX']
+                sta_indicies_visamp = [list(item) for item in sta_indicies_visamp]
+                sta_indicies_visphi = inhdul2['OI_VIS'].data['STA_INDEX']
+                sta_indicies_visphi = [list(item) for item in sta_indicies_visphi]
+                for i, sta_index_visamp in enumerate(sta_indicies_visamp):
+                    for j, sta_index_visphi in enumerate(sta_indicies_visphi):
+                        if ((sta_index_visamp == sta_index_visphi) \
+                            or (sta_index_visamp[::-1] == sta_index_visphi)):
+                            outhdul['OI_VIS'].data['VISPHI'][i] = inhdul2['OI_VIS'].data['VISPHI'][j]
+                            outhdul['OI_VIS'].data['VISPHIERR'][i] = inhdul2['OI_VIS'].data['VISPHIERR'][j]
 
     for dic in headerval:
         del outhdul[0].header[dic['key']]
@@ -85,81 +81,46 @@ def oifits_patchwork(incoherent_file: str, coherent_file: str, outfile_path: str
     inhdul.close()
     inhdul2.close()
 
-
-def single_merge(merge_dir: Path, bands: List[str]) -> None:
-    """Makes a
-
-    Parameters
-    ----------
-    merge_dir: Path
-        The folder in which the calibrated data is contained
-    bands: List[str]
-        A list containing the bands to be averaged over
-    """
-    for i in bands:
-        incoherent_dir = glob(os.path.join(merge_dir,
-                                               f"incoherent/{i}/calib", "*.rb"))
-        coherent_dir = [os.path.join(merge_dir,
-                                         f"coherent/{i}/calib", os.path.basename(x))\
-                            for x in incoherent_dir]
-
-        outfile_dir = os.path.join(merge_dir, "combined", i)
-
-        for j, k in enumerate(incoherent_dir):
-            print(f"Merging {os.path.basename(k)} with "\
-                  f"{os.path.basename(coherent_dir[j])}")
-            print("------------------------------------------------------------")
-            outfile_dir = os.path.join(merge_dir, "combined",\
-                                       i, os.path.basename(k))
+def merge_vis_and_cphases(merge_dir: Path, outfile_dir: Path) -> None:
+    """Merges the vis and the cphases (.fits)-files created by the averaging"""
+    cphases_file = glob(os.path.join(merge_dir, "*T3*.fits"))
+    vis_file = glob(os.path.join(merge_dir, "*VIS*.fits"))
+    oifits_patchwork(cphases_file, vis_file, outfile_dir)
 
 
-            if not os.path.exists(outfile_dir):
-                os.makedirs(outfile_dir)
-
-            incoherent_fits_files = glob(os.path.join(k, "*.fits"))
-            incoherent_fits_files.sort(key=lambda x: x[-8:])
-            coherent_fits_files = glob(os.path.join(coherent_dir[j], "*.fits"))
-            coherent_fits_files.sort(key=lambda x: x[-8:])
-
-            for l, m in enumerate(incoherent_fits_files):
-                print(f"Processing {os.path.basename(m)} with "\
-                      f"{os.path.basename(coherent_fits_files[l])}")
-                outfile_path = os.path.join(outfile_dir, os.path.basename(m))
-                oifits_patchwork(m, coherent_fits_files[l], outfile_path)
-
-            print("------------------------------------------------------------")
-            print("Done!")
-            print("------------------------------------------------------------")
-
-
-def merging_pipeline(merge_dir: Path,
-                     both: Optional[bool] = False,
-                     lband: Optional[bool] = False) -> None:
+def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     """This merges two (.fits)-files together into one, i.e. the  "incoherent"
     and the "coherent" files
 
     Parameters
     ----------
-    merge_dir: Path
+    data_dir: Path
         The directory in which the files are that should be merged, i.e. "incoherent" and
         "coherent" files
-    both: bool, optional
-        If both bands are to be merged, this has to be false for the "lband" option to be
-        considered
-    lband: bool, optional
-        If "both=False" and this is "True"", then lband will be merged , if
-        "both=False" and this is "False", then nband will be merged
+    stem_dir: Path
+    target_dir: Path
     """
-    if both:
-        bands = ["lband", "nband"]
-    else:
-        bands = ["lband"] if lband else ["nband"]
-    single_merge(merge_dir, bands)
+    root_dir = os.path.join(data_dir, stem_dir, "PRODUCTS", target_dir)
+    merge_dir = os.path.join(root_dir, "bcd_and_averaged")
+    outfile_dir = os.path.join(root_dir, "combined")
+    if not os.path.exists(outfile_dir):
+        os.makedirs(outfile_dir)
+
+    incoherent_dir = glob(os.path.join(merge_dir, "incoherent", "*.rb"))
+    coherent_dir = [dir.replace("incoherent", "coherent") for dir in incoherent_dir]
+
+    for incoherent_file in incoherent_dir:
+        print(os.path.dirname(incoherent_file))
+        # oifits_patchwork(m, coherent_fits_files[l], outfile_path)
+
+        print("------------------------------------------------------------")
+        print("Done!")
+        print("------------------------------------------------------------")
 
 
 if __name__ == "__main__":
-    data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220422"
-    merging_pipeline(os.path.join(data_path, stem_dir, "PRODUCTS", target_dir), both=True)
+    data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
+    stem_dir, target_dir = "matisse/GTO/hd163296/", "UTs/20190323"
+    merging_pipeline(data_dir, stem_dir, target_dir)
 
 
