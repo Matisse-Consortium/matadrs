@@ -1,232 +1,0 @@
-rm: cannot remove '/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/coherent/lband/*.rb': No such file or directory
-Processing coherent reduction
----------------------------------------------------------------------
-Old (.sof)-files have been deleted!
-------------------------------------------------------------------------
-Raw Data Directory or file list:         /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/RAW/ATs/20190323
-Calibration Directory:                   /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/RAW/ATs/20190323
-Results Directory:                       /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323
-Number of Cores:                         6
-Maximum Number of Iteration:             1
-------------------------------------------------------------------------
-Raw directory given
-Sorting files according to constraints...
-Working on files:   0%|          | 0/32 [00:00<?, ? files/s]Working on files:  47%|████▋     | 15/32 [00:00<00:00, 144.99 files/s]Working on files:  94%|█████████▍| 30/32 [00:00<00:00, 95.23 files/s] Working on files: 100%|██████████| 32/32 [00:00<00:00, 102.01 files/s]
-Determining the number of reduction blocks...
-Found 2 reduction blocks.
-
-Iteration  1
------------------------
-listing reduction blocks...
-listing files in the reduction blocks...
-listing actions in the reduction blocks...
-Searching GRA4MAT data...
-listing calibrations in the reduction blocks...
-Working on:   0%|          | 0/2 [00:00<?, ? block/s]Working on:  50%|█████     | 1/2 [00:00<00:00,  1.84 block/s]Working on: 100%|██████████| 2/2 [00:00<00:00,  3.66 block/s]
-done.
-listing calibrations from previous iteration in the reduction blocks...
-creating the sof files and directories...
-
-Testing if last reduction went through...
-sof file /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:41:19.HAWAII-2RG.sof does not exist. Creating it...
-outputDir /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_41_19.HAWAII-2RG.rb does not exist. Creating it...
-
-
-Testing if last reduction went through...
-sof file /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:53:41.HAWAII-2RG.sof does not exist. Creating it...
-outputDir /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_53_41.HAWAII-2RG.rb does not exist. Creating it...
-
-Reduction Blocks to process:             2
-esorex --output-dir=/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_41_19.HAWAII-2RG.rb mat_raw_estimates  --spectralBinning=5 --corrFlux=TRUE --useOpdMod=TRUE --coherentAlgo=2 --compensate='pb,rb,nl,if,bp,od' --tartyp=57 --hampelFilterKernel=10 /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:41:19.HAWAII-2RG.sof
-esorex --output-dir=/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_53_41.HAWAII-2RG.rb mat_raw_estimates  --spectralBinning=5 --corrFlux=TRUE --useOpdMod=TRUE --coherentAlgo=2 --compensate='pb,rb,nl,if,bp,od' --tartyp=57 --hampelFilterKernel=10 /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:53:41.HAWAII-2RG.sof
-rm: cannot remove '/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/*.rb': No such file or directory
-rm: cannot remove '/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/coherent/nband/*.rb': No such file or directory
-Reduction Blocks processed:              2
-Reduction Blocks not processed:          0
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
- 
-No more iteration to do
------------------------
- 
-Processing summary:
- 
-2019-03-23T08:41:19      HAWAII-2RG     ACTION_MAT_RAW_ESTIMATES       Processing done at iteration 1
-2019-03-23T08:53:41      HAWAII-2RG     ACTION_MAT_RAW_ESTIMATES       Processing done at iteration 1
----------------------------------------------------------------------
-Executed the coherent lband reduction in 0:01:56.834507 hh:mm:ss
----------------------------------------------------------------------
-Old (.sof)-files have been deleted!
-------------------------------------------------------------------------
-Raw Data Directory or file list:         /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/RAW/ATs/20190323
-Calibration Directory:                   /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/RAW/ATs/20190323
-Results Directory:                       /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323
-Number of Cores:                         6
-Maximum Number of Iteration:             1
-------------------------------------------------------------------------
-Raw directory given
-Sorting files according to constraints...
-Working on files:   0%|          | 0/32 [00:00<?, ? files/s]Working on files:  47%|████▋     | 15/32 [00:00<00:00, 144.62 files/s]Working on files:  94%|█████████▍| 30/32 [00:00<00:00, 108.33 files/s]Working on files: 100%|██████████| 32/32 [00:00<00:00, 113.87 files/s]
-Determining the number of reduction blocks...
-Found 2 reduction blocks.
-
-Iteration  1
------------------------
-listing reduction blocks...
-listing files in the reduction blocks...
-listing actions in the reduction blocks...
-Searching GRA4MAT data...
-listing calibrations in the reduction blocks...
-Working on:   0%|          | 0/2 [00:00<?, ? block/s]Working on: 100%|██████████| 2/2 [00:00<00:00, 445.92 block/s]
-done.
-listing calibrations from previous iteration in the reduction blocks...
-creating the sof files and directories...
-
-Testing if last reduction went through...
-sof file /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:41:19.AQUARIUS.sof does not exist. Creating it...
-outputDir /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_41_19.AQUARIUS.rb does not exist. Creating it...
-
-
-Testing if last reduction went through...
-sof file /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:53:41.AQUARIUS.sof does not exist. Creating it...
-outputDir /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_53_41.AQUARIUS.rb does not exist. Creating it...
-
-Reduction Blocks to process:             2
-esorex --output-dir=/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_41_19.AQUARIUS.rb mat_raw_estimates  --replaceTel=3 --corrFlux=TRUE --useOpdMod=TRUE --coherentAlgo=2 --spectralBinning=7 /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:41:19.AQUARIUS.sof
-esorex --output-dir=/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_53_41.AQUARIUS.rb mat_raw_estimates  --replaceTel=3 --corrFlux=TRUE --useOpdMod=TRUE --coherentAlgo=2 --spectralBinning=7 /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:53:41.AQUARIUS.sof
-rm: cannot remove '/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/*.rb': No such file or directory
-rm: cannot remove '/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/incoherent/lband/*.rb': No such file or directory
-Reduction Blocks processed:              2
-Reduction Blocks not processed:          0
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
- 
-No more iteration to do
------------------------
- 
-Processing summary:
- 
-2019-03-23T08:41:19      AQUARIUS       ACTION_MAT_RAW_ESTIMATES       Processing done at iteration 1
-2019-03-23T08:53:41      AQUARIUS       ACTION_MAT_RAW_ESTIMATES       Processing done at iteration 1
----------------------------------------------------------------------
-Executed the coherent nband reduction in 0:13:32.795589 hh:mm:ss
----------------------------------------------------------------------
-Processing incoherent reduction
----------------------------------------------------------------------
-Old (.sof)-files have been deleted!
-------------------------------------------------------------------------
-Raw Data Directory or file list:         /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/RAW/ATs/20190323
-Calibration Directory:                   /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/RAW/ATs/20190323
-Results Directory:                       /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323
-Number of Cores:                         6
-Maximum Number of Iteration:             1
-------------------------------------------------------------------------
-Raw directory given
-Sorting files according to constraints...
-Working on files:   0%|          | 0/32 [00:00<?, ? files/s]Working on files:  44%|████▍     | 14/32 [00:00<00:00, 131.97 files/s]Working on files:  88%|████████▊ | 28/32 [00:00<00:00, 94.16 files/s] Working on files: 100%|██████████| 32/32 [00:00<00:00, 102.36 files/s]
-Determining the number of reduction blocks...
-Found 2 reduction blocks.
-
-Iteration  1
------------------------
-listing reduction blocks...
-listing files in the reduction blocks...
-listing actions in the reduction blocks...
-Searching GRA4MAT data...
-listing calibrations in the reduction blocks...
-Working on:   0%|          | 0/2 [00:00<?, ? block/s]Working on: 100%|██████████| 2/2 [00:00<00:00, 416.95 block/s]
-done.
-listing calibrations from previous iteration in the reduction blocks...
-creating the sof files and directories...
-
-Testing if last reduction went through...
-sof file /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:41:19.HAWAII-2RG.sof does not exist. Creating it...
-outputDir /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_41_19.HAWAII-2RG.rb does not exist. Creating it...
-
-
-Testing if last reduction went through...
-sof file /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:53:41.HAWAII-2RG.sof does not exist. Creating it...
-outputDir /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_53_41.HAWAII-2RG.rb does not exist. Creating it...
-
-Reduction Blocks to process:             2
-esorex --output-dir=/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_41_19.HAWAII-2RG.rb mat_raw_estimates  --spectralBinning=5 --compensate='pb,rb,nl,if,bp,od' --useOpdMod=FALSE --tartyp=57 --hampelFilterKernel=10 /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:41:19.HAWAII-2RG.sof
-esorex --output-dir=/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_53_41.HAWAII-2RG.rb mat_raw_estimates  --spectralBinning=5 --compensate='pb,rb,nl,if,bp,od' --useOpdMod=FALSE --tartyp=57 --hampelFilterKernel=10 /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:53:41.HAWAII-2RG.sof
-rm: cannot remove '/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/*.rb': No such file or directory
-rm: cannot remove '/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/incoherent/nband/*.rb': No such file or directory
-Reduction Blocks processed:              2
-Reduction Blocks not processed:          0
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
- 
-No more iteration to do
------------------------
- 
-Processing summary:
- 
-2019-03-23T08:41:19      HAWAII-2RG     ACTION_MAT_RAW_ESTIMATES       Processing done at iteration 1
-2019-03-23T08:53:41      HAWAII-2RG     ACTION_MAT_RAW_ESTIMATES       Processing done at iteration 1
----------------------------------------------------------------------
-Executed the incoherent lband reduction in 0:07:59.617099 hh:mm:ss
----------------------------------------------------------------------
-Old (.sof)-files have been deleted!
-------------------------------------------------------------------------
-Raw Data Directory or file list:         /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/RAW/ATs/20190323
-Calibration Directory:                   /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/RAW/ATs/20190323
-Results Directory:                       /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323
-Number of Cores:                         6
-Maximum Number of Iteration:             1
-------------------------------------------------------------------------
-Raw directory given
-Sorting files according to constraints...
-Working on files:   0%|          | 0/32 [00:00<?, ? files/s]Working on files:  28%|██▊       | 9/32 [00:00<00:00, 78.28 files/s]Working on files:  78%|███████▊  | 25/32 [00:00<00:00, 119.88 files/s]Working on files: 100%|██████████| 32/32 [00:00<00:00, 119.78 files/s]
-Determining the number of reduction blocks...
-Found 2 reduction blocks.
-
-Iteration  1
------------------------
-listing reduction blocks...
-listing files in the reduction blocks...
-listing actions in the reduction blocks...
-Searching GRA4MAT data...
-listing calibrations in the reduction blocks...
-Working on:   0%|          | 0/2 [00:00<?, ? block/s]Working on: 100%|██████████| 2/2 [00:00<00:00, 446.61 block/s]
-done.
-listing calibrations from previous iteration in the reduction blocks...
-creating the sof files and directories...
-
-Testing if last reduction went through...
-sof file /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:41:19.AQUARIUS.sof does not exist. Creating it...
-outputDir /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_41_19.AQUARIUS.rb does not exist. Creating it...
-
-
-Testing if last reduction went through...
-sof file /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:53:41.AQUARIUS.sof does not exist. Creating it...
-outputDir /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_53_41.AQUARIUS.rb does not exist. Creating it...
-
-Reduction Blocks to process:             2
-esorex --output-dir=/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_41_19.AQUARIUS.rb mat_raw_estimates  --replaceTel=3 --spectralBinning=7 --useOpdMod=TRUE /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:41:19.AQUARIUS.sof
-esorex --output-dir=/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08_53_41.AQUARIUS.rb mat_raw_estimates  --replaceTel=3 --spectralBinning=7 --useOpdMod=TRUE /data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/Iter1/mat_raw_estimates.2019-03-23T08:53:41.AQUARIUS.sof
-Reduction Blocks processed:              2
-Reduction Blocks not processed:          0
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
-Object delSgr not found in MDFC catalog
- 
-No more iteration to do
------------------------
- 
-Processing summary:
- 
-2019-03-23T08:41:19      AQUARIUS       ACTION_MAT_RAW_ESTIMATES       Processing done at iteration 1
-2019-03-23T08:53:41      AQUARIUS       ACTION_MAT_RAW_ESTIMATES       Processing done at iteration 1
----------------------------------------------------------------------
-Executed the incoherent nband reduction in 0:13:37.745347 hh:mm:ss
----------------------------------------------------------------------
-Executed the overall reduction in 0:37:06.993891 hh:mm:ss

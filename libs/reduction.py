@@ -13,6 +13,7 @@ import mat_autoPipeline as mp
 
 
 def set_script_arguments(do_corr_flux: bool, array: str,
+                         lband: Optional[bool] = False,
                          spectral_binning: Optional[List] = [5, 7]) -> str:
     """Sets the arguments that are then passed to the 'mat_autoPipeline.py'
     script
@@ -33,7 +34,8 @@ def set_script_arguments(do_corr_flux: bool, array: str,
     """
     binning_L, binning_N = spectral_binning
     tel = 3 if array == "ATs" else 0
-    flux = "corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2/" if do_corr_flux else ""
+    opd_mod = "useOpdMod=FALSE/" if lband else "useOpdMod=TRUE/"
+    flux = f"corrFlux=TRUE/{opd_mod}coherentAlgo=2/" if do_corr_flux else ""
     paramL_lst = f"/spectralBinning={binning_L}/{flux}compensate='pb,rb,nl,if,bp,od'"
     paramN_lst = f"/replaceTel={tel}/{flux}spectralBinning={binning_N}"
     return paramL_lst, paramN_lst
@@ -72,7 +74,7 @@ def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
     path_lst = ["coherent" if mode else "incoherent", "lband" if band else "nband"]
     path = "/".join(path_lst)
     sub_dir = os.path.join(res_dir, path)
-    paramL, paramN = set_script_arguments(mode, array)
+    paramL, paramN = set_script_arguments(mode, array, band)
     skipL, skipN = int(not band), int(band)
 
     # NOTE: Removes the old '.sof'-files
@@ -157,7 +159,7 @@ def reduction_pipeline(raw_dir: Path, calib_dir: Path, res_dir: Path,
 
 if __name__ == "__main__":
     data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
-    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220420"
+    stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
     raw_dir = calib_dir = os.path.join(data_path, stem_dir, "RAW", target_dir)
     res_dir = os.path.join(data_path, stem_dir, "PRODUCTS", target_dir)
-    reduction_pipeline(raw_dir, calib_dir, res_dir, "UT", both=True)
+    reduction_pipeline(raw_dir, calib_dir, res_dir, "ATs", both=True)
