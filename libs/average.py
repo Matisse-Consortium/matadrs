@@ -51,15 +51,14 @@ def single_average(root_dir: Path, mode: str,
             if do_plot:
                 print("Creating plots...")
                 print("------------------------------------------------------------")
-                fig = plt.figure()
-                ax = fig.add_subplot()
-                plot_vis = Plotter([outfile_path_vis]).plot_vis(ax)
-                plt.savefig(os.path.join(outfile_dir, "TARGET_AVG_VIS_INT.pdf"), format="pdf")
+                plot_vis = Plotter([outfile_path_vis], save_path=outfile_dir,
+                                   plot_name= "TARGET_AVG_VIS_INT.pdf")
+                plot_vis.add_vis().plot(save=True)
 
-                fig = plt.figure()
-                ax = fig.add_subplot()
-                plot_cphases = Plotter([outfile_path_cphases]).plot_cphases(ax)
-                plt.savefig(os.path.join(outfile_dir, "TARGET_AVG_T3PHI_INT.pdf"), format="pdf")
+                plot_cphases = Plotter([outfile_path_cphases],
+                                       save_path=outfile_dir,
+                                       plot_name= "TARGET_AVG_T3PHI_INT.pdf")
+                plot_cphases.add_cphases().plot(save=True)
                 print("Plots created!")
                 print("------------------------------------------------------------")
             print("Done!")

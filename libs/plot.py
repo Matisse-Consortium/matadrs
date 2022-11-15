@@ -47,11 +47,16 @@ class Plotter:
                  flux_file: Optional[Path] = "",
                  axis_cutoffs: Optional[List] = [11, -17],
                  limit_spacing: Optional[float] = 0.05,
+                 plot_name: Optional[str] = "",
                  save_path: Optional[Path] = "") -> None:
         """Initialises the class instance"""
         self.fits_files = fits_files
-        self.plot_name = "combined_files.pdf" if len(self.fits_files) > 1\
-            else f"{os.path.basename(self.fits_files[0]).split('.')[0]}.pdf"
+        if not plot_name:
+            self.plot_name = "combined_files.pdf" if len(self.fits_files) > 1\
+                else f"{os.path.basename(self.fits_files[0]).split('.')[0]}.pdf"
+        else:
+            self.plot_name = plot_name
+
         self.save_path = save_path
         self.components = []
 
@@ -145,6 +150,10 @@ class Plotter:
         self.all_vis2 = [vis2[self.cutoff_low: self.cutoff_high] for vis2 in self.all_vis2]
         self.all_t3phi = [cphases[self.cutoff_low: self.cutoff_high]\
                           for cphases in self.all_t3phi]
+
+    @property
+    def number_of_plots(self):
+        return len(self.components)
 
     def get_plot_lims(self, data: List):
         """Gets the low and high limit for a plot from its data
@@ -295,12 +304,16 @@ class Plotter:
             If toggled, saves the plot to the self.save_path file with the
             self.plot_name
         """
-        number_of_plots = len(self.components)
-        columns = 3 if number_of_plots >= 5 else 2
-        rows = np.round(number_of_plots/3).astype(int)
+        columns = 1 if self.number_of_plots == 1 else\
+                (3 if self.number_of_plots >= 5 else 2)
+        rows = np.round(self.number_of_plots/columns).astype(int)\
+                if not self.number_of_plots == 1 else 1
         fig, axarr = plt.subplots(rows, columns)
-        for ax, component in zip(axarr.flatten(), self.components):
-            self.plot_data(ax, *component.values())
+        if not self.number_of_plots == 1:
+            for ax, component in zip(axarr.flatten(), self.components):
+                self.plot_data(ax, *component.values())
+        else:
+            self.plot_data(axarr, *self.components[0].values())
 
         fig.tight_layout()
 
