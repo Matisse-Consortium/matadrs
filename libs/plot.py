@@ -50,8 +50,9 @@ class Plotter:
                  save_path: Optional[Path] = "") -> None:
         """Initialises the class instance"""
         self.fits_files = fits_files
-        self.plot_name = "combined_files.pdf" if len(self.fits_file > 1)\
+        self.plot_name = "combined_files.pdf" if len(self.fits_files) > 1\
             else f"{os.path.basename(self.fits_files[0]).split('.')[0]}.pdf"
+        self.save_path = save_path
         self.components = []
 
         if len(self.fits_files) > 1:
@@ -285,18 +286,25 @@ class Plotter:
         return {"data": data, "data_name": data_name,
                 "tel_data": tel_data, "lband": lband, "unwrap": unwrap}
 
-    def plot(self, save_plt: Optional[bool] = False):
-        """Makes the plot from the components"""
+    def plot(self, save: Optional[bool] = False):
+        """Makes the plot from the components
+
+        Parameters
+        ----------
+        save: bool, optional
+            If toggled, saves the plot to the self.save_path file with the
+            self.plot_name
+        """
         number_of_plots = len(self.components)
         columns = 3 if number_of_plots >= 5 else 2
         rows = np.round(number_of_plots/3).astype(int)
-        fig, axarr = (rows, columns)
-        for i, (j, component) in zip(range(rows), enumerate(self.components)):
-            self.plot_data(axarr[i][j], *component.values())
+        fig, axarr = plt.subplots(rows, columns)
+        for ax, component in zip(axarr.flatten(), self.components):
+            self.plot_data(ax, *component.values())
 
         fig.tight_layout()
 
-        if save_plt:
+        if save:
             plt.savefig(os.path.join(self.save_path, self.plot_name), format="pdf")
         else:
             plt.show()
@@ -304,6 +312,7 @@ class Plotter:
     def add_flux(self) -> None:
         """Plots the flux """
         self.components.append(self._make_component(self.all_flux, "flux"))
+        return self
 
     def add_vis(self, lband: Optional[bool] = False) -> None:
         """Plots all the visibilities/correlated_fluxes
@@ -316,8 +325,9 @@ class Plotter:
         """
         self.components.append(self._make_component(self.all_vis, "vis",
                                                     self.all_tel_vis, lband))
+        return self
 
-    def add_corr_fluxes(self, lband: Optional[bool] = False) -> None:
+    def add_corr_flux(self, lband: Optional[bool] = False) -> None:
         """Plots all the visibilities/correlated_fluxes in one plot
 
         Parameters
@@ -328,11 +338,13 @@ class Plotter:
         """
         self.components.append(self._make_component(self.all_vis, "corr_flux",
                                                     self.all_tel_vis, lband))
+        return self
 
     def add_vis2(self, lband: Optional[bool] = False) -> None:
         """Plots all the visibilities squared in one plot"""
         self.components.append(_make_component(self.all_vis2, "vis2",
                                                self.all_tel_vis, lband))
+        return self
 
     def add_cphases(self, lband: Optional[bool] = False,
                      unwrap: Optional[bool] = False) -> None:
@@ -349,6 +361,7 @@ class Plotter:
         """
         self.components.append(self._make_component(self.all_t3phi, "cphases",
                                                     self.all_tel_t3phi, lband, unwrap))
+        return self
 
     def plot_vis24baseline(self, ax, do_fit: Optional[bool] = True) -> None:
         """ Plot the mean visibility for one certain wavelength and fit it with a

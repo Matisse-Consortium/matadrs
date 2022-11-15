@@ -78,12 +78,8 @@ def single_calibration(root_dir: Path, tar_dir: Path,
         print("Creating plots...")
         fits_files = glob(os.path.join(output_dir, "*.fits"))
         for fits_file in fits_files:
-            fig, (ax, bx) = plt.subplots(1, 2)
-            plot_fits = Plotter([fits_file])
-            plot_fits.plot_cphases(ax)
-            plot_fits.plot_corr_flux(bx)
-            plot_name = f"{os.path.basename(fits_file).split('.')[0]}.pdf"
-            plt.savefig(os.path.join(output_dir, plot_name), format="pdf")
+            plot_fits = Plotter([fits_file], save_path=output_dir)
+            plot_fits.add_cphases().add_corr_flux().plot(save=True)
         print("Plots created!")
 
     print("------------------------------------------------------------")
