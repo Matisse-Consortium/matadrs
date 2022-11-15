@@ -76,7 +76,7 @@ def averaging_pipeline(data_path: Path, stem_dir: Path,
             The folder to the time-stamp folder
         do_plots: bool, optional
         """
-        root_dir = os.path.join(data_path, stem_dir, "PRODUCT", target_dir)
+        root_dir = os.path.join(data_path, stem_dir, "PRODUCTS", target_dir)
         for mode in ["coherent", "incoherent"]:
             print(f"Averaging and BCD-calibration of {stem_dir} with mode={mode}")
             print("-----------------------------------------------------------")
@@ -85,6 +85,6 @@ def averaging_pipeline(data_path: Path, stem_dir: Path,
 
 if __name__ == "__main__":
     data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
-    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220422"
+    stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
     averaging_pipeline(data_path, stem_dir, target_dir, do_plot=True)
 
