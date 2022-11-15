@@ -8,20 +8,19 @@ from astropy.io import fits
 from typing import List, Optional
 
 
-def oifits_patchwork(incoherent_file: str, coherent_file: str,
-                     outfile_path: str,
-                     oi_types_list=[['vis2','visamp','visphi','t3','flux']],
-                     headerval=[]) -> None:
+def oifits_patchwork(incoherent_file: str, coherent_file: str, outfile_path: str,
+                     oi_types_list: Optional[List] = [['vis2','visamp','visphi','t3','flux']],
+                     headerval: Optional[List] = []) -> None:
     """Jozsef's file to merge two (.fits)-files, slightly reworked"""
     if os.path.exists(incoherent_file):
         copyfile(incoherent_file, outfile_path)
     else:
-        raise IOError('File not found: '+incoherent_file)
+        raise IOError(f"File not found: {incoherent_file}")
 
     outhdul  = fits.open(outfile_path, mode='update')
 
     n_oi_types_list = len(oi_types_list)
-    for i in range(n_oi_types_list):
+    for i in range(oi_types_list):
         oi_types = oi_types_list[i]
         inhdul = fits.open(incoherent_file, mode='readonly')
 
