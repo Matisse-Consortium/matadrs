@@ -7,6 +7,8 @@ from shutil import copyfile
 from astropy.io import fits
 from typing import List, Optional
 
+from plot import Plotter
+
 
 def oifits_patchwork(incoherent_file: Path, coherent_file: Path, outfile_path: Path,
                      oi_types_list: Optional[List] = [['vis2','visamp','visphi','t3','flux']],
@@ -18,7 +20,6 @@ def oifits_patchwork(incoherent_file: Path, coherent_file: Path, outfile_path: P
         raise IOError(f"File not found: {incoherent_file}")
 
     outhdul = fits.open(outfile_path, mode='update')
-    print(outfile_path)
 
     for oi_types in oi_types_list:
         inhdul = fits.open(incoherent_file, mode='readonly')
@@ -61,7 +62,7 @@ def oifits_patchwork(incoherent_file: Path, coherent_file: Path, outfile_path: P
 
             #look up visphi
             if 'visphi' in oi_types:
-                #match station indices
+                # Match station indices
                 sta_indicies_visamp = outhdul['OI_VIS'].data['STA_INDEX']
                 sta_indicies_visamp = [list(item) for item in sta_indicies_visamp]
                 sta_indicies_visphi = inhdul2['OI_VIS'].data['STA_INDEX']
@@ -72,7 +73,6 @@ def oifits_patchwork(incoherent_file: Path, coherent_file: Path, outfile_path: P
                             or (sta_index_visamp[::-1] == sta_index_visphi)):
                             outhdul['OI_VIS'].data['VISPHI'][i] = inhdul2['OI_VIS'].data['VISPHI'][j]
                             outhdul['OI_VIS'].data['VISPHIERR'][i] = inhdul2['OI_VIS'].data['VISPHIERR'][j]
-
     for dic in headerval:
         del outhdul[0].header[dic['key']]
         outhdul[0].header[dic['key']] = dic['value']
@@ -83,10 +83,10 @@ def oifits_patchwork(incoherent_file: Path, coherent_file: Path, outfile_path: P
     inhdul2.close()
 
 
-def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> None:
+def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
     """Merges the vis and cphases files in the respective directory"""
     target_name = stem_dir.split("/")[~1]
-    epoch = os.path.basename(average_dir).split(".")[0]
+    epoch = os.path.basename(average_dir).split(".")[2]
     band = "L" if "HAWAII" in os.path.basename(average_dir) else "N"
     fits_files = glob(os.path.join(average_dir, "*.fits"))
     cphases_file = [directory for directory in fits_files\
@@ -96,6 +96,9 @@ def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> None:
     out_file = os.path.join(average_dir,
                             f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits")
     oifits_patchwork(cphases_file, vis_file, out_file)
+    plot = Plotter([out_file], save_path=os.path.dirname(out_file))
+    plot.add_cphases().add_corr_flux().plot(save=True)
+    return out_file
 
 
 def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
@@ -119,10 +122,17 @@ def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     incoherent_dirs = glob(os.path.join(merge_dir, "incoherent", "*.rb"))
     coherent_dirs = [dir.replace("incoherent", "coherent") for dir in incoherent_dirs]
 
-    for incoherent_dir in incoherent_dirs:
-        merge_vis_and_cphases(stem_dir, incoherent_dir)
-        # oifits_patchwork(m, coherent_fits_files[l], outfile_path)
-
+    for coherent_dir, incoherent_dir in zip(coherent_dirs, incoherent_dirs):
+        print("Merging incoherent and coherent files of folder"\
+              f" {os.path.basename(coherent_dir).split('/')[~0]}")
+        print("------------------------------------------------------------")
+        coherent_file = merge_vis_and_cphases(stem_dir, coherent_dir)
+        incoherent_file = merge_vis_and_cphases(stem_dir, incoherent_dir)
+        out_file = os.path.basename(incoherent_file).replace("AVG", "FINAL")
+        oifits_patchwork(incoherent_file, coherent_file,
+                         os.path.join(outfile_dir, out_file))
+        plot = Plotter([os.path.join(outfile_dir, out_file)], save_path=outfile_dir)
+        plot.add_cphases().add_corr_flux().plot(save=True)
         print("------------------------------------------------------------")
         print("Done!")
         print("------------------------------------------------------------")
