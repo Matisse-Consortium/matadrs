@@ -103,6 +103,9 @@ def do_calibration(root_dir: Path, band_dir: Path,
     sub_dirs_rotated.rotate(1)
 
     for directory in sub_dirs:
+        print(f"Calibration of {os.path.basename(directory)}")
+        print(f"with mode_name={mode_name}")
+        print("------------------------------------------------------------")
         if check_if_target(directory):
             for dir_rotated in sub_dirs_rotated:
                 single_calibration(root_dir, directory,
@@ -129,9 +132,6 @@ def calibration_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path):
     for mode, mode_name in modes.items():
         for band in bands:
             band_dir = os.path.join(mode, band)
-            print(f"Calibration of {band_dir}")
-            print(f"with mode_name={mode_name}")
-            print("------------------------------------------------------------")
             do_calibration(root_dir, band_dir, mode_name=mode_name)
 
 
