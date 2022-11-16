@@ -41,7 +41,7 @@ def set_script_arguments(do_corr_flux: bool, array: str,
     return paramL_lst, paramN_lst
 
 
-def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
+def single_reduction(raw_dir: Path, res_dir: Path,
                      array: str, mode: bool, band: str) -> None:
     """Reduces either the lband or the nband data for either the "coherent" or
     "incoherent" setting for a single iteration/epoch.
@@ -54,8 +54,6 @@ def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
     ----------
     raw_dir: Path
         The path containing the raw observation files
-    calib_dir: Path
-        The path containing the calibration files
     res_dir: Path
         The path to contain to reduced data
     array: str
@@ -71,7 +69,8 @@ def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
     set_script_arguments()
     """
     start_time = time.time()
-    path_lst = ["coherent" if mode else "incoherent", "lband" if band else "nband"]
+    path_lst = ["coherent" if mode else "incoherent",
+                "lband" if band else "nband"]
     path = "/".join(path_lst)
     sub_dir = os.path.join(res_dir, path)
     paramL, paramN = set_script_arguments(mode, array, band)
@@ -90,15 +89,17 @@ def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
     if not os.path.exists(sub_dir):
         os.makedirs(sub_dir)
 
-    mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir,
-                        dirCalib=calib_dir,
-                        nbCore=6, resol='',
+    mp.mat_autoPipeline(dirRaw=raw_dir,
+                        dirResult=res_dir,
+                        dirCalib=raw_dir,
+                        nbCore=12, resol='',
                         paramL=paramL, paramN=paramN,
                         overwrite=0, maxIter=1,
                         skipL=skipL, skipN=skipN)
 
     try:
         os.system(f"mv -f {os.path.join(res_dir, 'Iter1/*.rb')} {sub_dir}")
+
     # TODO: Make logger here
     except Exception:
         print("Moving of files to {sub_dir} failed!")
@@ -110,38 +111,24 @@ def single_reduction(raw_dir: str, calib_dir: str, res_dir: str,
     print("---------------------------------------------------------------------")
 
 
-def reduction_pipeline(raw_dir: Path, calib_dir: Path, res_dir: Path,
-                       array: str, both: Optional[bool] = False,
-                       lband: Optional[bool] = False):
+def reduction_pipeline(root_dir: Path, stem_dir: Path,
+                       target_dir: Path, array: str):
     """Runs the pipeline for the data reduction
 
     Parameters
     ----------
     raw_dir: Path
         The path containing the raw observation files
-    calib_dir: Path
-        The path containing the calibration files
-    res_dir: Path
-        The path to contain to reduced data
     array: str
         The array configuration that was used for the observation
-    both: bool, optional
-        If both bands are to be reduced, this has to be false for the "lband" option to be
-        considered
-    lband: bool, optional
-        If "both=False" and this is "True"", then lband will be calibrated, if
-        "both=False" and this is "False", then nband will be calibrated
 
     See Also
     --------
     single_reduction()
     """
     overall_start_time = time.time()
-    if both:
-        band_bools = [True, False]
-    else:
-        band_bools = [lband]
-
+    raw_dir = os.path.join(root_dir, stem_dir, "RAW", target_dir)
+    res_dir = os.path.join(root_dir, stem_dir, "PRODUCTS", target_dir)
     if not os.path.exists(res_dir):
         os.makedirs(res_dir)
 
@@ -149,8 +136,8 @@ def reduction_pipeline(raw_dir: Path, calib_dir: Path, res_dir: Path,
         mode = "coherent" if mode_bools else "incoherent"
         print(f"Processing {mode} reduction")
         print("---------------------------------------------------------------------")
-        for band in band_bools:
-            single_reduction(raw_dir, calib_dir, res_dir, array,\
+        for band in [True, False]:
+            single_reduction(raw_dir, res_dir, array,\
                              mode=mode_bools, band=band)
 
     print(f"Executed the overall reduction in"
@@ -158,8 +145,6 @@ def reduction_pipeline(raw_dir: Path, calib_dir: Path, res_dir: Path,
 
 
 if __name__ == "__main__":
-    data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
+    data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
-    raw_dir = calib_dir = os.path.join(data_path, stem_dir, "RAW", target_dir)
-    res_dir = os.path.join(data_path, stem_dir, "PRODUCTS", target_dir)
-    reduction_pipeline(raw_dir, calib_dir, res_dir, "ATs", both=True)
+    reduction_pipeline(data_dir, stem_dir, target_dir, "ATs")
