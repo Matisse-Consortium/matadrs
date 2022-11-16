@@ -82,6 +82,7 @@ def oifits_patchwork(incoherent_file: Path, coherent_file: Path, outfile_path: P
     inhdul.close()
     inhdul2.close()
 
+
 def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> None:
     """Merges the vis and cphases files in the respective directory"""
     target_name = stem_dir.split("/")[~1]
@@ -92,10 +93,10 @@ def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> None:
                     if "t3" in directory.lower()][0]
     vis_file  = [directory for directory in fits_files\
                  if "vis" in directory.lower()][0]
-    print(average_dir)
     out_file = os.path.join(average_dir,
                             f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits")
     oifits_patchwork(cphases_file, vis_file, out_file)
+
 
 def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     """This merges two (.fits)-files together into one, i.e. the  "incoherent"
