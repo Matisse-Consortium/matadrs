@@ -8,7 +8,7 @@ from astropy.io import fits
 from typing import List, Optional
 
 
-def oifits_patchwork(incoherent_file: str, coherent_file: str, outfile_path: str,
+def oifits_patchwork(incoherent_file: Path, coherent_file: Path, outfile_path: Path,
                      oi_types_list: Optional[List] = [['vis2','visamp','visphi','t3','flux']],
                      headerval: Optional[List] = []) -> None:
     """Jozsef's file to merge two (.fits)-files, slightly reworked"""
@@ -17,7 +17,8 @@ def oifits_patchwork(incoherent_file: str, coherent_file: str, outfile_path: str
     else:
         raise IOError(f"File not found: {incoherent_file}")
 
-    outhdul  = fits.open(outfile_path, mode='update')
+    outhdul = fits.open(outfile_path, mode='update')
+    print(outfile_path)
 
     for oi_types in oi_types_list:
         inhdul = fits.open(incoherent_file, mode='readonly')
@@ -81,12 +82,20 @@ def oifits_patchwork(incoherent_file: str, coherent_file: str, outfile_path: str
     inhdul.close()
     inhdul2.close()
 
-def merge_vis_and_cphases(merge_dir: Path, outfile_dir: Path) -> None:
-    """Merges the vis and the cphases (.fits)-files created by the averaging"""
-    cphases_file = glob(os.path.join(merge_dir, "*T3*.fits"))
-    vis_file = glob(os.path.join(merge_dir, "*VIS*.fits"))
-    oifits_patchwork(cphases_file, vis_file, outfile_dir)
-
+def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> None:
+    """Merges the vis and cphases files in the respective directory"""
+    target_name = stem_dir.split("/")[~1]
+    epoch = os.path.basename(average_dir).split(".")[0]
+    band = "L" if "HAWAII" in os.path.basename(average_dir) else "N"
+    fits_files = glob(os.path.join(average_dir, "*.fits"))
+    cphases_file = [directory for directory in fits_files\
+                    if "t3" in directory.lower()][0]
+    vis_file  = [directory for directory in fits_files\
+                 if "vis" in directory.lower()][0]
+    print(average_dir)
+    out_file = os.path.join(average_dir,
+                            f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits")
+    oifits_patchwork(cphases_file, vis_file, out_file)
 
 def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     """This merges two (.fits)-files together into one, i.e. the  "incoherent"
@@ -106,11 +115,11 @@ def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     if not os.path.exists(outfile_dir):
         os.makedirs(outfile_dir)
 
-    incoherent_dir = glob(os.path.join(merge_dir, "incoherent", "*.rb"))
-    coherent_dir = [dir.replace("incoherent", "coherent") for dir in incoherent_dir]
+    incoherent_dirs = glob(os.path.join(merge_dir, "incoherent", "*.rb"))
+    coherent_dirs = [dir.replace("incoherent", "coherent") for dir in incoherent_dirs]
 
-    for incoherent_file in incoherent_dir:
-        print(os.path.dirname(incoherent_file))
+    for incoherent_dir in incoherent_dirs:
+        merge_vis_and_cphases(stem_dir, incoherent_dir)
         # oifits_patchwork(m, coherent_fits_files[l], outfile_path)
 
         print("------------------------------------------------------------")
@@ -120,7 +129,7 @@ def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
 
 if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    stem_dir, target_dir = "matisse/GTO/hd163296/", "UTs/20190323"
+    stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
     merging_pipeline(data_dir, stem_dir, target_dir)
 
 
