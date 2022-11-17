@@ -48,7 +48,8 @@ def matadrs_pipeline(data_dir: Path, stem_dir: Path, raw_dirs: List[Path]) -> No
 
 if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    stem_dir = "matisse/GTO/hd163296/"
-    target_dirs = [os.path.join("ATs", folder) for folder in ["20190323"]]
+    stem_dir = "matisse/GTO/hd142666/"
+    target_lst = ["20190514", "20220420", "20220422"]
+    target_dirs = [os.path.join("UTs", folder) for folder in target_lst]
     matadrs_pipeline(data_dir, stem_dir, target_dirs)
 
