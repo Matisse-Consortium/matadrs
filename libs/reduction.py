@@ -92,7 +92,7 @@ def single_reduction(raw_dir: Path, res_dir: Path,
     mp.mat_autoPipeline(dirRaw=raw_dir,
                         dirResult=res_dir,
                         dirCalib=raw_dir,
-                        nbCore=12, resol='',
+                        nbCore=6, resol='',
                         paramL=paramL, paramN=paramN,
                         overwrite=0, maxIter=1,
                         skipL=skipL, skipN=skipN)
