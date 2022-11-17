@@ -7,6 +7,7 @@ from typing import Optional
 
 from calib_BCD2 import calib_BCD
 from avg_oifits import avg_oifits
+from utils import cprint
 from plot import Plotter
 
 # NOTE: non chopped exposures 5-6. Do not average those together (For L-band)
@@ -20,9 +21,7 @@ def single_average(root_dir: Path, mode: str) -> None:
         band_dir: Path
             The folder in which the calibrated data is contained
         """
-        # band_name = "L" if "lband" in band_dir else "N"
         mode_dir = os.path.join("calib", mode)
-
         folders = glob(os.path.join(root_dir, mode_dir , "*.rb"))
         for folder in folders:
             print(f"Averaging folder {os.path.basename(folder)}")
@@ -47,18 +46,19 @@ def single_average(root_dir: Path, mode: str) -> None:
 
             print("Creating plots...")
             print("------------------------------------------------------------")
+            lband = True if "HAWAII" in outfile_dir else False
             plot_vis = Plotter([outfile_path_vis], save_path=outfile_dir,
-                               plot_name= "TARGET_AVG_VIS_INT.pdf")
+                               lband=lband, plot_name="TARGET_AVG_VIS_INT.pdf")
             plot_vis.add_vis().plot(save=True)
 
             plot_cphases = Plotter([outfile_path_cphases],
-                                   save_path=outfile_dir,
+                                   save_path=outfile_dir, lband=lband,
                                    plot_name= "TARGET_AVG_T3PHI_INT.pdf")
             plot_cphases.add_cphases().plot(save=True)
             print("Plots created!")
             print("------------------------------------------------------------")
             print("Done!")
-            print("------------------------------------------------------------")
+            print("-----------------------------------------------------------")
 
 
 def averaging_pipeline(data_path: Path, stem_dir: Path, target_dir: Path):
@@ -71,9 +71,14 @@ def averaging_pipeline(data_path: Path, stem_dir: Path, target_dir: Path):
         """
         root_dir = os.path.join(data_path, stem_dir, "PRODUCTS", target_dir)
         for mode in ["coherent", "incoherent"]:
-            print(f"Averaging and BCD-calibration of {stem_dir} with mode={mode}")
-            print("-----------------------------------------------------------")
+            cprint(f"Averaging and BCD-calibration of {stem_dir} with mode={mode}",
+                   "lp")
+            cprint("-----------------------------------------------------------",
+                   "lg")
             single_average(root_dir, mode)
+        cprint("Averaging done!", "lp")
+        cprint("-----------------------------------------------------------",
+               "lg")
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ from astropy.io import fits
 from typing import List, Optional
 
 from plot import Plotter
+from utils import cprint
 
 
 def oifits_patchwork(incoherent_file: Path, coherent_file: Path, outfile_path: Path,
@@ -87,7 +88,8 @@ def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
     """Merges the vis and cphases files in the respective directory"""
     target_name = stem_dir.split("/")[~1]
     epoch = os.path.basename(average_dir).split(".")[2]
-    band = "L" if "HAWAII" in os.path.basename(average_dir) else "N"
+    lband = True if "HAWAII" in average_dir else False
+    band = "L" if lband else "N"
     fits_files = glob(os.path.join(average_dir, "*.fits"))
     cphases_file = [directory for directory in fits_files\
                     if "t3" in directory.lower()][0]
@@ -96,7 +98,7 @@ def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
     out_file = os.path.join(average_dir,
                             f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits")
     oifits_patchwork(cphases_file, vis_file, out_file)
-    plot = Plotter([out_file], save_path=os.path.dirname(out_file))
+    plot = Plotter([out_file], lband=lband, save_path=os.path.dirname(out_file))
     plot.add_cphases().add_corr_flux().plot(save=True)
     return out_file
 
@@ -123,19 +125,22 @@ def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     coherent_dirs = [dir.replace("incoherent", "coherent") for dir in incoherent_dirs]
 
     for coherent_dir, incoherent_dir in zip(coherent_dirs, incoherent_dirs):
-        print("Merging incoherent and coherent files of folder"\
-              f" {os.path.basename(coherent_dir).split('/')[~0]}")
-        print("------------------------------------------------------------")
+        cprint("Merging incoherent and coherent files of folder"\
+               f" {os.path.basename(coherent_dir).split('/')[~0]}", "lp")
+        cprint("------------------------------------------------------------",
+              "lg")
         coherent_file = merge_vis_and_cphases(stem_dir, coherent_dir)
         incoherent_file = merge_vis_and_cphases(stem_dir, incoherent_dir)
         out_file = os.path.basename(incoherent_file).replace("AVG", "FINAL")
         oifits_patchwork(incoherent_file, coherent_file,
                          os.path.join(outfile_dir, out_file))
+        lband = True if "HAWAII" in out_file else False
         plot = Plotter([os.path.join(outfile_dir, out_file)], save_path=outfile_dir)
         plot.add_cphases().add_corr_flux().plot(save=True)
         print("------------------------------------------------------------")
         print("Done!")
         print("------------------------------------------------------------")
+    cprint("Merging Done!", "lp")
 
 
 if __name__ == "__main__":

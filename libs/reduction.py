@@ -8,6 +8,8 @@ from typing import List, Optional
 
 import mat_autoPipeline as mp
 
+from utils import cprint
+
 # TODO: Look up high spectral binning and make savefile somehow show all
 # High spectral binning is 7, 49
 
@@ -106,9 +108,10 @@ def single_reduction(raw_dir: Path, res_dir: Path,
 
     # Takes the time at end of execution
     print("---------------------------------------------------------------------")
-    print(f"Executed the {path_lst[0]} {path_lst[1]} reduction in"
+    cprint(f"Executed the {path_lst[0]} {path_lst[1]} reduction in"
           f" {datetime.timedelta(seconds=(time.time()-start_time))} hh:mm:ss")
-    print("---------------------------------------------------------------------")
+    cprint("---------------------------------------------------------------------",
+          "lg")
 
 
 def reduction_pipeline(root_dir: Path, stem_dir: Path,
@@ -134,14 +137,16 @@ def reduction_pipeline(root_dir: Path, stem_dir: Path,
 
     for mode_bools in [True, False]:
         mode = "coherent" if mode_bools else "incoherent"
-        print(f"Processing {mode} reduction")
-        print("---------------------------------------------------------------------")
+        cprint(f"Processing {mode} reduction", "lp")
+        cprint("---------------------------------------------------------------------",
+              "lg")
         for band in [True, False]:
             single_reduction(raw_dir, res_dir, array,\
                              mode=mode_bools, band=band)
 
-    print(f"Executed the overall reduction in"
-          f" {datetime.timedelta(seconds=(time.time()-overall_start_time))} hh:mm:ss")
+    cprint(f"Executed the overall reduction in"
+           f" {datetime.timedelta(seconds=(time.time()-overall_start_time))} hh:mm:ss",
+          "lp")
 
 
 if __name__ == "__main__":

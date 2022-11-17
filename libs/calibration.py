@@ -8,7 +8,7 @@ from collections import deque
 from typing import Optional
 
 from plot import Plotter
-from utils import get_path_descriptor, check_if_target
+from utils import get_path_descriptor, check_if_target, cprint
 from fluxcal import fluxcal
 
 # Datapath to the directories to be calibrated, global variables
@@ -38,12 +38,12 @@ def single_calibration(root_dir: Path, tar_dir: Path,
     --------
     get_path_descriptor()
     """
-    print(f"Calibrating {os.path.basename(tar_dir)} with "\
-          f"{os.path.basename(cal_dir)}")
+    cprint(f"Calibrating {os.path.basename(tar_dir)} with "\
+          f"{os.path.basename(cal_dir)}", "p")
     targets = glob(os.path.join(tar_dir, "TARGET_RAW_INT*"))
 
     if not targets:
-        warnings.warn("No 'TARGET_RAW_INT*'-files found. SKIPPED!")
+        cprint("'TARGET_RAW_INT*'-files found. SKIPPED!", "y")
         print("------------------------------------------------------------")
         return
 
@@ -52,7 +52,8 @@ def single_calibration(root_dir: Path, tar_dir: Path,
     calibrators.sort(key=lambda x: x[-8:])
 
     if len(targets) != len(calibrators):
-        warnings.warn("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-files. SKIPPING!")
+        cprint("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-"\
+                      " files. SKIPPING!", "y")
         print("------------------------------------------------------------")
         return
 
@@ -64,8 +65,8 @@ def single_calibration(root_dir: Path, tar_dir: Path,
     # TODO: Fix the numbering of the (.fits)-files
     for index, (target, calibrator) in enumerate(zip(targets, calibrators)):
         print("------------------------------------------------------------")
-        print(f"Processing {os.path.basename(target)} with "\
-              f"{os.path.basename(calibrator)}")
+        cprint(f"Processing {os.path.basename(target)} with "\
+              f"{os.path.basename(calibrator)}", "g")
         output_file = os.path.join(output_dir, f"TARGET_CAL_INT_000{index+1}.fits")
 
         fluxcal(target, calibrator, output_file,\
@@ -76,7 +77,8 @@ def single_calibration(root_dir: Path, tar_dir: Path,
     print("Creating plots...")
     fits_files = glob(os.path.join(output_dir, "*.fits"))
     for fits_file in fits_files:
-        plot_fits = Plotter([fits_file], save_path=output_dir)
+        lband = True if "HAWAII" in target else False
+        plot_fits = Plotter([fits_file], lband=lband, save_path=output_dir)
         plot_fits.add_cphases().add_corr_flux().plot(save=True)
     print("Plots created!")
     print("------------------------------------------------------------")
@@ -103,16 +105,18 @@ def do_calibration(root_dir: Path, band_dir: Path,
     sub_dirs_rotated.rotate(1)
 
     for directory in sub_dirs:
-        print(f"Calibration of {os.path.basename(directory)}")
-        print(f"with mode_name={mode_name}")
-        print("------------------------------------------------------------")
+        cprint(f"Calibration of {os.path.basename(directory)}"\
+               f" with mode_name={mode_name}", "lp")
+        cprint("------------------------------------------------------------",
+               "lg")
         if check_if_target(directory):
             for dir_rotated in sub_dirs_rotated:
                 single_calibration(root_dir, directory,
                                    dir_rotated, mode_name=mode_name)
         else:
-            warnings.warn("No 'TARGET_RAW_INT*'-files found. SKIPPED!")
-            print("------------------------------------------------------------")
+            cprint("No 'TARGET_RAW_INT*'-files found. SKIPPED!", "y")
+            cprint("------------------------------------------------------------",
+                   "lg")
             continue
 
 
@@ -133,6 +137,7 @@ def calibration_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path):
         for band in bands:
             band_dir = os.path.join(mode, band)
             do_calibration(root_dir, band_dir, mode_name=mode_name)
+    cprint("Calibration Done!", "lp")
 
 
 if __name__ == "__main__":

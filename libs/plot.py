@@ -45,12 +45,14 @@ class Plotter:
     """
     def __init__(self, fits_files: List,
                  flux_file: Optional[Path] = "",
-                 axis_cutoffs: Optional[List] = [11, -17],
+                 lband: Optional[bool]= False,
                  limit_spacing: Optional[float] = 0.05,
                  plot_name: Optional[str] = "",
+                 axis_cutoffs: Optional[List] = [0, 0],
                  save_path: Optional[Path] = "") -> None:
         """Initialises the class instance"""
         self.fits_files = fits_files
+        self.lband = lband
         if not plot_name:
             self.plot_name = "combined_files.pdf" if len(self.fits_files) > 1\
                 else f"{os.path.basename(self.fits_files[0]).split('.')[0]}.pdf"
@@ -144,12 +146,16 @@ class Plotter:
             # self.mean_bin_vis2 = [np.nanmean(i[self.si:self.ei]) for i in self.vis2data]
             # self.baseline_distances = [np.sqrt(x**2+y**2)\
                                        # for x, y in zip(self.ucoords, self.vcoords)]
-        self.wl = self.wl[self.cutoff_low:self.cutoff_high]
-        self.all_flux = [flux[self.cutoff_low:self.cutoff_high] for flux in self.all_flux]
-        self.all_vis = [vis[self.cutoff_low: self.cutoff_high] for vis in self.all_vis]
-        self.all_vis2 = [vis2[self.cutoff_low: self.cutoff_high] for vis2 in self.all_vis2]
-        self.all_t3phi = [cphases[self.cutoff_low: self.cutoff_high]\
-                          for cphases in self.all_t3phi]
+        if any(axis_cutoffs):
+            self.wl = self.wl[self.cutoff_low:self.cutoff_high]
+            self.all_flux = [flux[self.cutoff_low:self.cutoff_high]\
+                             for flux in self.all_flux]
+            self.all_vis = [vis[self.cutoff_low: self.cutoff_high]\
+                            for vis in self.all_vis]
+            self.all_vis2 = [vis2[self.cutoff_low: self.cutoff_high]\
+                             for vis2 in self.all_vis2]
+            self.all_t3phi = [cphases[self.cutoff_low: self.cutoff_high]\
+                              for cphases in self.all_t3phi]
 
     @property
     def number_of_plots(self):
@@ -183,8 +189,7 @@ class Plotter:
 
     def plot_data(self, ax, data: List, data_name: str,
                   tel_data: Optional[List] = [],
-                  lband: Optional[bool] = False,
-                  unwrap: Optional[bool] = False) -> None:
+                  lband: Optional[bool] = False,) -> None:
         """A template to plot multiple or a singular datasets
 
         Parameters
@@ -200,9 +205,6 @@ class Plotter:
         lband: bool, optional
             This specifies the axis used for cutoff, if set to "True" then region between
             L&M band, which has high peaks, is ignored
-        unwrap: bool, optional
-            This can only be activated if "data_name == cphase". It unwraps the phase from
-            180 deg for better visualisation
         """
         already_chosen_linestyles = []
         for index, dataset in enumerate(data):
@@ -225,8 +227,6 @@ class Plotter:
                 raise IOError(f"The 'data_name': {data_name} does not exist!")
 
             if data_name == "cphases":
-                if unwrap:
-                    dataset = np.unwrap(dataset, period=180)
                 if index % 4 == 0:
                     linestyle = self.get_plot_linestyle(already_chosen_linestyles)
                     already_chosen_linestyles.append(linestyle)
@@ -249,10 +249,7 @@ class Plotter:
         elif data_name == "flux":
             ax.set_ylabel("Flux [Jy]")
         else:
-            if unwrap:
-                ax.set_ylabel("Closure phases - Unwrapped [deg]")
-            else:
-                ax.set_ylabel("Closure phases [deg]")
+            ax.set_ylabel("Closure phases [deg]")
 
         if lband:
             indices = (np.where(self.wl < 4.25e-6)[0].tolist() +\
@@ -268,8 +265,7 @@ class Plotter:
 
     def _make_component(self, data: List, data_name: str,
                         tel_data: Optional[List] = [],
-                        lband: Optional[bool] = False,
-                        unwrap: Optional[bool] = False):
+                        lband: Optional[bool] = False):
         """Makes a plot component
 
         Parameters
@@ -283,9 +279,6 @@ class Plotter:
         lband: bool, optional
             This specifies the axis used for cutoff, if set to "True" then region between
             L&M band, which has high peaks, is ignored
-        unwrap: bool, optional
-            This can only be activated if "data_name == cphase". It unwraps the phase from
-            180 deg for better visualisation
 
         Returns
         -------
@@ -293,7 +286,7 @@ class Plotter:
             The component's information
         """
         return {"data": data, "data_name": data_name,
-                "tel_data": tel_data, "lband": lband, "unwrap": unwrap}
+                "tel_data": tel_data, "lband": lband}
 
     def plot(self, save: Optional[bool] = False):
         """Makes the plot from the components
@@ -308,7 +301,10 @@ class Plotter:
                 (3 if self.number_of_plots >= 5 else 2)
         rows = np.round(self.number_of_plots/columns).astype(int)\
                 if not self.number_of_plots == 1 else 1
-        fig, axarr = plt.subplots(rows, columns)
+        to_px = 1/plt.rcParams["figure.dpi"]
+        fig, axarr = plt.subplots(rows, columns,
+                                  constrained_layout=True,
+                                  figsize=(1024*to_px, 512*to_px))
         if not self.number_of_plots == 1:
             for ax, component in zip(axarr.flatten(), self.components):
                 self.plot_data(ax, *component.values())
@@ -327,53 +323,32 @@ class Plotter:
         self.components.append(self._make_component(self.all_flux, "flux"))
         return self
 
-    def add_vis(self, lband: Optional[bool] = False) -> None:
-        """Plots all the visibilities/correlated_fluxes
-
-        Parameters
-        ----------
-        lband: bool, optional
-            This specifies the axis used for cutoff, if set to "True" then region between
-            L&M band, which has high peaks, is ignored
-        """
+    def add_vis(self) -> None:
+        """Plots all the visibilities/correlated_fluxes """
         self.components.append(self._make_component(self.all_vis, "vis",
-                                                    self.all_tel_vis, lband))
+                                                    self.all_tel_vis,
+                                                    self.lband))
         return self
 
     def add_corr_flux(self, lband: Optional[bool] = False) -> None:
-        """Plots all the visibilities/correlated_fluxes in one plot
-
-        Parameters
-        ----------
-        lband: bool, optional
-            This specifies the axis used for cutoff, if set to "True" then region between
-            L&M band, which has high peaks, is ignored
-        """
+        """Plots all the visibilities/correlated_fluxes in one plot """
         self.components.append(self._make_component(self.all_vis, "corr_flux",
-                                                    self.all_tel_vis, lband))
+                                                    self.all_tel_vis,
+                                                    self.lband))
         return self
 
-    def add_vis2(self, lband: Optional[bool] = False) -> None:
+    def add_vis2(self) -> None:
         """Plots all the visibilities squared in one plot"""
         self.components.append(_make_component(self.all_vis2, "vis2",
-                                               self.all_tel_vis, lband))
+                                               self.all_tel_vis,
+                                               self.lband))
         return self
 
-    def add_cphases(self, lband: Optional[bool] = False,
-                     unwrap: Optional[bool] = False) -> None:
-        """Plots all the closure phases into one plot
-
-        Parameters
-        ----------
-        lband: bool, optional
-            This specifies the axis used for cutoff, if set to "True" then region between
-            L&M band, which has high peaks, is ignored
-        unwrap: bool, optional
-            This can only be activated if "data_name == cphase". It unwraps the phase from
-            180 deg for better visualisation
-        """
+    def add_cphases(self) -> None:
+        """Plots all the closure phases into one plot"""
         self.components.append(self._make_component(self.all_t3phi, "cphases",
-                                                    self.all_tel_t3phi, lband, unwrap))
+                                                    self.all_tel_t3phi,
+                                                    self.lband))
         return self
 
     def plot_vis24baseline(self, ax, do_fit: Optional[bool] = True) -> None:
@@ -599,4 +574,5 @@ if __name__ == ('__main__'):
     plotter_N.plot_corr_flux(ax)
     plotter_N.plot_cphases(bx)
     plt.savefig("test.png")
+
 
