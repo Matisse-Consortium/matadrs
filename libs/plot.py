@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from warnings import warn
 from typing import List, Optional
+
 from readout import ReadoutFits
+from utils import cprint
 
 # TODO: Make either model or fourier transform carry more info like the name of
 # the plot or similar -> Work more with classes
@@ -67,6 +69,8 @@ class Plotter:
                  " WARNING: Only data of SAME BAND can be unified into one plot!")
 
         self.cutoff_low, self.cutoff_high = axis_cutoffs
+        self.limit_low = self.cutoff_low if self.cutoff_low > 10 else 10
+        self.limit_high = self.cutoff_high if self.cutoff_high < -17 else -17
         self.limit_spacing = limit_spacing
 
         self.all_vis, self.all_vis_err = [], []
@@ -99,7 +103,7 @@ class Plotter:
                     self.flux = self.readout.get_flux()
                 except:
                     self.flux = None
-                    print("No total flux found!")
+                    cprint("No total flux found!", "y")
             else:
                 # FIXME: Make get data function like for fitting
                 self.flux = flux_file
@@ -249,14 +253,28 @@ class Plotter:
         elif data_name == "flux":
             ax.set_ylabel("Flux [Jy]")
         else:
-            ax.set_ylabel("Closure phases [deg]")
+            ax.set_ylabel(r"Closure phases [$^{\circ}$]")
 
+        data_bounding = [dataset[self.limit_low:self.limit_high]\
+                         for dataset in data]
+
+        # TODO: Fix this functionality -> Set the limits properly
+        # TODO: Set no limits for the closure phases
         if lband:
-            indices = (np.where(self.wl < 4.25e-6)[0].tolist() +\
-                       np.where(self.wl > 4.45e-6)[0].tolist()).sort()
-            plot_lims = self.get_plot_lims([i[0][indices] for i in data.copy()])
+            wavelength = self.wl[self.limit_low:self.limit_high]*1e6
+            lower = np.where(wavelength < 4.2)[0].tolist()
+            upper = np.where(wavelength > 4.6)[0].tolist()
+            indices = upper + lower
+            plot_lims = self.get_plot_lims([dataset[indices]\
+                                            for dataset in data_bounding])
         else:
-            plot_lims = self.get_plot_lims(data)
+            plot_lims = self.get_plot_lims(data_bounding)
+
+        if data_name == "cphases":
+            lim_offset = [-1, 1] if lband else [-100, 100]
+            plot_lims = [limit+offset for limit, offset\
+                         in zip(plot_lims, lim_offset)]
+
         ncol = len(data)//4 if data_name == "cphases" else len(data)//6
 
         ax.set_xlabel(r"Wavelength [$\mathrm{\mu}$m]")
@@ -298,8 +316,8 @@ class Plotter:
             self.plot_name
         """
         columns = 1 if self.number_of_plots == 1 else\
-                (3 if self.number_of_plots >= 5 else 2)
-        rows = np.round(self.number_of_plots/columns).astype(int)\
+                (3 if self.number_of_plots >= 3 else 2)
+        rows = np.ceil(self.number_of_plots/columns).astype(int)\
                 if not self.number_of_plots == 1 else 1
         to_px = 1/plt.rcParams["figure.dpi"]
         fig, axarr = plt.subplots(rows, columns,
@@ -317,6 +335,7 @@ class Plotter:
             plt.savefig(os.path.join(self.save_path, self.plot_name), format="pdf")
         else:
             plt.show()
+        plt.close()
 
     def add_flux(self) -> None:
         """Plots the flux """
@@ -565,14 +584,11 @@ def make_uv_plot(dic,ax,verbose=False,annotate=True,B_lim=(np.nan,np.nan),figsiz
 
 
 if __name__ == ('__main__'):
-    data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    specific_path = "matisse/GTO/hd142666/PRODUCT/UTs/20190514/"
-    fits_files_N = [""]
-    plotter_N = Plotter(fits_files_N)
-    fig, axarr = plt.subplots(1, 2)
-    ax, bx = axarr.flatten()
-    plotter_N.plot_corr_flux(ax)
-    plotter_N.plot_cphases(bx)
-    plt.savefig("test.png")
+    data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
+    stem_dir = "matisse/GTO/hd142666/PRODUCTS/UTs/20220420/"
+    target_dir = "combined/hd142666_2022-04-21T07_18_22_L_TARGET_FINAL_INT.fits"
+    fits_files_N = os.path.join(data_dir, stem_dir, target_dir)
+    plot_fits = Plotter([fits_files_N], lband=True)
+    plot_fits.add_cphases().plot()
 
 

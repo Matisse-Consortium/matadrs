@@ -59,6 +59,7 @@ def single_calibration(root_dir: Path, tar_dir: Path,
 
     output_dir = get_path_descriptor(root_dir, "TAR-CAL",
                                      targets[0], calibrators[0])
+    mode = "incoherent" if "incoherent" in output_dir else "coherent"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -79,7 +80,10 @@ def single_calibration(root_dir: Path, tar_dir: Path,
     for fits_file in fits_files:
         lband = True if "HAWAII" in target else False
         plot_fits = Plotter([fits_file], lband=lband, save_path=output_dir)
-        plot_fits.add_cphases().add_corr_flux().plot(save=True)
+        plot_fits.add_cphases().add_corr_flux()
+        if (mode == "incoherent") and (plot_fits.flux is not None):
+            plot_fits.add_flux()
+        plot_fits.plot(save=True)
     print("Plots created!")
     print("------------------------------------------------------------")
     print("Done!")

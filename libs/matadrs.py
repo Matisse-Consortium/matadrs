@@ -39,8 +39,8 @@ def matadrs_pipeline(data_dir: Path, stem_dir: Path, raw_dirs: List[Path]) -> No
               "lg")
         # reduction_pipeline(data_dir, stem_dir, target_dir, array)
         calibration_pipeline(data_dir, stem_dir, target_dir,)
-        averaging_pipeline(data_dir, stem_dir, target_dir)
-        merging_pipeline(data_dir, stem_dir, target_dir)
+        # averaging_pipeline(data_dir, stem_dir, target_dir)
+        # merging_pipeline(data_dir, stem_dir, target_dir)
         cprint("----------------------------------------------------------------------",
               "lg")
         cprint(f"Reduction, calibration, merging and averaging complete in "\
