@@ -103,7 +103,6 @@ class Plotter:
                     self.flux = self.readout.get_flux()
                 except:
                     self.flux = None
-                    cprint("No total flux found!", "y")
             else:
                 # FIXME: Make get data function like for fitting
                 self.flux = flux_file

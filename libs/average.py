@@ -7,10 +7,30 @@ from typing import Optional
 
 from calib_BCD2 import calib_BCD
 from avg_oifits import avg_oifits
-from utils import cprint
+
 from plot import Plotter
+from utils import cprint, oifits_patchwork
 
 # NOTE: non chopped exposures 5-6. Do not average those together (For L-band)
+
+def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
+    """Merges the vis and cphases files in the respective directory"""
+    target_name = stem_dir.split("/")[~1]
+    epoch = os.path.basename(average_dir).split(".")[2]
+    lband = True if "HAWAII" in average_dir else False
+    band = "L" if lband else "N"
+    fits_files = glob(os.path.join(average_dir, "*.fits"))
+    cphases_file = [directory for directory in fits_files\
+                    if "t3" in directory.lower()][0]
+    vis_file  = [directory for directory in fits_files\
+                 if "vis" in directory.lower()][0]
+    out_file = os.path.join(average_dir,
+                            f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits")
+    oifits_patchwork(cphases_file, vis_file, out_file)
+    plot = Plotter([out_file], lband=lband, save_path=os.path.dirname(out_file))
+    plot.add_cphases().add_corr_flux().plot(save=True)
+    return out_file
+
 
 def single_average(root_dir: Path, mode: str) -> None:
         """Calls Jozsef's code and does a average over the files for one band to average
