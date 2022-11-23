@@ -14,7 +14,6 @@ def single_merge(coherent_dir: Path, incoherent_dir: Path,
         the reduced and calibrated data
 
         """
-        cprint(f"Merging (.fits) of folder {os.path.basename(coherent_dir)}")
         outfile_dir = os.path.join(outfile_dir, os.path.basename(coherent_dir))
         if not os.path.exists(outfile_dir):
             os.makedirs(outfile_dir)
@@ -58,7 +57,7 @@ def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
                        for directory in coherent_dirs]
 
     for coherent_dir, incoherent_dir in zip(coherent_dirs, incoherent_dirs):
-        cprint("Merging incoherent and coherent files of folder"\
+        cprint("Merging (.fits)-files of folder"\
                f" {os.path.basename(coherent_dir).split('/')[~0]}", "lp")
         cprint("------------------------------------------------------------",
               "lg")

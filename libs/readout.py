@@ -64,7 +64,7 @@ class ReadoutFits:
 
     def get_flux(self):
         """Fetches the flux data and its errors"""
-        return self. get_data("oi_flux", "fluxdata")[0]
+        return self. get_data("oi_flux", "fluxdata", "fluxerr", "sta_index")
 
     def get_vis(self) -> np.ndarray:
         """Fetches the visibility data/correlated fluxes, its errors and sta-indices"""

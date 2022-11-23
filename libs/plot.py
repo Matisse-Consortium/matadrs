@@ -69,7 +69,7 @@ class Plotter:
                  " WARNING: Only data of SAME BAND can be unified into one plot!")
 
         self.cutoff_low, self.cutoff_high = axis_cutoffs
-        self.limit_low = self.cutoff_low if self.cutoff_low > 10 else 10
+        self.limit_low = self.cutoff_low if self.cutoff_low > 13 else 13
         self.limit_high = self.cutoff_high if self.cutoff_high < -17 else -17
         self.limit_spacing = limit_spacing
 
@@ -79,7 +79,7 @@ class Plotter:
         self.all_flux, self.all_flux_err = [], []
 
         # TODO: Properly implement different baseline configurations
-        self.all_tel_vis, self.all_tel_t3phi = [], []
+        self.all_tel_flux, self.all_tel_vis, self.all_tel_t3phi = [], [], []
         self.all_ucoords, self.all_vcoords = [], []
 
         self.fits_files_names = []
@@ -98,17 +98,6 @@ class Plotter:
             self.t3phidata, self.t3phierr = map(lambda x: x[:4],
                                                 self.readout.get_t3phi()[:2])
 
-            if not flux_file:
-                try:
-                    self.flux = self.readout.get_flux()
-                except:
-                    self.flux = None
-            else:
-                # FIXME: Make get data function like for fitting
-                self.flux = flux_file
-            if self.flux is not None:
-                self.all_flux.append(self.flux)
-
             # Get the telescope indices
             self.vissta = self.readout.get_vis()[2]
             self.t3phista = self.readout.get_t3phi()[2]
@@ -119,6 +108,23 @@ class Plotter:
             self.tel_t3phi = np.array([("-".join([ALL_TELS[telescope]\
                                                   for telescope in trio]))\
                                        for trio in self.t3phista])
+
+            if not flux_file:
+                try:
+                    self.flux, self.fluxerr = self.readout.get_flux()[:2]
+                    self.fluxsta = self.readout.get_flux()[2]
+                    self.tel_flux = np.array([ALL_TELS[telescope]\
+                                             for telescope in self.fluxsta])
+                except:
+                    self.flux = None
+            else:
+                # FIXME: Make get data function like for fitting
+                self.flux = flux_file
+
+            if self.flux is not None:
+                self.all_flux.extend(self.flux)
+                self.all_flux_err.extend(self.fluxerr)
+                self.all_tel_flux.extend(self.tel_flux)
 
             # Gets other important data
             self.ucoords, self.vcoords = map(lambda x: x[:6],\
@@ -213,21 +219,13 @@ class Plotter:
         for index, dataset in enumerate(data):
             if (data_name == "vis") or (data_name == "vis2")\
                or (data_name == "corr_flux"):
-                if not tel_data:
-                    raise IOError("For this dataset 'tel_data' is needed!")
                 baseline = np.around(np.sqrt(self.all_ucoords[index]**2+\
                                              self.all_vcoords[index]**2), 2)
                 pas = np.around((np.degrees(np.arctan2(self.all_vcoords[index],
                                                        self.all_ucoords[index]))-90)*-1, 2)
                 label = fr"{tel_data[index]} $B_p$={baseline} m $\phi={pas}^\circ$"
-            elif data_name == "cphases":
-                if not tel_data:
-                    raise IOError("For this dataset 'tel_data' is needed!")
-                label = tel_data[index]
-            elif data_name == "flux":
-                label = None
             else:
-                raise IOError(f"The 'data_name': {data_name} does not exist!")
+                label = tel_data[index]
 
             if data_name == "cphases":
                 if index % 4 == 0:
@@ -248,14 +246,17 @@ class Plotter:
         elif data_name == "vis2":
             ax.set_ylabel("Vis2")
         elif data_name == "corr_flux":
-            ax.set_ylabel("Corr. flux [Jy]")
+            ax.set_ylabel("Correlated flux [Jy]")
         elif data_name == "flux":
             ax.set_ylabel("Flux [Jy]")
         else:
             ax.set_ylabel(r"Closure phases [$^{\circ}$]")
 
-        data_bounding = [dataset[self.limit_low:self.limit_high]\
-                         for dataset in data]
+        if data_name == "flux":
+            data_bounding = [dataset[:self.limit_high] for dataset in data]
+        else:
+            data_bounding = [dataset[self.limit_low:self.limit_high]\
+                             for dataset in data]
 
         # TODO: Fix this functionality -> Set the limits properly
         # TODO: Set no limits for the closure phases
@@ -269,16 +270,14 @@ class Plotter:
         else:
             plot_lims = self.get_plot_lims(data_bounding)
 
-        if data_name == "cphases":
-            lim_offset = [-1, 1] if lband else [-100, 100]
-            plot_lims = [limit+offset for limit, offset\
-                         in zip(plot_lims, lim_offset)]
-
-        ncol = len(data)//4 if data_name == "cphases" else len(data)//6
+        plot_lims_after = [limit+0.25*limit for limit in plot_lims]
+        ncol = len(data)//4 if data_name == "cphases" else\
+                (len(data)//6 if data_name in\
+                 ["vis", "vis2", "corr_flux"] else 1)
 
         ax.set_xlabel(r"Wavelength [$\mathrm{\mu}$m]")
         ax.set_ylim(plot_lims)
-        ax.legend(loc=2, prop={'size': 6}, ncol=ncol)
+        ax.legend(loc=1, prop={'size': 6}, ncol=ncol)
 
     def _make_component(self, data: List, data_name: str,
                         tel_data: Optional[List] = [],
@@ -321,7 +320,7 @@ class Plotter:
         to_px = 1/plt.rcParams["figure.dpi"]
         fig, axarr = plt.subplots(rows, columns,
                                   constrained_layout=True,
-                                  figsize=(1024*to_px, 512*to_px))
+                                  figsize=(512*to_px*columns, 512*to_px*rows))
         if not self.number_of_plots == 1:
             for ax, component in zip(axarr.flatten(), self.components):
                 self.plot_data(ax, *component.values())
@@ -338,7 +337,8 @@ class Plotter:
 
     def add_flux(self) -> None:
         """Plots the flux """
-        self.components.append(self._make_component(self.all_flux, "flux"))
+        self.components.append(self._make_component(self.all_flux, "flux",
+                                                    self.all_tel_flux))
         return self
 
     def add_vis(self) -> None:
@@ -588,6 +588,6 @@ if __name__ == ('__main__'):
     target_dir = "combined/hd142666_2022-04-21T07_18_22_L_TARGET_FINAL_INT.fits"
     fits_files_N = os.path.join(data_dir, stem_dir, target_dir)
     plot_fits = Plotter([fits_files_N], lband=True)
-    plot_fits.add_cphases().plot()
+    plot_fits.add_cphases().add_corr_flux().add_flux().plot()
 
 

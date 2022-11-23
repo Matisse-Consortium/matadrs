@@ -128,7 +128,7 @@ def mat_autoPipeline(dirRaw="",dirResult="",dirCalib="",nbCore=0,resol=0,paramL=
     listRes = []
     listGRA4MAT = []
     listhdrGRA4MAT = []
-    for hdr,filename in zip(allhdr,listRaw):
+    for hdr, filename in zip(allhdr,listRaw):
         chip=''
         if ('RMNREC' in hdr['HIERARCH ESO DPR TYPE']):
             if ('GRAVITY' in hdr['HIERARCH ESO DEL FT SENSOR']):

@@ -1,8 +1,9 @@
 import os
 import time
 import datetime
+import shutil
 
-from warnings import warn
+from glob import glob
 from pathlib import Path
 from typing import List, Optional
 
@@ -10,13 +11,10 @@ import mat_autoPipeline as mp
 
 from utils import cprint
 
-# TODO: Look up high spectral binning and make savefile somehow show all
-# High spectral binning is 7, 49
-
+SPECTRAL_BINNING = {"LOW": [5, 7], "HIGH": [7, 49]}
 
 def set_script_arguments(do_corr_flux: bool, array: str,
-                         lband: Optional[bool] = False,
-                         spectral_binning: Optional[List] = [5, 7]) -> str:
+                         resolution: Optional[str] = "LOW") -> str:
     """Sets the arguments that are then passed to the 'mat_autoPipeline.py'
     script
 
@@ -34,17 +32,21 @@ def set_script_arguments(do_corr_flux: bool, array: str,
     str
         A string that contains the arguments, which are passed to the MATISSE-pipline
     """
-    binning_L, binning_N = spectral_binning
-    tel = 3 if array == "ATs" else 0
-    opd_mod = "useOpdMod=FALSE/" if lband else "useOpdMod=TRUE/"
-    flux = f"corrFlux=TRUE/{opd_mod}coherentAlgo=2/" if do_corr_flux else ""
-    paramL_lst = f"/spectralBinning={binning_L}/{flux}compensate='pb,rb,nl,if,bp,od'"
-    paramN_lst = f"/replaceTel={tel}/{flux}spectralBinning={binning_N}"
+    bin_L, bin_N = SPECTRAL_BINNING[resolution]
+    # NOTE: Jozsef uses 3 here, but Jacob 2? What is the meaning of this -> Read up on it
+    # -> Already asked, awaiting response
+    tel = "/replaceTel=3" if array == "ATs" else ""
+    coh_L  = f"corrFlux=TRUE/coherentAlgo=2/" if do_corr_flux else ""
+    coh_N = f"corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2/"\
+            if do_corr_flux else ""
+    paramL_lst = f"/{coh_L}compensate=[pb,rb,nl,if,bp,od]/spectralBinning={bin_L}"
+    paramN_lst = f"/{coh_N}compensate=[pb,rb,nl,if,bp,od]/spectralBinning={bin_N}{tel}"
     return paramL_lst, paramN_lst
 
 
 def single_reduction(raw_dir: Path, res_dir: Path,
-                     array: str, mode: bool, band: str) -> None:
+                     array: str, mode: bool, band: str,
+                     resolution: Optional[str] = "LOW") -> None:
     """Reduces either the lband or the nband data for either the "coherent" or
     "incoherent" setting for a single iteration/epoch.
 
@@ -70,52 +72,51 @@ def single_reduction(raw_dir: Path, res_dir: Path,
     --------
     set_script_arguments()
     """
+    # TODO: Replace this time with process finish time
     start_time = time.time()
-    path_lst = ["coherent" if mode else "incoherent",
-                "lband" if band else "nband"]
-    path = "/".join(path_lst)
-    sub_dir = os.path.join(res_dir, path)
-    paramL, paramN = set_script_arguments(mode, array, band)
-    skipL, skipN = int(not band), int(band)
-
-    # NOTE: Removes the old '.sof'-files
-    try:
-        os.system(f"rm {os.path.join(res_dir, 'Iter1/*.sof*')}")
-        os.system(f"rm -r {os.path.join(res_dir, 'Iter1/*.rb')}")
-        os.system(f"rm -r {os.path.join(sub_dir, '*.rb')}")
-        print("Old (.sof)-files have been deleted!")
-    # TODO: Make logger here
-    except Exception:
-        warn(f"Removing of (.sof)- and (.rb)-files from {sub_dir} has failed!")
-
-    if not os.path.exists(sub_dir):
-        os.makedirs(sub_dir)
-
-    mp.mat_autoPipeline(dirRaw=raw_dir,
-                        dirResult=res_dir,
-                        dirCalib=raw_dir,
-                        nbCore=6, resol='',
-                        paramL=paramL, paramN=paramN,
-                        overwrite=0, maxIter=1,
-                        skipL=skipL, skipN=skipN)
+    mode_and_band_dir = os.path.join(res_dir, mode, band)
+    param_L, param_N = set_script_arguments(mode, array, resolution)
+    skip_L = True if band == "nband" else False
+    skip_N = not skip_L
 
     try:
-        os.system(f"mv -f {os.path.join(res_dir, 'Iter1/*.rb')} {sub_dir}")
-
+        shutil.rmtree(os.path.join(res_dir, "Iter1"))
+        cprint("Old 'Iter1'-folder has been deleted!", "g")
     # TODO: Make logger here
     except Exception:
-        print("Moving of files to {sub_dir} failed!")
+        cprint(f"Removing of 'Iter1' folder from {mode_and_band_dir} has failed!",
+               "y")
 
-    # Takes the time at end of execution
+    if not os.path.exists(mode_and_band_dir):
+        os.makedirs(mode_and_band_dir)
+
+    # mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=raw_dir,
+                        # nbCore=6, resol='', paramL=param_L, paramN=param_N,
+                        # overwrite=0, maxIter=1, skipL=skip_L, skipN=skip_N)
+
+    try:
+        rb_folders = glob(os.path.join(res_dir, "Iter1/*.rb"))
+        for folder in rb_folders:
+            if os.path.exists(os.path.join(mode_and_band_dir,
+                                           os.path.basename(folder))):
+                shutil.rmtree(os.path.join(mode_and_band_dir,
+                                           os.path.basename(folder)))
+            shutil.move(folder, mode_and_band_dir)
+        cprint("Folders have sucessfully been moved to their directories", "g")
+    # TODO: Make logger here
+    except Exception:
+        cprint("Moving of files to {mode_and_band_dir} failed!", "y")
+
     print("---------------------------------------------------------------------")
-    cprint(f"Executed the {path_lst[0]} {path_lst[1]} reduction in"
+    cprint(f"Executed the {mode} reduction for the {band} in"
           f" {datetime.timedelta(seconds=(time.time()-start_time))} hh:mm:ss")
     cprint("---------------------------------------------------------------------",
           "lg")
 
 
 def reduction_pipeline(root_dir: Path, stem_dir: Path,
-                       target_dir: Path, array: str):
+                       target_dir: Path, array: str,
+                       resolution: Optional[str] = "LOW"):
     """Runs the pipeline for the data reduction
 
     Parameters
@@ -129,20 +130,21 @@ def reduction_pipeline(root_dir: Path, stem_dir: Path,
     --------
     single_reduction()
     """
+    # TODO: Replace this time with process finish time
     overall_start_time = time.time()
     raw_dir = os.path.join(root_dir, stem_dir, "RAW", target_dir)
     res_dir = os.path.join(root_dir, stem_dir, "PRODUCTS", target_dir)
+
     if not os.path.exists(res_dir):
         os.makedirs(res_dir)
 
-    for mode_bools in [True, False]:
-        mode = "coherent" if mode_bools else "incoherent"
+    for mode in ["coherent", "incoherent"]:
         cprint(f"Processing {mode} reduction", "lp")
         cprint("---------------------------------------------------------------------",
               "lg")
-        for band in [True, False]:
-            single_reduction(raw_dir, res_dir, array,\
-                             mode=mode_bools, band=band)
+        for band in ["lband", "nband"]:
+            single_reduction(raw_dir, res_dir, array,
+                             mode=mode, band=band)
 
     cprint(f"Executed the overall reduction in"
            f" {datetime.timedelta(seconds=(time.time()-overall_start_time))} hh:mm:ss",
