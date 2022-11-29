@@ -44,8 +44,8 @@ def set_script_arguments(corr_flux: bool, array: str,
     coh_L  = f"/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2"\
             if corr_flux else ""
     coh_N = f"/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2" if corr_flux else ""
-    paramL_lst = f"{coh_L}{compensate}/spectralBinning={bin_L}/"
-    paramN_lst = f"{tel}{coh_N}/spectralBinning={bin_N}/"
+    paramL_lst = f"{coh_L}{compensate}/spectralBinning={bin_L}"
+    paramN_lst = f"{tel}{coh_N}/spectralBinning={bin_N}"
     return paramL_lst, paramN_lst
 
 
@@ -89,7 +89,7 @@ def single_reduction(raw_dir: Path, calib_dir: Path, res_dir: Path,
     if not os.path.exists(mode_and_band_dir):
         os.makedirs(mode_and_band_dir)
 
-    mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=raw_dir,
+    mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=calib_dir,
                         nbCore=6, resol='', paramL=param_L, paramN=param_N,
                         overwrite=0, maxIter=1, skipL=skip_L, skipN=skip_N)
 
@@ -145,9 +145,10 @@ def reduction_pipeline(root_dir: Path, stem_dir: Path,
     # TODO: Add in the option to not remove old reduction and make new one take an
     # addional tag after its name
     try:
-        for folder in ["Iter1", "coherent", "incoherent"]:
-            if os.path.exists(os.path.join(res_dir, folder)):
-                shutil.rmtree(os.path.join(res_dir, folder))
+        folders = glob(os.path.join(res_dir, "*"))
+        for folder in folders:
+            if os.path.exists(folder):
+                shutil.rmtree(folder)
         cprint("Cleaned up old reduction!", "y")
     # TODO: Make logger here
     except Exception:
@@ -171,12 +172,4 @@ if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
     reduction_pipeline(data_dir, stem_dir, target_dir, "ATs")
-    # print("For coherent fluxes on UTs")
-    # print(set_script_arguments(corr_flux=True, array="UTs", resolution="low"))
-    # print("For incoherent fluxes on UTs")
-    # print(set_script_arguments(corr_flux=False, array="UTs", resolution="low"))
-    # print()
-    # print("For coherent fluxes on ATs")
-    # print(set_script_arguments(corr_flux=True, array="ATs", resolution="low"))
-    # print("For incoherent fluxes on ATs")
-    # print(set_script_arguments(corr_flux=False, array="ATs", resolution="low"))
+

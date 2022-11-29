@@ -41,7 +41,8 @@ def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
         elif bcd_info == "out-out":
             out_out = fits_file
         else:
-            cprint("BCD-configuration has not been found!", "y")
+            cprint("BCD-configuration has not been found!", "r")
+            raise ValueError
     return BCDFits(in_in, in_out, out_in, out_out)
 
 
