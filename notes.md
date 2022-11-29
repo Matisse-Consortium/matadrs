@@ -8,9 +8,20 @@
 [  ] Rewrite the multiple fits file approach, and specify somehow which fits-file to use
 [  ] Make the waterfall plots work similarly
 [  ] Improve plot axes titles
+[  ] Make the lband functionality part of the class attributes and not every plot
 
 ## Output
 [  ] Make text colored in console, so it is easier readable for example in output-file
+
+## Averaging
+[ ] Check that the sorting of the BCDs happens correctly
+[ ] Ask Jozsef why he doesnt use the in-out, out-in for N-band
+
+## Calibration
+[ ] Add calibration for chopped L-band files
+
+## Reduction
+[ ] Add the catalogues and the
 
 ## Done
 [ x ] Make plotter being able to add components to plot and then at the end plot all neatly

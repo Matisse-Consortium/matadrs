@@ -7,14 +7,12 @@ __pycache__/
 # Specific folders to ignore
 data/
 depracated/
+libs/jozsef_files/
+libs/jacob_files
+libs/tools/
+libs/calib_spec_databases
 
 # Specific files to ignore
-libs/robust.py
-libs/avg_oifits.py
-libs/fluxcal.py
 libs/calib_BCD2.py
+libs/avg_oifits.py
 libs/get_gravity_data.py
-libs/bcd_calibration.py
-libs/cflux_calibration_lmband.py
-libs/calib_spec_databases/
-libs/show_allred.py
