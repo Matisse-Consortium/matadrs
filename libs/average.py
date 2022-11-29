@@ -14,8 +14,7 @@ from plot import Plotter
 from readout import ReadoutFits
 from utils import cprint, oifits_patchwork
 
-# NOTE: non chopped exposures 5-6. Do not average those together (For L-band)
-# TODO: Write averaging for chopped exposures 5-6
+# TODO: Make the files more modular
 
 def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
     """Sorts the input (.fits)-files by their BCD configuration
@@ -65,7 +64,7 @@ def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
     return out_file
 
 
-def single_average(root_dir: Path, mode: str) -> None:
+def single_average(root_dir: Path, mode: str, lband) -> None:
         """Calls Jozsef's code and does a average over the files for one band to average
         the reduced and calibrated data
 
@@ -76,34 +75,49 @@ def single_average(root_dir: Path, mode: str) -> None:
         """
         mode_dir = os.path.join("calib", mode)
         folders = glob(os.path.join(root_dir, mode_dir , "*.rb"))
+
         for folder in folders:
             print(f"Averaging folder {os.path.basename(folder)}")
-            fits_files = glob(os.path.join(folder, "*.fits"))
-            fits_files.sort(key=lambda x: x[-8:])
-            fits_files = fits_files[:4]
+            lband = True if "HAWAII" in folder else False
+
+            unchopped_fits = glob(os.path.join(folder, "*.fits"))
+            unchopped_fits.sort(key=lambda x: x[-8:])
+
+            if len(fits_files) == 6:
+                unchopped_fits = unchopped_fits[:4]
+                chopped_fits = unchopped_fits[4:]
 
             folder_split = os.path.basename(folder).split(".")
             folder_split[0] += "-AVG"
             new_folder = ".".join(folder_split)
             outfile_dir = os.path.join(root_dir, "bcd_and_averaged",
                                        mode, new_folder)
-            lband = True if "HAWAII" in outfile_dir else False
 
             if not os.path.exists(outfile_dir):
                 os.makedirs(outfile_dir)
 
-            # epoch = ".".join(os.path.basename(band_dir).split(".")[2:5:2])
-            outfile_path_vis = os.path.join(outfile_dir, "TARGET_AVG_VIS_INT.fits")
-            outfile_path_cphases = os.path.join(outfile_dir, "TARGET_AVG_T3PHI_INT.fits")
-            avg_oifits(fits_files, outfile_path_vis)
-            # TODO: Check if the fits-files are properly sorted in in-in, in-out,
-            # out-in, out-out
+            outfile_path_vis =\
+                    os.path.join(outfile_dir, "TARGET_AVG_VIS_INT.fits")
+            outfile_path_cphases =\
+                    os.path.join(outfile_dir, "TARGET_AVG_T3PHI_INT.fits")
+            outfile_path_chopped =\
+                    os.path.join(outfile_dir, "TARGET_AVG_VIS_INT_CHOPPED.fits")
+
+            bcd = sort_fits_by_BCD(unchopped_fits)
+            avg_oifits(unchopped_fits, outfile_path_vis)
+
+            if chopped_fits:
+                avg_oifits(chopped_fits, outfile_path_chopped)
+
             if lband:
-                calib_BCD(*fits_files, outfile_path_cphases, plot=False)
+                calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in, bcd.out_out,
+                          outfile_path_cphases, plot=False)
             else:
-                calib_BCD(fits_files[0], "", "", fits_files[~0],
+                calib_BCD(bcd.in_in, "", "", bcd.out_out,
                          outfile_path_cphases, plot=False)
 
+            # TODO: Make the plotter take the save name automatically,
+            # if none given
             print("Creating plots...")
             print("------------------------------------------------------------")
             plot_vis = Plotter([outfile_path_vis], save_path=outfile_dir,
