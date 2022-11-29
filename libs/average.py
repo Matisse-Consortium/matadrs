@@ -54,6 +54,7 @@ def single_average(root_dir: Path, mode: str) -> None:
             new_folder = ".".join(folder_split)
             outfile_dir = os.path.join(root_dir, "bcd_and_averaged",
                                        mode, new_folder)
+            lband = True if "HAWAII" in outfile_dir else False
 
             if not os.path.exists(outfile_dir):
                 os.makedirs(outfile_dir)
@@ -62,11 +63,16 @@ def single_average(root_dir: Path, mode: str) -> None:
             outfile_path_vis = os.path.join(outfile_dir, "TARGET_AVG_VIS_INT.fits")
             outfile_path_cphases = os.path.join(outfile_dir, "TARGET_AVG_T3PHI_INT.fits")
             avg_oifits(fits_files, outfile_path_vis)
-            calib_BCD(*fits_files, outfile_path_cphases, plot=False)
+            # TODO: Check if the fits-files are properly sorted in in-in, in-out,
+            # out-in, out-out
+            if lband:
+                calib_BCD(*fits_files, outfile_path_cphases, plot=False)
+            else:
+                calib_BCD(fits_files[0], "", "", fits_files[~0],
+                         outfile_path_cphases, plot=False)
 
             print("Creating plots...")
             print("------------------------------------------------------------")
-            lband = True if "HAWAII" in outfile_dir else False
             plot_vis = Plotter([outfile_path_vis], save_path=outfile_dir,
                                lband=lband, plot_name="TARGET_AVG_VIS_INT.pdf")
             plot_vis.add_vis().plot(save=True)

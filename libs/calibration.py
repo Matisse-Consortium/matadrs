@@ -15,10 +15,10 @@ from fluxcal import fluxcal
 DATABASE_DIR = os.path.join(os.path.dirname(__file__), "calib_spec_databases")
 DATABASE_FILES = ['vBoekelDatabase.fits', 'calib_spec_db_v10.fits',
                   'calib_spec_db_v10_supplement.fits']
-DATABASE_PATHS = [os.path.join(DATABASE_DIR, databases) for databases in DATABASE_FILES]
+DATABASE_PATHS = [os.path.join(DATABASE_DIR, databases)\
+                  for databases in DATABASE_FILES]
 
-# TODO: Also make the CAL-CAL calibration
-
+# TODO: Also make the CAL-CAL calibration?
 
 def single_calibration(root_dir: Path, tar_dir: Path,
                        cal_dir: Path, mode_name: str) -> None:

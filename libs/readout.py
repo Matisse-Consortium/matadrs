@@ -3,6 +3,8 @@ import numpy as np
 from astropy.io import fits
 from typing import Any, Dict, List, Union, Optional
 
+# TODO: HIERARCH INS BCD1 ID, same for BCD2 ID
+# TODO: Use new version of readout from ppdmod
 
 class ReadoutFits:
     """All functionality to work with '.oifits/.fits'-files"""
@@ -23,9 +25,15 @@ class ReadoutFits:
         with fits.open(self.fits_file) as hdul:
             return hdul.info()
 
-    def get_header(self, hdr) -> str:
+    def repr_header(self, hdr) -> str:
         """Reads out the specified data"""
         return repr(fits.getheader(self.fits_file, hdr))
+
+    def get_header(self, hdr: Union[int, str], *args: Union[int, str]):
+        """Gets the header"""
+        with fits.open(self.fits_file) as hdul:
+            return [hdul[hdr].header[arg] for arg in args] if len(args) > 1 \
+                    else hdul[hdr].header[args[0]]
 
     def get_data(self, hdr: Union[int, str], *args: Union[int, str]) -> List[np.array]:
         """Gets a specific set of data and its error from a header and
@@ -43,8 +51,12 @@ class ReadoutFits:
         data: List[np.array]
         """
         with fits.open(self.fits_file) as hdul:
-            return [hdul[hdr].data[i] for i in args] if len(args) > 1 \
+            return [hdul[hdr].data[arg] for arg in args] if len(args) > 1 \
                     else hdul[hdr].data[args[0]]
+
+    def get_bcd_info(self):
+        return "-".join([self.get_header(0, "HIERARCH ESO INS BCD1 ID"),
+                        self.get_header(0, "HIERARCH ESO INS BCD2 ID")]).lower()
 
     def get_column_names(self, hdr) -> np.ndarray:
         """Fetches the columns of the header"""
@@ -126,7 +138,7 @@ class ReadoutFits:
 
 
 if __name__ == "__main__":
-    file = "/Users/scheuck/Documents/PhD/matisse_stuff/ppdmodler/assets/TARGET_RAW_INT_0001.fits"
-    readout = ReadoutFits(file)
-    print(readout.get_vis4wl(101))
+    f = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/incoherent/nband/mat_raw_estimates.2019-03-23T08_41_19.AQUARIUS.rb/TARGET_RAW_INT_0004.fits"
+    readout = ReadoutFits(f)
+    print(readout.get_bcd_info())
 

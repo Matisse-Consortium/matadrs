@@ -1,0 +1,81 @@
+
+Start time     : 2022-11-24T11:30:52
+Program name   : esorex
+Severity level : [ INFO  ] 
+
+11:30:52 [ INFO  ] : [tid=000] This is EsoRex, version 3.13.1
+11:30:52 [ INFO  ] : [tid=000] using the libraries: CPL = 7.1, CFITSIO = 3.36, WCSLIB = 4.24, FFTW (normal precision) = 3.3.4-sse2, FFTW (single precision) = 3.3.4-sse2, CPL FLOP counting is unavailable, enable with -DCPL_ADD_FLOPS, OPENMP = 201107
+11:30:52 [ INFO  ] : [tid=000] Invocation command line was: esorex --man-page mat_raw_estimates
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_cal_imarec.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_cal_oifits.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_im_basic.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_cal_det.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_merge_results.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_est_corr.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_est_shift.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_ext_beams.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_est_aphase.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_raw_estimates.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_proc_coher.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_im_extended.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_est_kappa.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_est_tfqual.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_cal_image.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_est_tf.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_wave_cal.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_est_opd.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_proc_incoher.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_cal_cphase.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_cal_vis.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_im_rem.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_cal_dphase.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [WARNING] : [tid=000] lt_dlopen (/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/lib/esopipes-plugins/matisse-1.6.0/mat_est_flat.so) returned NULL,
+lt_dlerror() = file not found
+
+11:30:52 [ ERROR ] : [tid=000] Unable to find recipe 'mat_raw_estimates'. Check that the recipe is in the path specified by the '--recipe-dir' option.

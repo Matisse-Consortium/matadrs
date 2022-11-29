@@ -7,46 +7,51 @@ from glob import glob
 from pathlib import Path
 from typing import List, Optional
 
-import mat_autoPipeline as mp
+from mat_tools import mat_autoPipeline as mp
 
 from utils import cprint
 
-SPECTRAL_BINNING = {"LOW": [5, 7], "HIGH": [7, 49]}
+SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
 
-def set_script_arguments(do_corr_flux: bool, array: str,
-                         resolution: Optional[str] = "LOW") -> str:
+def set_script_arguments(corr_flux: bool, array: str,
+                         resolution: Optional[str] = "low") -> str:
     """Sets the arguments that are then passed to the 'mat_autoPipeline.py'
     script
 
     Parameters
     ----------
-    do_corr_flux: bool
+    corr_flux: bool
         This specifies if the flux is to be reduced or not
     array: str
         The array configuration that was used for the observation
-    spectral_binning: List, optional
-        The spectral "binning" to be selected
+    resolution: str
+        This determines the spectral binning. Input can be "low" for
+        low-resolution in both bands, "high_ut" for low-resolution in L-band
+        and high-resolution in N-band for the UTs and the same for "high_at" for
+        the ATs
 
     Returns
     -------
     str
-        A string that contains the arguments, which are passed to the MATISSE-pipline
+        A string that contains the arguments, which are passed to the
+        MATISSE-pipline
     """
     bin_L, bin_N = SPECTRAL_BINNING[resolution]
     # NOTE: Jozsef uses 3 here, but Jacob 2? What is the meaning of this -> Read up on it
     # -> Already asked, awaiting response
-    tel = "/replaceTel=3" if array == "ATs" else ""
-    coh_L  = f"corrFlux=TRUE/coherentAlgo=2/" if do_corr_flux else ""
-    coh_N = f"corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2/"\
-            if do_corr_flux else ""
-    paramL_lst = f"/{coh_L}compensate=[pb,rb,nl,if,bp,od]/spectralBinning={bin_L}"
-    paramN_lst = f"/{coh_N}compensate=[pb,rb,nl,if,bp,od]/spectralBinning={bin_N}{tel}"
+    compensate = "/compensate=[pb,rb,nl,if,bp,od]"
+    tel = "/replaceTel=3" if array == "ATs" else "/replaceTel=0"
+    coh_L  = f"/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2"\
+            if corr_flux else ""
+    coh_N = f"/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2" if corr_flux else ""
+    paramL_lst = f"{coh_L}{compensate}/spectralBinning={bin_L}/"
+    paramN_lst = f"{tel}{coh_N}/spectralBinning={bin_N}/"
     return paramL_lst, paramN_lst
 
 
-def single_reduction(raw_dir: Path, res_dir: Path,
+def single_reduction(raw_dir: Path, calib_dir: Path, res_dir: Path,
                      array: str, mode: bool, band: str,
-                     resolution: Optional[str] = "LOW") -> None:
+                     resolution: Optional[str] = "low") -> None:
     """Reduces either the lband or the nband data for either the "coherent" or
     "incoherent" setting for a single iteration/epoch.
 
@@ -58,6 +63,8 @@ def single_reduction(raw_dir: Path, res_dir: Path,
     ----------
     raw_dir: Path
         The path containing the raw observation files
+    calib_dir: Path
+        The path containing the calibration files
     res_dir: Path
         The path to contain to reduced data
     array: str
@@ -79,20 +86,12 @@ def single_reduction(raw_dir: Path, res_dir: Path,
     skip_L = True if band == "nband" else False
     skip_N = not skip_L
 
-    try:
-        shutil.rmtree(os.path.join(res_dir, "Iter1"))
-        cprint("Old 'Iter1'-folder has been deleted!", "g")
-    # TODO: Make logger here
-    except Exception:
-        cprint(f"Removing of 'Iter1' folder from {mode_and_band_dir} has failed!",
-               "y")
-
     if not os.path.exists(mode_and_band_dir):
         os.makedirs(mode_and_band_dir)
 
-    # mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=raw_dir,
-                        # nbCore=6, resol='', paramL=param_L, paramN=param_N,
-                        # overwrite=0, maxIter=1, skipL=skip_L, skipN=skip_N)
+    mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=raw_dir,
+                        nbCore=6, resol='', paramL=param_L, paramN=param_N,
+                        overwrite=0, maxIter=1, skipL=skip_L, skipN=skip_N)
 
     try:
         rb_folders = glob(os.path.join(res_dir, "Iter1/*.rb"))
@@ -102,7 +101,10 @@ def single_reduction(raw_dir: Path, res_dir: Path,
                 shutil.rmtree(os.path.join(mode_and_band_dir,
                                            os.path.basename(folder)))
             shutil.move(folder, mode_and_band_dir)
-        cprint("Folders have sucessfully been moved to their directories", "g")
+
+        if rb_folders:
+            cprint("Folders have sucessfully been moved to their directories",
+                   "g")
     # TODO: Make logger here
     except Exception:
         cprint("Moving of files to {mode_and_band_dir} failed!", "y")
@@ -116,7 +118,7 @@ def single_reduction(raw_dir: Path, res_dir: Path,
 
 def reduction_pipeline(root_dir: Path, stem_dir: Path,
                        target_dir: Path, array: str,
-                       resolution: Optional[str] = "LOW"):
+                       resolution: Optional[str] = "low"):
     """Runs the pipeline for the data reduction
 
     Parameters
@@ -133,18 +135,32 @@ def reduction_pipeline(root_dir: Path, stem_dir: Path,
     # TODO: Replace this time with process finish time
     overall_start_time = time.time()
     raw_dir = os.path.join(root_dir, stem_dir, "RAW", target_dir)
+    # TODO: Change this to proper search for calibration_files
+    calib_dir = raw_dir
     res_dir = os.path.join(root_dir, stem_dir, "PRODUCTS", target_dir)
 
     if not os.path.exists(res_dir):
         os.makedirs(res_dir)
+
+    # TODO: Add in the option to not remove old reduction and make new one take an
+    # addional tag after its name
+    try:
+        for folder in ["Iter1", "coherent", "incoherent"]:
+            if os.path.exists(os.path.join(res_dir, folder)):
+                shutil.rmtree(os.path.join(res_dir, folder))
+        cprint("Cleaned up old reduction!", "y")
+    # TODO: Make logger here
+    except Exception:
+        cprint("Cleaning up failed!", "y")
+
 
     for mode in ["coherent", "incoherent"]:
         cprint(f"Processing {mode} reduction", "lp")
         cprint("---------------------------------------------------------------------",
               "lg")
         for band in ["lband", "nband"]:
-            single_reduction(raw_dir, res_dir, array,
-                             mode=mode, band=band)
+            single_reduction(raw_dir, calib_dir, res_dir,
+                             array, mode=mode, band=band)
 
     cprint(f"Executed the overall reduction in"
            f" {datetime.timedelta(seconds=(time.time()-overall_start_time))} hh:mm:ss",
@@ -155,3 +171,12 @@ if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
     reduction_pipeline(data_dir, stem_dir, target_dir, "ATs")
+    # print("For coherent fluxes on UTs")
+    # print(set_script_arguments(corr_flux=True, array="UTs", resolution="low"))
+    # print("For incoherent fluxes on UTs")
+    # print(set_script_arguments(corr_flux=False, array="UTs", resolution="low"))
+    # print()
+    # print("For coherent fluxes on ATs")
+    # print(set_script_arguments(corr_flux=True, array="ATs", resolution="low"))
+    # print("For incoherent fluxes on ATs")
+    # print(set_script_arguments(corr_flux=False, array="ATs", resolution="low"))
