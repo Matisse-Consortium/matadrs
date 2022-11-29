@@ -2,13 +2,16 @@ import os
 import matplotlib.pyplot as plt
 
 from glob import glob
+from typing import List
 from pathlib import Path
 from typing import Optional
+from collections import namedtuple
 
 from calib_BCD2 import calib_BCD
 from avg_oifits import avg_oifits
 
 from plot import Plotter
+from readout import ReadoutFits
 from utils import cprint, oifits_patchwork
 
 # NOTE: non chopped exposures 5-6. Do not average those together (For L-band)
@@ -23,14 +26,24 @@ def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
 
     Returns
     -------
-    SimpleNamespace
-        The fits ordered by their configuration
+    namedtuple
+        The fits ordered by their BCD-configuration
     """
-    fits_sorted = namedtuple("FitsSorted", ["in_in", "in_out",
-                                            "out_in", "out_out"])
+    BCDFits = namedtuple("BCDFits", ["in_in", "in_out", "out_in", "out_out"])
     for fits_file in fits_files:
-        ...
-    return
+        readout = ReadoutFits(fits_file)
+        bcd_info = readout.get_bcd_info()
+        if bcd_info == "in-in":
+            in_in = fits_file
+        elif bcd_info == "in-out":
+            in_out = fits_file
+        elif bcd_info == "out-in":
+            out_in = fits_file
+        elif bcd_info == "out-out":
+            out_out = fits_file
+        else:
+            cprint("BCD-configuration has not been found!", "y")
+    return BCDFits(in_in, in_out, out_in, out_out)
 
 
 def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:

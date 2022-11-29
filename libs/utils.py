@@ -5,7 +5,6 @@ from pathlib import Path
 from shutil import copyfile
 from astropy.io import fits
 from typing import Optional, List
-from collections import namedtuple
 
 
 def cprint(message: str, c: Optional[str] = None) -> None:
