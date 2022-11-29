@@ -12,6 +12,26 @@ from plot import Plotter
 from utils import cprint, oifits_patchwork
 
 # NOTE: non chopped exposures 5-6. Do not average those together (For L-band)
+# TODO: Write averaging for chopped exposures 5-6
+
+def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
+    """Sorts the input (.fits)-files by their BCD configuration
+
+    Parameters
+    ----------
+    fits_files: List[Path]
+
+    Returns
+    -------
+    SimpleNamespace
+        The fits ordered by their configuration
+    """
+    fits_sorted = namedtuple("FitsSorted", ["in_in", "in_out",
+                                            "out_in", "out_out"])
+    for fits_file in fits_files:
+        ...
+    return
+
 
 def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
     """Merges the vis and cphases files in the respective directory"""

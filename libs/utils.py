@@ -7,8 +7,6 @@ from astropy.io import fits
 from typing import Optional, List
 from collections import namedtuple
 
-BCD_LIST = ["IN-IN", "IN-OUT", "OUT-IN", "OUT-OUT"]
-
 
 def cprint(message: str, c: Optional[str] = None) -> None:
     """Prints with color"""
@@ -23,25 +21,6 @@ def cprint(message: str, c: Optional[str] = None) -> None:
         print("".join(colored_string))
     else:
         print(message)
-
-
-def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
-    """Sorts the input (.fits)-files by their BCD configuration
-
-    Parameters
-    ----------
-    fits_files: List[Path]
-
-    Returns
-    -------
-    SimpleNamespace
-        The fits ordered by their configuration
-    """
-    fits_sorted = namedtuple("FitsSorted", ["in_in", "in_out",
-                                            "out_in", "out_out"])
-    for fits_file in fits_files:
-        ...
-    return
 
 
 def check_if_target(target_dir: Path) -> bool:
