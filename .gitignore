@@ -7,7 +7,8 @@ __pycache__/
 
 # Specific folders to ignore
 data/
-src/matadrs/jacob_files
+src/matadrs/reduction/jacob_files
+src/matadrs/reduction/tools
 
 # Specific files to ignore
 src/matadrs/reduction/calib_BCD2.py

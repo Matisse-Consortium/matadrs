@@ -1,13 +1,15 @@
+import os
 import sys
+import shutil
+import importlib.util
+import subprocess
+
 from setuptools import setup, find_packages
 
-try:
-    import attrdict
-except ImportError:
-    import subprocess
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "attrdict==2.0.1"])
-finally:
-    print("Checked needed imports!")
+
+if importlib.util.find_spec("attrdict") is None:
+    subprocess.run([sys.executable, "-m", "pip", "install", "attrdict==2.0.1"],
+                   check=True)
 
 setup(
     name='matadrs',
@@ -58,8 +60,26 @@ setup(
         "webencodings==0.5.1",
         "wxPython==4.2.0",
         "zipp==3.11.0",
+
         # Direct requirements for matadrs
 
     ]
 )
+
+print("Installing 'mat_tools'!")
+if importlib.util.find_spec("mat_tools") is None:
+    if importlib.util.find_spec("wget") is None:
+        subprocess.run([sys.executable, "-m", "pip", "install", "wget==3.2"], check=True)
+
+    import wget
+    repo = "https://gitlab.oca.eu/MATISSE/tools/-/archive/master/tools-master.zip"
+    repo_dir = os.path.abspath("src/matadrs/reduction/tools-master")
+    zip_dir = repo_dir+".zip"
+    wget.download(repo, zip_dir)
+    subprocess.run(["tar", "-xf", zip_dir, "--directory", "src/matadrs/reduction/"],
+                   check=True)
+    subprocess.run([sys.executable, "-m", "pip", "install", "-e", f"{repo_dir}."],
+                   check=True)
+    shutil.rmtree(zip_dir)
+print("Done!")
 
