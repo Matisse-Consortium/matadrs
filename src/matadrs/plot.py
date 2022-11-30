@@ -6,8 +6,7 @@ from pathlib import Path
 from warnings import warn
 from typing import List, Optional
 
-from readout import ReadoutFits
-from utils import cprint
+from .readout import ReadoutFits
 
 # TODO: Make either model or fourier transform carry more info like the name of
 # the plot or similar -> Work more with classes

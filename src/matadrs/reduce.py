@@ -5,11 +5,10 @@ import shutil
 
 from glob import glob
 from pathlib import Path
-from typing import List, Optional
-
+from typing import Optional
 from mat_tools import mat_autoPipeline as mp
 
-from utils import cprint
+from .utils import cprint
 
 SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
 

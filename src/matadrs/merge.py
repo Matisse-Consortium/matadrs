@@ -2,10 +2,9 @@ import os
 
 from glob import glob
 from pathlib import Path
-from typing import List, Optional
 
-from plot import Plotter
-from utils import cprint, oifits_patchwork
+from .plot import Plotter
+from .utils import cprint, oifits_patchwork
 
 
 def single_merge(coherent_dir: Path, incoherent_dir: Path,

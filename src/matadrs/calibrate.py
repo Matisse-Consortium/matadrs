@@ -1,25 +1,16 @@
 import os
-import warnings
-import matplotlib.pyplot as plt
 
 from glob import glob
 from pathlib import Path
 from collections import deque
 from typing import Optional
+# from mat_tools import mat_flu
 
-from plot import Plotter
-from utils import get_path_descriptor, check_if_target, cprint
-from fluxcal import fluxcal
+from .plot import Plotter
+from .utils import get_path_descriptor, check_if_target, cprint
 
-# Datapath to the directories to be calibrated, global variables
-DATABASE_DIR = os.path.join(os.path.dirname(__file__), "calib_spec_databases")
-DATABASE_FILES = ['vBoekelDatabase.fits', 'calib_spec_db_v10.fits',
-                  'calib_spec_db_v10_supplement.fits']
-DATABASE_PATHS = [os.path.join(DATABASE_DIR, databases)\
-                  for databases in DATABASE_FILES]
 
 # TODO: Also make the CAL-CAL calibration?
-
 def single_calibration(root_dir: Path, tar_dir: Path,
                        cal_dir: Path, mode_name: str) -> None:
     """The calibration for a target and a calibrator folder

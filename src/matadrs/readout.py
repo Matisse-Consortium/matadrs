@@ -1,10 +1,8 @@
 import numpy as np
 
 from astropy.io import fits
-from typing import Any, Dict, List, Union, Optional
+from typing import List, Union
 
-# TODO: HIERARCH INS BCD1 ID, same for BCD2 ID
-# TODO: Use new version of readout from ppdmod
 
 class ReadoutFits:
     """All functionality to work with '.oifits/.fits'-files"""
