@@ -5,31 +5,30 @@ import datetime
 from pathlib import Path
 from typing import Optional
 
-from .reduce import reduction_pipeline
-from .calibrate import calibration_pipeline
-from .average import averaging_pipeline
-from .merge import merging_pipeline
+from .reduction import reduction_pipeline, calibration_pipeline, averaging_pipeline,\
+        merging_pipeline
 
 # TODO: Add functionality that clears all the paths before it write again, as to overwrite them
 
 def matadrs_pipeline(data_dir: Path, stem_dir: Path,
-                     reduce: Optional[bool] = True, calibrate: Optional[bool] = True,
-                     average: Optional[bool] = True, merge: Optional[bool] = True):
+                     target_dirs: List[Path],
+                     do_reduce: Optional[bool] = True,
+                     do_calibrate: Optional[bool] = True,
+                     do_average: Optional[bool] = True,
+                     do_merge: Optional[bool] = True):
     """Combines all the facettes of data reduction into one executable function that takes
     a list of epochs and different datasets to be reduced via the MATISSE pipeline, then
     calibrated, merged and averaged
 
     Parameters
     ----------
-    raw_dirs: List[Path]
-        The respective RAW directories
-
-    See Also
-    --------
-    reduction_pipeline()
-    calibration_pipeline()
-    merging_pipeline()
-    averaging_pipeline()
+    data_dir: Path
+    stem_dir: Path
+    target_dirs: List[Path]
+    do_reduce: bool, optional
+    do_calibrate: bool, optional
+    do_average: bool, optional
+    do_merge: bool, optional
     """
     for target_dir in target_dirs:
         start_time = time.time()
@@ -37,13 +36,13 @@ def matadrs_pipeline(data_dir: Path, stem_dir: Path,
         cprint(f"Starting data improvement of {target_dir}!", "r")
         cprint("----------------------------------------------------------------------",
               "lg")
-        if reduce:
+        if do_reduce:
             reduction_pipeline(data_dir, stem_dir, target_dir, array)
-        if calibrate:
+        if do_calibrate:
             calibration_pipeline(data_dir, stem_dir, target_dir,)
-        if average:
+        if do_average:
             averaging_pipeline(data_dir, stem_dir, target_dir)
-        if merge:
+        if do_merge:
             merging_pipeline(data_dir, stem_dir, target_dir)
         cprint("----------------------------------------------------------------------",
               "lg")

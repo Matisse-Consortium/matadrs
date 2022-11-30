@@ -1,15 +1,15 @@
 # Folders to ignore
 __pycache__/
+*.egg-info/
 
 # Files to ignore
 *.txt
 
 # Specific folders to ignore
 data/
-src/matadrs/libs/jozsef_files/
-src/matadrs/libs/jacob_files
+src/matadrs/jacob_files
 
 # Specific files to ignore
-src/matadrs/libs/calib_BCD2.py
-src/matadrs/libs/avg_oifits.py
-src/matadrs/libs/get_gravity_data.py
+src/matadrs/reduction/calib_BCD2.py
+src/matadrs/reduction/avg_oifits.py
+src/matadrs/grep/get_gravity_data.py
