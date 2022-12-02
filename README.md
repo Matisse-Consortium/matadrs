@@ -1,51 +1,46 @@
 # Matadrs
 The (modular) MATISSE Automated Data Reduction Software
 
-## Table of Contents
-* [Features](#features)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Ressources](#ressources)
-* [Contributors/Contact](#contributors)
-
 ## Features
-* `reduction.py`
-* `calibration.py`
+### Raw-data fetching from ESO-Archive
+> _To be implemented_
+
+### Data-reduction for MATISSE
+The script `matadrs.py` gives easy access of functionality from the following scripts
+(found under `libs/reduction/`)
+* `reduce.py`
+* `calibrate.py`
 * `average.py`
 * `merge.py`
 
 ## Installation
-> It is recommended to keep your Python3 installation clean by installing packages to a
-virtual-environment (for this see [Virtual Enviroment Setup](#virtual-enviroment-setup))
+It is recommended to keep your Python3 installation clean by installing packages to a
+[virtual-environment](#virtual-enviroment-setup)
 
 ### MATISSE-pipeline (required)
+First the MATISSE-pipeline needs to be installed.<br>
+For this follow the instructions found here:
 
-### Mat-tools (optional)
-This should be automatically installed with the `requirements.txt`,
-however, if you want to install a newer version follow the instructions from
-[installation-instructions](https://gitlab.oca.eu/MATISSE/tools/-/wikis/home)
-
-> :warning: Sometimes there occurs an error while installing the `wxPython`-wheels,
-required for the `mat-tools` package, this can be fixed by manually installing
-the missing package (the error should tell you which it is)
+### Mat-tools (required)
+Will be automatically installed, for in-depth information see
+[mat-tools](https://gitlab.oca.eu/MATISSE/tools/-/tree/master/mat_tools)
 
 ## Matadrs
-After installing the requirements (see [MATISSE-pipeline](#matisse-pipeline)
-and (possibly) manually installing the [Mat-tools](#mat-tools) package)
-you can install the remaining dependencies via executing,
+To install this package (locally) run
 ```
-pip install requirements.txt
+pip3 install -e .
 ```
 
-## Usage
-
-## Ressources
-### Virtual Enviroment Setup
+### Virtual Enviroment Setup (optional)
 There are multiple ways to create a virtual enviroment in python, such as
 [pyenv](https://towardsdatascience.com/managing-virtual-environment-with-pyenv-ae6f3fb835f8),
 which is an extension of the python (built-in) package
 [virtualenv](https://learnpython.com/blog/how-to-use-virtualenv-python/) or other tools
 such as [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html).
+
+## Usage
+
+## Ressources
 
 ## Contributors
 [M. B. Scheuck](https://github.com/MBSck)
