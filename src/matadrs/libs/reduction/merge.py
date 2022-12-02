@@ -7,8 +7,8 @@ from .plot import Plotter
 from .utils import cprint, oifits_patchwork
 
 
-def single_merge(coherent_dir: Path, incoherent_dir: Path,
-                 outfile_dir: Path) -> None:
+def merge_mode_folders(coherent_dir: Path,
+                       incoherent_dir: Path, outfile_dir: Path) -> None:
         """Calls Jozsef's code and does a average over the files for one band to average
         the reduced and calibrated data
 
@@ -35,7 +35,7 @@ def single_merge(coherent_dir: Path, incoherent_dir: Path,
             plot.plot(save=True)
 
 
-def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
+def merge(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     """This merges two (.fits)-files together into one, i.e. the  "incoherent"
     and the "coherent" files
 
@@ -60,7 +60,7 @@ def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
                f" {os.path.basename(coherent_dir).split('/')[~0]}", "lp")
         cprint("------------------------------------------------------------",
               "lg")
-        single_merge(coherent_dir, incoherent_dir, outfile_dir)
+        merge_mode_folders(coherent_dir, incoherent_dir, outfile_dir)
         print("------------------------------------------------------------")
         print("Done!")
         print("------------------------------------------------------------")
@@ -70,6 +70,6 @@ def merging_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
 if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
-    merging_pipeline(data_dir, stem_dir, target_dir)
+    merge(data_dir, stem_dir, target_dir)
 
 

@@ -133,7 +133,7 @@ def single_average(root_dir: Path, mode: str, lband) -> None:
             print("-----------------------------------------------------------")
 
 
-def averaging_pipeline(data_path: Path, stem_dir: Path, target_dir: Path):
+def average(data_path: Path, stem_dir: Path, target_dir: Path):
         """Calls Jozsef's code sequentially to average the reduced and calibrated data
 
         Parameters
@@ -156,5 +156,5 @@ def averaging_pipeline(data_path: Path, stem_dir: Path, target_dir: Path):
 if __name__ == "__main__":
     data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
-    averaging_pipeline(data_path, stem_dir, target_dir)
+    average(data_path, stem_dir, target_dir)
 

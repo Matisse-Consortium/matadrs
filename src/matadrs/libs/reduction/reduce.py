@@ -10,7 +10,9 @@ from mat_tools import mat_autoPipeline as mp
 
 from .utils import cprint
 
+
 SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
+
 
 def set_script_arguments(corr_flux: bool, array: str,
                          resolution: Optional[str] = "low") -> str:
@@ -48,9 +50,9 @@ def set_script_arguments(corr_flux: bool, array: str,
     return paramL_lst, paramN_lst
 
 
-def single_reduction(raw_dir: Path, calib_dir: Path, res_dir: Path,
-                     array: str, mode: bool, band: str,
-                     resolution: Optional[str] = "low") -> None:
+def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
+                 array: str, mode: bool, band: str,
+                 resolution: Optional[str] = "low") -> None:
     """Reduces either the lband or the nband data for either the "coherent" or
     "incoherent" setting for a single iteration/epoch.
 
@@ -115,9 +117,9 @@ def single_reduction(raw_dir: Path, calib_dir: Path, res_dir: Path,
           "lg")
 
 
-def reduction_pipeline(root_dir: Path, stem_dir: Path,
-                       target_dir: Path, array: str,
-                       resolution: Optional[str] = "low"):
+def reduce(root_dir: Path, stem_dir: Path,
+           target_dir: Path, array: str,
+           resolution: Optional[str] = "low"):
     """Runs the pipeline for the data reduction
 
     Parameters
@@ -159,8 +161,7 @@ def reduction_pipeline(root_dir: Path, stem_dir: Path,
         cprint("---------------------------------------------------------------------",
               "lg")
         for band in ["lband", "nband"]:
-            single_reduction(raw_dir, calib_dir, res_dir,
-                             array, mode=mode, band=band)
+            reduce_mode_and_band(raw_dir, calib_dir, res_dir, array, mode=mode, band=band)
 
     cprint(f"Executed the overall reduction in"
            f" {datetime.timedelta(seconds=(time.time()-overall_start_time))} hh:mm:ss",
@@ -170,5 +171,5 @@ def reduction_pipeline(root_dir: Path, stem_dir: Path,
 if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
-    reduction_pipeline(data_dir, stem_dir, target_dir, "ATs")
+    reduce(data_dir, stem_dir, target_dir, "ATs")
 

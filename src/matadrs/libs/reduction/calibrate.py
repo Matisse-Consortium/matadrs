@@ -11,8 +11,8 @@ from .utils import get_path_descriptor, check_if_target, cprint
 
 
 # TODO: Also make the CAL-CAL calibration?
-def single_calibration(root_dir: Path, tar_dir: Path,
-                       cal_dir: Path, mode_name: str) -> None:
+def calibrate_fits_files(root_dir: Path, tar_dir: Path,
+                         cal_dir: Path, mode_name: str) -> None:
     """The calibration for a target and a calibrator folder
 
     Parameters
@@ -81,8 +81,8 @@ def single_calibration(root_dir: Path, tar_dir: Path,
     print("------------------------------------------------------------")
 
 
-def do_calibration(root_dir: Path, band_dir: Path,
-                   mode_name: Optional[str] = "corrflux") -> None:
+def calibrate_folders(root_dir: Path, band_dir: Path,
+                      mode_name: Optional[str] = "corrflux") -> None:
     """Takes two folders and calibrates their contents together
 
     Parameters
@@ -106,8 +106,8 @@ def do_calibration(root_dir: Path, band_dir: Path,
                "lg")
         if check_if_target(directory):
             for dir_rotated in sub_dirs_rotated:
-                single_calibration(root_dir, directory,
-                                   dir_rotated, mode_name=mode_name)
+                calibrate_fits_files(root_dir, directory,
+                                     dir_rotated, mode_name=mode_name)
         else:
             cprint("No 'TARGET_RAW_INT*'-files found. SKIPPED!", "y")
             cprint("------------------------------------------------------------",
@@ -115,7 +115,7 @@ def do_calibration(root_dir: Path, band_dir: Path,
             continue
 
 
-def calibration_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path):
+def calibrate(data_dir: Path, stem_dir: Path, target_dir: Path):
     """Does the full calibration for all of the "cal_dir" subdirectories
 
     Parameters
@@ -131,12 +131,12 @@ def calibration_pipeline(data_dir: Path, stem_dir: Path, target_dir: Path):
     for mode, mode_name in modes.items():
         for band in bands:
             band_dir = os.path.join(mode, band)
-            do_calibration(root_dir, band_dir, mode_name=mode_name)
+            calibrate_folders(root_dir, band_dir, mode_name=mode_name)
     cprint("Calibration Done!", "lp")
 
 
 if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
-    calibration_pipeline(data_dir, stem_dir, target_dir)
+    calibrate(data_dir, stem_dir, target_dir)
 

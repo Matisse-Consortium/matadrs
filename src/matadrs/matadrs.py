@@ -5,11 +5,11 @@ import datetime
 from pathlib import Path
 from typing import Optional
 
-from .reduction import reduction_pipeline, calibration_pipeline, averaging_pipeline,\
-        merging_pipeline
+from .libs.reduction import reduce, calibrate, average, merge
 
-# TODO: Add functionality that clears all the paths before it write again, as to overwrite them
 
+# TODO: Add functionality that clears all the paths before it write again,
+# as to overwrite them
 def matadrs_pipeline(data_dir: Path, stem_dir: Path,
                      target_dirs: List[Path],
                      do_reduce: Optional[bool] = True,
@@ -37,13 +37,13 @@ def matadrs_pipeline(data_dir: Path, stem_dir: Path,
         cprint("----------------------------------------------------------------------",
               "lg")
         if do_reduce:
-            reduction_pipeline(data_dir, stem_dir, target_dir, array)
+            reduce(data_dir, stem_dir, target_dir, array)
         if do_calibrate:
-            calibration_pipeline(data_dir, stem_dir, target_dir,)
+            calibrate(data_dir, stem_dir, target_dir,)
         if do_average:
-            averaging_pipeline(data_dir, stem_dir, target_dir)
+            average(data_dir, stem_dir, target_dir)
         if do_merge:
-            merging_pipeline(data_dir, stem_dir, target_dir)
+            merge(data_dir, stem_dir, target_dir)
         cprint("----------------------------------------------------------------------",
               "lg")
         cprint(f"Reduction, calibration, merging and averaging complete in "\
