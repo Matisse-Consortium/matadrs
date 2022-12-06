@@ -3,9 +3,13 @@ import time
 import datetime
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
-from .libs.reduction import reduce, calibrate, average, merge
+from .libs.reduction.reduce import reduce
+from .libs.reduction.calibrate import calibrate
+from .libs.reduction.average import average
+from .libs.reduction.merge import merge
+from .libs.reduction.utils import cprint
 
 
 # TODO: Add functionality that clears all the paths before it write again,

@@ -4,7 +4,7 @@ from astropy.io import fits
 import fnmatch
 from numpy import asarray as ar
 from shutil import copyfile
-import robust
+from .robust import mean as rbmean
 
 #avg_cflux: if True, the function will average all the corr flux data (experimental)
 def avg_oifits(infile_list, outfile_path, headerval=[], avg_cflux=False):
@@ -145,7 +145,7 @@ def avg_oifits(infile_list, outfile_path, headerval=[], avg_cflux=False):
         # for ii in range(len(flux_arr)):
         #     print(flux_arr[ii])
         #avg_flux = np.nanmean(flux_arr,axis=0)
-        avg_flux = robust.mean(flux_arr,axis=0)
+        avg_flux = rbmean(flux_arr,axis=0)
         #avg_flux = np.nanmedian(flux_arr,axis=0)
         # print(avg_flux)
         # print(len(flux_arr))

@@ -5,8 +5,8 @@ from typing import List
 from pathlib import Path
 from collections import namedtuple
 
-from calib_BCD2 import calib_BCD
-from avg_oifits import avg_oifits
+from .calib_BCD2 import calib_BCD
+from .avg_oifits import avg_oifits
 
 from .plot import Plotter
 from .readout import ReadoutFits

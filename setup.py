@@ -7,6 +7,8 @@ import subprocess
 from setuptools import setup, find_packages
 
 
+# NOTE: Avoids errors during pre-install collection of wxPython
+# (which is required for mat-tools)
 if importlib.util.find_spec("attrdict") is None:
     subprocess.run([sys.executable, "-m", "pip", "install", "attrdict==2.0.1"],
                    check=True)
@@ -62,24 +64,25 @@ setup(
         "zipp==3.11.0",
 
         # Direct requirements for matadrs
+        "wget==3.2",
 
     ]
 )
 
-print("Installing 'mat_tools'!")
 if importlib.util.find_spec("mat_tools") is None:
-    if importlib.util.find_spec("wget") is None:
-        subprocess.run([sys.executable, "-m", "pip", "install", "wget==3.2"], check=True)
-
     import wget
-    repo = "https://gitlab.oca.eu/MATISSE/tools/-/archive/master/tools-master.zip"
-    repo_dir = os.path.abspath("src/matadrs/reduction/tools-master")
-    zip_dir = repo_dir+".zip"
-    wget.download(repo, zip_dir)
-    subprocess.run(["tar", "-xf", zip_dir, "--directory", "src/matadrs/reduction/"],
+
+    mat_tools_remote = "https://gitlab.oca.eu/MATISSE/tools/-/archive/master/tools-master.zip"
+    reduction_dir = os.path.abspath("src/matadrs/libs/reduction")
+    mat_tools_dir = os.path.join(reduction_dir, "tools-master")
+    zip_file_path = mat_tools_dir+".zip"
+
+    if not os.path.exists(zip_file_path):
+        wget.download(mat_tools_remote, zip_file_path)
+    if not os.path.exists(mat_tools_dir):
+        subprocess.run(["tar", "-xf", zip_file_path], cwd=reduction_dir, check=True)
+
+    subprocess.run([sys.executable, "-m", "pip", "-e", "install", "."], cwd=mat_tools_dir,
                    check=True)
-    subprocess.run([sys.executable, "-m", "pip", "install", "-e", f"{repo_dir}."],
-                   check=True)
-    shutil.rmtree(zip_dir)
-print("Done!")
+    shutil.rm(zip_file_path)
 

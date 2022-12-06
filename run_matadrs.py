@@ -1,3 +1,5 @@
+import os
+
 from matadrs import matadrs_pipeline
 
 DATA_DIR = "~/Data/hd163296/"

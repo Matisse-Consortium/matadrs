@@ -7,10 +7,11 @@ __pycache__/
 
 # Specific folders to ignore
 data/
-src/matadrs/reduction/jacob_files
-src/matadrs/reduction/tools
+src/matadrs/libs/reduction/jacob_files
+src/matadrs/libs/reduction/tools-master
+src/matadrs/libs/reduction/tools-master.zip
 
 # Specific files to ignore
-src/matadrs/reduction/calib_BCD2.py
-src/matadrs/reduction/avg_oifits.py
-src/matadrs/grep/get_gravity_data.py
+src/matadrs/libs/reduction/calib_BCD2.py
+src/matadrs/libs/reduction/avg_oifits.py
+src/matadrs/libs/grep/get_gravity_data.py
