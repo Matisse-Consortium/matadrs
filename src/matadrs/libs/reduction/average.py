@@ -1,6 +1,3 @@
-import os
-
-from glob import glob
 from typing import List
 from pathlib import Path
 from collections import namedtuple
@@ -47,18 +44,15 @@ def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
 def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
     """Merges the vis and cphases files in the respective directory"""
     target_name = stem_dir.split("/")[~1]
-    epoch = os.path.basename(average_dir).split(".")[2]
+    epoch = average_dir.name.split(".")[2]
     lband = True if "HAWAII" in average_dir else False
     band = "L" if lband else "N"
-    fits_files = glob(os.path.join(average_dir, "*.fits"))
-    cphases_file = [directory for directory in fits_files\
-                    if "t3" in directory.lower()][0]
-    vis_file  = [directory for directory in fits_files\
-                 if "vis" in directory.lower()][0]
-    out_file = os.path.join(average_dir,
-                            f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits")
+    fits_files = average_dir.glob("*.fits")
+    cphases_file = [directory for directory in fits_files if "t3" in directory.lower()][0]
+    vis_file  = [directory for directory in fits_files if "vis" in directory.lower()][0]
+    out_file = average_dir / f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits"
     oifits_patchwork(cphases_file, vis_file, out_file)
-    plot = Plotter([out_file], lband=lband, save_path=os.path.dirname(out_file))
+    plot = Plotter([out_file], lband=lband, save_path=out_file.parent)
     plot.add_cphases().add_corr_flux().plot(save=True)
     return out_file
 
@@ -72,36 +66,31 @@ def single_average(root_dir: Path, mode: str, lband) -> None:
         band_dir: Path
             The folder in which the calibrated data is contained
         """
-        mode_dir = os.path.join("calib", mode)
-        folders = glob(os.path.join(root_dir, mode_dir , "*.rb"))
+        mode_dir = Path("calib", mode)
+        folders = (root_dir / mode_dir).glob("*.rb")
 
         for folder in folders:
-            print(f"Averaging folder {os.path.basename(folder)}")
+            print(f"Averaging folder {folder.name}")
             lband = True if "HAWAII" in folder else False
 
-            unchopped_fits = glob(os.path.join(folder, "*.fits"))
+            unchopped_fits = folder.glob("*.fits")
             unchopped_fits.sort(key=lambda x: x[-8:])
 
             if len(fits_files) == 6:
                 unchopped_fits = unchopped_fits[:4]
                 chopped_fits = unchopped_fits[4:]
 
-            folder_split = os.path.basename(folder).split(".")
+            folder_split = folder.name.split(".")
             folder_split[0] += "-AVG"
             new_folder = ".".join(folder_split)
-            outfile_dir = os.path.join(root_dir, "bcd_and_averaged",
-                                       mode, new_folder)
+            outfile_dir = root_dir / "bcd_and_averaged" / mode / new_folder
 
-            if not os.path.exists(outfile_dir):
-                os.makedirs(outfile_dir)
+            if not outfile_dir.exists():
+                outfile_dir.mkdir()
 
-            outfile_path_vis =\
-                    os.path.join(outfile_dir, "TARGET_AVG_VIS_INT.fits")
-            outfile_path_cphases =\
-                    os.path.join(outfile_dir, "TARGET_AVG_T3PHI_INT.fits")
-            outfile_path_chopped =\
-                    os.path.join(outfile_dir, "TARGET_AVG_VIS_INT_CHOPPED.fits")
-
+            outfile_path_vis = outfile_dir/ "TARGET_AVG_VIS_INT.fits"
+            outfile_path_cphases = outfile_dir / "TARGET_AVG_T3PHI_INT.fits"
+            outfile_path_chopped = outfile_dir / "TARGET_AVG_VIS_INT_CHOPPED.fits"
             bcd = sort_fits_by_BCD(unchopped_fits)
             avg_oifits(unchopped_fits, outfile_path_vis)
 
@@ -141,7 +130,7 @@ def average(data_path: Path, stem_dir: Path, target_dir: Path):
         root_dir: Path
             The folder to the time-stamp folder
         """
-        root_dir = os.path.join(data_path, stem_dir, "products", target_dir)
+        root_dir = Path(data_path, stem_dir, "products", target_dir)
         for mode in ["coherent", "incoherent"]:
             cprint(f"Averaging and BCD-calibration of {stem_dir} with mode={mode}",
                    "lp")

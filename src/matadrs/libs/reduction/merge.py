@@ -1,6 +1,3 @@
-import os
-
-from glob import glob
 from pathlib import Path
 
 from .plot import Plotter
@@ -13,21 +10,21 @@ def merge_mode_folders(coherent_dir: Path,
         the reduced and calibrated data
 
         """
-        outfile_dir = os.path.join(outfile_dir, os.path.basename(coherent_dir))
-        if not os.path.exists(outfile_dir):
-            os.makedirs(outfile_dir)
+        outfile_dir = outfile_dir / coherent_dir.name
+        if not outfile_dir.exists():
+            outfile_dir.mkdir()
 
         lband = True if "HAWAII" in coherent_dir else False
 
-        incoherent_fits = glob(os.path.join(incoherent_dir, "*.fits"))
+        incoherent_fits = incoherent_dir.glob("*.fits")
         incoherent_fits.sort(key=lambda x: x[-8:])
-        coherent_fits = glob(os.path.join(coherent_dir, "*.fits"))
+        coherent_fits = coherent_dir.glob("*.fits")
         coherent_fits.sort(key=lambda x: x[-8:])
 
         for incoherent_file, coherent_file in zip(incoherent_fits, coherent_fits):
-            out_file = os.path.join(outfile_dir, os.path.basename(coherent_file))
+            out_file = outfile_dir / coherent_file.name
             oifits_patchwork(incoherent_file, coherent_file, out_file)
-            cprint(f"Plotting {os.path.basename(out_file)}")
+            cprint(f"Plotting {out_file.name}")
             plot = Plotter([out_file], lband=lband, save_path=outfile_dir)
             plot.add_cphases().add_corr_flux()
             if plot.flux is not None:
@@ -47,19 +44,17 @@ def merge(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     stem_dir: Path
     target_dir: Path
     """
-    root_dir = os.path.join(data_dir, stem_dir, "products", target_dir)
-    merge_dir = os.path.join(root_dir, "calib")
-    outfile_dir = os.path.join(root_dir, "merged_and_calib")
+    root_dir = Path(data_dir, stem_dir, "products", target_dir)
+    merge_dir = root_dir / "calib"
+    outfile_dir = root_dir / "merged_and_calib"
 
-    coherent_dirs = glob(os.path.join(merge_dir, "coherent", "*.rb"))
-    incoherent_dirs = [directory.replace("coherent", "incoherent")\
+    coherent_dirs = (merge_dir / "coherent").glob("*.rb")
+    incoherent_dirs = [Path(str(directory)).replace("coherent", "incoherent")\
                        for directory in coherent_dirs]
 
     for coherent_dir, incoherent_dir in zip(coherent_dirs, incoherent_dirs):
-        cprint("Merging (.fits)-files of folder"\
-               f" {os.path.basename(coherent_dir).split('/')[~0]}", "lp")
-        cprint("------------------------------------------------------------",
-              "lg")
+        cprint("Merging (.fits)-files of folder {coherent_dir.name.split('/')[~0]}", "lp")
+        cprint("------------------------------------------------------------", "lg")
         merge_mode_folders(coherent_dir, incoherent_dir, outfile_dir)
         print("------------------------------------------------------------")
         print("Done!")

@@ -1,6 +1,3 @@
-import os
-
-from glob import glob
 from pathlib import Path
 from collections import deque
 from typing import Optional
@@ -29,9 +26,8 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     --------
     get_path_descriptor()
     """
-    cprint(f"Calibrating {os.path.basename(tar_dir)} with "\
-          f"{os.path.basename(cal_dir)}", "p")
-    targets = glob(os.path.join(tar_dir, "TARGET_RAW_INT*"))
+    cprint(f"Calibrating {tar_dir.name} with {cal_dir.name}", "p")
+    targets = tar_dir.glob("TARGET_RAW_INT*")
 
     if not targets:
         cprint("'TARGET_RAW_INT*'-files found. SKIPPED!", "y")
@@ -39,7 +35,7 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
         return
 
     targets.sort(key=lambda x: x[-8:])
-    calibrators = glob(os.path.join(cal_dir, "CALIB_RAW_INT*"))
+    calibrators = cal_dir.glob("CALIB_RAW_INT*")
     calibrators.sort(key=lambda x: x[-8:])
 
     if len(targets) != len(calibrators):
@@ -51,15 +47,14 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     output_dir = get_path_descriptor(root_dir, "TAR-CAL",
                                      targets[0], calibrators[0])
     mode = "incoherent" if "incoherent" in output_dir else "coherent"
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    if not output_dir.exists():
+        output_dir.mkdir()
 
     # TODO: Fix the numbering of the (.fits)-files
     for index, (target, calibrator) in enumerate(zip(targets, calibrators)):
         print("------------------------------------------------------------")
-        cprint(f"Processing {os.path.basename(target)} with "\
-              f"{os.path.basename(calibrator)}", "g")
-        output_file = os.path.join(output_dir, f"TARGET_CAL_INT_000{index+1}.fits")
+        cprint(f"Processing {target.name} with {calibrator.name}", "g")
+        output_file = output_dir / f"TARGET_CAL_INT_000{index+1}.fits"
 
         fluxcal(target, calibrator, output_file,\
                 DATABASE_PATHS, mode=mode_name,
@@ -67,7 +62,7 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
 
     print("------------------------------------------------------------")
     print("Creating plots...")
-    fits_files = glob(os.path.join(output_dir, "*.fits"))
+    fits_files = output_dir.glob("*.fits")
     for fits_file in fits_files:
         lband = True if "HAWAII" in target else False
         plot_fits = Plotter([fits_file], lband=lband, save_path=output_dir)
@@ -94,16 +89,14 @@ def calibrate_folders(root_dir: Path, band_dir: Path,
         The mode of calibration. Either "corrflux", "flux" or "both" depending
         if it is "coherent" or "incoherent". Default mode is "corrflux"
     """
-    sub_dirs = glob(os.path.join(os.path.join(root_dir, band_dir), "*.rb"))
+    sub_dirs = (root_dir / band_dir).glob("*.rb")
     sub_dirs.sort(key=lambda x: x.split(".")[~2])
     sub_dirs_rotated = deque(sub_dirs.copy())
     sub_dirs_rotated.rotate(1)
 
     for directory in sub_dirs:
-        cprint(f"Calibration of {os.path.basename(directory)}"\
-               f" with mode_name={mode_name}", "lp")
-        cprint("------------------------------------------------------------",
-               "lg")
+        cprint(f"Calibration of {directory.name} with mode_name={mode_name}", "lp")
+        cprint("------------------------------------------------------------", "lg")
         if check_if_target(directory):
             for dir_rotated in sub_dirs_rotated:
                 calibrate_fits_files(root_dir, directory,
@@ -124,13 +117,12 @@ def calibrate(data_dir: Path, stem_dir: Path, target_dir: Path):
     stem_dir: Path
     target_dir: Path
     """
-    root_dir = os.path.join(data_dir, stem_dir, "products", target_dir)
-    modes, bands = {"coherent": "corrflux", "incoherent": "flux"},\
-            ["lband", "nband"]
+    root_dir = Path(data_dir, stem_dir, "products", target_dir)
+    modes, bands = {"coherent": "corrflux", "incoherent": "flux"}, ["lband", "nband"]
 
     for mode, mode_name in modes.items():
         for band in bands:
-            band_dir = os.path.join(mode, band)
+            band_dir = mode / band
             calibrate_folders(root_dir, band_dir, mode_name=mode_name)
     cprint("Calibration Done!", "lp")
 

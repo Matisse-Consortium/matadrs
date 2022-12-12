@@ -1,11 +1,10 @@
-import os
 import time
 import datetime
 import shutil
 
-from glob import glob
 from pathlib import Path
 from typing import Optional
+
 from mat_tools import mat_autoPipeline as mp
 
 from .utils import cprint
@@ -51,8 +50,8 @@ def set_script_arguments(corr_flux: bool, array: str,
 
 
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
-                 array: str, mode: bool, band: str,
-                 resolution: Optional[str] = "low") -> None:
+                         array: str, mode: bool, band: str,
+                         resolution: Optional[str] = "low") -> None:
     """Reduces either the lband or the nband data for either the "coherent" or
     "incoherent" setting for a single iteration/epoch.
 
@@ -82,25 +81,23 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     """
     # TODO: Replace this time with process finish time
     start_time = time.time()
-    mode_and_band_dir = os.path.join(res_dir, mode, band)
+    mode_and_band_dir = res_dir / mode / band
     param_L, param_N = set_script_arguments(mode, array, resolution)
     skip_L = True if band == "nband" else False
     skip_N = not skip_L
 
-    if not os.path.exists(mode_and_band_dir):
-        os.makedirs(mode_and_band_dir)
+    if not mode_and_band_dir.exists():
+        mode_and_band_dir.mkdir()
 
     mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=calib_dir,
                         nbCore=6, resol='', paramL=param_L, paramN=param_N,
                         overwrite=0, maxIter=1, skipL=skip_L, skipN=skip_N)
 
     try:
-        rb_folders = glob(os.path.join(res_dir, "Iter1/*.rb"))
+        rb_folders = res_dir.glob("Iter1/*.rb")
         for folder in rb_folders:
-            if os.path.exists(os.path.join(mode_and_band_dir,
-                                           os.path.basename(folder))):
-                shutil.rmtree(os.path.join(mode_and_band_dir,
-                                           os.path.basename(folder)))
+            if (mode_and_band_dir / folder.name).exists():
+                shutil.rmtree(mode_and_band_dir / folder.name)
             shutil.move(folder, mode_and_band_dir)
 
         if rb_folders:
@@ -135,24 +132,24 @@ def reduce(root_dir: Path, stem_dir: Path,
     """
     # TODO: Replace this time with process finish time
     overall_start_time = time.time()
-    raw_dir = os.path.join(root_dir, stem_dir, "raw", target_dir)
-    cprint(raw_dir)
+    raw_dir = Path(root_dir, stem_dir, "raw", target_dir)
 
     # TODO: Change this to proper search for calibration_files
     calib_dir = raw_dir
-    res_dir = os.path.join(root_dir, stem_dir, "products", target_dir)
+    res_dir = Path(root_dir, stem_dir, "products", target_dir)
 
-    if not os.path.exists(res_dir):
-        os.makedirs(res_dir)
+    if not res_dir.exists():
+        res_dir.mkdir()
 
     # TODO: Add in the option to not remove old reduction and make new one take an
     # addional tag after its name
     try:
-        folders = glob(os.path.join(res_dir, "*"))
+        folders = res_dir.glob("*")
         for folder in folders:
-            if os.path.exists(folder):
+            if folder.exists():
                 shutil.rmtree(folder)
         cprint("Cleaned up old reduction!", "y")
+
     # TODO: Make logger here
     except Exception:
         cprint("Cleaning up failed!", "y")
@@ -164,6 +161,7 @@ def reduce(root_dir: Path, stem_dir: Path,
               "lg")
         for band in ["lband", "nband"]:
             reduce_mode_and_band(raw_dir, calib_dir, res_dir, array, mode=mode, band=band)
+            breakpoint()
 
     cprint(f"Executed the overall reduction in"
            f" {datetime.timedelta(seconds=(time.time()-overall_start_time))} hh:mm:ss",
@@ -171,7 +169,7 @@ def reduce(root_dir: Path, stem_dir: Path,
 
 
 if __name__ == "__main__":
-    data_dir = "/Users/scheuck/Data/data_reduction/"
+    data_dir = "../../../../data"
     stem_dir, target_dir = "/hd163296/", "ATs/20190323"
     reduce(data_dir, stem_dir, target_dir, "ATs")
 
