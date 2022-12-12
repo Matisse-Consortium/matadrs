@@ -141,7 +141,7 @@ def average(data_path: Path, stem_dir: Path, target_dir: Path):
         root_dir: Path
             The folder to the time-stamp folder
         """
-        root_dir = os.path.join(data_path, stem_dir, "PRODUCTS", target_dir)
+        root_dir = os.path.join(data_path, stem_dir, "products", target_dir)
         for mode in ["coherent", "incoherent"]:
             cprint(f"Averaging and BCD-calibration of {stem_dir} with mode={mode}",
                    "lp")

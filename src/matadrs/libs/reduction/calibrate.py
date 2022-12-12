@@ -124,7 +124,7 @@ def calibrate(data_dir: Path, stem_dir: Path, target_dir: Path):
     stem_dir: Path
     target_dir: Path
     """
-    root_dir = os.path.join(data_dir, stem_dir, "PRODUCTS", target_dir)
+    root_dir = os.path.join(data_dir, stem_dir, "products", target_dir)
     modes, bands = {"coherent": "corrflux", "incoherent": "flux"},\
             ["lband", "nband"]
 

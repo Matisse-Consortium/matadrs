@@ -135,10 +135,12 @@ def reduce(root_dir: Path, stem_dir: Path,
     """
     # TODO: Replace this time with process finish time
     overall_start_time = time.time()
-    raw_dir = os.path.join(root_dir, stem_dir, "RAW", target_dir)
+    raw_dir = os.path.join(root_dir, stem_dir, "raw", target_dir)
+    cprint(raw_dir)
+
     # TODO: Change this to proper search for calibration_files
     calib_dir = raw_dir
-    res_dir = os.path.join(root_dir, stem_dir, "PRODUCTS", target_dir)
+    res_dir = os.path.join(root_dir, stem_dir, "products", target_dir)
 
     if not os.path.exists(res_dir):
         os.makedirs(res_dir)
@@ -169,7 +171,7 @@ def reduce(root_dir: Path, stem_dir: Path,
 
 
 if __name__ == "__main__":
-    data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
-    stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
+    data_dir = "/Users/scheuck/Data/data_reduction/"
+    stem_dir, target_dir = "/hd163296/", "ATs/20190323"
     reduce(data_dir, stem_dir, target_dir, "ATs")
 

@@ -47,7 +47,7 @@ def merge(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     stem_dir: Path
     target_dir: Path
     """
-    root_dir = os.path.join(data_dir, stem_dir, "PRODUCTS", target_dir)
+    root_dir = os.path.join(data_dir, stem_dir, "products", target_dir)
     merge_dir = os.path.join(root_dir, "calib")
     outfile_dir = os.path.join(root_dir, "merged_and_calib")
 
