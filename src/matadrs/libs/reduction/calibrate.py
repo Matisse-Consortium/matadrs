@@ -7,6 +7,7 @@ from .plot import Plotter
 from .utils import get_path_descriptor, check_if_target, cprint
 
 
+# TODO: Use the databases for calibration
 # TODO: Also make the CAL-CAL calibration?
 def calibrate_fits_files(root_dir: Path, tar_dir: Path,
                          cal_dir: Path, mode_name: str) -> None:
