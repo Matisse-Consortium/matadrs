@@ -1,98 +1,143 @@
-import numpy as np
+from typing import Dict, List
 
+import numpy as np
+import astropy.units as u
 from astropy.io import fits
-from typing import List, Union
+from pathlib import Path
+from astropy.table import Table, vstack
+
+
+DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
 
 
 class ReadoutFits:
     """All functionality to work with '.oifits/.fits'-files"""
-    def __init__(self, fits_file) -> None:
-        self.fits_file = fits_file
+    def __init__(self, fits_files: List[Path]) -> None:
+        self.hdulists = None
+        self._telescope_to_station_names = None
 
+        if not isinstance(fits_files, list):
+            fits_files = [fits_files]
+
+        if not isinstance(fits_files[0], Path):
+            self.fits_files = [Path(fits_file) for fits_file in fits_files]
+        else:
+            self.fits_files = fits_files
+
+    def __enter__(self) -> None:
+        """"""
+        self.hdulists = [fits.open(fits_file) for fits_file in self.fits_files]
+        return self
+
+    def __exit__(self, *exc) -> None:
+        """"""
+        for hdul in self.hdulist:
+            hdul.close()
 
     def __repr__(self):
         """The class's representation"""
-        ...
+        # TODO: Make this better
+        return f"The instance is maintaining the following files:\n"\
+               f"{', '.join([fits_file.name for fits_file in self.fits_files])}"
 
     def __str__(self):
         """The class's print"""
-        return f"The instance is maintaining the '{self.fits_file}.'"
+        return self.__repr__()
 
-    def get_info(self) -> str:
-        """Gets the header's info"""
-        with fits.open(self.fits_file) as hdul:
-            return hdul.info()
+    @property
+    def telescopes_to_station_names(self) -> List[Dict]:
+        """"""
+        if self._telescope_to_station_names is None:
+            tel_names = self.get_tables_for_fits("oi_array")
+            self._telescope_to_station_names = ...
+        return self._telescope_to_station_names
 
-    def repr_header(self, hdr) -> str:
-        """Reads out the specified data"""
-        return repr(fits.getheader(self.fits_file, hdr))
+    def get_primary_header(self):
+        """"""
+        return [hdul[0].header for hdul in self.hdulists]
 
-    def get_header(self, hdr: Union[int, str], *args: Union[int, str]):
-        """Gets the header"""
-        with fits.open(self.fits_file) as hdul:
-            return [hdul[hdr].header[arg] for arg in args] if len(args) > 1 \
-                    else hdul[hdr].header[args[0]]
+    def get_target(self):
+        """"""
+        return [primary["OBJECT"] for primary in self.get_primary_header()]
 
-    def get_data(self, hdr: Union[int, str], *args: Union[int, str]) -> List[np.array]:
-        """Gets a specific set of data and its error from a header and
-        subheader and returns the data of as many subheaders as in args
+    def get_ra_and_dec(self):
+        """"""
+        return [(primary["RA"], primary["DEC"]) for primary in self.get_primary_header()]
+
+    def get_bcd_configuration(self):
+        """"""
+        return ["-".join([primary["HIERARCH ESO INS BCD1 ID"],
+                          primary["HIERARCH ESO INS BCD2 ID"]])\
+                for primary in self.hdulists]
+
+    # def get_split_uvcoords(self) -> np.ndarray:
+        # """Splits a 2D-np.array into its 1D-components and returns the u- and
+        # v-coords seperatly"""
+        # uvcoords = self.get_uvcoords()
+        # return np.array([item[0] for item in uvcoords]),\
+                # np.array([item[1] for item in uvcoords])
+
+    def get_tables_for_fits(self, header: str) -> List[Table]:
+        """
 
         Parameters
         ----------
-        hdr: int | str
-            The header of the data to be retrieved
-        args: int | str
-            The subheader(s) that specify the data
+        header: str
 
         Returns
         -------
-        data: List[np.array]
+        List[Table]
         """
-        with fits.open(self.fits_file) as hdul:
-            return [hdul[hdr].data[arg] for arg in args] if len(args) > 1 \
-                    else hdul[hdr].data[args[0]]
+        return [Table().read(fits_file, hdu=header) for fits_file in self.fits_files]
 
-    def get_bcd_info(self):
-        return "-".join([self.get_header(0, "HIERARCH ESO INS BCD1 ID"),
-                        self.get_header(0, "HIERARCH ESO INS BCD2 ID")]).lower()
 
-    def get_column_names(self, hdr) -> np.ndarray:
-        """Fetches the columns of the header"""
-        with fits.open(self.fits_file) as hdul:
-            return (hdul[hdr].columns).names
+class ReadoutMATISSE(ReadoutFits):
+    """"""
+    def __init__(self, *args, **kwargs) -> None:
+        """"""
+        super().__init__(*args, **kwargs)
+        self._oi_vis = None
 
-    def get_uvcoords(self) -> np.ndarray:
-        """Fetches the u, v coord-lists and merges them as well as the individual components"""
-        return np.array([i for i in zip(self.get_data(4, "ucoord")[:6], self.get_data(4, "vcoord")[:6])])
+    @property
+    def oi_flux(self):
+        """Fetches the flux"""
+        if self._oi_flux is None:
+            self._oi_flux = self.get_tables_for_fits("oi_flux")
+        return self._oi_flux
 
-    def get_split_uvcoords(self) -> np.ndarray:
-        """Splits a 2D-np.array into its 1D-components and returns the u- and
-        v-coords seperatly"""
-        uvcoords = self.get_uvcoords()
-        return np.array([item[0] for item in uvcoords]),\
-                np.array([item[1] for item in uvcoords])
+    @property
+    def oi_vis(self):
+        """Fetches the visibility"""
+        if self._oi_vis is None:
+            self._oi_vis = self.get_tables_for_fits("oi_vis")
+        return self._oi_vis
 
-    def get_flux(self):
-        """Fetches the flux data and its errors"""
-        return self. get_data("oi_flux", "fluxdata", "fluxerr", "sta_index")
+    @property
+    def oi_vis2(self):
+        """Fetches the visibility"""
+        if self._oi_vis2 is None:
+            self._oi_vis2 = self.get_tables_for_fits("oi_vis2")
+        return self._oi_vis2
 
-    def get_vis(self) -> np.ndarray:
-        """Fetches the visibility data/correlated fluxes, its errors and sta-indices"""
-        return self.get_data("oi_vis", "visamp", "visamperr", "sta_index")
+    @property
+    def oi_t3(self):
+        """Fetches the visibility"""
+        if self._oi_t3 is None:
+            self._oi_t3 = self.get_tables_for_fits("oi_t3")
+        return self._oi_t3
 
-    def get_vis2(self) -> np.ndarray:
-        """Fetches the squared visibility data, its error and sta_indicies"""
-        return self.get_data("oi_vis2", "vis2data", "vis2err", "sta_index")
+    @property
+    def wl(self):
+        """Fetches the wavelengths"""
+        if self._wl is None:
+            self._wl = self.get_tables_for_fits("oi_wl")["EFF_WAVE"].to(u.um)
+        return self._wl
 
-    def get_t3phi(self) -> np.ndarray:
-        """Fetches the closure phase data, its error and sta_indicies"""
-        return self.get_data("oi_t3", "t3phi", "t3phierr", "sta_index")
+    # self.tel_vis = [["-".join(list(map(TEL_STATIONS.get, station_index["STA_INDEX"])))\
+                    # for station_index in vis] for vis in self.oi_vis]
 
-    def get_wl(self) -> np.ndarray:
-        return self.get_data("oi_wavelength", "eff_wave")
-
-    def get_tel_sta(self) -> np.ndarray:
-        return self.get_data(2, "tel_name", "sta_index")
+    # self.tel_t3 = [["-".join(list(map(TEL_STATIONS.get, station_index["STA_INDEX"])))\
+                    # for station_index in t3] for t3 in self.oi_t3]
 
     def get_vis4wl(self, wl_ind: int) -> np.ndarray:
         """Fetches the visdata(amp/phase)/correlated fluxes for one specific wavelength
@@ -136,7 +181,9 @@ class ReadoutFits:
 
 
 if __name__ == "__main__":
-    f = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd163296/PRODUCTS/ATs/20190323/incoherent/nband/mat_raw_estimates.2019-03-23T08_41_19.AQUARIUS.rb/TARGET_RAW_INT_0004.fits"
-    readout = ReadoutFits(f)
-    print(readout.get_bcd_info())
+    fits_files = ["hd142666_2019-05-14T05_28_03_N_TARGET_FINAL_INT.fits",
+                  "hd163296_2019-03-23T08_41_19_L_TARGET_FINAL_INT.fits"]
+    fits_files = [DATA_DIR / "jozsef_reductions" / fits_file for fits_file in fits_files]
+    with ReadoutMATISSE(fits_files) as readout:
+        breakpoint()
 
