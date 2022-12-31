@@ -15,7 +15,11 @@ class ReadoutFits:
     def __init__(self, fits_file: Path) -> None:
         self.fits_file = Path(fits_file)
 
-        self._wl = None
+        self._oi_wl = None
+        self._oi_flux = None
+        self._oi_vis = None
+        self._oi_vis2 = None
+        self._oi_t3 = None
         self._telescope_to_station_names = None
 
         with fits.open(self.fits_file) as hdul:
@@ -24,22 +28,62 @@ class ReadoutFits:
         self.target_name = self.primary_header["OBJECT"]
         self.ra, self.dec = self.primary_header["RA"], self.primary_header["DEC"]
 
-    # def __repr__(self):
-        # """The class's representation"""
-        # # TODO: Make this better
-        # return f"The instance is maintaining the following files:\n"\
-               # f"{', '.join([fits_file.name for fits_file in self.fits_file])}"
-
-    # def __str__(self):
-        # """The class's print"""
-        # return self.__repr__()
+    @property
+    def oi_wl(self):
+        """"""
+        if self._oi_wl is None:
+            self._oi_wl = self.get_table_for_fits("oi_wavelength")
+            self._oi_wl.remove_column("EFF_BAND")
+        return self._oi_wl
 
     @property
-    def wl(self):
-        """Fetches the wavelengths"""
-        if self._wl is None:
-            self._wl = self.get_table_for_fits("oi_wl")["EFF_WAVE"].to(u.um)
-        return self._wl
+    def oi_flux(self):
+        """Fetches the flux"""
+        if self._oi_flux is None:
+            self._oi_flux = self.get_table_for_fits("oi_flux")
+            self._oi_flux.add_columns([self.get_table_for_fits("oi_array")["TEL_NAME"]],
+                                     names="TEL_NAME")
+            self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "TEL_NAME"])
+        return self._oi_flux
+
+    @property
+    def oi_vis(self):
+        """Fetches the visibility"""
+        if self._oi_vis is None:
+            self._oi_vis = self.get_table_for_fits("oi_vis")
+            self._oi_vis.add_columns([self.get_delay_lines(self._oi_vis)],
+                                     names=["DELAY_LINE"])
+            self._oi_vis.keep_columns(["VISAMP", "VISAMPERR",
+                                       "UCOORD", "VCOORD", "DELAY_LINE"])
+        return self._oi_vis
+
+    @property
+    def oi_vis2(self):
+        """Fetches the visibility"""
+        if self._oi_vis2 is None:
+            self._oi_vis2 = self.get_table_for_fits("oi_vis2")
+            self._oi_vis2.add_columns([self.get_delay_lines(self._oi_vis2)],
+                                      names=["DELAY_LINE"])
+            self._oi_vis2.keep_columns(["VIS2DATA", "VIS2ERR",
+                                        "UCOORD", "VCOORD", "DELAY_LINE"])
+        return self._oi_vis2
+
+    @property
+    def oi_t3(self):
+        """Fetches the closure phase"""
+        if self._oi_t3 is None:
+            self._oi_t3 = self.get_table_for_fits("oi_t3")
+            # NOTE: After Jozsef this does not make good closure phases
+            # u3, v3 = -(u1+u2), -(v1+v2)
+            u1, u2 = self._oi_t3["U1COORD"].data, self._oi_t3["U2COORD"].data
+            v1, v2 = self._oi_t3["V1COORD"].data, self._oi_t3["V2COORD"].data
+            self._oi_t3.add_columns([list(zip(u1, u2, u1+u2)),
+                                    list(zip(v1, v2, v1+v2)),
+                                    self.get_triangles(self._oi_t3)],
+                                   names=["UCOORD", "VCOORD", "TRIANGLE"])
+            self._oi_t3.keep_columns(["T3PHI", "T3PHIERR",
+                                      "UCOORD", "VCOORD", "TRIANGLE"])
+        return self._oi_t3
 
     @property
     def telescopes_to_station_names(self) -> List[Dict]:
@@ -56,13 +100,6 @@ class ReadoutFits:
         return ["-".join([self.primary_header["HIERARCH ESO INS BCD1 ID"],
                           self.primary_header["HIERARCH ESO INS BCD2 ID"]])]
 
-    # def get_split_uvcoords(self) -> np.ndarray:
-        # """Splits a 2D-np.array into its 1D-components and returns the u- and
-        # v-coords seperatly"""
-        # uvcoords = self.get_uvcoords()
-        # return np.array([item[0] for item in uvcoords]),\
-                # np.array([item[1] for item in uvcoords])
-
     def get_table_for_fits(self, header: str) -> List[Table]:
         """
 
@@ -76,109 +113,26 @@ class ReadoutFits:
         """
         return Table().read(self.fits_file, hdu=header)
 
-
-class ReadoutMATISSE(ReadoutFits):
-    """"""
-    def __init__(self, *args, **kwargs) -> None:
-        """"""
-        super().__init__(*args, **kwargs)
-        self._oi_flux = None
-        self._oi_vis = None
-        self._oi_vis2 = None
-        self._oi_t3 = None
-
-        self._delay_lines, self._triangles = None, None
-
-    @property
-    def oi_flux(self):
-        """Fetches the flux"""
-        if self._oi_flux is None:
-            self._oi_flux = self.get_table_for_fits("oi_flux")
-        return self._oi_flux
-
-    @property
-    def oi_vis(self):
-        """Fetches the visibility"""
-        if self._oi_vis is None:
-            self._oi_vis = self.get_table_for_fits("oi_vis")
-        return self._oi_vis
-
-    @property
-    def oi_vis2(self):
-        """Fetches the visibility"""
-        if self._oi_vis2 is None:
-            self._oi_vis2 = self.get_table_for_fits("oi_vis2")
-        return self._oi_vis2
-
-    @property
-    def oi_t3(self):
-        """Fetches the visibility"""
-        if self._oi_t3 is None:
-            self._oi_t3 = self.get_table_for_fits("oi_t3")
-        return self._oi_t3
-
-    @property
-    def delay_lines(self):
+    def get_delay_lines(self, oi_vis: Table):
         """Fetches the delay lines' telescope configuration"""
-        if self._delay_lines is None:
-            self._delay_lines = ["-".join(list(map(self.telescopes_to_station_names.get,
-                                                    station_index)))\
-                                  for station_index in self.oi_vis["STA_INDEX"]]
-        return self._delay_lines
+        return ["-".join(list(map(self.telescopes_to_station_names.get,
+                                  station_index)))\
+                for station_index in oi_vis["STA_INDEX"]]
 
-    @property
-    def triangles(self):
+    def get_triangles(self, oi_t3: Table):
         """Fetches the triangles' telescope configurations"""
-        if self._triangles is None:
-            self._triangles = ["-".join(list(map(self.telescopes_to_station_names.get,
-                                                  station_index)))\
-                                for station_index in self.oi_t3["STA_INDEX"]]
-        return self._triangles
+        return ["-".join(list(map(self.telescopes_to_station_names.get,
+                                  station_index)))\
+                for station_index in oi_t3["STA_INDEX"]]
 
-    def get_vis4wl(self, wl_ind: int) -> np.ndarray:
-        """Fetches the visdata(amp/phase)/correlated fluxes for one specific wavelength
 
-        Returns
-        --------
-        visamp4wl: np.ndarray
-            The visamp for a specific wavelength
-        visamperr4wl: np.ndarray
-            The visamperr for a specific wavelength
-        visphase4wl: np.ndarray
-            The visphase for a specific wavelength
-        visphaseerr4wl: np.ndarray
-            The visphaseerr for a specific wavelength
-        """
-        visdata = self.get_vis()
-        visamp, visamperr = map(lambda x: x[:6], visdata[:2])
-        visphase, visphaseerr = map(lambda x: x[:6], visdata[2:4])
-        visamp4wl, visamperr4wl = map(lambda x: np.array([i[wl_ind] for i in x]).flatten(),
-                                      [visamp, visamperr])
-        visphase4wl, visphaseerr4wl= map(lambda x: np.array([i[wl_ind] for i in x]).flatten(),
-                                         [visphase, visphaseerr])
-
-        return visamp4wl, visamperr4wl, visphase4wl, visphaseerr4wl
-
-    def get_vis24wl(self, wl_ind: int) -> np.ndarray:
-        """Fetches the vis2data for one specific wavelength
-
-        Returns
-        --------
-        vis2data4wl: np.ndarray
-            The vis2data for a specific wavelength
-        vis2err4wl: np.ndarray
-            The vis2err for a specific wavelength
-        """
-        vis2data, vis2err  = map(lambda x: x[:6], self.get_vis2()[:2])
-        vis2data4wl, vis2err4wl = map(lambda x: np.array([i[wl_ind] for i in x]).flatten(),
-                                      [vis2data, vis2err])
-
-        return vis2data4wl, vis2err4wl
+class DataPrep:
+    def __init__(self, fits_files: List[Path]) -> None:
+        self.fits_files = fits_files
 
 
 if __name__ == "__main__":
     fits_file = "hd142666_2019-05-14T05_28_03_N_TARGET_FINAL_INT.fits"
     fits_file = DATA_DIR / "jozsef_reductions" / fits_file
     readout = ReadoutMATISSE(fits_file)
-    breakpoint()
 
