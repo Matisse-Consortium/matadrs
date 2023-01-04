@@ -6,12 +6,15 @@ __pycache__/
 *.txt
 
 # Specific folders to ignore
-data/
+data/hd163296
+data/jozsef_reductions
+data/calib_spec_databases
 libs/reduction/jacob_files
 libs/reduction/tools-master
 libs/reduction/tools-master.zip
 
 # Specific files to ignore
+data/cflux_calib.sof
 libs/reduction/calib_BCD2.py
 libs/reduction/avg_oifits.py
 libs/grep/get_gravity_data.py

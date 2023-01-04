@@ -8,14 +8,15 @@ import astropy.units as u
 from astropy.vizier import Vizier
 from mat_tools import mat_autoPipeline as mp
 
-from .utils import cprint
-from .readout import ReadoutFits
+from libs.reduction.utils import cprint
+from libs.reduction.readout import ReadoutFits
 
 
 JSDC_V2 = Vizier(catalog="II/346/jsdc_v2")
 SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
 MAIN_JSDC_PATH = Path("/CalibMap/JSDC/jsdc_2017_03_03.fits")
 ALT_JSDC_PATH = Path("/CalibMap/JSDC/cal_catalog_for_cals_not_in_jsdc_2022-07.fits")
+
 
 def get_calibrator_data(fits_file: Path, target_name: str,
                         match_radius: u.arcsec = 20*u.arcsec):
