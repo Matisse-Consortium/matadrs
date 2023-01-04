@@ -2,24 +2,55 @@ import time
 import datetime
 import shutil
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
+import numpy as np
 import astropy.units as u
+from astropy.table import Table
 from astropy.vizier import Vizier
+from astrop.coordinates import SkyCoord
 from mat_tools import mat_autoPipeline as mp
 
 from libs.reduction.utils import cprint
 from libs.reduction.readout import ReadoutFits
 
 
-JSDC_V2 = Vizier(catalog="II/346/jsdc_v2")
+DATA_DIR = Path(__file__).parent.parent.parent / "data"
+
+JSDC_V2_CATALOG = Vizier(catalog="II/346/jsdc_v2")
 SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
-MAIN_JSDC_PATH = Path("/CalibMap/JSDC/jsdc_2017_03_03.fits")
-ALT_JSDC_PATH = Path("/CalibMap/JSDC/cal_catalog_for_cals_not_in_jsdc_2022-07.fits")
+JSDC_CATALOG = DATA_DIR / "jsdc_20170303.fits"
+ADDITIONAL_CATALOG = DATA_DIR / "additional_calibrators_202207.fits"
 
 
-def get_calibrator_data(fits_file: Path, target_name: str,
-                        match_radius: u.arcsec = 20*u.arcsec):
+# TODO: Implement this tpl start for reduction
+# {'night':'2020-01-08', 'tpl_start':'2020-01-09T01:24:18', 'tel':'UTs','diL':'LOW','diN':'LOW'},  #V900Mon, SCI_V900Mon
+
+def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
+    """Checks if calibrator is in catalog. Returns catalog if True, else None
+
+    Parameters
+    ----------
+    readout: ReadoutFits
+    radius: u.arcsec
+    catalog_fits: Path
+
+    Returns
+    -------
+    catalog: Path | None
+    """
+    coords_calibrator = SkyCoord(readout.ra*u.deg, readout.dec*u.deg, frame="icrs")
+    table = Table().read(catalog)
+    coords_catalog = SkyCoord(table["RAJ2000"], table["DEJ2000"],
+                              unit=(u.hourangle, u.deg), frame="icrs")
+    separation = coords_calibrator.separation(coords_catalog)
+    if separation[np.nanargmin(separation)] < radius.to(u.deg):
+        return catalog
+    return None
+
+
+def gets_catalog_match(fits_file: Path, target_name: str,
+                       match_radius: u.arcsec = 20*u.arcsec):
     """Checks if the calibrator is in the 'jsdc_v2'-catalog and if not then searches the
     local calibrator databases
 
@@ -31,12 +62,15 @@ def get_calibrator_data(fits_file: Path, target_name: str,
         The name of the calibrator
     match_radius: u.arcsec
         The radius in which to search the catalouge
+
+    Returns
+    -------
+    catalog: Path | None
     """
     readout = ReadoutFits(fits_file)
-    entry = JSDC_V2.query_object(target_name, radius=match_radius)
-    ra, dec = readout.get_ra_and_dec()
-    if entry:
-        jdsc_path = MAIN_JSDC_PATH
+    if JSDC_V2_CATALOG.query_object(readout.target_name, radius=match_radius):
+        return JSDC_CATALOG
+    return in_catalog(readout, radius=match_radius, catalog=ADDITIONAL_CATALOG)
 
 
 def set_script_arguments(corr_flux: bool, array: str,

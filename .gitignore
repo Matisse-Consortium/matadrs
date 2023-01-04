@@ -8,12 +8,14 @@ __pycache__/
 # Specific folders to ignore
 data/hd163296
 data/jozsef_reductions
-data/calib_spec_databases
+data/calibrator_databases
+data/catalogues
 libs/reduction/jacob_files
 libs/reduction/tools-master
 libs/reduction/tools-master.zip
 
 # Specific files to ignore
+data/catalog.fits
 data/cflux_calib.sof
 libs/reduction/calib_BCD2.py
 libs/reduction/avg_oifits.py
