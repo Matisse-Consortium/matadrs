@@ -1,7 +1,5 @@
 from typing import Dict, List
 
-import numpy as np
-import astropy.units as u
 from astropy.io import fits
 from pathlib import Path
 from astropy.table import Table
@@ -40,10 +38,13 @@ class ReadoutFits:
     def oi_flux(self):
         """Fetches the flux"""
         if self._oi_flux is None:
-            self._oi_flux = self.get_table_for_fits("oi_flux")
-            self._oi_flux.add_columns([self.get_table_for_fits("oi_array")["TEL_NAME"]],
-                                     names="TEL_NAME")
-            self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "TEL_NAME"])
+            try:
+                self._oi_flux = self.get_table_for_fits("oi_flux")
+                self._oi_flux.add_columns([self.get_table_for_fits("oi_array")["TEL_NAME"]],
+                                         names="TEL_NAME")
+                self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "TEL_NAME"])
+            except Exception:
+                pass
         return self._oi_flux
 
     @property
@@ -126,13 +127,8 @@ class ReadoutFits:
                 for station_index in oi_t3["STA_INDEX"]]
 
 
-class DataPrep:
-    def __init__(self, fits_files: List[Path]) -> None:
-        self.fits_files = fits_files
-
-
 if __name__ == "__main__":
     fits_file = "hd142666_2019-05-14T05_28_03_N_TARGET_FINAL_INT.fits"
     fits_file = DATA_DIR / "jozsef_reductions" / fits_file
-    readout = ReadoutMATISSE(fits_file)
+    readout = ReadoutFits(fits_file)
 

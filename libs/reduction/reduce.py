@@ -1,16 +1,41 @@
 import time
 import datetime
 import shutil
-
 from pathlib import Path
 from typing import Optional
 
+import astropy.units as u
+from astropy.vizier import Vizier
 from mat_tools import mat_autoPipeline as mp
 
 from .utils import cprint
+from .readout import ReadoutFits
 
 
+JSDC_V2 = Vizier(catalog="II/346/jsdc_v2")
 SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
+MAIN_JSDC_PATH = Path("/CalibMap/JSDC/jsdc_2017_03_03.fits")
+ALT_JSDC_PATH = Path("/CalibMap/JSDC/cal_catalog_for_cals_not_in_jsdc_2022-07.fits")
+
+def get_calibrator_data(fits_file: Path, target_name: str,
+                        match_radius: u.arcsec = 20*u.arcsec):
+    """Checks if the calibrator is in the 'jsdc_v2'-catalog and if not then searches the
+    local calibrator databases
+
+    Parameters
+    ----------
+    fits_file: Path
+        The file that is to be reduced and checked if calibrator or not
+    target_name: str
+        The name of the calibrator
+    match_radius: u.arcsec
+        The radius in which to search the catalouge
+    """
+    readout = ReadoutFits(fits_file)
+    entry = JSDC_V2.query_object(target_name, radius=match_radius)
+    ra, dec = readout.get_ra_and_dec()
+    if entry:
+        jdsc_path = MAIN_JSDC_PATH
 
 
 def set_script_arguments(corr_flux: bool, array: str,
@@ -50,7 +75,7 @@ def set_script_arguments(corr_flux: bool, array: str,
 
 
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
-                         array: str, mode: bool, band: str,
+                         array: str, mode: bool, band: str, tp_start: str,
                          resolution: Optional[str] = "low") -> None:
     """Reduces either the lband or the nband data for either the "coherent" or
     "incoherent" setting for a single iteration/epoch.
@@ -74,10 +99,8 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
         "coherent" if "True"
     band: str
         The band for which the reduction is to be done, either "lband" or "nband"
-
-    See Also
-    --------
-    set_script_arguments()
+    tpl_star: str
+        The starting time of target's observations
     """
     # TODO: Replace this time with process finish time
     start_time = time.time()
@@ -91,8 +114,9 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
 
     # TODO: Set tpl and split calib and reduction files
     mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=calib_dir,
-                        nbCore=6, resol='', paramL=param_L, paramN=param_N,
-                        overwrite=0, maxIter=1, skipL=skip_L, skipN=skip_N)
+                        tplstartsel=tpl_start, nbCore=6, resol='',
+                        paramL=param_L, paramN=param_N, overwrite=0, maxIter=1,
+                        skipL=skip_L, skipN=skip_N)
 
     try:
         rb_folders = res_dir.glob("Iter1/*.rb")
@@ -102,8 +126,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
             shutil.move(folder, mode_and_band_dir)
 
         if rb_folders:
-            cprint("Folders have sucessfully been moved to their directories",
-                   "g")
+            cprint("Folders have sucessfully been moved to their directories", "g")
     # TODO: Make logger here
     except Exception:
         cprint("Moving of files to {mode_and_band_dir} failed!", "y")
@@ -113,6 +136,77 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
           f" {datetime.timedelta(seconds=(time.time()-start_time))} hh:mm:ss")
     cprint("---------------------------------------------------------------------",
           "lg")
+
+# # TODO: Check if object is calibrator
+# if fpath_CAL_lst: #if object is a calibrator
+    # hdr = hdr_lst[0]
+
+    # # NOTE: check whether calibrator is in JSDC
+    # match_radius = 20.0 #arcsec
+    # jsdc_match = False
+    # jsdc_path_match = ''
+    # target_name = hdr['HIERARCH ESO OBS TARG NAME']
+    # target_ra = hdr['RA'] #J2000
+    # target_dec = hdr['DEC'] #J2000
+    # #print(target_ra,target_dec)
+    # print('Check whether calibrator '+target_name+' is in JSDC v2:')
+    # result_jsdc = jsdc_v2.query_object(target_name,catalog='II/346/jsdc_v2',radius=match_radius*u.arcsec)
+    # #print(result_jsdc)
+    # if result_jsdc != []:
+        # if(len(result_jsdc[0]) > 0):
+            # #match
+            # jsdc_match = True
+            # jsdc_path_match = main_JSDC_path
+            # print('Calibrator found in JSDC v2: '+result_jsdc[0]['Name'][0])
+            # #    +', separation: %.2f arcsec'%(3600.0*min_sep.value))
+    # else:
+        # #check whether the calibrator is in the supplement catalog
+        # c_cal = SkyCoord(target_ra* u.deg, target_dec* u.deg, frame='icrs')
+        # caldb = fits.open(alt_JSDC_path)
+        # cal_name_lst = caldb[1].data['NAME']
+        # cal_ra_lst = caldb[1].data['RAJ2000']
+        # cal_dec_lst = caldb[1].data['DEJ2000']
+        # #print(cal_ra_lst[0:10], cal_dec_lst[0:10])
+        # c_lst = SkyCoord(ra=cal_ra_lst ,dec=cal_dec_lst , unit=(u.hourangle, u.deg), frame='icrs')
+        # # search for the calibrator in the calibrator database
+        # sep = c_cal.separation(c_lst)
+        # min_sep_idx = np.nanargmin(sep)
+        # min_sep = sep[min_sep_idx]
+        # caldb.close()
+        # if (min_sep < match_radius*u.deg/3600.0): #match_radius = 20 arcsec
+            # #match
+            # jsdc_match = True
+            # jsdc_path_match = alt_JSDC_path
+            # print('Calibrator found in the supplement catalog: '+os.path.basename(jsdc_path_match)+': '+cal_name_lst[min_sep_idx]
+                # +', separation: %.2f arcsec'%(3600.0*min_sep.value))
+
+    # if jsdc_match:
+        # cats_to_remove = []
+        # #check for an existing JSDC catalog in dir_calib
+        # fpath_JSDC_lst,hdr_lst = check_tag(dir_calib,'JSDC_CAT',None)
+        # replace_JSDC_cat = True
+        # if len(fpath_JSDC_lst) > 0:
+            # for fpath_JSDC,hdr in zip(fpath_JSDC_lst,hdr_lst):
+                # #check if the local JSDC catalog is the same as the reference JSDC catalog
+                # hdr_match = getheader(jsdc_path_match)
+                # if 'DATE' in hdr_match and 'DATE' in hdr:
+                    # if hdr_match['DATE'] == hdr['DATE']:
+                        # #if the JSDC catalog in dir_calib is the same as the one in the list of JSDC catalogs, then keep it
+                        # replace_JSDC_cat = False
+                # else:
+                    # cats_to_remove.append(fpath_JSDC)
+
+        # # remove unwanted JSDC cats
+        # for fpath in cats_to_remove:
+            # print('Removing unwanted JSDC cat: '+fpath)
+            # os.remove(fpath)
+
+        # if replace_JSDC_cat:
+            # # copy the wanted JSDC catalog to dir_calib
+            # print('Copying JSDC cat '+os.path.basename(jsdc_path_match)+' to '+dir_calib)
+            # shutil.copyfile(jsdc_path_match,os.path.join(dir_calib,os.path.basename(jsdc_path_match)))
+    # else:
+        # print('Calibrator not found in JSDC, reduced data will not contain TF2, thus visibility calibration (mat_cal_oifits) will fail.')
 
 
 def reduce(root_dir: Path, stem_dir: Path,
@@ -135,8 +229,11 @@ def reduce(root_dir: Path, stem_dir: Path,
     overall_start_time = time.time()
     raw_dir = Path(root_dir, stem_dir, "raw", target_dir).resolve()
 
-    # TODO: Change this to proper search for calibration_files
-    calib_dir = raw_dir
+    if (raw_dir / "calib_files").exists():
+        calib_dir = raw_dir / "calib_files"
+    else:
+        calib_dir = raw_dir
+
     res_dir = Path(root_dir, stem_dir, "products", target_dir).resolve()
 
     if not res_dir.exists():

@@ -1,12 +1,12 @@
 import os
-import numpy as np
-import matplotlib.pyplot as plt
-
 from pathlib import Path
 from warnings import warn
 from typing import List, Optional
 
-from .readout import ReadoutFits
+import numpy as np
+import matplotlib.pyplot as plt
+
+from matadrs.libs.reduction.readout import ReadoutFits
 
 # TODO: Make either model or fourier transform carry more info like the name of
 # the plot or similar -> Work more with classes
@@ -22,20 +22,7 @@ from .readout import ReadoutFits
 # TODO: Make automatic plotting functionality with axarr -> take lengths for components
 
 # The data path to the general data
-
-# Different baseline-configurations (small-, medium-, large) AT & UT.
-# Telescope names and "sta_index"
-SMALL = {1: "A0", 5: "B2", 13: "D0", 10: "C1"}
-MED = {28: "K0", 18: "G1", 13: "D0", 24: "J3"}
-LARGE = {1: "A0", 18: "G1", 23: "J2", 24: "J3"}
-UT = {32: "UT1", 33: "UT2", 34: "UT3", 35: "UT4"}
-
-# All baseline configurations
-ALL_TELS = {}
-ALL_TELS.update(SMALL)
-ALL_TELS.update(MED)
-ALL_TELS.update(LARGE)
-ALL_TELS.update(UT)
+DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
 
 
 class Plotter:
@@ -44,26 +31,26 @@ class Plotter:
     Attributes
     ----------
     """
-    def __init__(self, fits_files: List,
-                 flux_file: Optional[Path] = "",
+    def __init__(self, fits_files: List[Path],
+                 flux_file: Optional[Path] = None,
                  lband: Optional[bool]= False,
                  limit_spacing: Optional[float] = 0.05,
-                 plot_name: Optional[str] = "",
+                 plot_name: Optional[str] = None,
                  axis_cutoffs: Optional[List] = [0, 0],
-                 save_path: Optional[Path] = "") -> None:
+                 save_path: Optional[Path] = None) -> None:
         """Initialises the class instance"""
-        self.fits_files = fits_files
         self.lband = lband
-        if not plot_name:
-            self.plot_name = "combined_files.pdf" if len(self.fits_files) > 1\
-                else f"{os.path.basename(self.fits_files[0]).split('.')[0]}.pdf"
+
+        if plot_name is None:
+            self.plot_name = "combined_files.pdf" if len(fits_files) > 1\
+                else f"{os.path.basename(fits_files[0]).split('.')[0]}.pdf"
         else:
             self.plot_name = plot_name
 
         self.save_path = save_path
         self.components = []
 
-        if len(self.fits_files) > 1:
+        if len(fits_files) > 1:
             warn("There is more than one (.fits)-file detected."\
                  " WARNING: Only data of SAME BAND can be unified into one plot!")
 
@@ -72,98 +59,7 @@ class Plotter:
         self.limit_high = self.cutoff_high if self.cutoff_high < -17 else -17
         self.limit_spacing = limit_spacing
 
-        self.all_vis, self.all_vis_err = [], []
-        self.all_vis2, self.all_vis2_err = [], []
-        self.all_t3phi, self.all_t3phi_err = [], []
-        self.all_flux, self.all_flux_err = [], []
-
-        # TODO: Properly implement different baseline configurations
-        self.all_tel_flux, self.all_tel_vis, self.all_tel_t3phi = [], [], []
-        self.all_ucoords, self.all_vcoords = [], []
-
-        self.fits_files_names = []
-
-        for fits_file in self.fits_files:
-            self.readout = ReadoutFits(fits_file)
-            self.fits_file_name = os.path.basename(fits_file)
-            self.fits_files_names.append(self.fits_file_name)
-            # TODO: Make proper fits-file names for flux plots
-
-            # Fetches all the relevant data from the '.fits'-file
-            self.visdata, self.viserr = map(lambda x: x[:6],
-                                              self.readout.get_vis()[:2])
-            self.vis2data, self.vis2err = map(lambda x: x[:6],
-                                              self.readout.get_vis2()[:2])
-            self.t3phidata, self.t3phierr = map(lambda x: x[:4],
-                                                self.readout.get_t3phi()[:2])
-
-            # Get the telescope indices
-            self.vissta = self.readout.get_vis()[2]
-            self.t3phista = self.readout.get_t3phi()[2]
-
-            # Sets the descriptors of the telescopes' baselines and the closure # phases
-            self.tel_vis = np.array([("-".join([ALL_TELS[telescope]\
-                                         for telescope in duo])) for duo in self.vissta])
-            self.tel_t3phi = np.array([("-".join([ALL_TELS[telescope]\
-                                                  for telescope in trio]))\
-                                       for trio in self.t3phista])
-
-            if not flux_file:
-                try:
-                    self.flux, self.fluxerr = self.readout.get_flux()[:2]
-                    self.fluxsta = self.readout.get_flux()[2]
-                    self.tel_flux = np.array([ALL_TELS[telescope]\
-                                             for telescope in self.fluxsta])
-                except:
-                    self.flux = None
-            else:
-                # FIXME: Make get data function like for fitting
-                self.flux = flux_file
-
-            if self.flux is not None:
-                self.all_flux.extend(self.flux)
-                self.all_flux_err.extend(self.fluxerr)
-                self.all_tel_flux.extend(self.tel_flux)
-
-            # Gets other important data
-            self.ucoords, self.vcoords = map(lambda x: x[:6],\
-                                             self.readout.get_split_uvcoords())
-            self.wl = self.readout.get_wl()
-
-            self.all_vis.extend(self.visdata)
-            self.all_vis_err.extend(self.viserr)
-            self.all_vis2.extend(self.vis2data)
-            self.all_vis2_err.extend(self.vis2err)
-            self.all_t3phi.extend(self.t3phidata)
-            self.all_t3phi_err.extend(self.t3phierr)
-
-            self.all_tel_vis.extend(self.tel_vis)
-            self.all_tel_t3phi.extend(self.tel_t3phi)
-
-            self.all_ucoords.extend(self.ucoords)
-            self.all_vcoords.extend(self.vcoords)
-
-            # The mean of the wavelength.
-            # The mean of all the visibilities and their standard deviation
-            # self.mean_wl = np.mean(self.wl)
-            # self.wl_slice= [j for j in self.wl\
-                            # if (j >= self.mean_wl-0.5e-06 and j <= self.mean_wl+0.5e-06)]
-            # self.si, self.ei = (int(np.where(self.wl == self.wl_slice[0])[0])-5,
-                                    # int(np.where(self.wl == self.wl_slice[~0])[0])+5)
-
-            # self.mean_bin_vis2 = [np.nanmean(i[self.si:self.ei]) for i in self.vis2data]
-            # self.baseline_distances = [np.sqrt(x**2+y**2)\
-                                       # for x, y in zip(self.ucoords, self.vcoords)]
-        if any(axis_cutoffs):
-            self.wl = self.wl[self.cutoff_low:self.cutoff_high]
-            self.all_flux = [flux[self.cutoff_low:self.cutoff_high]\
-                             for flux in self.all_flux]
-            self.all_vis = [vis[self.cutoff_low: self.cutoff_high]\
-                            for vis in self.all_vis]
-            self.all_vis2 = [vis2[self.cutoff_low: self.cutoff_high]\
-                             for vis2 in self.all_vis2]
-            self.all_t3phi = [cphases[self.cutoff_low: self.cutoff_high]\
-                              for cphases in self.all_t3phi]
+        self.readout = ReadoutFits(fits_files)
 
     @property
     def number_of_plots(self):
@@ -218,9 +114,10 @@ class Plotter:
         for index, dataset in enumerate(data):
             if (data_name == "vis") or (data_name == "vis2")\
                or (data_name == "corr_flux"):
+                # TODO: Make this with new readout
                 baseline = np.around(np.sqrt(self.all_ucoords[index]**2+\
                                              self.all_vcoords[index]**2), 2)
-                pas = np.around((np.degrees(np.arctan2(self.all_vcoords[index],
+                pas = np.around((np.degrees(np.arctan2(self.readout.oi_vis[index],
                                                        self.all_ucoords[index]))-90)*-1, 2)
                 label = fr"{tel_data[index]} $B_p$={baseline} m $\phi={pas}^\circ$"
             else:
@@ -582,11 +479,9 @@ def make_uv_plot(dic,ax,verbose=False,annotate=True,B_lim=(np.nan,np.nan),figsiz
 
 
 if __name__ == ('__main__'):
-    data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    stem_dir = "matisse/GTO/hd142666/PRODUCTS/UTs/20220420/"
-    target_dir = "combined/hd142666_2022-04-21T07_18_22_L_TARGET_FINAL_INT.fits"
-    fits_files_N = os.path.join(data_dir, stem_dir, target_dir)
-    plot_fits = Plotter([fits_files_N], lband=True)
+    # TODO: Fix the plotter for the pandas dataframe structure
+    fits_files = DATA_DIR / "jozsef_reductions" / "hd142666_2019-05-14T05_28_03_N_TARGET_FINAL_INT.fits"
+    plot_fits = Plotter([fits_files])
     plot_fits.add_cphases().add_corr_flux().add_flux().plot()
 
 

@@ -9,7 +9,6 @@ from .plot import Plotter
 from .readout import ReadoutFits
 from .utils import cprint, oifits_patchwork
 
-
 # TODO: Make the files more modular
 def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
     """Sorts the input (.fits)-files by their BCD configuration
