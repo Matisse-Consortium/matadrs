@@ -101,6 +101,17 @@ class ReadoutFits:
         return ["-".join([self.primary_header["HIERARCH ESO INS BCD1 ID"],
                           self.primary_header["HIERARCH ESO INS BCD2 ID"]])]
 
+    @property
+    def tpl_start(self):
+        """Gets the template start datetime"""
+        return self.primary_header["HIERARCH ESO TPL START"]
+
+    def is_calibrator(self):
+        """Checks if the target was observed as calibrator"""
+        if self.primary_header["HIERARCH ESO DPR CATG"].lower() == "calib":
+            return True
+        return False
+
     def get_table_for_fits(self, header: str) -> List[Table]:
         """
 

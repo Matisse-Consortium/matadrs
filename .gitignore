@@ -6,8 +6,6 @@ __pycache__/
 *.txt
 
 # Specific folders to ignore
-data/hd163296
-data/jozsef_reductions
 data/calibrator_databases
 data/catalogues
 libs/reduction/jacob_files

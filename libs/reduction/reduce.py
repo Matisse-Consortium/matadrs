@@ -2,7 +2,7 @@ import time
 import datetime
 import shutil
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import astropy.units as u
@@ -16,15 +16,39 @@ from libs.reduction.readout import ReadoutFits
 
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
+CATALOG_DIR = DATA_DIR / "catalogues"
 
 JSDC_V2_CATALOG = Vizier(catalog="II/346/jsdc_v2")
+JSDC_CATALOG = CATALOG_DIR / "jsdc_20170303.fits"
+ADDITIONAL_CATALOG = CATALOG_DIR / "additional_calibrators_202207.fits"
+
 SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
-JSDC_CATALOG = DATA_DIR / "jsdc_20170303.fits"
-ADDITIONAL_CATALOG = DATA_DIR / "additional_calibrators_202207.fits"
 
 
-# TODO: Implement this tpl start for reduction
-# {'night':'2020-01-08', 'tpl_start':'2020-01-09T01:24:18', 'tel':'UTs','diL':'LOW','diN':'LOW'},  #V900Mon, SCI_V900Mon
+# TODO: Maybe there is a smarter way of globbing twice? Not that important however...
+def get_tpl_match(raw_dir: Path, tpl_start: str):
+    """Gets a (.fits)-file matching the tpl start
+
+    Parameters
+    ----------
+    raw_dir: Path
+    tpl_start: str
+
+    Returns
+    -------
+    fits_file: Path
+    """
+    for fits_file in raw_dir.glob("*.fits"):
+        if tpl_start == ReadoutFits(fits_file).tpl_start:
+            return fits_file
+        else:
+            raise FileNotFoundError("No file with matching tpl_start exists!")
+
+
+def get_tpl_starts(raw_dir: Path):
+    """Iterates through all files and gets their tpl start times"""
+    return set([ReadoutFits(fits_file).tpl_start for fits_file in raw_dir.glob("*.fits")])
+
 
 def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
     """Checks if calibrator is in catalog. Returns catalog if True, else None
@@ -45,12 +69,14 @@ def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
                               unit=(u.hourangle, u.deg), frame="icrs")
     separation = coords_calibrator.separation(coords_catalog)
     if separation[np.nanargmin(separation)] < radius.to(u.deg):
+        cprint("Calibrator found in supplementary catalog!", "g")
         return catalog
+    cprint("Calibrator not found in any catalogs! No TF2 and 'mat_cal_oifits' will fail",
+           "r")
     return None
 
 
-def gets_catalog_match(fits_file: Path, target_name: str,
-                       match_radius: u.arcsec = 20*u.arcsec):
+def get_catalog_match(fits_file: Path, match_radius: u.arcsec = 20*u.arcsec):
     """Checks if the calibrator is in the 'jsdc_v2'-catalog and if not then searches the
     local calibrator databases
 
@@ -58,8 +84,6 @@ def gets_catalog_match(fits_file: Path, target_name: str,
     ----------
     fits_file: Path
         The file that is to be reduced and checked if calibrator or not
-    target_name: str
-        The name of the calibrator
     match_radius: u.arcsec
         The radius in which to search the catalouge
 
@@ -69,6 +93,7 @@ def gets_catalog_match(fits_file: Path, target_name: str,
     """
     readout = ReadoutFits(fits_file)
     if JSDC_V2_CATALOG.query_object(readout.target_name, radius=match_radius):
+        cprint("Calibrator found in JSDC v2 catalog!", "g")
         return JSDC_CATALOG
     return in_catalog(readout, radius=match_radius, catalog=ADDITIONAL_CATALOG)
 
@@ -97,8 +122,8 @@ def set_script_arguments(corr_flux: bool, array: str,
         MATISSE-pipline
     """
     bin_L, bin_N = SPECTRAL_BINNING[resolution]
-    # NOTE: Jozsef uses 3 here, but Jacob 2? What is the meaning of this -> Read up on it
-    # -> Already asked, awaiting response
+    # NOTE: Jozsef uses TEL 3 here, but Jacob 2? What is the meaning of this
+    # -> Read up on it. Already asked! Awaiting response
     compensate = "/compensate=[pb,rb,nl,if,bp,od]"
     tel = "/replaceTel=3" if array == "ATs" else "/replaceTel=0"
     coh_L  = f"/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2"\
@@ -110,7 +135,7 @@ def set_script_arguments(corr_flux: bool, array: str,
 
 
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
-                         array: str, mode: bool, band: str, tp_start: str,
+                         array: str, mode: bool, band: str, tpl_start: str,
                          resolution: Optional[str] = "low") -> None:
     """Reduces either the lband or the nband data for either the "coherent" or
     "incoherent" setting for a single iteration/epoch.
@@ -137,8 +162,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     tpl_star: str
         The starting time of target's observations
     """
-    # TODO: Replace this time with process finish time
-    start_time = time.time()
+    start_time = time.perf_counter()
     mode_and_band_dir = res_dir / mode / band
     param_L, param_N = set_script_arguments(mode, array, resolution)
     skip_L = True if band == "nband" else False
@@ -147,7 +171,12 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     if not mode_and_band_dir.exists():
         mode_and_band_dir.mkdir()
 
-    # TODO: Set tpl and split calib and reduction files
+    # TODO: Readout is called twice here, make this easier!!!
+    fits_file = get_tpl_match(raw_dir, tpl_start)
+    if ReadoutFits(fits_file).is_calibrator():
+        catalog_path = get_catalog_match(fits_file)
+        shutil.copy(catalog_path, calib_dir / catalog_path.name)
+
     mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=calib_dir,
                         tplstartsel=tpl_start, nbCore=6, resol='',
                         paramL=param_L, paramN=param_N, overwrite=0, maxIter=1,
@@ -162,86 +191,16 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
 
         if rb_folders:
             cprint("Folders have sucessfully been moved to their directories", "g")
+
     # TODO: Make logger here
     except Exception:
         cprint("Moving of files to {mode_and_band_dir} failed!", "y")
 
-    print("---------------------------------------------------------------------")
+    cprint(f"{'':-^50}", "lg")
     cprint(f"Executed the {mode} reduction for the {band} in"
-          f" {datetime.timedelta(seconds=(time.time()-start_time))} hh:mm:ss")
-    cprint("---------------------------------------------------------------------",
-          "lg")
-
-# # TODO: Check if object is calibrator
-# if fpath_CAL_lst: #if object is a calibrator
-    # hdr = hdr_lst[0]
-
-    # # NOTE: check whether calibrator is in JSDC
-    # match_radius = 20.0 #arcsec
-    # jsdc_match = False
-    # jsdc_path_match = ''
-    # target_name = hdr['HIERARCH ESO OBS TARG NAME']
-    # target_ra = hdr['RA'] #J2000
-    # target_dec = hdr['DEC'] #J2000
-    # #print(target_ra,target_dec)
-    # print('Check whether calibrator '+target_name+' is in JSDC v2:')
-    # result_jsdc = jsdc_v2.query_object(target_name,catalog='II/346/jsdc_v2',radius=match_radius*u.arcsec)
-    # #print(result_jsdc)
-    # if result_jsdc != []:
-        # if(len(result_jsdc[0]) > 0):
-            # #match
-            # jsdc_match = True
-            # jsdc_path_match = main_JSDC_path
-            # print('Calibrator found in JSDC v2: '+result_jsdc[0]['Name'][0])
-            # #    +', separation: %.2f arcsec'%(3600.0*min_sep.value))
-    # else:
-        # #check whether the calibrator is in the supplement catalog
-        # c_cal = SkyCoord(target_ra* u.deg, target_dec* u.deg, frame='icrs')
-        # caldb = fits.open(alt_JSDC_path)
-        # cal_name_lst = caldb[1].data['NAME']
-        # cal_ra_lst = caldb[1].data['RAJ2000']
-        # cal_dec_lst = caldb[1].data['DEJ2000']
-        # #print(cal_ra_lst[0:10], cal_dec_lst[0:10])
-        # c_lst = SkyCoord(ra=cal_ra_lst ,dec=cal_dec_lst , unit=(u.hourangle, u.deg), frame='icrs')
-        # # search for the calibrator in the calibrator database
-        # sep = c_cal.separation(c_lst)
-        # min_sep_idx = np.nanargmin(sep)
-        # min_sep = sep[min_sep_idx]
-        # caldb.close()
-        # if (min_sep < match_radius*u.deg/3600.0): #match_radius = 20 arcsec
-            # #match
-            # jsdc_match = True
-            # jsdc_path_match = alt_JSDC_path
-            # print('Calibrator found in the supplement catalog: '+os.path.basename(jsdc_path_match)+': '+cal_name_lst[min_sep_idx]
-                # +', separation: %.2f arcsec'%(3600.0*min_sep.value))
-
-    # if jsdc_match:
-        # cats_to_remove = []
-        # #check for an existing JSDC catalog in dir_calib
-        # fpath_JSDC_lst,hdr_lst = check_tag(dir_calib,'JSDC_CAT',None)
-        # replace_JSDC_cat = True
-        # if len(fpath_JSDC_lst) > 0:
-            # for fpath_JSDC,hdr in zip(fpath_JSDC_lst,hdr_lst):
-                # #check if the local JSDC catalog is the same as the reference JSDC catalog
-                # hdr_match = getheader(jsdc_path_match)
-                # if 'DATE' in hdr_match and 'DATE' in hdr:
-                    # if hdr_match['DATE'] == hdr['DATE']:
-                        # #if the JSDC catalog in dir_calib is the same as the one in the list of JSDC catalogs, then keep it
-                        # replace_JSDC_cat = False
-                # else:
-                    # cats_to_remove.append(fpath_JSDC)
-
-        # # remove unwanted JSDC cats
-        # for fpath in cats_to_remove:
-            # print('Removing unwanted JSDC cat: '+fpath)
-            # os.remove(fpath)
-
-        # if replace_JSDC_cat:
-            # # copy the wanted JSDC catalog to dir_calib
-            # print('Copying JSDC cat '+os.path.basename(jsdc_path_match)+' to '+dir_calib)
-            # shutil.copyfile(jsdc_path_match,os.path.join(dir_calib,os.path.basename(jsdc_path_match)))
-    # else:
-        # print('Calibrator not found in JSDC, reduced data will not contain TF2, thus visibility calibration (mat_cal_oifits) will fail.')
+           f" {datetime.timedelta(seconds=(time.perf_counter()-start_time))} hh:mm:ss",
+           "lg")
+    cprint(f"{'':-^50}", "lg")
 
 
 def reduce(root_dir: Path, stem_dir: Path,
@@ -260,14 +219,16 @@ def reduce(root_dir: Path, stem_dir: Path,
     --------
     single_reduction()
     """
-    # TODO: Replace this time with process finish time
-    overall_start_time = time.time()
+    overall_start_time = time.perf_counter()
     raw_dir = Path(root_dir, stem_dir, "raw", target_dir).resolve()
 
-    if (raw_dir / "calib_files").exists():
-        calib_dir = raw_dir / "calib_files"
-    else:
-        calib_dir = raw_dir
+    calib_dir = raw_dir / "calib_files"
+    if not calib_dir.exists():
+        calib_dir.mkdir()
+        calibration_files = raw_dir.glob("M.*")
+        for calibration_file in calibration_files:
+            shutil.move(calibration_file, calib_dir / calibration_file.name)
+        cprint("Moved calibration files into 'calib_files' folders!", "g")
 
     res_dir = Path(root_dir, stem_dir, "products", target_dir).resolve()
 
@@ -287,22 +248,22 @@ def reduce(root_dir: Path, stem_dir: Path,
     except Exception:
         cprint("Cleaning up failed!", "y")
 
+    for tpl_start in sorted(list(get_tpl_starts(raw_dir))):
+        cprint(f"Reducing data of tpl_start: {tpl_start}", "g")
+        cprint(f"{'':-^50}", "lg")
+        for mode in ["coherent", "incoherent"]:
+            cprint(f"Processing {mode} reduction", "lp")
+            cprint(f"{'':-^50}", "lg")
+            for band in ["lband", "nband"]:
+                reduce_mode_and_band(raw_dir, calib_dir, res_dir, array,
+                                     resolution=resolution, mode=mode, band=band,
+                                     tpl_start=tpl_start)
 
-    for mode in ["coherent", "incoherent"]:
-        cprint(f"Processing {mode} reduction", "lp")
-        cprint("---------------------------------------------------------------------",
-              "lg")
-        for band in ["lband", "nband"]:
-            reduce_mode_and_band(raw_dir, calib_dir, res_dir, array, mode=mode, band=band)
-
-    cprint(f"Executed the overall reduction in"
-           f" {datetime.timedelta(seconds=(time.time()-overall_start_time))} hh:mm:ss",
-          "lp")
+    execution_time = time.perf_counter()-overall_start_time
+    cprint(f"{datetime.timedelta(seconds=execution_time)} hh:mm:ss", "lg")
 
 
 if __name__ == "__main__":
     data_dir = Path("~", "Code/matadrs/data").expanduser()
     stem_dir, target_dir = "/hd163296/", "ATs/20190323"
-    print(set_script_arguments(corr_flux=True, array="UTs"))
-    # reduce(data_dir, stem_dir, target_dir, "ATs")
-
+    reduce(data_dir, stem_dir, target_dir, "ATs")
