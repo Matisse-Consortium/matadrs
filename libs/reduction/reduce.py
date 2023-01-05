@@ -180,7 +180,6 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
         for catalog in calib_dir.glob("catalog"):
             os.remove(catalog)
 
-    # TODO: Maybe add removal of catalog
     mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=calib_dir,
                         tplstartsel=tpl_start, nbCore=6, resol='',
                         paramL=param_L, paramN=param_N, overwrite=0, maxIter=1,
