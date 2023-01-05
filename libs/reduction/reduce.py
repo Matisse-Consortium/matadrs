@@ -19,13 +19,13 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 CATALOG_DIR = DATA_DIR / "catalogues"
 
 JSDC_V2_CATALOG = Vizier(catalog="II/346/jsdc_v2")
-JSDC_CATALOG = CATALOG_DIR / "jsdc_20170303.fits"
-ADDITIONAL_CATALOG = CATALOG_DIR / "additional_calibrators_202207.fits"
+JSDC_CATALOG = CATALOG_DIR / "jsdc_v2_catalog_20170303.fits"
+ADDITIONAL_CATALOG = CATALOG_DIR / "supplementary_catalog_202207.fits"
 
 SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
 
 
-# TODO: Maybe there is a smarter way of globbing twice? Not that important however...
+# TODO: Maybe there is a smarter way than globbing twice? Not that important however...
 def get_tpl_match(raw_dir: Path, tpl_start: str):
     """Gets a (.fits)-file matching the tpl start
 
@@ -176,7 +176,11 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     if ReadoutFits(fits_file).is_calibrator():
         catalog_path = get_catalog_match(fits_file)
         shutil.copy(catalog_path, calib_dir / catalog_path.name)
+    else:
+        for catalog in calib_dir.glob("catalog"):
+            os.remove(catalog)
 
+    # TODO: Maybe add removal of catalog
     mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=calib_dir,
                         tplstartsel=tpl_start, nbCore=6, resol='',
                         paramL=param_L, paramN=param_N, overwrite=0, maxIter=1,
