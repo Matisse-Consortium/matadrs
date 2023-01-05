@@ -7,12 +7,13 @@ from typing import Optional
 import numpy as np
 import astropy.units as u
 from astropy.table import Table
-from astropy.vizier import Vizier
-from astrop.coordinates import SkyCoord
+from astroquery.vizier import Vizier
+from astropy.coordinates import SkyCoord
 from mat_tools import mat_autoPipeline as mp
 
-from libs.reduction.utils import cprint
-from libs.reduction.readout import ReadoutFits
+# TODO: Find way to make this into a complete module -> More pythonic!
+from utils import cprint
+from readout import ReadoutFits
 
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
@@ -41,8 +42,7 @@ def get_tpl_match(raw_dir: Path, tpl_start: str):
     for fits_file in raw_dir.glob("*.fits"):
         if tpl_start == ReadoutFits(fits_file).tpl_start:
             return fits_file
-        else:
-            raise FileNotFoundError("No file with matching tpl_start exists!")
+    raise FileNotFoundError("No file with matching tpl_start exists!")
 
 
 def get_tpl_starts(raw_dir: Path):
@@ -50,12 +50,12 @@ def get_tpl_starts(raw_dir: Path):
     return set([ReadoutFits(fits_file).tpl_start for fits_file in raw_dir.glob("*.fits")])
 
 
-def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
+def in_catalog(coords_calibrator: SkyCoord, radius: u.arcsec, catalog: Path):
     """Checks if calibrator is in catalog. Returns catalog if True, else None
 
     Parameters
     ----------
-    readout: ReadoutFits
+    coords_calibrator: SkyCoord
     radius: u.arcsec
     catalog_fits: Path
 
@@ -63,7 +63,6 @@ def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
     -------
     catalog: Path | None
     """
-    coords_calibrator = SkyCoord(readout.ra*u.deg, readout.dec*u.deg, frame="icrs")
     table = Table().read(catalog)
     coords_catalog = SkyCoord(table["RAJ2000"], table["DEJ2000"],
                               unit=(u.hourangle, u.deg), frame="icrs")
@@ -71,8 +70,8 @@ def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
     if separation[np.nanargmin(separation)] < radius.to(u.deg):
         cprint("Calibrator found in supplementary catalog!", "g")
         return catalog
-    cprint("Calibrator not found in any catalogs! No TF2 and 'mat_cal_oifits' will fail",
-           "r")
+    cprint("Calibrator not found in any catalogs!"
+           " No TF2 and 'mat_cal_oifits' will fail", "r")
     return None
 
 
@@ -92,10 +91,13 @@ def get_catalog_match(fits_file: Path, match_radius: u.arcsec = 20*u.arcsec):
     catalog: Path | None
     """
     readout = ReadoutFits(fits_file)
-    if JSDC_V2_CATALOG.query_object(readout.target_name, radius=match_radius):
+    coords_calibrator = SkyCoord(readout.ra*u.deg,
+                                 readout.dec*u.deg, frame="icrs")
+    if JSDC_V2_CATALOG.query_region(coords_calibrator, radius=match_radius):
         cprint("Calibrator found in JSDC v2 catalog!", "g")
         return JSDC_CATALOG
-    return in_catalog(readout, radius=match_radius, catalog=ADDITIONAL_CATALOG)
+    return in_catalog(coords_calibrator,
+                      radius=match_radius, catalog=ADDITIONAL_CATALOG)
 
 
 def set_script_arguments(corr_flux: bool, array: str,
@@ -169,21 +171,25 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     skip_N = not skip_L
 
     if not mode_and_band_dir.exists():
-        mode_and_band_dir.mkdir()
+        mode_and_band_dir.mkdir(parents=True)
 
     # TODO: Readout is called twice here, make this easier!!!
     fits_file = get_tpl_match(raw_dir, tpl_start)
     if ReadoutFits(fits_file).is_calibrator():
+        cprint("Calibrator detected!"
+               f" Moving corresponding catalog to {calib_dir.name}...", "y")
         catalog_path = get_catalog_match(fits_file)
-        shutil.copy(catalog_path, calib_dir / catalog_path.name)
+        if catalog_path is not None:
+            shutil.copy(catalog_path, calib_dir / catalog_path.name)
     else:
-        for catalog in calib_dir.glob("catalog"):
+        for catalog in calib_dir.glob("*catalog*"):
             os.remove(catalog)
+        cprint("Science target detected! Removing catalogs...", "y")
 
-    mp.mat_autoPipeline(dirRaw=raw_dir, dirResult=res_dir, dirCalib=calib_dir,
-                        tplstartsel=tpl_start, nbCore=6, resol='',
-                        paramL=param_L, paramN=param_N, overwrite=0, maxIter=1,
-                        skipL=skip_L, skipN=skip_N)
+    mp.mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(res_dir),
+                        dirCalib=str(calib_dir), tplstartsel=tpl_start,
+                        nbCore=6, resol='', paramL=param_L, paramN=param_N,
+                        overwrite=0, maxIter=1, skipL=skip_L, skipN=skip_N)
 
     try:
         rb_folders = res_dir.glob("Iter1/*.rb")
@@ -193,20 +199,21 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
             shutil.move(folder, mode_and_band_dir)
 
         if rb_folders:
-            cprint("Folders have sucessfully been moved to their directories", "g")
+            cprint(f"Moving folders to directory {mode_and_band_dir.name}", "g")
 
     # TODO: Make logger here
     except Exception:
-        cprint("Moving of files to {mode_and_band_dir} failed!", "y")
+        cprint(f"Moving of files to {mode_and_band_dir.name} failed!", "y")
 
     cprint(f"{'':-^50}", "lg")
     cprint(f"Executed the {mode} reduction for the {band} in"
-           f" {datetime.timedelta(seconds=(time.perf_counter()-start_time))} hh:mm:ss",
+           f" {datetime.timedelta(seconds=(time.perf_counter()-start_time))}"
+           "hh:mm:ss",
            "lg")
     cprint(f"{'':-^50}", "lg")
 
 
-def reduce(root_dir: Path, stem_dir: Path,
+def reduce(root_dir: Path, instrument_dir: Path,
            target_dir: Path, array: str,
            resolution: Optional[str] = "low"):
     """Runs the pipeline for the data reduction
@@ -223,20 +230,22 @@ def reduce(root_dir: Path, stem_dir: Path,
     single_reduction()
     """
     overall_start_time = time.perf_counter()
-    raw_dir = Path(root_dir, stem_dir, "raw", target_dir).resolve()
+    raw_dir = Path(root_dir, instrument_dir, "raw", target_dir).resolve()
 
     calib_dir = raw_dir / "calib_files"
+    # TODO: Catch edge case where this does not move the files if calib_dir
+    # exists already!
     if not calib_dir.exists():
-        calib_dir.mkdir()
+        calib_dir.mkdir(parents=True)
+        cprint("Moving calibration files into 'calib_files' folders!", "g")
         calibration_files = raw_dir.glob("M.*")
         for calibration_file in calibration_files:
             shutil.move(calibration_file, calib_dir / calibration_file.name)
-        cprint("Moved calibration files into 'calib_files' folders!", "g")
 
-    res_dir = Path(root_dir, stem_dir, "products", target_dir).resolve()
+    res_dir = Path(root_dir, instrument_dir, "products", target_dir).resolve()
 
     if not res_dir.exists():
-        res_dir.mkdir()
+        res_dir.mkdir(parents=True)
 
     # TODO: Add in the option to not remove old reduction and make new one take an
     # addional tag after its name
@@ -245,13 +254,14 @@ def reduce(root_dir: Path, stem_dir: Path,
         for folder in folders:
             if folder.exists():
                 shutil.rmtree(folder)
-        cprint("Cleaned up old reduction!", "y")
+        cprint("Cleaning up old reduction...", "y")
 
     # TODO: Make logger here
     except Exception:
         cprint("Cleaning up failed!", "y")
 
     for tpl_start in sorted(list(get_tpl_starts(raw_dir))):
+        cprint(f"{'':-^50}", "lg")
         cprint(f"Reducing data of tpl_start: {tpl_start}", "g")
         cprint(f"{'':-^50}", "lg")
         for mode in ["coherent", "incoherent"]:
@@ -267,6 +277,6 @@ def reduce(root_dir: Path, stem_dir: Path,
 
 
 if __name__ == "__main__":
-    data_dir = Path("~", "Code/matadrs/data").expanduser()
-    stem_dir, target_dir = "/hd163296/", "ATs/20190323"
-    reduce(data_dir, stem_dir, target_dir, "ATs")
+    root_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/")
+    target_dir, date_dir = "matisse/GTO/hd163296", "ATs/20190323"
+    reduce(root_dir, target_dir, date_dir, "ATs")

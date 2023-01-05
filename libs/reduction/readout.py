@@ -8,6 +8,13 @@ from astropy.table import Table
 DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
 
 
+# TODO: Make this into ReadoutFits function or so for plotting
+# With simbad import
+# objects = Simbad.query_region(coords_calibrator,
+                              # radius=20*u.arcsec)["MAIN_ID"].data.tolist()
+# calibrator_name = sorted(objects)[0]
+
+
 class ReadoutFits:
     """All functionality to work with '.oifits/.fits'-files"""
     def __init__(self, fits_file: Path) -> None:
