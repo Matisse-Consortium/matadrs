@@ -2,14 +2,14 @@ from typing import List
 from pathlib import Path
 from collections import namedtuple
 
-from .calib_BCD2 import calib_BCD
-from .avg_oifits import avg_oifits
+# TODO: Find way to make this into a complete module -> More pythonic!
+from plot import Plotter
+from readout import ReadoutFits
+from calib_BCD2 import calib_BCD
+from avg_oifits import avg_oifits
+from utils import cprint, oifits_patchwork
 
-from .plot import Plotter
-from .readout import ReadoutFits
-from .utils import cprint, oifits_patchwork
 
-# TODO: Make the files more modular
 def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
     """Sorts the input (.fits)-files by their BCD configuration
 
@@ -41,7 +41,17 @@ def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
 
 
 def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
-    """Merges the vis and cphases files in the respective directory"""
+    """Merges the vis and cphases files in the respective directory
+
+    Parameters
+    ----------
+    stem_dir: Path
+    average_dir: Path
+
+    Returns
+    -------
+    out_file: str
+    """
     target_name = stem_dir.split("/")[~1]
     epoch = average_dir.name.split(".")[2]
     lband = True if "HAWAII" in average_dir else False
@@ -60,6 +70,8 @@ def single_average(root_dir: Path, mode: str, lband) -> None:
         """Calls Jozsef's code and does a average over the files for one band to average
         the reduced and calibrated data
 
+        Parameters
+        ----------
         root_dir: Path
             The root folder for the PRODUCT
         band_dir: Path
@@ -93,8 +105,10 @@ def single_average(root_dir: Path, mode: str, lband) -> None:
             bcd = sort_fits_by_BCD(unchopped_fits)
             avg_oifits(unchopped_fits, outfile_path_vis)
 
+            # TODO: See how to bcd-calibrate the chopped files as well
             if chopped_fits:
                 avg_oifits(chopped_fits, outfile_path_chopped)
+                # calib_BCD()
 
             if lband:
                 calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in, bcd.out_out,
@@ -103,10 +117,9 @@ def single_average(root_dir: Path, mode: str, lband) -> None:
                 calib_BCD(bcd.in_in, "", "", bcd.out_out,
                          outfile_path_cphases, plot=False)
 
-            # TODO: Make the plotter take the save name automatically,
-            # if none given
-            print("Creating plots...")
-            print("------------------------------------------------------------")
+            # TODO: Make the plotter take the save name automatically, if is none given
+            cprint("Creating plots...", "g")
+            cprint(f"{'':-^50}", "lg")
             plot_vis = Plotter([outfile_path_vis], save_path=outfile_dir,
                                lband=lband, plot_name="TARGET_AVG_VIS_INT.pdf")
             plot_vis.add_vis().plot(save=True)
@@ -115,10 +128,9 @@ def single_average(root_dir: Path, mode: str, lband) -> None:
                                    save_path=outfile_dir, lband=lband,
                                    plot_name= "TARGET_AVG_T3PHI_INT.pdf")
             plot_cphases.add_cphases().plot(save=True)
-            print("Plots created!")
-            print("------------------------------------------------------------")
-            print("Done!")
-            print("-----------------------------------------------------------")
+            cprint(f"{'':-^50}", "lg")
+            cprint("Done!", "g")
+            cprint(f"{'':-^50}", "lg")
 
 
 def average(data_path: Path, stem_dir: Path, target_dir: Path):
@@ -131,14 +143,11 @@ def average(data_path: Path, stem_dir: Path, target_dir: Path):
         """
         root_dir = Path(data_path, stem_dir, "products", target_dir)
         for mode in ["coherent", "incoherent"]:
-            cprint(f"Averaging and BCD-calibration of {stem_dir} with mode={mode}",
-                   "lp")
-            cprint("-----------------------------------------------------------",
-                   "lg")
+            cprint(f"Averaging and BCD-calibration of {stem_dir} with mode={mode}", "lp")
+            cprint(f"{'':-^50}", "lg")
             single_average(root_dir, mode)
         cprint("Averaging done!", "lp")
-        cprint("-----------------------------------------------------------",
-               "lg")
+        cprint(f"{'':-^50}", "lg")
 
 
 if __name__ == "__main__":

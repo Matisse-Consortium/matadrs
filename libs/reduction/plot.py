@@ -6,23 +6,13 @@ from typing import List, Optional
 import numpy as np
 import matplotlib.pyplot as plt
 
-from matadrs.libs.reduction.readout import ReadoutFits
+# TODO: Find way to make this into a complete module -> More pythonic!
+from readout import ReadoutFits
 
 # TODO: Make either model or fourier transform carry more info like the name of
 # the plot or similar -> Work more with classes
 
-# TODO: Implement plot save func
-
-# TODO: Make standalone method that makes plot plot immediately
-# TODO: Make the same for custom configured plots
-
-# TODO: Make single plot and multi plot decorator that can the quickly execute the plots
-# as well as store data in the class about the plot info
-
-# TODO: Make automatic plotting functionality with axarr -> take lengths for components
-
-# The data path to the general data
-DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
 
 class Plotter:

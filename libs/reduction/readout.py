@@ -5,7 +5,7 @@ from pathlib import Path
 from astropy.table import Table
 
 
-DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
+DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
 
 # TODO: Make this into ReadoutFits function or so for plotting
@@ -13,8 +13,7 @@ DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
 # objects = Simbad.query_region(coords_calibrator,
                               # radius=20*u.arcsec)["MAIN_ID"].data.tolist()
 # calibrator_name = sorted(objects)[0]
-
-
+# TODO: Think of way to make this more modular and useable by another function
 class ReadoutFits:
     """All functionality to work with '.oifits/.fits'-files"""
     def __init__(self, fits_file: Path) -> None:
@@ -35,7 +34,7 @@ class ReadoutFits:
 
     @property
     def oi_wl(self):
-        """"""
+        """Gets the wavelength table"""
         if self._oi_wl is None:
             self._oi_wl = self.get_table_for_fits("oi_wavelength")
             self._oi_wl.remove_column("EFF_BAND")
@@ -43,12 +42,12 @@ class ReadoutFits:
 
     @property
     def oi_flux(self):
-        """Fetches the flux"""
+        """Fetches the flux table"""
         if self._oi_flux is None:
             try:
                 self._oi_flux = self.get_table_for_fits("oi_flux")
                 self._oi_flux.add_columns([self.get_table_for_fits("oi_array")["TEL_NAME"]],
-                                         names="TEL_NAME")
+                                          names="TEL_NAME")
                 self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "TEL_NAME"])
             except Exception:
                 pass
@@ -56,7 +55,7 @@ class ReadoutFits:
 
     @property
     def oi_vis(self):
-        """Fetches the visibility"""
+        """Fetches the visibility table"""
         if self._oi_vis is None:
             self._oi_vis = self.get_table_for_fits("oi_vis")
             self._oi_vis.add_columns([self.get_delay_lines(self._oi_vis)],
@@ -67,7 +66,7 @@ class ReadoutFits:
 
     @property
     def oi_vis2(self):
-        """Fetches the visibility"""
+        """Fetches the squared visibility table"""
         if self._oi_vis2 is None:
             self._oi_vis2 = self.get_table_for_fits("oi_vis2")
             self._oi_vis2.add_columns([self.get_delay_lines(self._oi_vis2)],
@@ -78,7 +77,7 @@ class ReadoutFits:
 
     @property
     def oi_t3(self):
-        """Fetches the closure phase"""
+        """Fetches the closure phase table"""
         if self._oi_t3 is None:
             self._oi_t3 = self.get_table_for_fits("oi_t3")
             # NOTE: After Jozsef this does not make good closure phases
@@ -120,15 +119,16 @@ class ReadoutFits:
         return False
 
     def get_table_for_fits(self, header: str) -> List[Table]:
-        """
+        """Fetches the data from a (.fits)-file as a table
 
         Parameters
         ----------
         header: str
+            The header which data is to be stored in a table
 
         Returns
         -------
-        List[Table]
+        Table
         """
         return Table().read(self.fits_file, hdu=header)
 

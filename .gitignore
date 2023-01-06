@@ -13,6 +13,7 @@ libs/reduction/tools-master
 libs/reduction/tools-master.zip
 
 # Specific files to ignore
+data/mat_target_list.xlsx
 data/catalog.fits
 data/cflux_calib.sof
 libs/reduction/calib_BCD2.py
