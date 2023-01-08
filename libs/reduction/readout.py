@@ -40,10 +40,14 @@ class ReadoutFits:
         """Fetches the target's name via Simbad by its coordinates"""
         # TODO: Make this DISCLAIMER better -> Internet requirement
         if self._name is None:
-            objects = Simbad.query_region(self.coords,
-                                          radius=20*u.arcsec)["MAIN_ID"].data.tolist()
-            # TODO: Maybe improve the way the common string is found? -> Multiple string names
-            self._name = sorted(objects)[0]
+            header_name = self.primary_header["OBJECT"]
+            if header_name in ["SKY", "STD", "STD,RMNREC"]:
+                objects = Simbad.query_region(self.coords,
+                                              radius=20*u.arcsec)["MAIN_ID"].data.tolist()
+                # TODO: Maybe improve the way the common string is found? -> Multiple string names
+                self._name = sorted(objects)[0]
+            else:
+                self._name = header_name.lower()
         return self._name
 
     @property

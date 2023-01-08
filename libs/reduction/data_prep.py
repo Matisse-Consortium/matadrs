@@ -37,6 +37,8 @@ class DataPrep:
         self._oi_vis, self._oi_vis2 = None, None
 
         self.readouts = [ReadoutFits(fits_file) for fits_file in self.fits_files]
+
+        # TODO: Implement this in plotter
         # self.uv_coords = self._merge_simple_data("uvcoords")
         # self.uv_coords_cphase = self._merge_simple_data("uvcoords_cphase")
         # self.baselines_cphase = self._merge_simple_data("baselines_cphase")
