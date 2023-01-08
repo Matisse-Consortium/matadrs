@@ -90,14 +90,11 @@ def get_catalog_match(fits_file: Path, match_radius: u.arcsec = 20*u.arcsec):
     -------
     catalog: Path | None
     """
-    readout = ReadoutFits(fits_file)
-    coords_calibrator = SkyCoord(readout.ra*u.deg,
-                                 readout.dec*u.deg, frame="icrs")
+    coords_calibrator = ReadoutFits(fits_file).coords
     if JSDC_V2_CATALOG.query_region(coords_calibrator, radius=match_radius):
         cprint("Calibrator found in JSDC v2 catalog!", "g")
         return JSDC_CATALOG
-    return in_catalog(coords_calibrator,
-                      radius=match_radius, catalog=ADDITIONAL_CATALOG)
+    return in_catalog(coords_calibrator, radius=match_radius, catalog=ADDITIONAL_CATALOG)
 
 
 def set_script_arguments(corr_flux: bool, array: str,
