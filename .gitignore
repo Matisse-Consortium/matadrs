@@ -17,6 +17,7 @@ libs/reduction/tools-master.zip
 data/mat_target_list.xlsx
 data/catalog.fits
 data/cflux_calib.sof
+libs/reduction/fluxcal.py
 libs/reduction/calib_BCD2.py
 libs/reduction/avg_oifits.py
 libs/grep/get_gravity_data.py

@@ -51,12 +51,12 @@ def get_tpl_starts(raw_dir: Path):
     return set([ReadoutFits(fits_file).tpl_start for fits_file in raw_dir.glob("*.fits")])
 
 
-def in_catalog(coords_calibrator: SkyCoord, radius: u.arcsec, catalog: Path):
+def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
     """Checks if calibrator is in catalog. Returns catalog if True, else None
 
     Parameters
     ----------
-    coords_calibrator: SkyCoord
+    readout: ReadoutFits
     radius: u.arcsec
     catalog_fits: Path
 
@@ -67,12 +67,12 @@ def in_catalog(coords_calibrator: SkyCoord, radius: u.arcsec, catalog: Path):
     table = Table().read(catalog)
     coords_catalog = SkyCoord(table["RAJ2000"], table["DEJ2000"],
                               unit=(u.hourangle, u.deg), frame="icrs")
-    separation = coords_calibrator.separation(coords_catalog)
+    separation = readout.coords.separation(coords_catalog)
     if separation[np.nanargmin(separation)] < radius.to(u.deg):
-        cprint("Calibrator found in supplementary catalog!", "g")
+        cprint(f"Calibrator '{readout.name}' found in supplementary catalog!", "g")
         return catalog
-    cprint("Calibrator not found in any catalogs!"
-           " No TF2 and 'mat_cal_oifits' will fail", "r")
+    cprint(f"Calibrator '{readout.name}' not found in any catalogs!"
+           " No TF2 and the 'mat_cal_oifits'-recipe will fail", "r")
     return None
 
 
@@ -91,11 +91,11 @@ def get_catalog_match(fits_file: Path, match_radius: u.arcsec = 20*u.arcsec):
     -------
     catalog: Path | None
     """
-    coords_calibrator = ReadoutFits(fits_file).coords
-    if JSDC_V2_CATALOG.query_region(coords_calibrator, radius=match_radius):
-        cprint("Calibrator found in JSDC v2 catalog!", "g")
+    readout = ReadoutFits(fits_file)
+    if JSDC_V2_CATALOG.query_region(readout.coords, radius=match_radius):
+        cprint(f"Calibrator '{readout.name}' found in JSDC v2 catalog!", "g")
         return JSDC_CATALOG
-    return in_catalog(coords_calibrator, radius=match_radius, catalog=ADDITIONAL_CATALOG)
+    return in_catalog(readout.coords, radius=match_radius, catalog=ADDITIONAL_CATALOG)
 
 
 def set_script_arguments(corr_flux: bool, array: str,
@@ -197,7 +197,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
             shutil.move(folder, mode_and_band_dir)
 
         if rb_folders:
-            cprint(f"Moving folders to directory {mode_and_band_dir.name}", "g")
+            cprint(f"Moving folders to directory {mode_and_band_dir.name}...", "g")
 
     # TODO: Make logger here
     except Exception:
@@ -235,7 +235,7 @@ def reduce(root_dir: Path, instrument_dir: Path,
     # exists already!
     if not calib_dir.exists():
         calib_dir.mkdir(parents=True)
-        cprint("Moving calibration files into 'calib_files' folders!", "g")
+        cprint("Moving calibration files into 'calib_files' folders...", "g")
         calibration_files = raw_dir.glob("M.*")
         for calibration_file in calibration_files:
             shutil.move(calibration_file, calib_dir / calibration_file.name)
@@ -263,7 +263,7 @@ def reduce(root_dir: Path, instrument_dir: Path,
         cprint(f"Reducing data of tpl_start: {tpl_start}", "g")
         cprint(f"{'':-^50}", "lg")
         for mode in ["coherent", "incoherent"]:
-            cprint(f"Processing {mode} reduction", "lp")
+            cprint(f"Processing {mode} reduction...", "lp")
             cprint(f"{'':-^50}", "lg")
             for band in ["lband", "nband"]:
                 reduce_mode_and_band(raw_dir, calib_dir, res_dir, array,
