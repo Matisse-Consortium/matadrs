@@ -72,15 +72,16 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
         cprint(f"{'':-^50}", "lg")
         cprint(f"Processing {target.name} with {calibrator.name}...", "g")
-        output_file = output_dir / f"TARGET_CAL_INT_000{index}.fits"
+        output_file = str(output_dir / f"TARGET_CAL_INT_000{index}.fits")
+        target, calibrator = str(target), str(calibrator)
 
         # TODO: Make this not as redundant, and the airmass correction implement as well?
-        if "lband" in str(target):
-            fluxcal(str(target), str(calibrator(), str(output_file),
+        if "lband" in target:
+            fluxcal(target, calibrator, output_file,
                     list(map(str, LBAND_DATABASES)), mode=mode_name,
                     output_fig_dir=str(output_dir), do_airmass_correction=True)
         else:
-            fluxcal(str(target), str(calibrator), str(output_file),
+            fluxcal(target, calibrator, output_file,
                     list(map(str, NBAND_DATABASES)), mode=mode_name,
                     output_fig_dir=str(output_dir), do_airmass_correction=True)
 
@@ -92,6 +93,7 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
         if mode == "incoherent":
             plot_fits.add_flux()
         plot_fits.plot(save=True)
+
     cprint(f"{'':-^50}", "lg")
     cprint("Done!", "g")
     cprint(f"{'':-^50}", "lg")
