@@ -2,10 +2,10 @@ from pathlib import Path
 from typing import Optional
 from collections import deque, namedtuple
 
-from mat_tools.libFluxCal import fluxcal
+# TODO: Find way to make this into a complete module -> More pythonic!
+from fluxcal import fluxcal
 from calib_BCD2 import calib_BCD
 
-# TODO: Find way to make this into a complete module -> More pythonic!
 from plot import Plotter
 from readout import ReadoutFits
 from utils import get_path_descriptor, check_if_target, cprint
@@ -76,25 +76,22 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
 
         # TODO: Make this not as redundant, and the airmass correction implement as well?
         if "lband" in str(target):
-            fluxcal(target, calibrator, output_file,
+            fluxcal(str(target), str(calibrator(), str(output_file),
                     list(map(str, LBAND_DATABASES)), mode=mode_name,
-                    output_fig_dir=output_dir, do_airmass_correction=True)
+                    output_fig_dir=str(output_dir), do_airmass_correction=True)
         else:
-            fluxcal(target, calibrator, output_file,
+            fluxcal(str(target), str(calibrator), str(output_file),
                     list(map(str, NBAND_DATABASES)), mode=mode_name,
-                    output_fig_dir=output_dir, do_airmass_correction=True)
+                    output_fig_dir=str(output_dir), do_airmass_correction=True)
 
-    # TODO: Make plotting possible again
-    # cprint(f"{'':-^50}", "lg")
-    # cprint("Creating plots...", "g")
-    # fits_files = output_dir.glob("*.fits")
-    # for fits_file in fits_files:
-        # lband = True if "HAWAII" in target else False
-        # plot_fits = Plotter([fits_file], lband=lband, save_path=output_dir)
-        # plot_fits.add_cphases().add_corr_flux()
-        # if (mode == "incoherent") and (plot_fits.flux is not None):
-            # plot_fits.add_flux()
-        # plot_fits.plot(save=True)
+    cprint(f"{'':-^50}", "lg")
+    cprint("Creating plots...", "g")
+    for fits_file in output_dir.glob("*.fits"):
+        plot_fits = Plotter([fits_file], save_path=output_dir)
+        plot_fits.add_cphase().add_vis()
+        if mode == "incoherent":
+            plot_fits.add_flux()
+        plot_fits.plot(save=True)
     cprint(f"{'':-^50}", "lg")
     cprint("Done!", "g")
     cprint(f"{'':-^50}", "lg")
