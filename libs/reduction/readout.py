@@ -114,17 +114,21 @@ class ReadoutFits:
         """Fetches the closure phase table"""
         if self._oi_t3 is None:
             self._oi_t3 = self.get_table_for_fits("oi_t3")
-            # NOTE: After Jozsef this does not make good closure phases
-            # u3, v3 = -(u1+u2), -(v1+v2)
             u1, u2 = self._oi_t3["U1COORD"], self._oi_t3["U2COORD"]
             v1, v2 = self._oi_t3["V1COORD"], self._oi_t3["V2COORD"]
             uv_coords = []
+            # NOTE: After Jozsef: u3, v3 = -(u1+u2), -(v1+v2) -> Dropping the minus
+            # better closure phases in modelling -> Check that!
             for u_coord, v_coord in zip(zip(u1, u2, u1+u2), zip(v1, v2, v1+v2)):
                 uv_coords.append(np.array(list(zip(u_coord, v_coord))))
-            self._oi_t3.add_columns([np.array(uv_coords),
-                                     self.get_delay_lines(self._oi_t3)],
-                                    names=["UVCOORD", "TRIANGLE"])
-            self._oi_t3.keep_columns(["T3PHI", "T3PHIERR", "UVCOORD", "TRIANGLE"])
+            uv_coords = np.array(uv_coords)
+            baselines = [np.sqrt(uv_coord[:, 0]**2+uv_coord[:, 1]**2)\
+                    for uv_coord in uv_coords]
+            self._oi_t3.add_columns([uv_coords,
+                                     self.get_delay_lines(self._oi_t3), baselines],
+                                    names=["UVCOORD", "TRIANGLE", "BASELINE"])
+            self._oi_t3.keep_columns(["T3PHI", "T3PHIERR",
+                                      "UVCOORD", "TRIANGLE", "BASELINE"])
         return self._oi_t3
 
     @property
