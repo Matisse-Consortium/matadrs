@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, List
+from typing import Callable, Optional, List
 
 import numpy as np
 import astropy.units as u
@@ -29,6 +29,7 @@ class DataPrep:
                  flux_files: Optional[List[Path]] = None) -> None:
         """Initialises the class"""
         self.fits_files = fits_files
+
         if flux_files is None:
             self.flux_files = [None]*len(fits_files)
         else:
@@ -65,11 +66,7 @@ class DataPrep:
     def oi_wl(self):
         """Gets the unified wavelength table"""
         if self._oi_wl is None:
-            try:
-                self._oi_wl = vstack([readout.oi_wl for readout in self.readouts])
-            except TableMergeError:
-                # TODO: implement padding here
-                ...
+            self._oi_wl = self._set_table_attribute("oi_wl")
         return self._oi_wl
 
     @property
@@ -78,49 +75,41 @@ class DataPrep:
         # TODO: Check how the flux can be unified and later how to handle empty/None
         # rows!!!
         if self._oi_flux is None:
-            try:
-                self._oi_wl = vstack([readout.oi_wl for readout in self.readouts])
-            except TableMergeError:
-                # TODO: implement padding here
-                ...
+            self._oi_flux = self._set_table_attribute("oi_flux")
         return self._oi_flux
 
     @property
     def oi_vis(self):
         """Fetches the visibility table"""
         if self._oi_vis is None:
-            try:
-                self._oi_vis = vstack([readout.oi_vis for readout in self.readouts])
-            except TableMergeError:
-                # TODO: implement padding here
-                ...
+            self._oi_vis = self._set_table_attribute("oi_vis")
         return self._oi_vis
 
     @property
     def oi_vis2(self):
         """Fetches the squared visibility table"""
         if self._oi_vis2 is None:
-            try:
-                self._oi_vis2 = vstack([readout.oi_vis2 for readout in self.readouts])
-            except TableMergeError:
-                # TODO: implement padding here
-                ...
+            self._oi_vis2 = self._set_table_attribute("oi_vis2")
         return self._oi_vis2
 
     @property
     def oi_t3(self):
         """Fetches the closure phase table"""
         if self._oi_t3 is None:
+            self._oi_t3 = self._set_table_attribute("oi_t3")
+        return self._oi_t3
+
+    def _set_table_attribute(self, attribute_name: str):
+        """Sets the Table properties"""
+        if len(self.readouts) > 1:
             try:
-                self._oi_t3 = vstack([readout.oi_t3 for readout in self.readouts])
+                return vstack([getattr(readout, attribute_name)\
+                        for readout in self.readouts])
             except TableMergeError:
                 # TODO: implement padding here
                 ...
-        return self._oi_t3
-
-    def get_data_for_wavelength(self, table: Table, wavelengths: u.um) -> Table:
-        """Fetches the corresponding data for the sought wavelength"""
-        ...
+        else:
+            return getattr(self.readouts[0], attribute_name)
 
     # TODO: Check how to pad the arrays so they all have length 121
     def pad_column(self, table: Table, columns: List[str]):
@@ -129,10 +118,14 @@ class DataPrep:
             for row in table[colname]:
                 ...
 
+    def get_data_for_wavelength(self, table: Table, wavelengths: u.um) -> Table:
+        """Fetches the corresponding data for the sought wavelength"""
+        ...
+
 
 if __name__ == "__main__":
-    fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits",
-                  "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits"]
+    fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits"]
+                  # "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits"]
                   # "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
     fits_files = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
     data_prep = DataPrep(fits_files)

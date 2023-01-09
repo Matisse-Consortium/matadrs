@@ -77,7 +77,7 @@ class ReadoutFits:
                 self._oi_flux = self.get_table_for_fits("oi_flux")
             except KeyError:
                 # TODO: Implement here flux-file support
-                if flux_file is not None:
+                if self.flux_file is not None:
                     ...
                 else:
                     self._oi_flux = Table()
