@@ -13,8 +13,8 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
 
 # TODO: Improve docs
-
-
+# TODO: Make functions that provide the baselines and uv-coords or so or put it in the
+# tables
 class ReadoutFits:
     """All functionality to work with '.oifits/.fits'-files in a table based manner"""
 
@@ -88,9 +88,11 @@ class ReadoutFits:
         if self._oi_vis is None:
             self._oi_vis = self.get_table_for_fits("oi_vis")
             self._oi_vis.add_columns([self.get_delay_lines(self._oi_vis),
-                                      self.merge_uv_coords(self._oi_vis)],
-                                     names=["DELAY_LINE", "UVCOORD"])
-            self._oi_vis.keep_columns(["VISAMP", "VISAMPERR", "UVCOORD", "DELAY_LINE"])
+                                      self.merge_uv_coords(self._oi_vis),
+                                      self.get_baselines(self._oi_vis)],
+                                     names=["DELAY_LINE", "UVCOORD", "BASELINE"])
+            self._oi_vis.keep_columns(["VISAMP", "VISAMPERR",
+                                        "UVCOORD", "DELAY_LINE", "BASELINE"])
         return self._oi_vis
 
     @property
@@ -99,9 +101,11 @@ class ReadoutFits:
         if self._oi_vis2 is None:
             self._oi_vis2 = self.get_table_for_fits("oi_vis2")
             self._oi_vis2.add_columns([self.get_delay_lines(self._oi_vis2),
-                                       self.merge_uv_coords(self._oi_vis2)],
-                                      names=["DELAY_LINE", "UVCOORD"])
-            self._oi_vis2.keep_columns(["VIS2DATA", "VIS2ERR", "UVCOORD", "DELAY_LINE"])
+                                       self.merge_uv_coords(self._oi_vis2),
+                                       self.get_baselines(self._oi_vis2)],
+                                      names=["DELAY_LINE", "UVCOORD", "BASELINE"])
+            self._oi_vis2.keep_columns(["VIS2DATA", "VIS2ERR",
+                                        "UVCOORD", "DELAY_LINE", "BASELINE"])
         return self._oi_vis2
 
     @property
@@ -168,6 +172,11 @@ class ReadoutFits:
         """Merges the u- and v-coordinates into a set of (u, v)-coordinates"""
         u_coords, v_coords = table["UCOORD"], table["VCOORD"]
         return np.array(list(zip(u_coords, v_coords)))
+
+    def get_baselines(self, table: Table):
+        """Calculates the baselines from the (u, v)-coordinates"""
+        u_coords, v_coords = table["UCOORD"], table["VCOORD"]
+        return np.sqrt(u_coords**2+v_coords**2)
 
     def get_delay_lines(self, table: Table):
         """Fetches the delay lines' telescope configuration from the visibility table"""

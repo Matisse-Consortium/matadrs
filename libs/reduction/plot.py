@@ -4,13 +4,17 @@ from warnings import warn
 from typing import List, Optional
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from pandas import DataFrame
 
 # TODO: Find way to make this into a complete module -> More pythonic!
-from readout import ReadoutFits
+from data_prep import DataPrep
 
 # TODO: Make either model or fourier transform carry more info like the name of
 # the plot or similar -> Work more with classes
+# TODO: Facilitate the plotting by getting the data from the DataPrep class and putting it
+# into a pandas frame to easily plot it
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
@@ -22,34 +26,36 @@ class Plotter:
     ----------
     """
     def __init__(self, fits_files: List[Path],
-                 flux_file: Optional[Path] = None,
-                 lband: Optional[bool]= False,
+                 flux_files: Optional[List[Path]] = None,
                  limit_spacing: Optional[float] = 0.05,
                  plot_name: Optional[str] = None,
                  axis_cutoffs: Optional[List] = [0, 0],
                  save_path: Optional[Path] = None) -> None:
         """Initialises the class instance"""
-        self.lband = lband
+        # TODO: Implement L- or N-band check. Fix this
+        self.lband = False
+        # TODO: Make it that if multiple datasets are input that multiple plots are made
+        # for the different bands -> See how to implement this
+        if len(fits_files) > 1:
+            warn("There is more than one (.fits)-file detected."\
+                 " WARNING: Only data of SAME BAND can be unified into one plot!")
+        self.data_prep = DataPrep(fits_files)
 
+        # TODO: Improve this plot name giving. Only one fits file is respected in this
         if plot_name is None:
             self.plot_name = "combined_files.pdf" if len(fits_files) > 1\
-                else f"{os.path.basename(fits_files[0]).split('.')[0]}.pdf"
+                else f"{fits_files[0].name.split('.')[0]}.pdf"
         else:
             self.plot_name = plot_name
 
         self.save_path = save_path
         self.components = []
 
-        if len(fits_files) > 1:
-            warn("There is more than one (.fits)-file detected."\
-                 " WARNING: Only data of SAME BAND can be unified into one plot!")
-
         self.cutoff_low, self.cutoff_high = axis_cutoffs
         self.limit_low = self.cutoff_low if self.cutoff_low > 13 else 13
         self.limit_high = self.cutoff_high if self.cutoff_high < -17 else -17
         self.limit_spacing = limit_spacing
 
-        self.readout = ReadoutFits(fits_files)
 
     @property
     def number_of_plots(self):
@@ -81,25 +87,24 @@ class Plotter:
         if all(linestyle in linestyles in already_chosen_linestyles):
             raise RuntimeError("No linestyle to pick as all have been picked already!")
 
-    def plot_data(self, ax, data: List, data_name: str,
-                  tel_data: Optional[List] = [],
-                  lband: Optional[bool] = False,) -> None:
+    def get_dataframe(self, table: Table, column: str) -> DataFrame:
+        """Prepares a DataFrame for a certain column of a table"""
+        data = [array[0] for array in table[column].as_array()]
+        df = pd.DataFrame({index: array for index, array in enumerate(data, start=1)})
+        return df
+
+    # TODO: Make this better with the Table support
+    def make_component(self, data_name: str) -> None:
         """A template to plot multiple or a singular datasets
 
         Parameters
         ----------
-        ax
-            The matplotlib axis to be used for the plot
-        data: List
-            The plots dataset
         data_name: str
             The name of the data to be plotted. Determines the legend- and plot labels
-        tel_data: List, optional
-            The telescops' names
-        lband: bool, optional
-            This specifies the axis used for cutoff, if set to "True" then region between
-            L&M band, which has high peaks, is ignored
         """
+        # TODO: Implement table operations for rounding on baselines
+        # TODO: Implement dataframe structures and telescope names from the tables
+        # Implement way to choose linestyles and such
         already_chosen_linestyles = []
         for index, dataset in enumerate(data):
             if (data_name == "vis") or (data_name == "vis2")\
@@ -107,7 +112,7 @@ class Plotter:
                 # TODO: Make this with new readout
                 baseline = np.around(np.sqrt(self.all_ucoords[index]**2+\
                                              self.all_vcoords[index]**2), 2)
-                pas = np.around((np.degrees(np.arctan2(self.readout.oi_vis[index],
+                pas = np.around((np.degrees(np.arctan2(self.data_prep.oi_vis[index],
                                                        self.all_ucoords[index]))-90)*-1, 2)
                 label = fr"{tel_data[index]} $B_p$={baseline} m $\phi={pas}^\circ$"
             else:
@@ -146,7 +151,7 @@ class Plotter:
 
         # TODO: Fix this functionality -> Set the limits properly
         # TODO: Set no limits for the closure phases
-        if lband:
+        if self.lband:
             wavelength = self.wl[self.limit_low:self.limit_high]*1e6
             lower = np.where(wavelength < 4.2)[0].tolist()
             upper = np.where(wavelength > 4.6)[0].tolist()
@@ -165,30 +170,9 @@ class Plotter:
         ax.set_ylim(plot_lims)
         ax.legend(loc=1, prop={'size': 6}, ncol=ncol)
 
-    def _make_component(self, data: List, data_name: str,
-                        tel_data: Optional[List] = [],
-                        lband: Optional[bool] = False):
-        """Makes a plot component
-
-        Parameters
-        ----------
-        data: List
-            The plots dataset
-        data_name: str
-            The name of the data to be plotted. Determines the legend- and plot labels
-        tel_data: List, optional
-            The telescops' names
-        lband: bool, optional
-            This specifies the axis used for cutoff, if set to "True" then region between
-            L&M band, which has high peaks, is ignored
-
-        Returns
-        -------
-        Dict
-            The component's information
-        """
-        return {"data": data, "data_name": data_name,
-                "tel_data": tel_data, "lband": lband}
+        if data_name == "flux":
+            data = self.get_dataframe(self.data_prep.oi_flux, "FLUXDATA")
+            tel_data = self.data_prep.oi_flux["TEL_NAME"]
 
     def plot(self, save: Optional[bool] = False):
         """Makes the plot from the components
@@ -216,15 +200,17 @@ class Plotter:
         fig.tight_layout()
 
         if save:
-            plt.savefig(os.path.join(self.save_path, self.plot_name), format="pdf")
+            plt.savefig(self.save_path / self.plot_name, format="pdf")
         else:
             plt.show()
         plt.close()
 
     def add_flux(self) -> None:
         """Plots the flux """
-        self.components.append(self._make_component(self.all_flux, "flux",
-                                                    self.all_tel_flux))
+        self.components.append(self._make_component(self.get_dataframe(self.data_prep.oi_flux,
+                                                                       "FLUXDATA"),
+                                                    "flux",
+                                                    self.data_prep.oi_flux["TEL_NAME"]))
         return self
 
     def add_vis(self) -> None:
@@ -469,9 +455,11 @@ def make_uv_plot(dic,ax,verbose=False,annotate=True,B_lim=(np.nan,np.nan),figsiz
 
 
 if __name__ == ('__main__'):
-    # TODO: Fix the plotter for the pandas dataframe structure
-    fits_files = DATA_DIR / "jozsef_reductions" / "hd142666_2019-05-14T05_28_03_N_TARGET_FINAL_INT.fits"
-    plot_fits = Plotter([fits_files])
+    fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits"]
+                  # "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits",
+                  # "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
+    fits_files = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
+    plot_fits = Plotter(fits_files)
     plot_fits.add_cphases().add_corr_flux().add_flux().plot()
 
 

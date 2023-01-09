@@ -20,6 +20,8 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 # TODO: For model fitting. Save the infos as astropy.Table
 # TODO: Implement all the properties from ReadoutFits in this class as well
 # TODO: Maybe rename the class to better fit its purpose
+# TODO: Make a submodule that contains the plot.py, readout.py and data_prep.py
+# TODO: Implement the flux-files somehow
 class DataPrep:
     """"""
 
