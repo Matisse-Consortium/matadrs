@@ -47,16 +47,16 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     get_path_descriptor()
     """
     cprint(f"Calibrating {tar_dir.name} with {cal_dir.name}...", "p")
-    targets = tar_dir.glob("TARGET_RAW_INT*")
+    targets = sorted(tar_dir.glob("TARGET_RAW_INT*"),
+                     key=lambda x: x.name[-8:])
 
     if not targets:
         cprint("No 'TARGET_RAW_INT*'-files found. SKIPPED!", "y")
         cprint(f"{'':-^50}", "lg")
         return
 
-    targets.sort(key=lambda x: x[-8:])
-    calibrators = cal_dir.glob("CALIB_RAW_INT*")
-    calibrators.sort(key=lambda x: x[-8:])
+    calibrators = sorted(cal_dir.glob("CALIB_RAW_INT*"),
+                         key=lambda x: x.name[-8:])
 
     if len(targets) != len(calibrators):
         cprint("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-files. SKIPPING!", "y")
@@ -65,9 +65,9 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
 
     output_dir = get_path_descriptor(root_dir, "TAR-CAL",
                                      targets[0], calibrators[0])
-    mode = "incoherent" if "incoherent" in output_dir else "coherent"
+    mode = "incoherent" if "incoherent" in str(output_dir) else "coherent"
     if not output_dir.exists():
-        output_dir.mkdir()
+        output_dir.mkdir(parents=True)
 
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
         cprint(f"{'':-^50}", "lg")
@@ -75,12 +75,14 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
         output_file = output_dir / f"TARGET_CAL_INT_000{index}.fits"
 
         # TODO: Make this not as redundant, and the airmass correction implement as well?
-        if "lband" in target:
-            fluxcal(target, calibrator, output_file, LBAND_DATABASES,
-                    mode=mode_name, output_fig_dir=output_dir, do_airmass_correction=True)
+        if "lband" in str(target):
+            fluxcal(target, calibrator, output_file,
+                    list(map(str, LBAND_DATABASES)), mode=mode_name,
+                    output_fig_dir=output_dir, do_airmass_correction=True)
         else:
-            fluxcal(target, calibrator, output_file, NBAND_DATABASES,
-                    mode=mode_name, output_fig_dir=output_dir, do_airmass_correction=True)
+            fluxcal(target, calibrator, output_file,
+                    list(map(str, NBAND_DATABASES)), mode=mode_name,
+                    output_fig_dir=output_dir, do_airmass_correction=True)
 
     # TODO: Make plotting possible again
     # cprint(f"{'':-^50}", "lg")
@@ -111,8 +113,7 @@ def calibrate_folders(root_dir: Path, band_dir: Path,
         The mode of calibration. Either "corrflux", "flux" or "both" depending
         if it is "coherent" or "incoherent". Default mode is "corrflux"
     """
-    sub_dirs = (root_dir / band_dir).glob("*.rb")
-    sub_dirs.sort(key=lambda x: x.split(".")[~2])
+    sub_dirs = sorted((root_dir / band_dir).glob("*.rb"))
     sub_dirs_rotated = deque(sub_dirs.copy())
     sub_dirs_rotated.rotate(1)
 
@@ -143,8 +144,7 @@ def calibrate(data_dir: Path, stem_dir: Path, target_dir: Path):
 
     for mode, mode_name in modes.items():
         for band in bands:
-            band_dir = mode / band
-            calibrate_folders(root_dir, band_dir, mode_name=mode_name)
+            calibrate_folders(root_dir, Path(mode, band), mode_name=mode_name)
     cprint("Calibration Done!", "lp")
 
 

@@ -1,3 +1,4 @@
+import os
 import time
 import datetime
 import shutil
@@ -275,5 +276,5 @@ def reduce(root_dir: Path, instrument_dir: Path,
 
 if __name__ == "__main__":
     root_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/")
-    target_dir, date_dir = "matisse/GTO/hd163296", "ATs/20190323"
-    reduce(root_dir, target_dir, date_dir, "ATs")
+    target_dir, date_dir = "matisse/GTO/hd142666", "UTs/20220420"
+    reduce(root_dir, target_dir, date_dir, "UTs")

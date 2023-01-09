@@ -3,8 +3,9 @@ import os
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
-from astropy.io import fits
 from typing import Optional, List
+
+from astropy.io import fits
 
 
 def cprint(message: str, c: Optional[str] = None) -> None:
@@ -58,13 +59,13 @@ def get_path_descriptor(root_dir: Path, descriptor: Path,
     output_dir: Path
         The path for the output directory
     """
-    mode_and_band = os.path.dirname(os.path.dirname(tar_dir)).split("/")[-2:]
-    dir_name, time_stamp_sci, band = os.path.dirname(tar_dir).split('.')[:-1]
+    mode_and_band = str(tar_dir.parents[1]).split("/")[-2:]
+    dir_name, time_stamp_sci, detector = str(tar_dir.parent).split(".")[:-1]
     dir_name = dir_name.split('/')[-1].replace("raw", "cal")
-    time_cal = os.path.dirname(cal_dir).split('.')[-3]
+    time_stamp_cal = str(cal_dir.parent).split('.')[-3]
     new_dir_name = '.'.join([descriptor, dir_name,
-                             time_stamp_sci, band, time_cal, "rb"])
-    return os.path.join(root_dir, "calib", mode_and_band[0], new_dir_name)
+                             time_stamp_sci, detector, time_stamp_cal, "rb"])
+    return root_dir / "calib" / mode_and_band[0] / new_dir_name
 
 
 def oifits_patchwork(incoherent_file: Path, coherent_file: Path, outfile_path: Path,
