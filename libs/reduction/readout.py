@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Optional, Dict, List
 
 import numpy as np
 import astropy.units as u
@@ -15,11 +15,13 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 # TODO: Improve docs
 # TODO: Make functions that provide the baselines and uv-coords or so or put it in the
 # tables
+# TODO: Add to fluxcalibration that it changes the unit to Jy not ADU -> Jozsef's script
 class ReadoutFits:
     """All functionality to work with '.oifits/.fits'-files in a table based manner"""
 
-    def __init__(self, fits_file: Path) -> None:
+    def __init__(self, fits_file: Path, flux_file: Optional[Path] = "") -> None:
         self.fits_file = Path(fits_file)
+        self.flux_file = Path(flux_file) if flux_file else None
 
         self._name = None
 
@@ -74,10 +76,16 @@ class ReadoutFits:
             try:
                 self._oi_flux = self.get_table_for_fits("oi_flux")
             except KeyError:
-                self._oi_flux = Table()
-                nan_array = np.full(self.longest_entry, np.nan)
-                self._oi_flux.add_columns([[nan_array], [nan_array]],
-                                          names=["FLUXDATA", "FLUXERR"])
+                # TODO: Implement here flux-file support
+                if flux_file is not None:
+                    ...
+                else:
+                    self._oi_flux = Table()
+                    # TODO: Make this work so the unit is Jy -> Right now it has no effect
+                    nan_array = self._oi_flux.Column(np.full(self.longest_entry, np.nan),
+                                                     unit=u.Jy)
+                    self._oi_flux.add_columns([[nan_array], [nan_array]],
+                                              names=["FLUXDATA", "FLUXERR"])
             self._oi_flux.add_column([self.get_table_for_fits("oi_array")["TEL_NAME"].astype(str)],
                                      name="TEL_NAME")
             self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "TEL_NAME"])
