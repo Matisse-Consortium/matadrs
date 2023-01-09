@@ -63,6 +63,7 @@ class ReadoutFits:
             wl = self.get_table_for_fits("oi_wavelength")["EFF_WAVE"]
             self._oi_wl.add_column(self._oi_wl.Column([wl.data.astype(np.float64)],
                                                       unit=wl.unit), name="EFF_WAVE")
+            self._oi_wl["EFF_WAVE"] = self._oi_wl["EFF_WAVE"].to(u.um)
         return self._oi_wl
 
     @property
