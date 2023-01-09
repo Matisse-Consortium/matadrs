@@ -76,14 +76,13 @@ def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
     return None
 
 
-def get_catalog_match(fits_file: Path, match_radius: u.arcsec = 20*u.arcsec):
+def get_catalog_match(readout: ReadoutFits, match_radius: u.arcsec = 20*u.arcsec):
     """Checks if the calibrator is in the 'jsdc_v2'-catalog and if not then searches the
     local calibrator databases
 
     Parameters
     ----------
-    fits_file: Path
-        The file that is to be reduced and checked if calibrator or not
+    readout: ReadoutFits
     match_radius: u.arcsec
         The radius in which to search the catalouge
 
@@ -91,7 +90,6 @@ def get_catalog_match(fits_file: Path, match_radius: u.arcsec = 20*u.arcsec):
     -------
     catalog: Path | None
     """
-    readout = ReadoutFits(fits_file)
     if JSDC_V2_CATALOG.query_region(readout.coords, radius=match_radius):
         cprint(f"Calibrator '{readout.name}' found in JSDC v2 catalog!", "g")
         return JSDC_CATALOG
@@ -171,18 +169,17 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     if not mode_and_band_dir.exists():
         mode_and_band_dir.mkdir(parents=True)
 
-    # TODO: Readout is called twice here, make this easier!!!
-    fits_file = get_tpl_match(raw_dir, tpl_start)
-    if ReadoutFits(fits_file).is_calibrator():
-        cprint("Calibrator detected!"
+    readout = ReadoutFits(get_tpl_match(raw_dir, tpl_start))
+    if readout.is_calibrator():
+        cprint(f"Calibrator '{readout.name}' detected!"
                f" Moving corresponding catalog to {calib_dir.name}...", "y")
-        catalog_path = get_catalog_match(fits_file)
+        catalog_path = get_catalog_match(readout)
         if catalog_path is not None:
             shutil.copy(catalog_path, calib_dir / catalog_path.name)
     else:
         for catalog in calib_dir.glob("*catalog*"):
             os.remove(catalog)
-        cprint("Science target detected! Removing catalogs...", "y")
+        cprint(f"Science target '{readout.name}' detected! Removing catalogs...", "y")
 
     mp.mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(res_dir),
                         dirCalib=str(calib_dir), tplstartsel=tpl_start,
