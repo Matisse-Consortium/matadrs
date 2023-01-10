@@ -11,10 +11,20 @@ from astropy.coordinates import SkyCoord
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
+# All baseline configurations
+SMALL = {1: "A0", 5: "B2", 13: "D0", 10: "C1"}
+MED = {28: "K0", 18: "G1", 13: "D0", 24: "J3"}
+LARGE = {1: "A0", 18: "G1", 23: "J2", 24: "J3"}
+UT = {32: "UT1", 33: "UT2", 34: "UT3", 35: "UT4"}
+
+STATION_INDICES_TO_NAMES = {}
+STATION_INDICES_TO_NAMES.update(SMALL)
+STATION_INDICES_TO_NAMES.update(MED)
+STATION_INDICES_TO_NAMES.update(LARGE)
+STATION_INDICES_TO_NAMES.update(UT)
+
 
 # TODO: Improve docs
-# TODO: Make functions that provide the baselines and uv-coords or so or put it in the
-# tables
 # TODO: Add to fluxcalibration that it changes the unit to Jy not ADU -> Jozsef's script
 class ReadoutFits:
     """All functionality to work with '.oifits/.fits'-files in a table based manner"""
@@ -140,16 +150,6 @@ class ReadoutFits:
         return self._oi_t3
 
     @property
-    def telescopes_to_station_names(self) -> List[Dict]:
-        """Makes a dict of the station indicies and their station names from the array
-        table"""
-        if self._telescope_to_station_names is None:
-            oi_array = self.get_table_for_fits("oi_array")
-            self._telescope_to_station_names = dict(zip(oi_array["STA_INDEX"],
-                                                        oi_array["TEL_NAME"]))
-        return self._telescope_to_station_names
-
-    @property
     def bcd_configuration(self):
         """Gets the BCD-configuration from the primary header"""
         return ["-".join([self.primary_header["HIERARCH ESO INS BCD1 ID"],
@@ -193,8 +193,7 @@ class ReadoutFits:
 
     def get_delay_lines(self, table: Table):
         """Fetches the delay lines' telescope configuration from the visibility table"""
-        return ["-".join(list(map(self.telescopes_to_station_names.get,
-                                  station_index)))
+        return ["-".join(list(map(STATION_INDICES_TO_NAMES.get, station_index)))
                 for station_index in table["STA_INDEX"]]
 
 
