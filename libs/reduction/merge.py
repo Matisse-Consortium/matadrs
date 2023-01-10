@@ -110,10 +110,10 @@ def merge_folders(coherent_dir: Path, incoherent_dir: Path, output_dir: Path):
     cprint(f"{'':-^50}", "lg")
     cprint(f"Merging averaged files...", "g")
     cprint(f"{'':-^50}", "lg")
-    merge_averaged_files()
+    merge_averaged_files(coherent_dir, incoherent_dir, output_dir)
     cprint(f"{'':-^50}", "lg")
     cprint(f"Merging non-averaged files...", "g")
-    merge_non_averaged_files()
+    merge_non_averaged_files(coherent_dir, incoherent_dir, output_dir)
     cprint(f"{'':-^50}", "lg")
 
 
@@ -129,6 +129,7 @@ def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     """
     root_dir = Path(root_dir, stem_dir, "products", target_dir)
     coherent_dirs = (root_dir / "bcd_and_averaged" / "coherent").glob("*.rb")
+    breakpoint()
     incoherent_dirs = [Path(str(directory).replace("coherent", "incoherent"))\
                        for directory in coherent_dirs]
 
@@ -138,6 +139,7 @@ def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
 
     cprint(f"Merging files...", "lp")
     cprint(f"{'':-^50}", "lg")
+    # FIXME: This is not executed -> Why?
     for coherent_dir, incoherent_dir in zip(coherent_dirs, incoherent_dirs):
         merge_folders(coherent_dir, incoherent_dir, output_dir)
     cprint("Merging Done!", "lp")
@@ -146,4 +148,4 @@ def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
 if __name__ == "__main__":
     root_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
-    merge(data_dir, stem_dir, target_dir)
+    merge(root_dir, stem_dir, target_dir)
