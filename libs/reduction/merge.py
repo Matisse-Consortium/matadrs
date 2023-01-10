@@ -2,95 +2,148 @@ from pathlib import Path
 
 # TODO: Find way to make this into a complete module -> More pythonic!
 from plot import Plotter
-from utils import cprint, oifits_patchwork
+from readout import ReadoutFits
+from utils import cprint, get_fits
+from avg_oifits import oifits_patchwork
 
 
-def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
-    """Merges the vis and cphases files in the respective directory
+HEADER_TO_REMOVE = [{'key':'HIERARCH ESO INS BCD1 ID','value':' '},
+                    {'key':'HIERARCH ESO INS BCD2 ID','value':' '},
+                    {'key':'HIERARCH ESO INS BCD1 NAME','value':' '},
+                    {'key':'HIERARCH ESO INS BCD2 NAME','value':' '}]
+
+OI_TYPES = [["flux"], ["visamp"], ["visphi"], ["vis2"], ["t3"]]
+
+
+def get_output_file_path(coherent_dir: Path, target_name: str, output_dir: Path) -> Path:
+    """Makes the output file's Path from the information in the folder it is in"""
+    tpl_start_cal, detector, tpl_start_sci = str(coherent_dir.name).split(".")[2:-1]
+    return output_dir / f"{target_name}_{tpl_start_cal}:{tpl_start_sci}_FINAL_TARGET_INT.fits"
+
+
+def merge_averaged_files(coherent_dir: Path,
+                         incoherent_dir: Path, output_dir: Path) -> None:
+    """Merges the averaged files of visibility-, flux- and bcd-calibration
 
     Parameters
     ----------
-    stem_dir: Path
-    average_dir: Path
-
-    Returns
-    -------
-    out_file: str
+    coherent_dir: Path
+    incoherent_dir: Path
+    output_dir: Path
     """
-    target_name = stem_dir.split("/")[~1]
-    epoch = average_dir.name.split(".")[2]
-    lband = True if "HAWAII" in average_dir else False
-    band = "L" if lband else "N"
-    fits_files = average_dir.glob("*.fits")
-    cphases_file = [directory for directory in fits_files if "t3" in directory.lower()][0]
-    vis_file  = [directory for directory in fits_files if "vis" in directory.lower()][0]
-    out_file = average_dir / f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits"
-    oifits_patchwork(cphases_file, vis_file, out_file)
-    # plot = Plotter([out_file], lband=lband, save_path=out_file.parent)
-    # plot.add_cphases().add_corr_flux().plot(save=True)
-    return out_file
+    coherent_flux = str(coherent_dir / "TARGET_AVGFLUXCAL_INT.fits")
+    coherent_bcd_vis = str(coherent_dir / "TARGET_AVG_T3PHI_INT.fits")
+    incoherent_flux = str(incoherent_dir / "TARGET_AVGFLUXCAL_INT.fits")
+    incoherent_vis = str(incoherent_dir / "TARGET_AVGCAL_INT.fits")
+    incoherent_bcd_vis = str(incoherent_dir / "TARGET_AVG_T3PHI_INT.fits")
+    out_file = get_output_file_path(coherent_dir,
+                                    ReadoutFits(Path(coherent_flux)).target_name,
+                                    output_dir)
+
+    if "lband" in str(coherent_dir):
+        files_to_merge = [incoherent_flux, coherent_flux,
+                          coherent_bcd_vis, incoherent_vis, incoherent_bcd_vis]
+    else:
+        files_to_merge = [incoherent_flux, coherent_flux,
+                          coherent_bcd_vis, incoherent_vis, coherent_bcd_vis]
+    oi_types_list = [["flux"], ["visamp"], ["visphi"], ["vis2"], ["t3"]]
+    oifits_patchwork(files_to_merge, str(out_file),
+                     oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
+    # TODO: Implement handling of chopped files
+    # TODO: Add plotting here
 
 
-# FIXME: May be wrong. Check Jozsef's code as he is doing merging differently
-def merge_mode_folders(coherent_dir: Path,
-                       incoherent_dir: Path, outfile_dir: Path) -> None:
-        """Calls Jozsef's code and does a average over the files for one band to average
-        the reduced and calibrated data
+def merge_non_averaged_files(coherent_dir: Path,
+                             incoherent_dir: Path, output_dir: Path) -> None:
+    """Merges the non-averaged individual files of the visibility and flux calibration
 
-        """
-        outfile_dir = outfile_dir / coherent_dir.name
-        if not outfile_dir.exists():
-            outfile_dir.mkdir()
+    Parameters
+    ----------
+    coherent_dir: Path
+    incoherent_dir: Path
+    output_dir: Path
+    """
+    output_dir = output_dir / "non_averaged"
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
 
-        lband = True if "HAWAII" in coherent_dir else False
+    coherent_unchopped_vis_fits,\
+            coherent_chopped_vis_fits = get_fits(coherent_dir, "TARGET_CAL")
+    coherent_unchopped_flux_fits,\
+            coherent_chopped_flux_fits = get_fits(coherent_dir, "TARGET_FLUXCAL")
+    incoherent_unchopped_vis_fits,\
+            incoherent_chopped_vis_fits = get_fits(incoherent_dir, "TARGET_CAL")
+    incoherent_unchopped_flux_fits,\
+            incoherent_chopped_flux_fits = get_fits(incoherent_dir, "TARGET_FLUXCAL")
 
-        incoherent_fits = incoherent_dir.glob("*.fits")
-        incoherent_fits.sort(key=lambda x: x[-8:])
-        coherent_fits = coherent_dir.glob("*.fits")
-        coherent_fits.sort(key=lambda x: x[-8:])
+    for index, (coh_unchopped_vis, inc_unchopped_vis, coh_unchopped_flux, inc_unchopped_flux)\
+            in enumerate(zip(coherent_unchopped_vis_fits, incoherent_unchopped_vis_fits,
+                             coherent_unchopped_flux_fits, incoherent_unchopped_flux_fits)):
+        out_file = get_output_file_path(coherent_dir,
+                                        ReadoutFits(Path(coh_unchopped_vis)).target_name,
+                                        output_dir)
+        out_file = out_file.parent / f"{out_file.stem}_00{index}.fits"
 
-        for incoherent_file, coherent_file in zip(incoherent_fits, coherent_fits):
-            out_file = outfile_dir / coherent_file.name
-            oifits_patchwork(incoherent_file, coherent_file, out_file)
-            cprint(f"Plotting {out_file.name}")
-            plot = Plotter([out_file], lband=lband, save_path=outfile_dir)
-            plot.add_cphases().add_corr_flux()
-            if plot.flux is not None:
-                plot.add_flux()
-            plot.plot(save=True)
+        if "lband" in str(coherent_dir):
+            files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
+                              coh_unchopped_vis, inc_unchopped_vis, inc_unchopped_vis]
+        else:
+            files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
+                              coh_unchopped_vis, inc_unchopped_vis, coh_unchopped_vis]
+
+        oifits_patchwork(files_to_merge, str(out_file), oi_types_list=OI_TYPES)
+        # TODO: Implement handling of chopped files
+        # TODO: Add plotting here
 
 
-def merge(data_dir: Path, stem_dir: Path, target_dir: Path) -> None:
+def merge_folders(coherent_dir: Path, incoherent_dir: Path, output_dir: Path):
+    """Merges the averaged files of the given folders as well as the non-averaged files,
+    which are looked up
+
+    Parameters
+    ----------
+    coherent_dir: Path
+    incoherent_dir: Path
+    output_dir: Path
+    """
+    cprint(f"Merging files of folder {coherent_dir.name.split('/')[~0]}...", "lp")
+    cprint(f"{'':-^50}", "lg")
+    cprint(f"Merging averaged files...", "g")
+    cprint(f"{'':-^50}", "lg")
+    merge_averaged_files()
+    cprint(f"{'':-^50}", "lg")
+    cprint(f"Merging non-averaged files...", "g")
+    merge_non_averaged_files()
+    cprint(f"{'':-^50}", "lg")
+
+
+def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     """This merges two (.fits)-files together into one, i.e. the  "incoherent"
     and the "coherent" files
 
     Parameters
     ----------
-    data_dir: Path
-        The directory in which the files are that should be merged, i.e. "incoherent" and
-        "coherent" files
+    root_dir: Path
     stem_dir: Path
     target_dir: Path
     """
-    root_dir = Path(data_dir, stem_dir, "products", target_dir)
-    merge_dir = root_dir / "calib"
-    outfile_dir = root_dir / "merged_and_calib"
-
-    coherent_dirs = (merge_dir / "coherent").glob("*.rb")
-    incoherent_dirs = [Path(str(directory)).replace("coherent", "incoherent")\
+    root_dir = Path(root_dir, stem_dir, "products", target_dir)
+    coherent_dirs = (root_dir / "bcd_and_averaged" / "coherent").glob("*.rb")
+    incoherent_dirs = [Path(str(directory).replace("coherent", "incoherent"))\
                        for directory in coherent_dirs]
 
+    output_dir = root_dir / "final"
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
+
+    cprint(f"Merging files...", "lp")
+    cprint(f"{'':-^50}", "lg")
     for coherent_dir, incoherent_dir in zip(coherent_dirs, incoherent_dirs):
-        cprint("Merging (.fits)-files of folder {coherent_dir.name.split('/')[~0]}", "lp")
-        cprint("------------------------------------------------------------", "lg")
-        merge_mode_folders(coherent_dir, incoherent_dir, outfile_dir)
-        print("------------------------------------------------------------")
-        print("Done!")
-        print("------------------------------------------------------------")
+        merge_folders(coherent_dir, incoherent_dir, output_dir)
     cprint("Merging Done!", "lp")
 
 
 if __name__ == "__main__":
-    data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
+    root_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
     merge(data_dir, stem_dir, target_dir)

@@ -5,7 +5,6 @@ from typing import List, Optional
 from collections import deque, namedtuple
 
 # TODO: Find way to make this into a complete module -> More pythonic!
-from plot import Plotter
 from readout import ReadoutFits
 from fluxcal import fluxcal
 from calib_BCD2 import calib_BCD
@@ -118,19 +117,6 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
         shutil.move(str(fits_file), str(output_dir / fits_file.name))
     shutil.move(str(Path().cwd() / "esorex.log"),
                 str(output_dir / "mat_cal_oifits.log"))
-
-    # TODO: Fix this at some point
-    cprint(f"{'':-^50}", "lg")
-    cprint("Creating plots...", "g")
-    for fits_file in output_dir.glob("*.fits"):
-        plot_fits = Plotter([fits_file], save_path=output_dir)
-        plot_fits.add_cphase().add_vis()
-        # if mode == "incoherent":
-            # plot_fits.add_flux()
-        plot_fits.plot(save=True)
-
-    cprint(f"{'':-^50}", "lg")
-    cprint("Done!", "g")
     cprint(f"{'':-^50}", "lg")
 
 

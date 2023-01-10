@@ -1,28 +1,19 @@
+import shutil
 from typing import List
 from pathlib import Path
 from collections import namedtuple
 
 # TODO: Find way to make this into a complete module -> More pythonic!
-from plot import Plotter
 from readout import ReadoutFits
 from calib_BCD2 import calib_BCD
 from avg_oifits import avg_oifits
-from utils import cprint, oifits_patchwork
+from utils import cprint, get_fits
 
 
 HEADER_TO_REMOVE = [{'key':'HIERARCH ESO INS BCD1 ID','value':' '},
                     {'key':'HIERARCH ESO INS BCD2 ID','value':' '},
                     {'key':'HIERARCH ESO INS BCD1 NAME','value':' '},
                     {'key':'HIERARCH ESO INS BCD2 NAME','value':' '}]
-
-def get_fits(folder: Path, tag: str):
-    """Searches a folder for a tag and returns the non-chopped and chopped (.fits)-files"""
-    unchopped_fits = sorted(folder.glob(f"{tag}*.fits"),
-                            key=lambda x: x.name[-8:])
-
-    if len(unchopped_fits) == 6:
-        return unchopped_fits[:4], unchopped_fits[4:]
-    return unchopped_fits, None
 
 
 def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
@@ -78,10 +69,9 @@ def average_files(unchopped_fits: List[Path], chopped_fits: List[Path], output_d
 def bcd_calibration(unchopped_fits: List[Path], output_dir: Path):
     """Executes the BCD-calibration for the the unchopped visbility calibrated files"""
     cprint(f"Executing BCD-calibration...", "g")
-    lband = True if "HAWAII" in str(unchopped_fits[0].parent) else False
     outfile_path_cphases = output_dir / "TARGET_AVG_T3PHI_INT.fits"
     bcd = sort_fits_by_BCD(unchopped_fits)
-    if lband:
+    if "lband" in str(unchopped_fits[0]):
         calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in, bcd.out_out,
                   outfile_path_cphases, plot=False)
     else:
@@ -123,13 +113,8 @@ def average_folders(root_dir: Path, mode: str) -> None:
             average_files(unchopped_vis_fits, chopped_vis_fits, output_dir)
             average_files(unchopped_flux_fits, chopped_flux_fits, output_dir)
             bcd_calibration(unchopped_vis_fits, output_dir)
-
-            # TODO: Make this work again
-            # cprint("Creating plots...", "g")
-            # cprint(f"{'':-^50}", "lg")
-            # plot_vis = Plotter([outfile_path_vis], save_path=output_dir,)
-            cprint(f"{'':-^50}", "lg")
-            cprint("Done!", "g")
+            for fits_file in folder.glob("*.fits"):
+                shutil.copy(str(fits_file), (output_dir / fits_file.name))
             cprint(f"{'':-^50}", "lg")
 
 
