@@ -5,11 +5,10 @@ from typing import List, Optional
 from collections import deque, namedtuple
 
 # TODO: Find way to make this into a complete module -> More pythonic!
-from fluxcal import fluxcal
-from calib_BCD2 import calib_BCD
-
 from plot import Plotter
 from readout import ReadoutFits
+from fluxcal import fluxcal
+from calib_BCD2 import calib_BCD
 from utils import get_path_descriptor, check_if_target, cprint
 
 
@@ -18,9 +17,8 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 DATABASE_DIR = DATA_DIR / "calibrator_databases"
 LBAND_DATABASES = [DATABASE_DIR / database\
         for database in ["vBoekelDatabase.fits", "calib_spec_db_v10.fits",
-                         "calib_spec_db_v10_supplement.fits"]]
-                   # TODO: Find this database
-                   # "calib_spec_db_supplement3.fits"]
+                        "calib_spec_db_v10_supplement.fits",
+                         "calib_spec_db_supplement3.fits"]]
 NBAND_DATABASES = LBAND_DATABASES[:]+[DATABASE_DIR / "vBoekelDatabase.fitsold"]
 
 ESOREX_CMD = "/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/bin/esorex"
@@ -63,6 +61,7 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     --------
     get_path_descriptor()
     """
+    # TODO: Make the following into a function
     cprint(f"Calibrating {tar_dir.name} with {cal_dir.name}...", "p")
     targets = sorted(tar_dir.glob("TARGET_RAW_INT*"),
                      key=lambda x: x.name[-8:])
@@ -75,17 +74,19 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     calibrators = sorted(cal_dir.glob("CALIB_RAW_INT*"),
                          key=lambda x: x.name[-8:])
 
+    # TODO: Make this better so it calibrates even if the calibrator or the science
+    # target is chopped but the other is not
     if len(targets) != len(calibrators):
         cprint("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-files. SKIPPING!", "y")
         cprint(f"{'':-^50}", "lg")
         return
 
-    output_dir = get_path_descriptor(root_dir, "TAR-CAL",
-                                     targets[0], calibrators[0])
+    output_dir = get_path_descriptor(root_dir, "TAR-CAL", targets[0], calibrators[0])
     mode = "incoherent" if "incoherent" in str(output_dir) else "coherent"
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
 
+    # TODO: Make the following into a function
     cprint(f"{'':-^50}", "lg")
     cprint("Calibrating fluxes...", "g")
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
@@ -118,15 +119,15 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     shutil.move(str(Path().cwd() / "esorex.log"),
                 str(output_dir / "mat_cal_oifits.log"))
 
-    # cprint(f"{'':-^50}", "lg")
-    # cprint("Creating plots...", "g")
-    # for fits_file in output_dir.glob("*.fits"):
-        # plot_fits = Plotter([fits_file], save_path=output_dir)
-        # plot_fits.add_cphase().add_vis()
-        # # TODO: Fix this at some point
-        # # if mode == "incoherent":
-            # # plot_fits.add_flux()
-        # plot_fits.plot(save=True)
+    # TODO: Fix this at some point
+    cprint(f"{'':-^50}", "lg")
+    cprint("Creating plots...", "g")
+    for fits_file in output_dir.glob("*.fits"):
+        plot_fits = Plotter([fits_file], save_path=output_dir)
+        plot_fits.add_cphase().add_vis()
+        # if mode == "incoherent":
+            # plot_fits.add_flux()
+        plot_fits.plot(save=True)
 
     cprint(f"{'':-^50}", "lg")
     cprint("Done!", "g")

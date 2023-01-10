@@ -10,6 +10,21 @@ from avg_oifits import avg_oifits
 from utils import cprint, oifits_patchwork
 
 
+HEADER_TO_REMOVE = [{'key':'HIERARCH ESO INS BCD1 ID','value':' '},
+                    {'key':'HIERARCH ESO INS BCD2 ID','value':' '},
+                    {'key':'HIERARCH ESO INS BCD1 NAME','value':' '},
+                    {'key':'HIERARCH ESO INS BCD2 NAME','value':' '}]
+
+def get_fits(folder: Path, tag: str):
+    """Searches a folder for a tag and returns the non-chopped and chopped (.fits)-files"""
+    unchopped_fits = folder.glob(f"{tag}*.fits")
+    unchopped_fits.sort(key=lambda x: x[-8:])
+
+    if len(unchopped_fits) == 6:
+        return unchopped_fits[:4], unchopped_fits[4:]
+    return unchopped_fits, None
+
+
 def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
     """Sorts the input (.fits)-files by their BCD configuration
 
@@ -40,33 +55,41 @@ def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
     return BCDFits(in_in, in_out, out_in, out_out)
 
 
-def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
-    """Merges the vis and cphases files in the respective directory
+def average_files(unchopped_fits: List[Path], chopped_fits: List[Path], output_dir: Path):
+    """Averages a set of unchopped and chopped (.fits)-files"""
+    if "TARGET_CAL_INT" in unchopped_fits[0].name:
+        cprint(f"Averaging visibility calibration...", "g")
+        outfile_name = "TARGET_AVG_VIS"
+    else:
+        cprint(f"Averaging flux calibration...", "g")
+        outfile_name = "TARGET_AVG_FLUX"
 
-    Parameters
-    ----------
-    stem_dir: Path
-    average_dir: Path
+    outfile_unchopped = output_dir/ f"{outfile_name}_INT.fits"
+    outfile_chopped = output_dir/ f"{outfile_name}_INT_CHOPPED.fits"
 
-    Returns
-    -------
-    out_file: str
-    """
-    target_name = stem_dir.split("/")[~1]
-    epoch = average_dir.name.split(".")[2]
-    lband = True if "HAWAII" in average_dir else False
-    band = "L" if lband else "N"
-    fits_files = average_dir.glob("*.fits")
-    cphases_file = [directory for directory in fits_files if "t3" in directory.lower()][0]
-    vis_file  = [directory for directory in fits_files if "vis" in directory.lower()][0]
-    out_file = average_dir / f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits"
-    oifits_patchwork(cphases_file, vis_file, out_file)
-    plot = Plotter([out_file], lband=lband, save_path=out_file.parent)
-    plot.add_cphases().add_corr_flux().plot(save=True)
-    return out_file
+    avg_oifits(unchopped_fits, outfile_unchopped, headerval=HEADER_TO_REMOVE)
+
+    # TODO: See how to bcd-calibrate the chopped files as well
+    if chopped_fits is not None:
+        avg_oifits(chopped_fits, outfile_chopped, headerval=HEADER_TO_REMOVE)
+        # calib_BCD()
 
 
-def single_average(root_dir: Path, mode: str, lband) -> None:
+def bcd_calibration(unchopped_fits: List[Path], output_dir: Path):
+    """Executes the BCD-calibration for the the unchopped visbility calibrated files"""
+    cprint(f"Executing BCD-calibration...", "g")
+    lband = True if "HAWAII" in unchopped_fits[0].parent else False
+    outfile_path_cphases = output_dir / "TARGET_AVG_T3PHI_INT.fits"
+    bcd = sort_fits_by_BCD(unchopped_fits)
+    if lband:
+        calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in, bcd.out_out,
+                  outfile_path_cphases, plot=False)
+    else:
+        calib_BCD(bcd.in_in, "", "", bcd.out_out,
+                 outfile_path_cphases, plot=False)
+
+
+def average_folders(root_dir: Path, mode: str, lband) -> None:
         """Calls Jozsef's code and does a average over the files for one band to average
         the reduced and calibrated data
 
@@ -81,53 +104,30 @@ def single_average(root_dir: Path, mode: str, lband) -> None:
         folders = (root_dir / mode_dir).glob("*.rb")
 
         for folder in folders:
-            print(f"Averaging folder {folder.name}")
-            lband = True if "HAWAII" in folder else False
+            # TODO: Make this into function
+            cprint(f"Averaging folder {folder.name}...", "g")
+            cprint(f"{'':-^50}", "lg")
 
-            unchopped_fits = folder.glob("*.fits")
-            unchopped_fits.sort(key=lambda x: x[-8:])
-
-            if len(fits_files) == 6:
-                unchopped_fits = unchopped_fits[:4]
-                chopped_fits = unchopped_fits[4:]
+            # TODO: Make check if vis-calibration or flux calibration did not work
+            unchopped_vis_fits, chopped_vis_fits = get_fits(folder, "TARGET_CAL")
+            unchopped_flux_fits, chopped_flux_fits = get_fits(folder, "TARGET_FLUXCAL")
 
             folder_split = folder.name.split(".")
             folder_split[0] += "-AVG"
             new_folder = ".".join(folder_split)
-            outfile_dir = root_dir / "bcd_and_averaged" / mode / new_folder
+            output_dir = root_dir / "bcd_and_averaged" / mode / new_folder
 
-            if not outfile_dir.exists():
-                outfile_dir.mkdir()
+            if not output_dir.exists():
+                output_dir.mkdir(parents=True)
 
-            outfile_path_vis = outfile_dir/ "TARGET_AVG_VIS_INT.fits"
-            outfile_path_cphases = outfile_dir / "TARGET_AVG_T3PHI_INT.fits"
-            outfile_path_chopped = outfile_dir / "TARGET_AVG_VIS_INT_CHOPPED.fits"
-            bcd = sort_fits_by_BCD(unchopped_fits)
-            avg_oifits(unchopped_fits, outfile_path_vis)
+            average_files(unchopped_vis_fits, chopped_vis_fits, output_dir)
+            average_files(unchopped_flux_fits, chopped_flux_fits, output_dir)
+            bcd_calibration(unchopped_vis_fits, output_dir)
 
-            # TODO: See how to bcd-calibrate the chopped files as well
-            if chopped_fits:
-                avg_oifits(chopped_fits, outfile_path_chopped)
-                # calib_BCD()
-
-            if lband:
-                calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in, bcd.out_out,
-                          outfile_path_cphases, plot=False)
-            else:
-                calib_BCD(bcd.in_in, "", "", bcd.out_out,
-                         outfile_path_cphases, plot=False)
-
-            # TODO: Make the plotter take the save name automatically, if is none given
-            cprint("Creating plots...", "g")
-            cprint(f"{'':-^50}", "lg")
-            plot_vis = Plotter([outfile_path_vis], save_path=outfile_dir,
-                               lband=lband, plot_name="TARGET_AVG_VIS_INT.pdf")
-            plot_vis.add_vis().plot(save=True)
-
-            plot_cphases = Plotter([outfile_path_cphases],
-                                   save_path=outfile_dir, lband=lband,
-                                   plot_name= "TARGET_AVG_T3PHI_INT.pdf")
-            plot_cphases.add_cphases().plot(save=True)
+            # TODO: Make this work again
+            # cprint("Creating plots...", "g")
+            # cprint(f"{'':-^50}", "lg")
+            # plot_vis = Plotter([outfile_path_vis], save_path=output_dir,)
             cprint(f"{'':-^50}", "lg")
             cprint("Done!", "g")
             cprint(f"{'':-^50}", "lg")
@@ -145,7 +145,7 @@ def average(data_path: Path, stem_dir: Path, target_dir: Path):
         for mode in ["coherent", "incoherent"]:
             cprint(f"Averaging and BCD-calibration of {stem_dir} with mode={mode}", "lp")
             cprint(f"{'':-^50}", "lg")
-            single_average(root_dir, mode)
+            average_folders(root_dir, mode)
         cprint("Averaging done!", "lp")
         cprint(f"{'':-^50}", "lg")
 
@@ -154,4 +154,3 @@ if __name__ == "__main__":
     data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
     average(data_path, stem_dir, target_dir)
-

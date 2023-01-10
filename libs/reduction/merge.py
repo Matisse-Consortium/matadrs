@@ -1,9 +1,37 @@
 from pathlib import Path
 
-from .plot import Plotter
-from .utils import cprint, oifits_patchwork
+# TODO: Find way to make this into a complete module -> More pythonic!
+from plot import Plotter
+from utils import cprint, oifits_patchwork
 
 
+def merge_vis_and_cphases(stem_dir: Path, average_dir: Path) -> str:
+    """Merges the vis and cphases files in the respective directory
+
+    Parameters
+    ----------
+    stem_dir: Path
+    average_dir: Path
+
+    Returns
+    -------
+    out_file: str
+    """
+    target_name = stem_dir.split("/")[~1]
+    epoch = average_dir.name.split(".")[2]
+    lband = True if "HAWAII" in average_dir else False
+    band = "L" if lband else "N"
+    fits_files = average_dir.glob("*.fits")
+    cphases_file = [directory for directory in fits_files if "t3" in directory.lower()][0]
+    vis_file  = [directory for directory in fits_files if "vis" in directory.lower()][0]
+    out_file = average_dir / f"{target_name}_{epoch}_{band}_TARGET_AVG_INT.fits"
+    oifits_patchwork(cphases_file, vis_file, out_file)
+    # plot = Plotter([out_file], lband=lband, save_path=out_file.parent)
+    # plot.add_cphases().add_corr_flux().plot(save=True)
+    return out_file
+
+
+# FIXME: May be wrong. Check Jozsef's code as he is doing merging differently
 def merge_mode_folders(coherent_dir: Path,
                        incoherent_dir: Path, outfile_dir: Path) -> None:
         """Calls Jozsef's code and does a average over the files for one band to average
@@ -66,5 +94,3 @@ if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
     stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
     merge(data_dir, stem_dir, target_dir)
-
-
