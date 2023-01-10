@@ -1,3 +1,4 @@
+import shutil
 import subprocess
 from pathlib import Path
 from typing import List, Optional
@@ -106,9 +107,16 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     cprint(f"{'':-^50}", "lg")
     cprint("Calibrating visibilities...", "g")
     sof_file = create_visbility_sof(output_dir, targets, calibrators)
-    with open(output_dir / "mat_cal_oifits.log", "w+") as esorex:
-        subprocess.call([ESOREX_CMD, f"--output-dir={str(output_dir)}",
-                         "mat_cal_oifits", str(sof_file)], stdout=esorex)
+    subprocess.call([ESOREX_CMD, f"--output-dir={str(output_dir)}",
+                     "mat_cal_oifits", str(sof_file)],
+                    stdout=subprocess.DEVNULL)
+
+    # TODO: Find way to make this moving better than this -> Moves (.fits)-files
+    # from this path that get created by 'mat_cal_oifits?'
+    for fits_file in Path().cwd().glob("*.fits"):
+        shutil.move(str(fits_file), str(output_dir / fits_file.name))
+    shutil.move(str(Path().cwd() / "esorex.log"),
+                str(output_dir / "mat_cal_oifits.log"))
 
     # cprint(f"{'':-^50}", "lg")
     # cprint("Creating plots...", "g")
