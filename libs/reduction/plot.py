@@ -31,8 +31,8 @@ class Plotter:
                  plot_name: Optional[str] = None,
                  save_path: Optional[Path] = None) -> None:
         """Initialises the class instance"""
-        # TODO: Implement L- or N-band check. Fix this
-        self.lband = False
+        self._band_mask = None
+
         # TODO: Make it that if multiple datasets are input that multiple plots are made
         # for the different bands -> See how to implement this
         if len(fits_files) > 1:
@@ -50,37 +50,41 @@ class Plotter:
         self.save_path = save_path
         self.components = {}
 
+        self.wl = self.data_prep.oi_wl["EFF_WAVE"].data[0]
+
     @property
     def number_of_plots(self):
         return len(self.components)
 
-    # def get_plot_linestyle(self, already_chosen_linestyles: List):
-        # """Gets a linestyle, which is different from the already chosen one
+    # TODO: Make this more modular for multiple files -> Right now only one wl is
+    # respected
+    # FIXME: Make this work. Right now it is filtering all the values
+    @property
+    def band_mask(self):
+        """The masking for the bands to make the plots visually readable"""
+        if self._band_mask is None:
+            wl = pd.DataFrame({"wl": self.wl})
+            if np.any(wl < 7.):
+                if np.any(wl < 2.) and np.any(wl > 3.):
+                    self._band_mask = (wl > 1.6) & (wl < 1.8) & (wl > 3.) & (wl < 4.)
+                elif np.any(wl < 2.):
+                    self._band_mask = (wl > 1.6) & (wl < 1.8)
+                else:
+                    self._band_mask = (wl > 3.) & (wl < 4.)
+            else:
+                self._band_mask = (wl > 8.5) & (wl < 12.5)
+        return ~self._band_mask["wl"]
 
-        # Parameters
-        # ----------
-        # already_chosen_linestyles: List
-            # A list that contains the linestyles that have already been applied
-        # """
-        # linestyles = ["-", "--", "-.", ":"]
-        # for linestyle in linestyles:
-            # if linestyle not in already_chosen_linestyles:
-                # return linestyle
-
-        # if all(linestyle in linestyles in already_chosen_linestyles):
-            # raise RuntimeError("No linestyle to pick as all have been picked already!")
+    # TODO: This should not need to be a thing, but it doesn't work otherwise
+    def mask_dataframe(self, df: DataFrame, mask: np.ndarray) -> None:
+        """Iterates through each row to mask a DataFrame"""
+        for column in df.columns:
+            df[column] = df[column].mask(mask)
+        return df
 
     def set_dataframe(self, labels: List[str], column: Column) -> DataFrame:
         """Prepares each row in a column as a pandas DataFrame"""
         return pd.DataFrame({label: array for label, array in zip(labels, column.data)})
-
-    # TODO: Settings for dataframe cuts if lband and general cuts. IMPLEMENT This!
-            # if 'MATISSE' in dic['INSTRUMENT']:
-                # if math.isnan(wl_lim[0]) or math.isnan(wl_lim[1]):
-                    # M_idx = np.logical_not(np.logical_and(x > 1.6,x < 1.8)+np.logical_and(x > 3.0,x < 4.0)+np.logical_and(x > 8.0,x < 12.5) )
-                # else:
-                    # M_idx = np.logical_not(np.logical_and(x > 1.6,x < 1.8)+np.logical_and(x > 3.0,x < 4.0)+np.logical_and(x > 8.0,x < 12.5)+\
-                    # np.logical_and(x > wl_lim[0],x < wl_lim[1]) )
 
     def make_component(self, data_name: str,
                        legend_format: Optional[str] = "long") -> DataFrame:
@@ -125,9 +129,9 @@ class Plotter:
                                      self.data_prep.oi_t3["T3PHI"])
         else:
             raise ValueError("Input data name cannot be queried!")
-        # TODO: Make this more modular for multiple files
-        df["lambda"] = self.data_prep.oi_wl["EFF_WAVE"].data[0]
-        return df
+        df["lambda"] = self.wl
+        # TODO: Why is this needed?
+        return self.mask_dataframe(df, self.band_mask)
 
     def plot(self, save: Optional[bool] = False):
         """Makes the plot from the components
@@ -151,12 +155,13 @@ class Plotter:
             # TODO: Implement flux np.nan detection and not plotting it
             for ax, (name, dataframe) in zip(axarr.flatten(), self.components.items()):
                 dataframe.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
-                               ylabel=name, ax=ax)
+                               ylabel=name, ax=ax, legend=True)
+                plt.legend(fontsize=6)
         else:
             # TODO: Make this more modular for future plots
             name, dataframe = self.components[0].items()
             dataframe.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
-                           ylabel=name, ax=axarr)
+                           ylabel=name, ax=axarr, legend=True)
 
         fig.tight_layout()
 
@@ -165,7 +170,6 @@ class Plotter:
         else:
             plt.show()
         plt.close()
-
         # ax.legend(loc=1, prop={'size': 6}, ncol=ncol)
 
     # TODO: Make somehow correlated flux and unit support in this component
@@ -188,6 +192,22 @@ class Plotter:
         """Plots all the closure phases into one plot"""
         self.components["Closure phases [$^{\circ}$]"] = self.make_component("cphase")
         return self
+
+    # def get_plot_linestyle(self, already_chosen_linestyles: List):
+        # """Gets a linestyle, which is different from the already chosen one
+
+        # Parameters
+        # ----------
+        # already_chosen_linestyles: List
+            # A list that contains the linestyles that have already been applied
+        # """
+        # linestyles = ["-", "--", "-.", ":"]
+        # for linestyle in linestyles:
+            # if linestyle not in already_chosen_linestyles:
+                # return linestyle
+
+        # if all(linestyle in linestyles in already_chosen_linestyles):
+            # raise RuntimeError("No linestyle to pick as all have been picked already!")
 
     # def plot_vis24baseline(self, ax, do_fit: Optional[bool] = True) -> None:
         # """ Plot the mean visibility for one certain wavelength and fit it with a
@@ -403,11 +423,11 @@ class Plotter:
 
 
 if __name__ == ('__main__'):
-    fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits"]
-                  # "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits",
-                  # "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
+    fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits",
+                  "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits",
+                  "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
     fits_files = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
-    plot_fits = Plotter(fits_files)
-    plot_fits.add_cphase().add_vis().plot()
+    plot_fits = Plotter([fits_files[1]])
+    plot_fits.add_cphase().add_vis("short").plot()
 
 
