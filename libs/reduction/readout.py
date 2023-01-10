@@ -156,8 +156,8 @@ class ReadoutFits:
     @property
     def bcd_configuration(self):
         """Gets the BCD-configuration from the primary header"""
-        return ["-".join([self.primary_header["HIERARCH ESO INS BCD1 ID"],
-                          self.primary_header["HIERARCH ESO INS BCD2 ID"]])]
+        return "-".join([self.primary_header["HIERARCH ESO INS BCD1 ID"],
+                         self.primary_header["HIERARCH ESO INS BCD2 ID"]]).lower()
 
     @property
     def tpl_start(self):

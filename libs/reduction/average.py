@@ -17,8 +17,8 @@ HEADER_TO_REMOVE = [{'key':'HIERARCH ESO INS BCD1 ID','value':' '},
 
 def get_fits(folder: Path, tag: str):
     """Searches a folder for a tag and returns the non-chopped and chopped (.fits)-files"""
-    unchopped_fits = folder.glob(f"{tag}*.fits")
-    unchopped_fits.sort(key=lambda x: x[-8:])
+    unchopped_fits = sorted(folder.glob(f"{tag}*.fits"),
+                            key=lambda x: x.name[-8:])
 
     if len(unchopped_fits) == 6:
         return unchopped_fits[:4], unchopped_fits[4:]
@@ -38,16 +38,16 @@ def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
         The fits ordered by their BCD-configuration
     """
     BCDFits = namedtuple("BCDFits", ["in_in", "in_out", "out_in", "out_out"])
+    # TODO: Can be easier done with DataPrep -> Implement here
     for fits_file in fits_files:
-        readout = ReadoutFits(fits_file)
-        bcd_info = readout.get_bcd_info()
-        if bcd_info == "in-in":
+        bcd_configuration = ReadoutFits(fits_file).bcd_configuration
+        if bcd_configuration == "in-in":
             in_in = fits_file
-        elif bcd_info == "in-out":
+        elif bcd_configuration == "in-out":
             in_out = fits_file
-        elif bcd_info == "out-in":
+        elif bcd_configuration == "out-in":
             out_in = fits_file
-        elif bcd_info == "out-out":
+        elif bcd_configuration == "out-out":
             out_out = fits_file
         else:
             cprint("BCD-configuration has not been found!", "r")
@@ -78,7 +78,7 @@ def average_files(unchopped_fits: List[Path], chopped_fits: List[Path], output_d
 def bcd_calibration(unchopped_fits: List[Path], output_dir: Path):
     """Executes the BCD-calibration for the the unchopped visbility calibrated files"""
     cprint(f"Executing BCD-calibration...", "g")
-    lband = True if "HAWAII" in unchopped_fits[0].parent else False
+    lband = True if "HAWAII" in str(unchopped_fits[0].parent) else False
     outfile_path_cphases = output_dir / "TARGET_AVG_T3PHI_INT.fits"
     bcd = sort_fits_by_BCD(unchopped_fits)
     if lband:
@@ -89,7 +89,7 @@ def bcd_calibration(unchopped_fits: List[Path], output_dir: Path):
                  outfile_path_cphases, plot=False)
 
 
-def average_folders(root_dir: Path, mode: str, lband) -> None:
+def average_folders(root_dir: Path, mode: str) -> None:
         """Calls Jozsef's code and does a average over the files for one band to average
         the reduced and calibrated data
 
