@@ -90,8 +90,9 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     for fits_file in output_dir.glob("*.fits"):
         plot_fits = Plotter([fits_file], save_path=output_dir)
         plot_fits.add_cphase().add_vis()
-        if mode == "incoherent":
-            plot_fits.add_flux()
+        # TODO: Fix this at some point
+        # if mode == "incoherent":
+            # plot_fits.add_flux()
         plot_fits.plot(save=True)
 
     cprint(f"{'':-^50}", "lg")
