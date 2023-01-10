@@ -1,5 +1,6 @@
+import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 from collections import deque, namedtuple
 
 # TODO: Find way to make this into a complete module -> More pythonic!
@@ -20,11 +21,26 @@ LBAND_DATABASES = [DATABASE_DIR / database\
                    # TODO: Find this database
                    # "calib_spec_db_supplement3.fits"]
 NBAND_DATABASES = LBAND_DATABASES[:]+[DATABASE_DIR / "vBoekelDatabase.fitsold"]
+
+ESOREX_CMD = "/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/bin/esorex"
+
+
 # TODO: Make functionality that does not only calibrate willy nilly, but checks if the
 # calibrator is there for N-band, L-band or LN-band, see Jozsef's files. Use the
 # mat_target_list of newest edition for that (grep it via python api of google sheets)
 # Make a function for this
 # MAT_TARGET_LIST = DATA_DIR / "mat_target_list.xlsx"
+def create_visbility_sof(raw_dir: Path,
+                         targets: List[Path], calibrators: List[Path]) -> Path:
+    """Creates the (.sof)-file needed for the visibility calibration with mat_cal_oifits"""
+    sof_file = raw_dir / "visbility_reduction.sof"
+    with open(sof_file, "w+") as sof:
+        for target in targets:
+            sof.write(f"{target} TARGET_RAW_INT\n")
+        sof.write("\n")
+        for calibrator in calibrators:
+            sof.write(f"{target} CALIB_RAW_INT\n")
+    return sof_file
 
 
 # TODO: Implement visibility calibration like Jozsef, maybe?
@@ -72,7 +88,7 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
         cprint(f"{'':-^50}", "lg")
         cprint(f"Processing {target.name} with {calibrator.name}...", "g")
-        output_file = str(output_dir / f"TARGET_CAL_INT_000{index}.fits")
+        output_file = str(output_dir / f"TARGET_FLUXCAL_INT_000{index}.fits")
         target, calibrator = str(target), str(calibrator)
 
         # TODO: Make this not as redundant, and the airmass correction implement as well?
@@ -84,6 +100,12 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
             fluxcal(target, calibrator, output_file,
                     list(map(str, NBAND_DATABASES)), mode=mode_name,
                     output_fig_dir=str(output_dir), do_airmass_correction=True)
+
+    cprint(f"{'':-^50}", "lg")
+    cprint("Calibrating visibilities...", "g")
+    sof_file = create_visbility_sof(tar_dir, targets, calibrators)
+    subprocess.call([ESOREX_CMD, f"--output-dir='{output_dir}'",
+                     "mat_cal_oifits", str(sof_file)])
 
     cprint(f"{'':-^50}", "lg")
     cprint("Creating plots...", "g")
