@@ -39,7 +39,7 @@ def create_visbility_sof(raw_dir: Path,
             sof.write(f"{target} TARGET_RAW_INT\n")
         sof.write("\n")
         for calibrator in calibrators:
-            sof.write(f"{target} CALIB_RAW_INT\n")
+            sof.write(f"{calibrator} CALIB_RAW_INT\n")
     return sof_file
 
 
@@ -85,6 +85,8 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
 
+    cprint(f"{'':-^50}", "lg")
+    cprint("Calibrating fluxes...", "g")
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
         cprint(f"{'':-^50}", "lg")
         cprint(f"Processing {target.name} with {calibrator.name}...", "g")
@@ -103,19 +105,20 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
 
     cprint(f"{'':-^50}", "lg")
     cprint("Calibrating visibilities...", "g")
-    sof_file = create_visbility_sof(tar_dir, targets, calibrators)
-    subprocess.call([ESOREX_CMD, f"--output-dir='{output_dir}'",
-                     "mat_cal_oifits", str(sof_file)])
+    sof_file = create_visbility_sof(output_dir, targets, calibrators)
+    with open(output_dir / "mat_cal_oifits.log", "w+") as esorex:
+        subprocess.call([ESOREX_CMD, f"--output-dir={str(output_dir)}",
+                         "mat_cal_oifits", str(sof_file)], stdout=esorex)
 
-    cprint(f"{'':-^50}", "lg")
-    cprint("Creating plots...", "g")
-    for fits_file in output_dir.glob("*.fits"):
-        plot_fits = Plotter([fits_file], save_path=output_dir)
-        plot_fits.add_cphase().add_vis()
-        # TODO: Fix this at some point
-        # if mode == "incoherent":
-            # plot_fits.add_flux()
-        plot_fits.plot(save=True)
+    # cprint(f"{'':-^50}", "lg")
+    # cprint("Creating plots...", "g")
+    # for fits_file in output_dir.glob("*.fits"):
+        # plot_fits = Plotter([fits_file], save_path=output_dir)
+        # plot_fits.add_cphase().add_vis()
+        # # TODO: Fix this at some point
+        # # if mode == "incoherent":
+            # # plot_fits.add_flux()
+        # plot_fits.plot(save=True)
 
     cprint(f"{'':-^50}", "lg")
     cprint("Done!", "g")
