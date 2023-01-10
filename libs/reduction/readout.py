@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 from typing import Optional, Dict, List
 
@@ -7,6 +8,9 @@ from astropy.io import fits
 from astroquery.simbad import Simbad
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
+
+# NOTE: Remove units warning. In (.fits)-file 'day' unit contain, which doesn't exist
+warnings.simplefilter("ignore", category=u.UnitsWarning)
 
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
