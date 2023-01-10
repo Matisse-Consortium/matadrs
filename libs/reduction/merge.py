@@ -129,7 +129,6 @@ def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
     """
     root_dir = Path(root_dir, stem_dir, "products", target_dir)
     coherent_dirs = (root_dir / "bcd_and_averaged" / "coherent").glob("*.rb")
-    breakpoint()
     incoherent_dirs = [Path(str(directory).replace("coherent", "incoherent"))\
                        for directory in coherent_dirs]
 
@@ -139,6 +138,7 @@ def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
 
     cprint(f"Merging files...", "lp")
     cprint(f"{'':-^50}", "lg")
+
     # FIXME: This is not executed -> Why?
     for coherent_dir, incoherent_dir in zip(coherent_dirs, incoherent_dirs):
         merge_folders(coherent_dir, incoherent_dir, output_dir)
