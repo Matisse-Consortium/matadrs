@@ -170,5 +170,5 @@ def calibrate(data_dir: Path, stem_dir: Path, target_dir: Path):
 
 if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
+    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220420"
     calibrate(data_dir, stem_dir, target_dir)
