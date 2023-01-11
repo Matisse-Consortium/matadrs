@@ -90,6 +90,8 @@ def get_catalog_match(readout: ReadoutFits, match_radius: u.arcsec = 20*u.arcsec
     -------
     catalog: Path | None
     """
+    test = JSDC_V2_CATALOG.query_region(readout.coords, radius=match_radius)
+    breakpoint()
     if JSDC_V2_CATALOG.query_region(readout.coords, radius=match_radius):
         cprint(f"Calibrator '{readout.name}' found in JSDC v2 catalog!", "g")
         return JSDC_CATALOG
@@ -119,10 +121,12 @@ def set_script_arguments(corr_flux: bool, array: str,
         A string that contains the arguments, which are passed to the
         MATISSE-pipline
     """
+    if resolution == "high":
+        resolution = f"{resolution}_{array.lower()[:-1]}"
     bin_L, bin_N = SPECTRAL_BINNING[resolution]
     # NOTE: Jozsef uses TEL 3 here, but Jacob 2? What is the meaning of this
     # -> Read up on it. Already asked! Awaiting response
-    compensate = "/compensate=[pb,rb,nl,if,bp,od]"
+    compensate = '/compensate="[pb,rb,nl,if,bp,od]"'
     tel = "/replaceTel=3" if array == "ATs" else "/replaceTel=0"
     coh_L  = f"/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2"\
             if corr_flux else ""
