@@ -122,6 +122,50 @@ class DataPrep:
         """Fetches the corresponding data for the sought wavelength"""
         ...
 
+    # def get_data_for_wavelength(self, data: Union[Quantity, np.ndarray],
+                                # wl_poly_indices: List) -> List:
+        # """Fetches data for one or more wavelengths from the nested arrays. Gets the
+        # corresponding values by index from the nested arrays (baselines/triangle)
+
+        # Parameters
+        # ----------
+        # data: astropy.units.Quantity | numpy.ndarray
+            # The data for every baseline/triangle
+        # wl_poly_indices: List
+            # The polychromatic indices of the wavelength solution. This has to be a doubly
+            # nested list
+
+        # Returns
+        # --------
+        # data4wl: List
+        # """
+        # # NOTE: Right now the data is immediately averaged after getting taken. Maybe
+        # # change this for the future
+        # polychromatic_data_averaged = []
+        # for dataset in data:
+            # data4wl = []
+            # for wl_indices in wl_poly_indices:
+                # data4wl_poly_index = []
+                # for wl_index in wl_indices:
+                    # array_wl_slice = u.Quantity([array[wl_index] for array in dataset])
+                    # data4wl_poly_index.append(array_wl_slice)
+                # data4wl.append(u.Quantity(data4wl_poly_index))
+            # averaged_dataset_slice = self.average_polychromatic_data(data4wl)
+            # polychromatic_data_averaged.append(averaged_dataset_slice)
+        # return [u.Quantity(dataset4wl) for dataset4wl in polychromatic_data_averaged]
+
+    # def average_polychromatic_data(self, polychromatic_data: Quantity):
+        # """Fetches and then averages over polychromatic data. Iterates over the
+        # polychromatic wavelength slices and then takes the mean of them
+
+        # Parameters
+        # ----------
+        # polychromatic_data: astropy.units.Quantity
+            # The polychromatic data slices of wavelengths in one window
+        # """
+        # return u.Quantity([np.mean(data_slice, axis=0)\
+                           # for data_slice in polychromatic_data])
+
 
 if __name__ == "__main__":
     fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits"]

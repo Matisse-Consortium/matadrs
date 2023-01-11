@@ -8,6 +8,8 @@ from astropy.io import fits
 from astroquery.simbad import Simbad
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
+from scipy.interpolate import CubicSpline
+
 
 # NOTE: Remove units warning. In (.fits)-file 'day' unit contain, which doesn't exist
 warnings.simplefilter("ignore", category=u.UnitsWarning)
@@ -90,11 +92,13 @@ class ReadoutFits:
             try:
                 self._oi_flux = self.get_table_for_fits("oi_flux")
             except KeyError:
-                # TODO: Implement here flux-file support
+                self._oi_flux = Table()
                 if self.flux_file is not None:
-                    ...
+                    flux, flux_err = self.get_flux_data_from_flux_file()
+                    self._oi_flux.add_columns([self._oi_flux.Column([flux], unit=u.Jy),
+                                              self._oi_flux.Column([flux_err], unit=u.Jy)],
+                                              names=["FLUXDATA", "FLUXERR"])
                 else:
-                    self._oi_flux = Table()
                     # TODO: Make this work so the unit is Jy -> Right now it has no effect
                     nan_array = self._oi_flux.Column(np.full(self.longest_entry, np.nan),
                                                      unit=u.Jy)
@@ -103,6 +107,7 @@ class ReadoutFits:
             self._oi_flux.add_column([self.get_table_for_fits("oi_array")["TEL_NAME"].astype(str)],
                                      name="TEL_NAME")
             self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "TEL_NAME"])
+        # TODO: Maybe remove "TEL_NAME"
         return self._oi_flux
 
     @property
@@ -171,6 +176,20 @@ class ReadoutFits:
             return True
         return False
 
+    def get_flux_data_from_flux_file(self) -> u.Quantity:
+        """Reads the flux data from the flux file and then interpolates it to the
+        wavelength solution used by MATISSE
+
+        Returns
+        -------
+        flux: astropy.units.Quantity
+        """
+        flux_data = Table.read(self.flux_file, names=["wl", "flux"], format="ascii")
+        cubic_spline = CubicSpline(flux_data["wl"], flux_data["flux"])
+        interpolated_flux = (cubic_spline(self.oi_wl["EFF_WAVE"].data)).ravel()
+        # TODO: Get a better error representation for the flux
+        return interpolated_flux, interpolated_flux*0.1
+
     def get_table_for_fits(self, header: str) -> List[Table]:
         """Fetches the data from a (.fits)-file as a table
 
@@ -206,5 +225,7 @@ if __name__ == "__main__":
                   "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits",
                   "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
     fits_files = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
-    readout = ReadoutFits(fits_files[0])
+    flux_files = ["HD_163296_sws.txt", "HD_163296_timmi2.txt"]
+    flux_files = [DATA_DIR / "tests" / flux_file for flux_file in flux_files]
+    readout = ReadoutFits(fits_files[0], flux_files[0])
     breakpoint()
