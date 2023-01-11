@@ -25,7 +25,7 @@ def cprint(message: str, c: Optional[str] = None) -> None:
 
 def get_fits(folder: Path, tag: str):
     """Searches a folder for a tag and returns the non-chopped and chopped (.fits)-files"""
-    unchopped_fits = sorted(folder.glob(f"{tag}*.fits"),
+    unchopped_fits = sorted(folder.glob(f"*{tag}*.fits"),
                             key=lambda x: x.name[-8:])
 
     if len(unchopped_fits) == 6:

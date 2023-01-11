@@ -5,10 +5,11 @@ from typing import List, Optional
 from collections import deque, namedtuple
 
 # TODO: Find way to make this into a complete module -> More pythonic!
+from plot import Plotter
 from readout import ReadoutFits
 from fluxcal import fluxcal
 from calib_BCD2 import calib_BCD
-from utils import get_path_descriptor, check_if_target, cprint
+from utils import get_path_descriptor, check_if_target, cprint, get_fits
 
 
 # TODO: Also make the CAL-CAL calibration??
@@ -103,6 +104,9 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
             fluxcal(target, calibrator, output_file,
                     list(map(str, NBAND_DATABASES)), mode=mode_name,
                     output_fig_dir=str(output_dir), do_airmass_correction=True)
+        cprint("Plotting file...", "y")
+    plot_fits = Plotter([output_file], save_path=output_dir)
+    plot_fits.add_cphase().add_vis().plot(save=True)
 
     cprint(f"{'':-^50}", "lg")
     cprint("Calibrating visibilities...", "g")
@@ -110,6 +114,10 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     subprocess.call([ESOREX_CMD, f"--output-dir={str(output_dir)}",
                      "mat_cal_oifits", str(sof_file)],
                     stdout=subprocess.DEVNULL)
+    cprint("Plotting visibility files...", "g")
+    for fits_file in get_fits(output_dir, "TARGET_CAL_INT"):
+        plot_fits = Plotter([fits_file], save_path=output_dir)
+        plot_fits.add_cphase().add_vis().plot(save=True)
 
     # TODO: Find way to make this moving better than this -> Moves (.fits)-files
     # from this path that get created by 'mat_cal_oifits?'

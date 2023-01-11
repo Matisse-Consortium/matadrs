@@ -21,7 +21,7 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
 
 class Plotter:
-    """Class that plots models as well as vis-, t3phi- and uv-data
+    """Class that plots models as well as reduced data
 
     Attributes
     ----------
@@ -142,6 +142,7 @@ class Plotter:
             If toggled, saves the plot to the self.save_path file with the
             self.plot_name
         """
+        # TODO: Handle save structure differently -> with save_path and so
         columns = 1 if self.number_of_plots == 1 else\
                 (3 if self.number_of_plots >= 3 else 2)
         rows = np.ceil(self.number_of_plots/columns).astype(int)\

@@ -13,7 +13,8 @@ from astropy.coordinates import SkyCoord
 from mat_tools import mat_autoPipeline as mp
 
 # TODO: Find way to make this into a complete module -> More pythonic!
-from utils import cprint
+from plot import Plotter
+from utils import cprint, get_fits
 from readout import ReadoutFits
 
 
@@ -193,9 +194,15 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     try:
         rb_folders = res_dir.glob("Iter1/*.rb")
         for folder in rb_folders:
+            cprint(f"Moving folder {folder.name}...", "g")
             if (mode_and_band_dir / folder.name).exists():
                 shutil.rmtree(mode_and_band_dir / folder.name)
             shutil.move(folder, mode_and_band_dir)
+            cprint(f"Plotting files of folder {folder.name}...", "g")
+            for fits_file in get_fits((mode_and_band_dir / folder.name, "RAW_INT"))
+                plot_fits = Plotter([fits_file],
+                                    save_path=(mode_and_band_dir / folder.name))
+                plot_fits.add_cphase().add_vis().plot(save=True)
 
         if rb_folders:
             cprint(f"Moving folders to directory {mode_and_band_dir.name}...", "g")
