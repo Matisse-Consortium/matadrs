@@ -7,7 +7,7 @@ from collections import namedtuple
 from readout import ReadoutFits
 from calib_BCD2 import calib_BCD
 from avg_oifits import avg_oifits
-from utils import cprint, get_fits
+from utils import cprint, split_fits
 
 
 HEADER_TO_REMOVE = [{'key':'HIERARCH ESO INS BCD1 ID','value':' '},
@@ -46,7 +46,8 @@ def sort_fits_by_BCD(fits_files: List[Path]) -> namedtuple:
     return BCDFits(in_in, in_out, out_in, out_out)
 
 
-def average_files(unchopped_fits: List[Path], chopped_fits: List[Path], output_dir: Path):
+def average_files(unchopped_fits: List[Path],
+                  chopped_fits: List[Path], output_dir: Path):
     """Averages a set of unchopped and chopped (.fits)-files"""
     if "TARGET_CAL_INT" in unchopped_fits[0].name:
         cprint(f"Averaging visibility calibration...", "g")
@@ -98,8 +99,10 @@ def average_folders(root_dir: Path, mode: str) -> None:
             cprint(f"{'':-^50}", "lg")
 
             # TODO: Make check if vis-calibration or flux calibration did not work
-            unchopped_vis_fits, chopped_vis_fits = get_fits(folder, "TARGET_CAL")
-            unchopped_flux_fits, chopped_flux_fits = get_fits(folder, "TARGET_FLUXCAL")
+            unchopped_vis_fits, chopped_vis_fits = split_fits(folder,
+                                                              "TARGET_CAL")
+            unchopped_flux_fits, chopped_flux_fits = split_fits(folder,
+                                                                "TARGET_FLUXCAL")
 
             folder_split = folder.name.split(".")
             folder_split[0] += "-AVG"
@@ -114,6 +117,11 @@ def average_folders(root_dir: Path, mode: str) -> None:
             bcd_calibration(unchopped_vis_fits, output_dir)
             for fits_file in folder.glob("*.fits"):
                 shutil.copy(str(fits_file), (output_dir / fits_file.name))
+
+            cprint("Plotting averaged files...", "g")
+            for fits_file in get_fits_by_tag(output_dir, "AVG"):
+                plot_fits = Plotter([fits_file], save_path=output_dir)
+                plot_fits.add_cphase().add_vis().plot(save=True)
             cprint(f"{'':-^50}", "lg")
 
 

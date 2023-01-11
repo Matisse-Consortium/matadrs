@@ -14,7 +14,7 @@ from mat_tools import mat_autoPipeline as mp
 
 # TODO: Find way to make this into a complete module -> More pythonic!
 from plot import Plotter
-from utils import cprint, get_fits
+from utils import cprint, get_fits_by_tag
 from readout import ReadoutFits
 
 
@@ -92,9 +92,10 @@ def get_catalog_match(readout: ReadoutFits, match_radius: u.arcsec = 20*u.arcsec
     catalog: Path | None
     """
     match = JSDC_V2_CATALOG.query_region(readout.coords, radius=match_radius)
-    if match and (len(match[0] > 0)):
-        cprint(f"Calibrator '{match[0]['NAME'][0]}' found in JSDC v2 catalog!",
-               "g")
+    if match:
+        if len(match[0]) > 0:
+            cprint(f"Calibrator '{match[0]['Name'][0]}' found in JSDC v2 catalog!",
+                   "y")
         return JSDC_CATALOG
     return in_catalog(readout.coords, radius=match_radius, catalog=ADDITIONAL_CATALOG)
 
@@ -177,9 +178,10 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     readout = ReadoutFits(get_tpl_match(raw_dir, tpl_start))
     if readout.is_calibrator():
         cprint(f"Calibrator '{readout.name}' detected!"
-               f" Moving corresponding catalog to {calib_dir.name}...", "y")
+               f" Checking for catalog...", "g")
         catalog_path = get_catalog_match(readout)
         if catalog_path is not None:
+            cprint(f"Moving catalog to {calib_dir.name}...", "g")
             shutil.copy(catalog_path, calib_dir / catalog_path.name)
     else:
         for catalog in calib_dir.glob("*catalog*"):
@@ -198,18 +200,21 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
             if (mode_and_band_dir / folder.name).exists():
                 shutil.rmtree(mode_and_band_dir / folder.name)
             shutil.move(folder, mode_and_band_dir)
-            cprint(f"Plotting files of folder {folder.name}...", "g")
-            for fits_file in get_fits((mode_and_band_dir / folder.name, "RAW_INT"))
-                plot_fits = Plotter([fits_file],
-                                    save_path=(mode_and_band_dir / folder.name))
-                plot_fits.add_cphase().add_vis().plot(save=True)
 
         if rb_folders:
-            cprint(f"Moving folders to directory {mode_and_band_dir.name}...", "g")
+            cprint(f"Moving folders to directory {mode_and_band_dir.name}...",
+                   "g")
 
     # TODO: Make logger here
     except Exception:
-        cprint(f"Moving of files to {mode_and_band_dir.name} failed!", "y")
+        cprint(f"Moving of files to {mode_and_band_dir.name} failed!", "r")
+
+    for folder in mode_and_band_dir.glob("*.rb"):
+        cprint(f"Plotting files of folder {folder.name}...", "g")
+        for fits_file in get_fits_by_tag(folder, "RAW_INT"):
+            plot_fits = Plotter([fits_file],
+                                save_path=(mode_and_band_dir / folder.name))
+            plot_fits.add_cphase().add_vis().plot(save=True)
 
     cprint(f"{'':-^50}", "lg")
     cprint(f"Executed the {mode} reduction for the {band} in"
@@ -284,5 +289,5 @@ def reduce(root_dir: Path, instrument_dir: Path,
 
 if __name__ == "__main__":
     root_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/")
-    target_dir, date_dir = "matisse/GTO/hd142666", "UTs/20220422"
+    target_dir, date_dir = "matisse/GTO/hd142666", "UTs/20190514"
     reduce(root_dir, target_dir, date_dir, "UTs")

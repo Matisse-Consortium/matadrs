@@ -22,15 +22,18 @@ def cprint(message: str, c: Optional[str] = None) -> None:
     else:
         print(message)
 
-
-def get_fits(folder: Path, tag: str):
-    """Searches a folder for a tag and returns the non-chopped and chopped (.fits)-files"""
-    unchopped_fits = sorted(folder.glob(f"*{tag}*.fits"),
-                            key=lambda x: x.name[-8:])
-
+def split_fits(folder: Path, tag: str):
+    """Searches a folder for a tag and returns the non-chopped
+    and chopped (.fits)-files"""
+    unchopped_fits = get_fits_by_tag(folder, tag)
     if len(unchopped_fits) == 6:
         return unchopped_fits[:4], unchopped_fits[4:]
     return unchopped_fits, None
+
+
+def get_fits_by_tag(folder: Path, tag: str):
+    """Searches a folder for a tag and returns the (.fits)-files matching it"""
+    return sorted(folder.glob(f"*{tag}*.fits"), key=lambda x: x.name[-8:])
 
 
 def check_if_target(target_dir: Path) -> bool:

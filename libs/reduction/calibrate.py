@@ -9,7 +9,7 @@ from plot import Plotter
 from readout import ReadoutFits
 from fluxcal import fluxcal
 from calib_BCD2 import calib_BCD
-from utils import get_path_descriptor, check_if_target, cprint, get_fits
+from utils import get_path_descriptor, check_if_target, cprint, get_fits_by_tag
 
 
 # TODO: Also make the CAL-CAL calibration??
@@ -115,7 +115,7 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
                      "mat_cal_oifits", str(sof_file)],
                     stdout=subprocess.DEVNULL)
     cprint("Plotting visibility files...", "g")
-    for fits_file in get_fits(output_dir, "TARGET_CAL_INT"):
+    for fits_file in get_fits_by_tag(output_dir, "TARGET_CAL_INT"):
         plot_fits = Plotter([fits_file], save_path=output_dir)
         plot_fits.add_cphase().add_vis().plot(save=True)
 

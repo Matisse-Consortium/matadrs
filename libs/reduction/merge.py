@@ -4,7 +4,7 @@ from pathlib import Path
 # TODO: Find way to make this into a complete module -> More pythonic!
 from plot import Plotter
 from readout import ReadoutFits
-from utils import cprint, get_fits
+from utils import cprint, split_fits
 from avg_oifits import oifits_patchwork
 
 
@@ -74,13 +74,13 @@ def merge_non_averaged_files(coherent_dir: Path,
         output_dir.mkdir(parents=True)
 
     coherent_unchopped_vis_fits,\
-            coherent_chopped_vis_fits = get_fits(coherent_dir, vis_tag)
+            coherent_chopped_vis_fits = split_fits(coherent_dir, vis_tag)
     coherent_unchopped_flux_fits,\
-            coherent_chopped_flux_fits = get_fits(coherent_dir, flux_tag)
+            coherent_chopped_flux_fits = split_fits(coherent_dir, flux_tag)
     incoherent_unchopped_vis_fits,\
-            incoherent_chopped_vis_fits = get_fits(incoherent_dir, vis_tag)
+            incoherent_chopped_vis_fits = split_fits(incoherent_dir, vis_tag)
     incoherent_unchopped_flux_fits,\
-            incoherent_chopped_flux_fits = get_fits(incoherent_dir, flux_tag)
+            incoherent_chopped_flux_fits = split_fits(incoherent_dir, flux_tag)
 
     for index, (coh_unchopped_vis, inc_unchopped_vis, coh_unchopped_flux, inc_unchopped_flux)\
             in enumerate(zip(coherent_unchopped_vis_fits, incoherent_unchopped_vis_fits,
