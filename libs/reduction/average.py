@@ -60,10 +60,8 @@ def average_files(unchopped_fits: List[Path], chopped_fits: List[Path], output_d
 
     avg_oifits(unchopped_fits, outfile_unchopped, headerval=HEADER_TO_REMOVE)
 
-    # TODO: See how to bcd-calibrate the chopped files as well
     if chopped_fits is not None:
         avg_oifits(chopped_fits, outfile_chopped, headerval=HEADER_TO_REMOVE)
-        # calib_BCD()
 
 
 def bcd_calibration(unchopped_fits: List[Path], output_dir: Path):
@@ -77,6 +75,7 @@ def bcd_calibration(unchopped_fits: List[Path], output_dir: Path):
     else:
         calib_BCD(bcd.in_in, "", "", bcd.out_out,
                  outfile_path_cphases, plot=False)
+    # TODO: See how to bcd-calibrate the chopped files as well
 
 
 def average_folders(root_dir: Path, mode: str) -> None:

@@ -90,10 +90,10 @@ def get_catalog_match(readout: ReadoutFits, match_radius: u.arcsec = 20*u.arcsec
     -------
     catalog: Path | None
     """
-    test = JSDC_V2_CATALOG.query_region(readout.coords, radius=match_radius)
-    breakpoint()
-    if JSDC_V2_CATALOG.query_region(readout.coords, radius=match_radius):
-        cprint(f"Calibrator '{readout.name}' found in JSDC v2 catalog!", "g")
+    match = JSDC_V2_CATALOG.query_region(readout.coords, radius=match_radius)
+    if match and (len(match[0] > 0)):
+        cprint(f"Calibrator '{match[0]['NAME'][0]}' found in JSDC v2 catalog!",
+               "g")
         return JSDC_CATALOG
     return in_catalog(readout.coords, radius=match_radius, catalog=ADDITIONAL_CATALOG)
 
@@ -277,5 +277,5 @@ def reduce(root_dir: Path, instrument_dir: Path,
 
 if __name__ == "__main__":
     root_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/")
-    target_dir, date_dir = "matisse/GTO/hd142666", "UTs/20220420"
+    target_dir, date_dir = "matisse/GTO/hd142666", "UTs/20220422"
     reduce(root_dir, target_dir, date_dir, "UTs")

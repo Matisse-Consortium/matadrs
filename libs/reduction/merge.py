@@ -33,11 +33,11 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     """
     flux, vis = "TARGET_AVG_FLUX_INT.fits", "TARGET_AVG_VIS_INT.fits"
     bcd = "TARGET_AVG_T3PHI_INT.fits"
-    coherent_flux, incoherent_flux = [str(directory / flux)\
+    coherent_flux, incoherent_flux = [directory / flux\
                                       for directory in directories]
-    coherent_vis, incoherent_vis = [str(directory / vis)\
+    coherent_vis, incoherent_vis = [directory / vis\
                                       for directory in directories]
-    coherent_bcd_vis, incoherent_bcd_vis = [str(directory / bcd)\
+    coherent_bcd_vis, incoherent_bcd_vis = [directory / bcd\
                                             for directory in directories]
     out_file = get_output_file_path(directories[0],
                                     ReadoutFits(Path(coherent_flux)).target_name,
@@ -49,9 +49,12 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     else:
         files_to_merge = [incoherent_flux, coherent_flux,
                           coherent_bcd_vis, incoherent_vis, coherent_bcd_vis]
-    oi_types_list = [["flux"], ["visamp"], ["visphi"], ["vis2"], ["t3"]]
-    oifits_patchwork(files_to_merge, str(out_file),
-                     oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
+    if all([fits_file.exists() for fits_file in files_to_merge]):
+        oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
+                         oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
+    else:
+        raise FileNotFoundError("Files haven't been found: 'oifits_patchwork'"
+                                " cannot be executed!")
     # TODO: Implement handling of chopped files
 
 
@@ -81,7 +84,7 @@ def merge_non_averaged_files(coherent_dir: Path,
 
     for index, (coh_unchopped_vis, inc_unchopped_vis, coh_unchopped_flux, inc_unchopped_flux)\
             in enumerate(zip(coherent_unchopped_vis_fits, incoherent_unchopped_vis_fits,
-                             coherent_unchopped_flux_fits, incoherent_unchopped_flux_fits)):
+                             coherent_unchopped_flux_fits, incoherent_unchopped_flux_fits), start=1):
         out_file = get_output_file_path(coherent_dir,
                                         ReadoutFits(Path(coh_unchopped_vis)).target_name,
                                         output_dir)
@@ -94,7 +97,12 @@ def merge_non_averaged_files(coherent_dir: Path,
             files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
                               coh_unchopped_vis, inc_unchopped_vis, coh_unchopped_vis]
 
-        oifits_patchwork(files_to_merge, str(out_file), oi_types_list=OI_TYPES)
+        if all([fits_file.exists() for fits_file in files_to_merge]):
+            oifits_patchwork(list(map(str, files_to_merge)),
+                             str(out_file), oi_types_list=OI_TYPES)
+        else:
+            raise FileNotFoundError("Files haven't been found: 'oifits_patchwork'"
+                                    " cannot be executed!")
         # TODO: Implement handling of chopped files
 
 
