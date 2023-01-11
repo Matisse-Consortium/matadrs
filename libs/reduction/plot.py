@@ -40,12 +40,12 @@ class Plotter:
                  " WARNING: Only data of SAME BAND can be unified into one plot!")
         self.data_prep = DataPrep(fits_files)
 
+        if save_path is None:
+            self.save_path = Path("").cwd()
+
         # TODO: Improve this plot name giving. Only one fits file is respected in this
         if plot_name is None:
-            self.plot_name = "combined_files.pdf" if len(fits_files) > 1\
-                else f"{fits_files[0].name.split('.')[0]}.pdf"
-        else:
-            self.plot_name = plot_name
+            self.plot_name = f"{fits_files[0].stem}.pdf"
 
         self.save_path = save_path
         self.components = {}
@@ -166,7 +166,7 @@ class Plotter:
         fig.tight_layout()
 
         if save:
-            plt.savefig(self.save_path / self.plot_name, format="pdf")
+            plt.savefig(str(self.save_path / self.plot_name), format="pdf")
         else:
             plt.show()
         plt.close()
