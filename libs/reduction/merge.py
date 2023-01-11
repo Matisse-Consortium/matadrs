@@ -151,7 +151,7 @@ def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
         plot_fits = Plotter([fits_file], save_path=output_dir)
         plot_fits.add_cphase().add_vis().plot(save=True)
     for fits_file in (output_dir / "non_averaged").glob("*.fits"):
-        plot_fits = Plotter([fits_file], save_path=output_dir)
+        plot_fits = Plotter([fits_file], save_path=(output_dir / "non_averaged"))
         plot_fits.add_cphase().add_vis().plot(save=True)
     cprint(f"{'':-^50}", "lg")
     cprint("Merging Done!", "lp")
