@@ -39,7 +39,7 @@ class DataPrep:
         self._oi_flux, self._oi_t3 = None, None
         self._oi_vis, self._oi_vis2 = None, None
 
-        self.readouts = [ReadoutFits(fits_file) for fits_file in self.fits_files]
+        self.readouts = list(map(ReadoutFits, self.fits_files))
 
         # TODO: Implement this in plotter
         # self.uv_coords = self._merge_simple_data("uvcoords")
@@ -169,7 +169,7 @@ class DataPrep:
 
 if __name__ == "__main__":
     fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits"]
-                  # "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits"]
+                  # "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits",
                   # "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
     fits_files = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
     data_prep = DataPrep(fits_files)

@@ -5,9 +5,10 @@ from collections import namedtuple
 
 # TODO: Find way to make this into a complete module -> More pythonic!
 from readout import ReadoutFits
+from plot import Plotter
 from calib_BCD2 import calib_BCD
 from avg_oifits import avg_oifits
-from utils import cprint, split_fits
+from utils import cprint, split_fits, get_fits_by_tag
 
 
 HEADER_TO_REMOVE = [{'key':'HIERARCH ESO INS BCD1 ID','value':' '},
@@ -144,5 +145,5 @@ def average(data_path: Path, stem_dir: Path, target_dir: Path):
 
 if __name__ == "__main__":
     data_path = "/data/beegfs/astro-storage/groups/matisse/scheuck/data"
-    stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
+    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20190514"
     average(data_path, stem_dir, target_dir)

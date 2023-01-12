@@ -11,6 +11,7 @@ from astropy.table import Table, Column
 
 # TODO: Find way to make this into a complete module -> More pythonic!
 from data_prep import DataPrep
+from utils import cprint
 
 # TODO: Make either model or fourier transform carry more info like the name of
 # the plot or similar -> Work more with classes
@@ -31,26 +32,27 @@ class Plotter:
                  plot_name: Optional[str] = None,
                  save_path: Optional[Path] = None) -> None:
         """Initialises the class instance"""
+        self.data_prep = DataPrep(fits_files)
         self._band_mask = None
 
         # TODO: Make it that if multiple datasets are input that multiple plots are made
         # for the different bands -> See how to implement this
         if len(fits_files) > 1:
-            warn("There is more than one (.fits)-file detected."\
-                 " WARNING: Only data of SAME BAND can be unified into one plot!")
-        self.data_prep = DataPrep(fits_files)
+            cprint("There is more than one (.fits)-file detected."
+                   " WARNING: Only data of SAME BAND can be unified"
+                   " into one plot!", "y")
 
         if save_path is None:
             self.save_path = Path("").cwd()
+        else:
+            self.save_path = Path(save_path)
 
         # TODO: Improve this plot name giving. Only one fits file is respected in this
         if plot_name is None:
-            self.plot_name = f"{fits_files[0].stem}.pdf"
-
-        self.save_path = save_path
-        self.components = {}
+            self.plot_name = f"{Path(fits_files[0]).stem}.pdf"
 
         self.wl = self.data_prep.oi_wl["EFF_WAVE"].data[0]
+        self.components = {}
 
     @property
     def number_of_plots(self):

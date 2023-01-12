@@ -2,7 +2,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from typing import List, Optional
-from collections import deque, namedtuple
+from collections import deque
 
 # TODO: Find way to make this into a complete module -> More pythonic!
 from plot import Plotter
@@ -23,7 +23,6 @@ NBAND_DATABASES = LBAND_DATABASES[:]+[DATABASE_DIR / "vBoekelDatabase.fitsold"]
 
 ESOREX_CMD = "/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/bin/esorex"
 
-
 # TODO: Make functionality that does not only calibrate willy nilly, but checks if the
 # calibrator is there for N-band, L-band or LN-band, see Jozsef's files. Use the
 # mat_target_list of newest edition for that (grep it via python api of google sheets)
@@ -43,6 +42,8 @@ def create_visbility_sof(raw_dir: Path,
 
 
 # TODO: Implement visibility calibration like Jozsef, maybe?
+# TODO: Make this better so it calibrates even if the calibrator or the science
+# target is chopped but the other is not
 def calibrate_fits_files(root_dir: Path, tar_dir: Path,
                          cal_dir: Path, mode_name: str) -> None:
     """The calibration for a target and a calibrator folder
@@ -63,21 +64,16 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     """
     # TODO: Make the following into a function
     cprint(f"Calibrating {tar_dir.name} with {cal_dir.name}...", "p")
-    targets = sorted(tar_dir.glob("TARGET_RAW_INT*"),
-                     key=lambda x: x.name[-8:])
+    targets = get_fits_by_tag(tar_dir, "TARGET_RAW_INT")
+    calibrators = get_fits_by_tag(cal_dir, "CALIB_RAW_INT")
 
     if not targets:
-        cprint("No 'TARGET_RAW_INT*'-files found. SKIPPED!", "y")
+        cprint("No 'TARGET_RAW_INT*'-files found. SKIPPING!", "y")
         cprint(f"{'':-^50}", "lg")
         return
-
-    calibrators = sorted(cal_dir.glob("CALIB_RAW_INT*"),
-                         key=lambda x: x.name[-8:])
-
-    # TODO: Make this better so it calibrates even if the calibrator or the science
-    # target is chopped but the other is not
     if len(targets) != len(calibrators):
-        cprint("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-files. SKIPPING!", "y")
+        cprint("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-files. SKIPPING!",
+               "y")
         cprint(f"{'':-^50}", "lg")
         return
 
@@ -92,21 +88,21 @@ def calibrate_fits_files(root_dir: Path, tar_dir: Path,
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
         cprint(f"{'':-^50}", "lg")
         cprint(f"Processing {target.name} with {calibrator.name}...", "g")
-        output_file = str(output_dir / f"TARGET_FLUXCAL_INT_000{index}.fits")
+        output_file = output_dir / f"TARGET_FLUXCAL_INT_000{index}.fits"
         target, calibrator = str(target), str(calibrator)
 
         # TODO: Make this not as redundant, and the airmass correction implement as well?
         if "lband" in target:
-            fluxcal(target, calibrator, output_file,
+            fluxcal(target, calibrator, str(output_file),
                     list(map(str, LBAND_DATABASES)), mode=mode_name,
                     output_fig_dir=str(output_dir), do_airmass_correction=True)
         else:
-            fluxcal(target, calibrator, output_file,
+            fluxcal(target, calibrator, str(output_file),
                     list(map(str, NBAND_DATABASES)), mode=mode_name,
                     output_fig_dir=str(output_dir), do_airmass_correction=True)
         cprint("Plotting file...", "y")
-    plot_fits = Plotter([output_file], save_path=output_dir)
-    plot_fits.add_cphase().add_vis().plot(save=True)
+        plot_fits = Plotter([output_file], save_path=output_dir)
+        plot_fits.add_cphase().add_vis().plot(save=True)
 
     cprint(f"{'':-^50}", "lg")
     cprint("Calibrating visibilities...", "g")

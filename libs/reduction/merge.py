@@ -166,5 +166,5 @@ def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
 
 if __name__ == "__main__":
     root_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    stem_dir, target_dir = "matisse/GTO/hd163296/", "ATs/20190323"
+    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20190514"
     merge(root_dir, stem_dir, target_dir)

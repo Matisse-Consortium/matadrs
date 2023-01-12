@@ -5,11 +5,11 @@ import datetime
 from pathlib import Path
 from typing import Optional, List
 
-from .libs.reduction.reduce import reduce
-from .libs.reduction.calibrate import calibrate
-from .libs.reduction.average import average
-from .libs.reduction.merge import merge
-from .libs.reduction.utils import cprint
+from reduce import reduce
+from calibrate import calibrate
+from average import average
+from merge import merge
+from utils import cprint
 
 
 # TODO: Add functionality that clears all the paths before it write again,
