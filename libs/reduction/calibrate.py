@@ -5,9 +5,7 @@ from typing import List, Optional
 from collections import deque
 
 from .fluxcal import fluxcal
-from .calib_BCD2 import calib_BCD
 from ..utils.plot import Plotter
-from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, get_path_descriptor, check_if_target, get_fits_by_tag
 
 
@@ -171,8 +169,8 @@ def calibrate_folders(root_dir: Path, band_dir: Path,
             continue
 
 
-def calibrate(root_dir: Path, stem_dir: Path,
-              target_dir: Path, mode: str = "both", band: str = "both"):
+def calibrate(root_dir: Path, stem_dir: Path, target_dir: Path,
+              mode: Optional[str] = "both", band: Optional[str] = "both") -> None:
     """Does the full calibration for all of the "cal_dir" subdirectories
 
     Parameters
@@ -182,19 +180,24 @@ def calibrate(root_dir: Path, stem_dir: Path,
     stem_dir: Path
     target_dir: Path
         The directory of the science target
+    mode: str, optional
+        The mode in which the reduction is to be executed. Either 'coherent',
+        'incoherent' or 'both'
+    band: str, optional
+        The band in which the reduction is to be executed. Either 'lband',
+        'nband' or 'both'
     """
     root_dir = Path(data_dir, stem_dir, "products", target_dir)
     if mode not in ["both", "coherent", "incoherent"]:
-        raise IOError(f"No mode named {mode} exists!")
+        raise IOError(f"No mode named '{mode}' exists!")
     if band not in ["both", "lband", "nband"]:
-        raise IOError(f"No band named {band} exists!")
+        raise IOError(f"No band named '{band}' exists!")
     modes = ["coherent", "incoherent"] if "both" else [mode]
     bands = ["lband", "nband"] if "both" else [band]
 
     for mode in modes:
         for band in bands:
-            calibrate_folders(root_dir,
-                              Path(mode, band), mode_name=MODE_NAMES[mode])
+            calibrate_folders(root_dir, Path(mode, band), mode_name=MODE_NAMES[mode])
     cprint("Calibration Done!", "lp")
 
 
