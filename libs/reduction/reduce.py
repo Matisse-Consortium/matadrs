@@ -3,7 +3,7 @@ import time
 import datetime
 import shutil
 from pathlib import Path
-from typing import Optional
+from typing import Set, Optional
 
 import numpy as np
 import astropy.units as u
@@ -12,10 +12,9 @@ from astroquery.vizier import Vizier
 from astropy.coordinates import SkyCoord
 from mat_tools import mat_autoPipeline as mp
 
-# TODO: Find way to make this into a complete module -> More pythonic!
-from plot import Plotter
-from utils import cprint, get_fits_by_tag
-from readout import ReadoutFits
+from ..utils.plot import Plotter
+from ..utils.readout import ReadoutFits
+from ..utils.tools import cprint, get_fits_by_tag
 
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
@@ -29,17 +28,21 @@ SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
 
 
 # TODO: Maybe there is a smarter way than globbing twice? Not that important however...
-def get_tpl_match(raw_dir: Path, tpl_start: str):
-    """Gets a (.fits)-file matching the tpl start
+def get_tpl_match(raw_dir: Path, tpl_start: str) -> Path:
+    """Gets a singular (.fits)-file matching the 'tpl_start', i.e., the starting time of
+    the observation
 
     Parameters
     ----------
     raw_dir: Path
+        The directory containing the raw-files
     tpl_start: str
+        The starting time of the observation
 
     Returns
     -------
     fits_file: Path
+        A (.fits)-file matching the input
     """
     for fits_file in raw_dir.glob("*.fits"):
         if tpl_start == ReadoutFits(fits_file).tpl_start:
@@ -47,23 +50,34 @@ def get_tpl_match(raw_dir: Path, tpl_start: str):
     raise FileNotFoundError("No file with matching tpl_start exists!")
 
 
-def get_tpl_starts(raw_dir: Path):
-    """Iterates through all files and gets their tpl start times"""
+def get_tpl_starts(raw_dir: Path) -> Set[str]:
+    """Iterates through all files and gets their 'tpl_start', i.e, the starting time of
+    the individual observations
+
+    Parameters
+    ----------
+    raw_dir: Path
+        The directory containing the raw-files
+    """
     return set([ReadoutFits(fits_file).tpl_start for fits_file in raw_dir.glob("*.fits")])
 
 
-def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
-    """Checks if calibrator is in catalog. Returns catalog if True, else None
+def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path) -> Optional[Path]:
+    """Checks if calibrator is in the given catalog.
 
     Parameters
     ----------
     readout: ReadoutFits
+        A class wrapping a (.fits)-file, that reads out its information quickly
     radius: u.arcsec
-    catalog_fits: Path
+        The radius in which targets are queried from the catalog
+    catlog: Path
+        The catalog which is to be queried from the catalog
 
     Returns
     -------
     catalog: Path | None
+        The catalog in which the object has been found in
     """
     table = Table().read(catalog)
     coords_catalog = SkyCoord(table["RAJ2000"], table["DEJ2000"],
@@ -77,31 +91,34 @@ def in_catalog(readout: ReadoutFits, radius: u.arcsec, catalog: Path):
     return None
 
 
-def get_catalog_match(readout: ReadoutFits, match_radius: u.arcsec = 20*u.arcsec):
+def get_catalog_match(readout: ReadoutFits, radius: u.arcsec = 20*u.arcsec):
     """Checks if the calibrator is in the 'jsdc_v2'-catalog and if not then searches the
-    local calibrator databases
+    local, supplementary calibrator databases
 
     Parameters
     ----------
     readout: ReadoutFits
-    match_radius: u.arcsec
-        The radius in which to search the catalouge
+        A class wrapping a (.fits)-file, that reads out its information quickly
+    radius: u.arcsec
+        The radius in which targets are queried from the catalog
 
     Returns
     -------
     catalog: Path | None
+        The catalog in which the object has been found in
     """
-    match = JSDC_V2_CATALOG.query_region(readout.coords, radius=match_radius)
+    match = JSDC_V2_CATALOG.query_region(readout.coords, radius=radius)
     if match:
         if len(match[0]) > 0:
             cprint(f"Calibrator '{match[0]['Name'][0]}' found in JSDC v2 catalog!",
                    "y")
         return JSDC_CATALOG
-    return in_catalog(readout.coords, radius=match_radius, catalog=ADDITIONAL_CATALOG)
+    return in_catalog(readout.coords, radius=radius, catalog=ADDITIONAL_CATALOG)
 
 
+# TODO: Determine the spectral binning by automatic readout in the future
 def set_script_arguments(corr_flux: bool, array: str,
-                         resolution: Optional[str] = "low") -> str:
+                         resolution: Optional[str] = "low") -> Tuple[str]:
     """Sets the arguments that are then passed to the 'mat_autoPipeline.py'
     script
 
@@ -111,7 +128,7 @@ def set_script_arguments(corr_flux: bool, array: str,
         This specifies if the flux is to be reduced or not
     array: str
         The array configuration that was used for the observation
-    resolution: str
+    resolution: str, optional
         This determines the spectral binning. Input can be "low" for
         low-resolution in both bands, "high_ut" for low-resolution in L-band
         and high-resolution in N-band for the UTs and the same for "high_at" for
@@ -119,43 +136,46 @@ def set_script_arguments(corr_flux: bool, array: str,
 
     Returns
     -------
-    str
-        A string that contains the arguments, which are passed to the
-        MATISSE-pipline
+    lband_params: str
+        The arguments passed to the MATISSE-pipline for the L-band
+    nband_params: str
+        The arguments passed to the MATISSE-pipline for the N-band
     """
     if resolution == "high":
         resolution = f"{resolution}_{array.lower()[:-1]}"
     bin_L, bin_N = SPECTRAL_BINNING[resolution]
+
     # NOTE: Jozsef uses TEL 3 here, but Jacob 2? What is the meaning of this
     # -> Read up on it. Already asked! Awaiting response
     compensate = '/compensate="[pb,rb,nl,if,bp,od]"'
     tel = "/replaceTel=3" if array == "ATs" else "/replaceTel=0"
-    coh_L  = f"/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2"\
-            if corr_flux else ""
-    coh_N = f"/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2" if corr_flux else ""
-    paramL_lst = f"{coh_L}{compensate}/spectralBinning={bin_L}"
-    paramN_lst = f"{tel}{coh_N}/spectralBinning={bin_N}"
-    return paramL_lst, paramN_lst
+    coh_L = "/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2" if corr_flux else ""
+    coh_N = "/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2" if corr_flux else ""
+    return f"{coh_L}{compensate}/spectralBinning={bin_L}",\
+            f"{tel}{coh_N}/spectralBinning={bin_N}"
 
 
+# TODO: Read out the array configurations from the (.fits)-files
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
                          array: str, mode: bool, band: str, tpl_start: str,
                          resolution: Optional[str] = "low") -> None:
-    """Reduces either the lband or the nband data for either the "coherent" or
-    "incoherent" setting for a single iteration/epoch.
+    """Reduces either the L- and/or the N-band data for either the 'coherent' and/or
+    'incoherent' setting for a single iteration/epoch.
 
-    Removes the old (.sof)-files to ensure proper reduction and then creates the needed
-    folders in the "res_dir"-directory. After this, it starts the reduction with the
-    specified settings
+    Notes
+    -----
+    Removes the old (.sof)-files to ensure proper reduction and then creates folders in
+    the 'res_dir'-directory. After this, it starts the reduction with the specified
+    settings
 
     Parameters
     ----------
     raw_dir: Path
-        The path containing the raw observation files
+        The direcotry containing the raw observation files
     calib_dir: Path
-        The path containing the calibration files
+        The directory containing the calibration files
     res_dir: Path
-        The path to contain to reduced data
+        The directory to contain to reduced data
     array: str
         The array configuration that was used for the observation. Either "AT" or "UT"
     mode: bool
@@ -164,7 +184,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     band: str
         The band for which the reduction is to be done, either "lband" or "nband"
     tpl_star: str
-        The starting time of target's observations
+        The starting time of observations
     """
     start_time = time.perf_counter()
     mode_and_band_dir = res_dir / mode / band
@@ -224,6 +244,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path, res_dir: Path,
     cprint(f"{'':-^50}", "lg")
 
 
+# TODO: Change the way the folders are structured and input for ease-of use
 def reduce(root_dir: Path, instrument_dir: Path,
            target_dir: Path, array: str,
            resolution: Optional[str] = "low"):
@@ -232,13 +253,9 @@ def reduce(root_dir: Path, instrument_dir: Path,
     Parameters
     ----------
     raw_dir: Path
-        The path containing the raw observation files
+        The directory containing the raw observation files
     array: str
         The array configuration that was used for the observation
-
-    See Also
-    --------
-    single_reduction()
     """
     overall_start_time = time.perf_counter()
     raw_dir = Path(root_dir, instrument_dir, "raw", target_dir).resolve()
