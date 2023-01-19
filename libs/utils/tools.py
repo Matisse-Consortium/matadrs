@@ -1,5 +1,11 @@
+import time
+from datetime import timedelta
+from functools import wraps
 from pathlib import Path
-from typing import Tuple, Optional, List
+from typing import Callable, Tuple, List, Union, Optional
+
+__all__ = ["cprint", "print_execution_time", "get_execution_modes",
+           "split_fits", "get_fits_by_tag", "check_if_target", "get_path_descriptor"]
 
 
 def cprint(message: str, color: Optional[str] = None) -> None:
@@ -21,6 +27,51 @@ def cprint(message: str, color: Optional[str] = None) -> None:
         print(color_code[0] + message + color_code[1])
     else:
         print(message)
+
+
+def print_execution_time(func: Callable):
+    """Prints the execution time of the input function"""
+    @wraps(func)
+    def inner(*args, **kwargs):
+        overall_start_time = time.perf_counter()
+        func()
+        execution_time = time.perf_counter()-overall_start_time
+        cprint(f"Executed in {timedelta(seconds=execution_time)}"
+               " hh:mm:ss", "lg")
+    return inner
+
+
+def get_execution_modes(mode: Optional[str] = None,
+                        band: Optional[str] = None) -> Tuple[List[str], List[str]]:
+    """Determines the mode- and band configurations used by the users input. Returns
+    either one or two lists depending on the input
+
+    Parameters
+    ----------
+    mode: str, optional
+        The mode in which the reduction is to be executed. Either 'coherent',
+        'incoherent' or 'both'
+    band: str, optional
+        The band in which the reduction is to be executed. Either 'lband',
+        'nband' or 'both'
+
+    Returns
+    -------
+    modes: List[str]
+        A list of the modes to be enhanced
+    bands: List[str]
+        A list of the bands to be enhanced
+    """
+    modes, bands = [], []
+    if mode is not None:
+        if mode not in ["both", "coherent", "incoherent"]:
+            raise IOError(f"No mode named '{mode}' exists!")
+        modes = ["coherent", "incoherent"] if "both" else [mode]
+    if band is not None:
+        if band not in ["both", "lband", "nband"]:
+            raise IOError(f"No band named '{band}' exists!")
+        bands = ["lband", "nband"] if "both" else [band]
+    return modes, bands
 
 
 def split_fits(directory: Path, tag: str) -> Tuple[List[Path], Optional[List[Path]]]:

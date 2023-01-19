@@ -1,18 +1,20 @@
 from pathlib import Path
-from typing import Callable, Optional, List
+from typing import Optional, List
 
 import numpy as np
 import astropy.units as u
 from astropy.table import Table, vstack
 from astropy.table.np_utils import TableMergeError
 
-from readout import ReadoutFits
+from .readout import ReadoutFits
+
+__all__ = []
 
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
 
-# TODO: Keep all in Table format as long as possible but switch to np.ndarrays when needed
+# TODO: Keep all in Table format as long as possible but switch to np.ndarrays .when needed
 # TODO: Find way to unify tables so that all sub-tables are still differentiable and
 # recognisable, but also that the unfied values are easily accesible
 # TODO: Implement the np.nan functionality in plotting -> For fits plotting and plotter
@@ -40,13 +42,6 @@ class DataPrep:
         self._oi_vis, self._oi_vis2 = None, None
 
         self.readouts = list(map(ReadoutFits, self.fits_files))
-
-        # TODO: Implement this in plotter
-        # self.uv_coords = self._merge_simple_data("uvcoords")
-        # self.uv_coords_cphase = self._merge_simple_data("uvcoords_cphase")
-        # self.baselines_cphase = self._merge_simple_data("baselines_cphase")
-        # self.telescope_info = self._merge_simple_data("telescope")
-        # self.baselines = self._merge_simple_data("baselines")
 
     def __repr__(self):
         """The DataHandler class' representation"""
