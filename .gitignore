@@ -9,8 +9,8 @@ __pycache__/
 data/tests
 data/calibrator_databases
 data/catalogues
-libs/jacob_files
-libs/tools-master
+matadrs/libs/jacob_files
+matadrs/libs/tools-master
 
 # Specific files to ignore
 data/mat_target_list.xlsx
