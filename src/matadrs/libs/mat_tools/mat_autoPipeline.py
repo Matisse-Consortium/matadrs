@@ -23,13 +23,13 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 """
 import argparse
+import filecmp
 import glob
 import os
 import shutil
 import sys
 from multiprocessing.pool import Pool
 
-import filecmp
 import numpy as np
 from tqdm import tqdm
 from astropy.io import fits

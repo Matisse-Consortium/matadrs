@@ -32,7 +32,7 @@ JSDC_V2_CATALOG = Vizier(catalog="II/346/jsdc_v2")
 JSDC_CATALOG = CATALOG_DIR / "jsdc_v2_catalog_20170303.fits"
 ADDITIONAL_CATALOG = CATALOG_DIR / "supplementary_catalog_202207.fits"
 
-SPECTRAL_BINNING = {"low": [5, 7], "high_ut": [5, 38], "high_at": [5, 98]}
+SPECTRAL_BINNING = {"low": [5, 7], "high_uts": [5, 38], "high_ats": [5, 98]}
 NUMBER_CORES = 6
 
 
@@ -180,7 +180,6 @@ def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
         cprint(f"Calibrator '{readout.name}' detected!"
                f" Checking for catalog...", "g")
         catalog = get_catalog_match(readout)
-        # TODO: Add here the check for the calibrator if the catalog is up-to date
         if catalog is not None:
             outdated_catalogs_found = remove_old_catalogs(calib_dir)
             if outdated_catalogs_found:
@@ -195,38 +194,34 @@ def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
 
 
 # TODO: Finish this
-def get_array_and_binning(tpl_start: str):
+def get_array_and_binning(readout: ReadoutFits, tpl_start: str):
     """Gets the array-configuration and the binning for the L- and N-band from
     a (.fits)-file with the observations starting time
 
     Parameters
     ----------
     tpl_start: str
+        The starting time of the observation
 
     Returns
     -------
     array_configuration: str
     binning
     """
-    bin_L, bin_N = SPECTRAL_BINNING[resolution]
+    bin_L, bin_N = SPECTRAL_BINNING[readout.resolution]
 
 
-def set_script_arguments(corr_flux: bool, array: str,
-                         resolution: Optional[str] = "low") -> Tuple[str]:
-    """Sets the arguments that are then passed to the 'mat_autoPipeline.py'
-    script
+def set_script_arguments(raw_dir: Path, corr_flux: bool, tpl_start: str) -> Tuple[str]:
+    """Sets the arguments that are then passed to the 'mat_autoPipeline.py' script
 
     Parameters
     ----------
+    raw_dir: Path
+        The directory containing the raw observation files
     corr_flux: bool
         This specifies if the reduction is to be done 'coherently' or 'incoherently'
-    array: str
-        The array configuration that was used for the observation
-    resolution: str, optional
-        This determines the spectral binning. Input can be "low" for
-        low-resolution in both bands, "high_ut" for low-resolution in L-band
-        and high-resolution in N-band for the UTs and the same for "high_at" for
-        the ATs
+    tpl_start: str
+        The starting time of the observation
 
     Returns
     -------
@@ -235,14 +230,16 @@ def set_script_arguments(corr_flux: bool, array: str,
     nband_params: str
         The arguments passed to the MATISSE-pipline for the N-band
     """
-    if resolution == "high":
-        resolution = f"{resolution}_{array.lower()[:-1]}"
+    readout = get_readout_for_tpl_match(raw_dir, tpl_start)
+    if readout.resolution == "high":
+        resolution = f"{readout.resolution}_{readout.array_configuration}"
+    bin_lband, bin_nband = SPECTRAL_BINNING[resolution]
     compensate = '/compensate="[pb,rb,nl,if,bp,od]"'
-    tel = "/replaceTel=3" if array == "ATs" else "/replaceTel=0"
-    coh_L = "/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2" if corr_flux else ""
-    coh_N = "/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2" if corr_flux else ""
-    return f"{coh_L}{compensate}/spectralBinning={bin_L}",\
-            f"{tel}{coh_N}/spectralBinning={bin_N}"
+    tel = "/replaceTel=3" if readout.array_configuration == "ats" else "/replaceTel=0"
+    coh_lband = "/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2" if corr_flux else ""
+    coh_nband = "/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2" if corr_flux else ""
+    return f"{coh_lband}{compensate}/spectralBinning={bin_lband}",\
+            f"{tel}{coh_nband}/spectralBinning={bin_nband}"
 
 
 def finish_reduction(product_dir: Path, mode: str, band: str) -> None:

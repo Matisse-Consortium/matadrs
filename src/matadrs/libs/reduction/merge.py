@@ -7,19 +7,33 @@ from readout import ReadoutFits
 from utils import cprint, split_fits
 from avg_oifits import oifits_patchwork
 
+__all__ = ["get_output_file_path", "merge_averaged_files",
+           "merge_non_averaged_files", "merge_folders", "merge"]
 
-HEADER_TO_REMOVE = [{'key':'HIERARCH ESO INS BCD1 ID','value':' '},
-                    {'key':'HIERARCH ESO INS BCD2 ID','value':' '},
-                    {'key':'HIERARCH ESO INS BCD1 NAME','value':' '},
-                    {'key':'HIERARCH ESO INS BCD2 NAME','value':' '}]
+HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
+                    {'key': 'HIERARCH ESO INS BCD2 ID', 'value': ' '},
+                    {'key': 'HIERARCH ESO INS BCD1 NAME', 'value': ' '},
+                    {'key': 'HIERARCH ESO INS BCD2 NAME', 'value': ' '}]
 
 OI_TYPES = [["flux"], ["visamp"], ["visphi"], ["vis2"], ["t3"]]
 
 
-def get_output_file_path(coherent_dir: Path, target_name: str, output_dir: Path) -> Path:
-    """Makes the output file's Path from the information in the folder it is in"""
-    tpl_start_cal, detector, tpl_start_sci = str(coherent_dir.name).split(".")[2:-1]
-    return output_dir / f"{target_name}_{tpl_start_cal}:{tpl_start_sci}_FINAL_TARGET_INT.fits"
+# TODO: Remove the folder's input and just get the data from the fits-file?
+def get_output_file_path(fits_file: Path, output_dir: Path) -> Path:
+    """Makes the output file's Path from the information from the input (.fits)-file
+    and the directory it is contained in
+
+    Parameters
+    ----------
+    fits_file: Path
+    output_dir: Path
+
+    Returns
+    -------
+    output_file: Path"""
+    readout = ReadoutFits(fits_file)
+    tpl_start_cal, detector, tpl_start_sci = str(fits_file.parent.name).split(".")[2:-1]
+    return output_dir / f"{readout.name}_{tpl_start_cal}:{tpl_start_sci}_FINAL_TARGET_INT.fits"
 
 
 def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
@@ -33,16 +47,13 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     """
     flux, vis = "TARGET_AVG_FLUX_INT.fits", "TARGET_AVG_VIS_INT.fits"
     bcd = "TARGET_AVG_T3PHI_INT.fits"
-    coherent_flux, incoherent_flux = [directory / flux\
-                                      for directory in directories]
-    coherent_vis, incoherent_vis = [directory / vis\
-                                      for directory in directories]
-    coherent_bcd_vis, incoherent_bcd_vis = [directory / bcd\
-                                            for directory in directories]
-    out_file = get_output_file_path(directories[0],
-                                    ReadoutFits(Path(coherent_flux)).target_name,
-                                    output_dir)
+    coherent_flux, incoherent_flux = [directory / flux for directory in directories]
+    coherent_vis, incoherent_vis = [directory / vis for directory in directories]
+    coherent_bcd_vis, incoherent_bcd_vis = [directory / bcd for directory in directories]
+    out_file = get_output_file_path(coherent_flux, output_dir)
 
+    # NOTE: The files in the 'files_to_merge' list correspond to the 'OI_TYPE' list. Thus
+    # one can determine what is merged in what way
     if "lband" in str(directories[0]):
         files_to_merge = [incoherent_flux, coherent_flux,
                           coherent_bcd_vis, incoherent_vis, incoherent_bcd_vis]
@@ -65,7 +76,9 @@ def merge_non_averaged_files(coherent_dir: Path,
     Parameters
     ----------
     coherent_dir: Path
+        The coherently reduced and calibrated directories
     incoherent_dir: Path
+        The incoherently reduced and calibrated directories
     output_dir: Path
     """
     output_dir = output_dir / "non_averaged"
@@ -85,9 +98,7 @@ def merge_non_averaged_files(coherent_dir: Path,
     for index, (coh_unchopped_vis, inc_unchopped_vis, coh_unchopped_flux, inc_unchopped_flux)\
             in enumerate(zip(coherent_unchopped_vis_fits, incoherent_unchopped_vis_fits,
                              coherent_unchopped_flux_fits, incoherent_unchopped_flux_fits), start=1):
-        out_file = get_output_file_path(coherent_dir,
-                                        ReadoutFits(Path(coh_unchopped_vis)).target_name,
-                                        output_dir)
+        out_file = get_output_file_path(coh_unchopped_vis, output_dir)
         out_file = out_file.parent / f"{out_file.stem}_00{index}.fits"
 
         if "lband" in str(coherent_dir):
