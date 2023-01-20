@@ -1,0 +1,2 @@
+calibrator_databases filter=lfs diff=lfs merge=lfs -text
+catalogues filter=lfs diff=lfs merge=lfs -text

@@ -7,17 +7,11 @@ __pycache__/
 
 # Specific folders to ignore
 data/tests
-data/calibrator_databases
-data/catalogues
 src/matadrs/jacob_files
 
 # Specific files to ignore
 data/mat_target_list.xlsx
 data/~$mat_target_list.xlsx
 data/mat_target_list.csv
-data/catalog.fits
 data/cflux_calib.sof
-libs/reduction/fluxcal.py
-libs/reduction/calib_BCD2.py
-libs/reduction/avg_oifits.py
-libs/grep/get_gravity_data.py
+grep/get_gravity_data.py
