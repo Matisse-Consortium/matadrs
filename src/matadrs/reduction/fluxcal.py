@@ -42,6 +42,7 @@ from shutil import copyfile
 
 import numpy as np
 import scipy.stats
+import toml
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
@@ -52,7 +53,8 @@ from astroquery.simbad import Simbad
 from numpy.polynomial.polynomial import polyval
 from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve
 
-SKYCALC_CLI_CMD = '/home/varga/.local/bin/skycalc_cli'
+# TODO: Make the load properly
+SKYCALC_CLI_CMD = toml.load()
 
 
 # match_radius [arcsec]

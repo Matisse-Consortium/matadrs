@@ -21,10 +21,6 @@ NBAND_DATABASES = LBAND_DATABASES[:]+[DATABASE_DIR / "vBoekelDatabase.fitsold"]
 
 MODE_NAMES = {"coherent": "corrflux", "incoherent": "flux"}
 
-# TODO: Automatically get the installation and if not prompt the user to set-it up. Make a
-# (.yaml)-file or so?
-ESOREX_CMD = "/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/bin/esorex"
-
 
 # TODO: Make functionality that does not only calibrate willy nilly, but checks if the
 # calibrator is there for N-band, L-band or LN-band, see Jozsef's files. Use the
