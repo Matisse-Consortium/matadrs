@@ -16,7 +16,7 @@ __all__ = ["ReadoutFits"]
 warnings.simplefilter("ignore", category=u.UnitsWarning)
 
 # TODO: Make this into a configuration file
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
 
 # NOTE: All VLTI-baseline configurations by station indices to names
 SMALL = {1: "A0", 5: "B2", 13: "D0", 10: "C1"}
@@ -155,7 +155,7 @@ class ReadoutFits:
             self._coords = SkyCoord(self.ra*u.deg, self.dec*u.deg, frame="icrs")
         return self._coords
 
-    # TODO: Test if this works for multiple reductions
+    # TODO: Test if this works for multiple reductions of UTs/ATs
     @property
     def array_configuration(self) -> str:
         """Fetches the array's configuration from the primary header"""

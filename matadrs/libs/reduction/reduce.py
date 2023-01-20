@@ -211,15 +211,16 @@ def get_array_and_binning(readout: ReadoutFits, tpl_start: str):
     bin_L, bin_N = SPECTRAL_BINNING[readout.resolution]
 
 
-def set_script_arguments(raw_dir: Path, corr_flux: bool, tpl_start: str) -> Tuple[str]:
+def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]:
     """Sets the arguments that are then passed to the 'mat_autoPipeline.py' script
 
     Parameters
     ----------
     raw_dir: Path
         The directory containing the raw observation files
-    corr_flux: bool
-        This specifies if the reduction is to be done 'coherently' or 'incoherently'
+    mode: str
+        The mode in which the reduction is to be executed. Either 'coherent',
+        'incoherent' or 'both'
     tpl_start: str
         The starting time of the observation
 
@@ -233,11 +234,13 @@ def set_script_arguments(raw_dir: Path, corr_flux: bool, tpl_start: str) -> Tupl
     readout = get_readout_for_tpl_match(raw_dir, tpl_start)
     if readout.resolution == "high":
         resolution = f"{readout.resolution}_{readout.array_configuration}"
-    bin_lband, bin_nband = SPECTRAL_BINNING[resolution]
-    compensate = '/compensate="[pb,rb,nl,if,bp,od]"'
     tel = "/replaceTel=3" if readout.array_configuration == "ats" else "/replaceTel=0"
-    coh_lband = "/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2" if corr_flux else ""
-    coh_nband = "/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2" if corr_flux else ""
+    coh_lband = coh_nband = ""
+    if mode == "coherent":
+        coh_lband = "/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2"
+        coh_nband = "/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2"
+    compensate = '/compensate="[pb,rb,nl,if,bp,od]"'
+    bin_lband, bin_nband = SPECTRAL_BINNING[resolution]
     return f"{coh_lband}{compensate}/spectralBinning={bin_lband}",\
             f"{tel}{coh_nband}/spectralBinning={bin_nband}"
 
@@ -280,7 +283,7 @@ def finish_reduction(product_dir: Path, mode: str, band: str) -> None:
             plot_fits.add_cphase().add_vis().plot(save=True)
 
 
-@print_execution_time()
+@print_execution_time
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                          product_dir: Path, mode: bool,
                          band: str, tpl_start: str) -> None:
@@ -301,10 +304,10 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
         The directory containing to the observation associated calibration files
     product_dir: Path
         The directory to contain the reduced files
-    mode: str, optional
+    mode: str
         The mode in which the reduction is to be executed. Either 'coherent',
         'incoherent' or 'both'
-    band: str, optional
+    band: str
         The band in which the reduction is to be executed. Either 'lband',
         'nband' or 'both'
     tpl_star: str
@@ -314,7 +317,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     skip_N = not skip_L
 
     # FIXME: Get array and resolution from the (.fits)-file
-    param_L, param_N = set_script_arguments(mode, array, resolution)
+    param_L, param_N = set_script_arguments(mode, mode, tpl_start)
     mp.mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
                         dirCalib=str(calib_dir), tplstartsel=tpl_start,
                         nbCore=NUMBER_CORES, resol='', paramL=param_L, paramN=param_N,
@@ -359,7 +362,7 @@ def prepare_reduction(raw_dir: Path, calib_dir: Path, product_dir: Path) -> None
         cprint("Cleaning up failed!", "y")
 
 
-@print_execution_time()
+@print_execution_time
 def reduce(raw_dir: Path, product_dir: Path,
            mode: Optional[str] = "both", band: Optional[str] = "both") -> None:
     """Runs the pipeline for the data reduction
