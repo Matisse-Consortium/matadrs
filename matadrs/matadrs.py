@@ -5,8 +5,6 @@ from .libs.reduction import reduce, calibrate, average, merge
 from .libs.utils.tools import cprint, print_execution_time
 
 
-# TODO: Add functionality that clears all the paths before it write again,
-# as to overwrite them
 @print_execution_time
 def matadrs_pipeline(raw_dirs: Union[List[Path], [Path]],
                      product_dir: Path,
@@ -30,8 +28,9 @@ def matadrs_pipeline(raw_dirs: Union[List[Path], [Path]],
 
     Notes
     -----
-    Subdirectories for the individual steps will automatically be created in the
-    'product_dir'
+    WARNING: All files in a given folder from any previous reduction will be REMOVED.
+    Subdirectories for the individual steps ('reduced', 'calib', 'averaged', 'final')
+    will be AUTOMATICALLY created in the 'product_dir'
     """
     if isinstance(raw_dirs, list):
         if not all(list(map(lambda x: isinstance(x, Path), raw_dirs))):
@@ -42,7 +41,7 @@ def matadrs_pipeline(raw_dirs: Union[List[Path], [Path]],
         if raw_dirs.exists():
             raw_dirs = [raw_dirs]
     else:
-        raise IOError("Neither List nor Path has been input!")
+        raise IOError("Neither valid Lists of Paths nor valid Path has been input!")
 
     for raw_dir in raw_dirs:
         cprint(f"Starting data reduction of '{raw_dir}'...", "cy")
@@ -57,7 +56,7 @@ def matadrs_pipeline(raw_dirs: Union[List[Path], [Path]],
             merge(data_dir, stem_dir, target_dir)
         cprint(f"{'':-^50}", "lg")
     cprint(f"{'':-^50}", "lg")
-    cprint("All done!", "g")
+    cprint("All done!", "cy")
 
 
 if __name__ == "__main__":

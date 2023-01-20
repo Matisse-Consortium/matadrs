@@ -2,7 +2,7 @@ import time
 from datetime import timedelta
 from functools import wraps
 from pathlib import Path
-from typing import Callable, Tuple, List, Union, Optional
+from typing import Callable, Tuple, List, Optional
 
 __all__ = ["cprint", "print_execution_time", "get_execution_modes",
            "split_fits", "get_fits_by_tag", "check_if_target", "get_path_descriptor"]

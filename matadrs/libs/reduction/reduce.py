@@ -1,8 +1,6 @@
-# TODO: Write a note that explains that if executed the reduction redoes the specified
-# files
-# TODO: Remove only the specified files?
 import os
 import shutil
+import pkgutil
 from pathlib import Path
 from typing import Set, Tuple, Union, Optional
 
@@ -20,23 +18,18 @@ from ..utils.tools import cprint, print_execution_time,\
         get_execution_modes, get_fits_by_tag
 
 __all__ = ["get_readout_for_tpl_match", "get_tpl_starts", "in_catalog",
-           "get_catalog_match", "prepare_catalogs", "get_array_and_binning",
-           "set_script_arguments", "finish_reduction", "reduce_mode_and_band",
-           "prepare_reduction", "reduce"]
+           "get_catalog_match", "prepare_catalogs", "set_script_arguments",
+           "cleanup_reduction", "reduce_mode_and_band", "prepare_reduction", "reduce"]
 
 
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
-CATALOG_DIR = DATA_DIR / "catalogues"
-
+CATALOG_DIR = pkgutil.get_data(__name__, "data/catalogues")
 JSDC_V2_CATALOG = Vizier(catalog="II/346/jsdc_v2")
 JSDC_CATALOG = CATALOG_DIR / "jsdc_v2_catalog_20170303.fits"
 ADDITIONAL_CATALOG = CATALOG_DIR / "supplementary_catalog_202207.fits"
 
 SPECTRAL_BINNING = {"low": [5, 7], "high_uts": [5, 38], "high_ats": [5, 98]}
-NUMBER_CORES = 6
 
 
-# TODO: Maybe there is a smarter way than globbing twice? Not that important however...
 def get_readout_for_tpl_match(raw_dir: Path, tpl_start: str) -> Path:
     """Gets the readout of a singular (.fits)-file matching the 'tpl_start', i.e.,
     the starting time of the observation
@@ -77,7 +70,6 @@ def get_tpl_starts(raw_dir: Path) -> Set[str]:
     return set([ReadoutFits(fits_file).tpl_start for fits_file in raw_dir.glob("*.fits")])
 
 
-# TODO: Test this function
 def remove_old_catalogs(catalog: Path, calib_dir: Path) -> bool:
     """Checks if the latest catalog is already existing in the calibration directory and
     removes outdated iterations
@@ -193,24 +185,6 @@ def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
         cprint(f"Science target '{readout.name}' detected! Removing catalogs...", "y")
 
 
-# TODO: Finish this
-def get_array_and_binning(readout: ReadoutFits, tpl_start: str):
-    """Gets the array-configuration and the binning for the L- and N-band from
-    a (.fits)-file with the observations starting time
-
-    Parameters
-    ----------
-    tpl_start: str
-        The starting time of the observation
-
-    Returns
-    -------
-    array_configuration: str
-    binning
-    """
-    bin_L, bin_N = SPECTRAL_BINNING[readout.resolution]
-
-
 def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]:
     """Sets the arguments that are then passed to the 'mat_autoPipeline.py' script
 
@@ -245,7 +219,8 @@ def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]
             f"{tel}{coh_nband}/spectralBinning={bin_nband}"
 
 
-def finish_reduction(product_dir: Path, mode: str, band: str) -> None:
+def cleanup_reduction(product_dir: Path, mode: str,
+                      band: str, overwrite: bool) -> None:
     """Moves the folders to their corresponding folders of structure '/mode/band' after
     the reduction has been finished and plots the (.fits)-files contained in them
 
@@ -257,22 +232,20 @@ def finish_reduction(product_dir: Path, mode: str, band: str) -> None:
     band: str, optional
         The band in which the reduction is to be executed. Either 'lband',
         'nband' or 'both'
+    overwrite: bool, optional
+        If 'True' overwrites present files from previous reduction
     """
     mode_and_band_dir = product_dir / mode / band
     if not mode_and_band_dir.exists():
         mode_and_band_dir.mkdir(parents=True)
 
-    try:
-        reduced_folders = product_dir.glob("Iter1/*.rb")
-        for reduced_folder in reduced_folders:
-            cprint(f"Moving folder {reduced_folder.name}...", "g")
-            if (mode_and_band_dir / reduced_folder.name).exists():
-                shutil.rmtree(mode_and_band_dir / reduced_folder.name)
+    for reduced_folder in product_dir.glob("Iter1/*.rb"):
+        cprint(f"Moving folder '{reduced_folder.name}'...", "g")
+        if ((mode_and_band_dir / reduced_folder.name).exists()) and (not overwrite):
+            cprint(f"Could not move {reduced_folder},"
+                   " as directories from previous reduction exists!")
+        else:
             shutil.move(reduced_folder, mode_and_band_dir)
-
-    # TODO: Make logger here
-    except Exception:
-        cprint(f"Moving of files to {mode_and_band_dir.name} failed!", "r")
 
     # TODO: Remove this for loop? Maybe after properly implementing plotting?
     for reduced_folder in mode_and_band_dir.glob("*.rb"):
@@ -286,7 +259,7 @@ def finish_reduction(product_dir: Path, mode: str, band: str) -> None:
 @print_execution_time
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                          product_dir: Path, mode: bool,
-                         band: str, tpl_start: str) -> None:
+                         band: str, tpl_start: str, overwrite: bool) -> None:
     """Reduces either the L- and/or the N-band data for either the 'coherent' and/or
     'incoherent' setting for a single iteration/epoch.
 
@@ -312,6 +285,8 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
         'nband' or 'both'
     tpl_star: str
         The starting time of observations
+    overwrite: bool, optional
+        If 'True' overwrites present files from previous reduction
     """
     skip_L = True if band == "nband" else False
     skip_N = not skip_L
@@ -320,14 +295,15 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     param_L, param_N = set_script_arguments(mode, mode, tpl_start)
     mp.mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
                         dirCalib=str(calib_dir), tplstartsel=tpl_start,
-                        nbCore=NUMBER_CORES, resol='', paramL=param_L, paramN=param_N,
+                        nbCore=6, resol='', paramL=param_L, paramN=param_N,
                         overwrite=0, maxIter=1, skipL=skip_L, skipN=skip_N)
 
-    finish_reduction(product_dir, mode, band)
+    cleanup_reduction(product_dir, mode, band, overwrite)
     cprint(f"{'':-^50}", "lg")
 
 
-def prepare_reduction(raw_dir: Path, calib_dir: Path, product_dir: Path) -> None:
+def prepare_reduction(raw_dir: Path, calib_dir: Path,
+                      product_dir: Path, remove_previous: bool) -> None:
     """Prepares the reduction by removing removing old product files and sorting the raw
     files by associated calibrations and observations
 
@@ -351,20 +327,10 @@ def prepare_reduction(raw_dir: Path, calib_dir: Path, product_dir: Path) -> None
     if not product_dir.exists():
         product_dir.mkdir(parents=True)
 
-    try:
-        for directory in product_dir.glob("*"):
-            if directory.exists():
-                shutil.rmtree(directory)
-        cprint("Cleaning up old reduction...", "y")
-
-    # TODO: Make logger here
-    except Exception:
-        cprint("Cleaning up failed!", "y")
-
 
 @print_execution_time
-def reduce(raw_dir: Path, product_dir: Path,
-           mode: Optional[str] = "both", band: Optional[str] = "both") -> None:
+def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
+           band: Optional[str] = "both", overwrite: Optional[bool] = False) -> None:
     """Runs the pipeline for the data reduction
 
     Parameters
@@ -379,9 +345,16 @@ def reduce(raw_dir: Path, product_dir: Path,
     band: str, optional
         The band in which the reduction is to be executed. Either 'lband',
         'nband' or 'both'
+    overwrite: bool, optional
+        If 'True' overwrites present files from previous reduction
+
+    Notes
+    -----
+    The reduction is executed on 6 cores in multiprocessing
     """
-    raw_dir, product_dir = Path(raw_dir).resolve(), Path(product_dir).resolve()
+    raw_dir = Path(raw_dir).resolve()
     calib_dir = raw_dir / "calib_files"
+    product_dir = Path(product_dir / "reduced").resolve()
     # TODO: Remove the old files during the loop? -> To make it more versatile?
     prepare_reduction(raw_dir, calib_dir, product_dir)
     modes, bands = get_execution_modes(mode, band)
@@ -395,9 +368,7 @@ def reduce(raw_dir: Path, product_dir: Path,
             cprint(f"{'':-^50}", "lg")
             for band in bands:
                 reduce_mode_and_band(raw_dir, calib_dir, product_dir,
-                                     mode=mode, band=band, tpl_start=tpl_start)
-
+                                     mode, band, tpl_start, overwrite)
 
 if __name__ == "__main__":
-    raw_dir = ""
-    reduce(raw_dir)
+    breakpoint()

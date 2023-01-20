@@ -204,6 +204,13 @@ def calibrate(reduced_dir: Path, result_dir: Path,
     cprint("Calibration Done!", "lp")
 
 
+    # TODO: Make this for every step of the reduction?
+    # if remove_previous:
+        # for directory in product_dir.glob("*"):
+            # shutil.rmtree(directory)
+        # cprint("Cleaning up old reduction...", "y")
+
+
 if __name__ == "__main__":
     data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
     stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220420"
