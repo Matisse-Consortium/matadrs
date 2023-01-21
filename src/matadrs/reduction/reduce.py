@@ -1,5 +1,6 @@
 import os
 import shutil
+import importlib.resources
 from pathlib import Path
 from typing import Set, Tuple, Union, Optional
 
@@ -20,7 +21,7 @@ __all__ = ["get_readout_for_tpl_match", "get_tpl_starts", "in_catalog",
            "get_catalog_match", "prepare_catalogs", "set_script_arguments",
            "cleanup_reduction", "reduce_mode_and_band", "prepare_reduction", "reduce"]
 
-# CATALOG_DIR = pkgutil.get_data(__name__, "data/catalogues")
+CATALOG_DIR = Path(importlib.resources.path("matadrs", "data/catalogues"))
 JSDC_V2_CATALOG = Vizier(catalog="II/346/jsdc_v2")
 JSDC_CATALOG = CATALOG_DIR / "jsdc_v2_catalog_20170303.fits"
 ADDITIONAL_CATALOG = CATALOG_DIR / "supplementary_catalog_202207.fits"
