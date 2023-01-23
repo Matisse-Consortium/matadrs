@@ -1,5 +1,6 @@
 import shutil
 import subprocess
+import pkg_resources
 from pathlib import Path
 from typing import List, Optional
 from collections import deque
@@ -11,8 +12,7 @@ from ..utils.tools import cprint, get_path_descriptor, check_if_target, get_fits
 __all__ = ["create_visbility_sof", "calibrate_files", "calibrate_folders", "calibrate"]
 
 # TODO: Get correct calibrator for N- and L-band
-
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 DATABASE_DIR = DATA_DIR / "calibrator_databases"
 DATABASES = ["vBoekelDatabase.fits", "calib_spec_db_v10.fits",
              "calib_spec_db_v10_supplement.fits", "calib_spec_db_supplement3.fits"]
@@ -119,7 +119,7 @@ def calibrate_files(reduced_dir: Path, target_dir: Path,
     cprint(f"{'':-^50}", "lg")
     cprint("Calibrating visibilities...", "g")
     sof_file = create_visbility_sof(output_dir, targets, calibrators)
-    subprocess.call([ESOREX_CMD, f"--output-dir={str(output_dir)}",
+    subprocess.call(["esorex", f"--output-dir={str(output_dir)}",
                      "mat_cal_oifits", str(sof_file)],
                     stdout=subprocess.DEVNULL)
     cprint("Plotting visibility files...", "g")

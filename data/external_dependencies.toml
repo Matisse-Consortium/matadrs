@@ -1,5 +1,0 @@
-[esorex_cmd]
-path = "/data/beegfs/astro-storage/groups/matisse/isbell/esorex_installation/bin/esorex"
-
-[skycalc_cli]
-path = ".local/bin/skycalc_cli"

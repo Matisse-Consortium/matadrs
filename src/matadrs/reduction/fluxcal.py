@@ -38,6 +38,7 @@ calibrator model spectrum there, default: '' (= no figure made)
 # account treat if there is no matching source in the database: DONE
 import math
 import os
+import importlib.resources
 from shutil import copyfile
 
 import numpy as np
@@ -52,9 +53,6 @@ from scipy.interpolate import interp1d
 from astroquery.simbad import Simbad
 from numpy.polynomial.polynomial import polyval
 from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve
-
-# TODO: Make the load properly
-SKYCALC_CLI_CMD = toml.load()
 
 
 # match_radius [arcsec]
@@ -281,7 +279,7 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile,
         create_skycalc_inputfile(fname_in_cal, airmass_cal,
                                  pwv_cal, wmin, wmax, wdelta=dlambda)
         print('Start SkyCalc (CAL).')
-        os.system(SKYCALC_CLI_CMD + ' -i '
+        os.system("skycalc_cli" + ' -i '
                   + fname_in_cal + ' -o ' + fname_skycalc_out_cal)
         figpath_out = outputdir+'/skycalc_output_cal_'+tag_cal+'.png'
         plot_skycalc_output(fname_skycalc_out_cal, figpath_out, airmass_cal, pwv_cal)
