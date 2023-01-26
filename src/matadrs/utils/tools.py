@@ -34,10 +34,11 @@ def print_execution_time(func: Callable):
     @wraps(func)
     def inner(*args, **kwargs):
         overall_start_time = time.perf_counter()
-        func(*args, **kwargs)
+        result = func(*args, **kwargs)
         execution_time = time.perf_counter()-overall_start_time
         cprint(f"Executed in {timedelta(seconds=execution_time)}"
                " hh:mm:ss", "lg")
+        return result
     return inner
 
 
