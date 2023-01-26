@@ -10,8 +10,4 @@ data/tests
 src/matadrs/jacob_files
 
 # Specific files to ignore
-data/mat_target_list.xlsx
-data/~$mat_target_list.xlsx
-data/mat_target_list.csv
-data/cflux_calib.sof
-grep/get_gravity_data.py
+tests/data/*
