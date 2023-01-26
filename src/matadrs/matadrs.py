@@ -68,16 +68,12 @@ def reduction_pipeline(raw_dirs: Union[List[Path], Path],
     if isinstance(product_dirs, list):
         if not all(list(map(lambda x: isinstance(x, Path), product_dirs))):
             product_dirs = list(map(Path, product_dirs))
-        if not all(list(map(lambda x: x.exists(), product_dirs))):
-            raise IOError("The Paths in the product_dirs list do not exists!")
     elif isinstance(product_dirs, Path):
-        if product_dirs.exists():
-            product_dirs = [product_dirs]
-        else:
-            raise IOError("The Path given for the product_dirs do not exists!")
+        product_dirs = [product_dirs]
+    elif isinstance(product_dirs, str):
+        product_dirs = [Path(product_dirs)]
     else:
-        raise IOError("Nor valid Lists of Paths nor valid Path for product_dirs has"
-                      " been input!")
+        raise IOError("Input for product_dirs is in incorrect format!")
 
     for raw_dir, product_dir in zip(raw_dirs, product_dirs):
         cprint(f"Starting data reduction of '{raw_dir}'...", "cy")

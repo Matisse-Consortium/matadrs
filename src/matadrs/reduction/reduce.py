@@ -289,9 +289,8 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
         If 'True' overwrites present files from previous reduction
     """
     skip_L = True if band == "nband" else False
-
-    # FIXME: Get array and resolution from the (.fits)-file
-    param_L, param_N = set_script_arguments(mode, mode, tpl_start)
+    param_L, param_N = set_script_arguments(raw_dir, mode, tpl_start)
+    prepare_catalogs(raw_dir, calib_dir, tpl_start)
     mp.mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
                         dirCalib=str(calib_dir), tplstartsel=tpl_start,
                         nbCore=6, resol='', paramL=param_L, paramN=param_N,
