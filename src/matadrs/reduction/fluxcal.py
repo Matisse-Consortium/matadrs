@@ -42,7 +42,6 @@ from shutil import copyfile
 
 import numpy as np
 import scipy.stats
-import toml
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve

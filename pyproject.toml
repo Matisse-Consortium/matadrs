@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "matadrs"
-version = "0.1"
+version = "0.1.0"
 description = "An extended, fully automated MATISSE-data reduction pipeline"
 requires-python = ">=3.9"
 readme = "README.md"
@@ -31,6 +31,7 @@ classifiers = [
 dependencies = [
 	'importlib-metadata; python_version<"3.8"',
 	"astropy >=5.1",
+    "pandas==1.5.2",
 	"matplotlib >=3.5.3",
 	"numpy >=1.23.2",
 	"pip >=22.2.2",

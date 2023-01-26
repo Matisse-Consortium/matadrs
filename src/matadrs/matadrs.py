@@ -7,15 +7,15 @@ from .utils.tools import cprint, print_execution_time
 
 # TODO: Update docs
 @print_execution_time
-def matadrs_pipeline(raw_dirs: Union[List[Path], Path],
-                     product_dirs: Union[List[Path], Path],
-                     mode: Optional[str] = "both",
-                     band: Optional[str] = "both",
-                     overwrite: Optional[bool] = False) -> None:
-                     do_reduce: Optional[bool] = True,
-                     do_calibrate: Optional[bool] = True,
-                     do_average: Optional[bool] = True,
-                     do_merge: Optional[bool] = True) -> None:
+def reduction_pipeline(raw_dirs: Union[List[Path], Path],
+                       product_dirs: Union[List[Path], Path],
+                       mode: Optional[str] = "both",
+                       band: Optional[str] = "both",
+                       overwrite: Optional[bool] = False,
+                       do_reduce: Optional[bool] = True,
+                       do_calibrate: Optional[bool] = True,
+                       do_average: Optional[bool] = True,
+                       do_merge: Optional[bool] = True) -> None:
     """Combines all the facettes of data reduction into one executable function that takes
     a single or a list of epochs to be reduced via the MATISSE pipeline, then calibrates,
     merges and averages them, in succession
@@ -91,10 +91,3 @@ def matadrs_pipeline(raw_dirs: Union[List[Path], Path],
         # if do_merge:
             # merge(data_dir, stem_dir, target_dir)
     cprint(f"{'':-^50}", "cy")
-
-
-if __name__ == "__main__":
-    data_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd142666")
-    observation_dirs = ["UTs/20190514", "UTs/20220420", "UTs/20220422"]
-    matadrs_pipeline(list(map(lambda x: data_dir / x, observation_dirs)),
-                     do_reduce=True, do_calibrate=False, do_average=False, do_merge=False)

@@ -7,7 +7,7 @@ The (modular) MATISSE Automated Data Reduction Software
 
 ### Data-reduction for MATISSE
 The script `matadrs.py` gives easy access of functionality from the following scripts
-(found under `libs/reduction/`)
+(found under `matadrs/reduction/`)
 * `reduce.py`
 * `calibrate.py`
 * `average.py`
@@ -21,26 +21,23 @@ It is recommended to keep your Python3 installation clean by installing packages
 First the MATISSE-pipeline needs to be installed.<br>
 For this follow the instructions found here:
 
-### Mat-tools (required)
-Will be automatically installed, for in-depth information see
-[mat-tools](https://gitlab.oca.eu/MATISSE/tools/-/tree/master/mat_tools)
-
 ## Matadrs
-To install this package (locally) run
+To install this package (locally, in development mode) run
 ```
 pip3 install -e .
 ```
-
-### Virtual Enviroment Setup (optional)
-There are multiple ways to create a virtual enviroment in python, such as
-[pyenv](https://towardsdatascience.com/managing-virtual-environment-with-pyenv-ae6f3fb835f8),
-which is an extension of the python (built-in) package
-[virtualenv](https://learnpython.com/blog/how-to-use-virtualenv-python/) or other tools
-such as [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html).
+For a permanent installation run
+```
+pip3 install matadrs git+ssh://git@github.com:MBSck/matadrs.git
+```
 
 ## Usage
 
 ## Ressources
 
-## Contributors
-[M. B. Scheuck](https://github.com/MBSck)
+## Credit
+* J. Varga for his utmost helpful input and the `fluxcal` and `avg_oifits` scripts
+* R. van Boekel, J. Varga, A. Matter for their calibrator and object catalogues as well as
+  the [JSDC-catalog ](https://cdsarc.cds.unistra.fr/viz-bin/cat/II/300)
+* F. Millour for the `calib_BCD2` script and J. Varga for his rework of the same
+* M. Neeser for the `getdata_ESO_archive` script
