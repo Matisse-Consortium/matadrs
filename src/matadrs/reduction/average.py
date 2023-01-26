@@ -23,8 +23,8 @@ from typing import Optional, List
 
 from .avg_oifits import avg_oifits
 from .calib_BCD2 import calib_BCD
-from ..utils.readout import ReadoutFits
 from ..utils.plot import Plotter
+from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, split_fits, get_fits_by_tag
 
 

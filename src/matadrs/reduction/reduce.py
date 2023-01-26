@@ -10,8 +10,8 @@ from astropy.table import Table
 from astroquery.vizier import Vizier
 from astropy.coordinates import SkyCoord
 
-from ..mat_tools.mat_autoPipeline import mat_autoPipeline as mp
 from ..mat_tools.libAutoPipeline import matisseType
+from ..mat_tools.mat_autoPipeline import mat_autoPipeline as mp
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time,\
@@ -289,14 +289,13 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
         If 'True' overwrites present files from previous reduction
     """
     skip_L = True if band == "nband" else False
-    skip_N = not skip_L
 
     # FIXME: Get array and resolution from the (.fits)-file
     param_L, param_N = set_script_arguments(mode, mode, tpl_start)
     mp.mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
                         dirCalib=str(calib_dir), tplstartsel=tpl_start,
                         nbCore=6, resol='', paramL=param_L, paramN=param_N,
-                        overwrite=0, maxIter=1, skipL=skip_L, skipN=skip_N)
+                        overwrite=0, maxIter=1, skipL=skip_L, skipN=(not skip_L))
 
     cleanup_reduction(product_dir, mode, band, overwrite)
     cprint(f"{'':-^50}", "lg")
@@ -356,7 +355,7 @@ def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
     calib_dir = raw_dir / "calib_files"
     product_dir = Path(product_dir / "reduced").resolve()
     # TODO: Remove the old files during the loop? -> To make it more versatile?
-    prepare_reduction(raw_dir, calib_dir, product_dir)
+    prepare_reduction(raw_dir, calib_dir, product_dir, overwrite)
     modes, bands = get_execution_modes(mode, band)
 
     for tpl_start in sorted(list(get_tpl_starts(raw_dir))):

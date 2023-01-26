@@ -1,11 +1,10 @@
 from typing import List
 from pathlib import Path
 
-# TODO: Find way to make this into a complete module -> More pythonic!
-from plot import Plotter
-from readout import ReadoutFits
-from utils import cprint, split_fits
-from avg_oifits import oifits_patchwork
+from .avg_oifits import oifits_patchwork
+from ..utils.plot import Plotter
+from ..utils.readout import ReadoutFits
+from ..utils.tools import cprint, split_fits
 
 __all__ = ["get_output_file_path", "merge_averaged_files",
            "merge_non_averaged_files", "merge_folders", "merge"]

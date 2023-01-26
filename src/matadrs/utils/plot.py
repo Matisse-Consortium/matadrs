@@ -10,8 +10,8 @@ from pandas import DataFrame
 from astropy.table import Table, Column
 
 # TODO: Find way to make this into a complete module -> More pythonic!
-from data_prep import DataPrep
-from utils import cprint
+from ..utils.data_prep import DataPrep
+from ..utils.tools import cprint
 
 # TODO: Make either model or fourier transform carry more info like the name of
 # the plot or similar -> Work more with classes

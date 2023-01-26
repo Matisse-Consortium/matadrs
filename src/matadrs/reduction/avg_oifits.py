@@ -1,10 +1,13 @@
 import os
+import fnmatch
+from shutil import copyfile
+
 import numpy as np
 from astropy.io import fits
-import fnmatch
 from numpy import asarray as ar
-from shutil import copyfile
+
 from ..utils.robust import mean as rbmean
+
 
 #avg_cflux: if True, the function will average all the corr flux data (experimental)
 def avg_oifits(infile_list, outfile_path, headerval=[], avg_cflux=False):

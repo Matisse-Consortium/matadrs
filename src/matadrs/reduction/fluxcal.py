@@ -38,7 +38,6 @@ calibrator model spectrum there, default: '' (= no figure made)
 # account treat if there is no matching source in the database: DONE
 import math
 import os
-import importlib.resources
 from shutil import copyfile
 
 import numpy as np
@@ -46,13 +45,13 @@ import scipy.stats
 import toml
 from astropy import units as u
 from astropy.coordinates import SkyCoord
+from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve
 from astropy.io import fits
+from astroquery.simbad import Simbad
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator
-from scipy.interpolate import interp1d
-from astroquery.simbad import Simbad
 from numpy.polynomial.polynomial import polyval
-from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve
+from scipy.interpolate import interp1d
 
 
 # match_radius [arcsec]
