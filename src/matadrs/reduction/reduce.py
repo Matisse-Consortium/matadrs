@@ -15,7 +15,7 @@ from ..mat_tools.libAutoPipeline import matisseType
 from ..mat_tools.mat_autoPipeline import mat_autoPipeline
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
-from ..utils.tools import cprint, print_execution_time,\
+from ..utils.tools import cprint, print_execution_time, capitalise_to_index,\
         get_execution_modes, get_fits_by_tag
 
 __all__ = ["get_readout_for_tpl_match", "get_tpl_starts", "in_catalog",
@@ -89,7 +89,6 @@ def remove_old_catalogs(catalog: Path, calib_dir: Path):
     """
     newest_catalog_time = Time(ReadoutFits(catalog).primary_header["DATE"])\
             if "DATE" in ReadoutFits(catalog).primary_header else ""
-    breakpoint()
     for readout in list(map(lambda x: ReadoutFits(x), find_catalogs(calib_dir))):
         catalog_time = Time(readout.primary_header["DATE"])\
                 if "DATE" in readout.primary_header else ""
@@ -161,7 +160,6 @@ def get_catalog_match(readout: ReadoutFits,
 
 # NOTE: Is this function even necessary, it seems like the catalogs of the VLTI are
 # anyways newer than the ones online -> Check with Jozsef and check multiple files
-# FIXME: Science Targets are detected as calibrators, check why
 def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
     """Checks if the starting time given by 'tpl_start' corresponds to the observation of
     a science target/calibrator and removes/prepares the un/needed catalogs
@@ -177,7 +175,6 @@ def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
     """
     # FIXME: Detects calibrator where science target should be detected
     readout = get_readout_for_tpl_match(raw_dir, tpl_start)
-    breakpoint()
     if readout.is_calibrator():
         cprint(f"Calibrator '{readout.name}' detected!"
                f" Checking for catalog...", "g")
@@ -216,6 +213,8 @@ def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]
         The arguments passed to the MATISSE-pipline for the N-band
     """
     readout = get_readout_for_tpl_match(raw_dir, tpl_start)
+    cprint("INFO: Used telescopes - "
+           f"{capitalise_to_index(readout.array_configuration, 2)}", "lg")
     if readout.resolution == "high":
         resolution = f"{readout.resolution}_{readout.array_configuration}"
     else:
@@ -269,6 +268,7 @@ def cleanup_reduction(product_dir: Path, mode: str,
             plot_fits.add_cphase().add_vis().plot(save=True)
 
 
+# FIXME: Lband data is not reduced???
 @print_execution_time
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                          product_dir: Path, mode: bool,
@@ -304,13 +304,12 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     skip_L = True if band == "nband" else False
     param_L, param_N = set_script_arguments(raw_dir, mode, tpl_start)
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
-    # mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
-                     # dirCalib=str(calib_dir), tplstartsel=tpl_start,
-                     # nbCore=6, resol='', paramL=param_L, paramN=param_N,
-                     # overwrite=0, maxIter=1, skipL=skip_L, skipN=(not skip_L))
+    mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
+                     dirCalib=str(calib_dir), tplstartsel=tpl_start,
+                     nbCore=6, resol='', paramL=param_L, paramN=param_N,
+                     overwrite=0, maxIter=1, skipL=skip_L, skipN=(not skip_L))
 
     cleanup_reduction(product_dir, mode, band, overwrite)
-    cprint(f"{'':-^50}", "lg")
 
 
 def prepare_reduction(raw_dir: Path, calib_dir: Path,
@@ -369,15 +368,11 @@ def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
     prepare_reduction(raw_dir, calib_dir, product_dir, overwrite)
     for tpl_start in sorted(list(get_tpl_starts(raw_dir))):
         cprint(f"{'':-^50}", "lg")
-        cprint(f"Reducing data of tpl_start: {tpl_start}", "g")
-        cprint(f"{'':-^50}", "lg")
+        cprint(f"Reducing data of tpl_start: {tpl_start}", "lp")
         for mode in modes:
-            cprint(f"Processing {mode} reduction...", "lp")
+            cprint(f"Processing the {mode} mode...", "lp")
             cprint(f"{'':-^50}", "lg")
             for band in bands:
+                cprint(f"Processing the {band.title()}...", "lp")
                 reduce_mode_and_band(raw_dir, calib_dir, product_dir,
                                      mode, band, tpl_start, overwrite)
-
-
-if __name__ == "__main__":
-    breakpoint()

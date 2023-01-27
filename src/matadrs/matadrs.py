@@ -86,4 +86,3 @@ def reduction_pipeline(raw_dirs: Union[List[Path], Path],
             # average(data_dir, stem_dir, target_dir)
         # if do_merge:
             # merge(data_dir, stem_dir, target_dir)
-    cprint(f"{'':-^50}", "cy")

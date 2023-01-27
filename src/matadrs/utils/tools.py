@@ -4,8 +4,9 @@ from functools import wraps
 from pathlib import Path
 from typing import Callable, Tuple, List, Optional
 
-__all__ = ["cprint", "print_execution_time", "get_execution_modes",
-           "split_fits", "get_fits_by_tag", "check_if_target", "get_path_descriptor"]
+__all__ = ["cprint", "capitalise_to_index", "print_execution_time",
+           "get_execution_modes", "split_fits", "get_fits_by_tag", "check_if_target",
+           "get_path_descriptor"]
 
 
 def cprint(message: str, color: Optional[str] = None) -> None:
@@ -29,6 +30,13 @@ def cprint(message: str, color: Optional[str] = None) -> None:
         print(message)
 
 
+def capitalise_to_index(string: str, index: int):
+    """Capitalises a string until a certain index"""
+    if index == len(string):
+        return string.capitalize()
+    return string[:index].capitalize() + string[index:].lower()
+
+
 def print_execution_time(func: Callable):
     """Prints the execution time of the input function"""
     @wraps(func)
@@ -36,8 +44,10 @@ def print_execution_time(func: Callable):
         overall_start_time = time.perf_counter()
         result = func(*args, **kwargs)
         execution_time = time.perf_counter()-overall_start_time
+        cprint(f"{'':-^50}", "lg")
         cprint(f"Executed in {timedelta(seconds=execution_time)}"
                " hh:mm:ss", "lg")
+        cprint(f"{'':-^50}", "lg")
         return result
     return inner
 
@@ -161,7 +171,3 @@ def get_path_descriptor(root_dir: Path, descriptor: Path,
     new_dir_name = '.'.join([descriptor, dir_name,
                              time_stamp_sci, detector, time_stamp_cal, "rb"])
     return root_dir / "calib" / mode_and_band[0] / new_dir_name
-
-
-if __name__ == "__main__":
-    print(cprint("Hello", "lp"))

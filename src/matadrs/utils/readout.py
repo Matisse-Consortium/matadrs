@@ -160,12 +160,11 @@ class ReadoutFits:
     def observation_type(self) -> str:
         """Fetches the type of the observation, i.e., if the object is a science target or
         calibrator"""
-        if "SCI" in self.primary_header["HIERARCH ESO OBS NAME"].lower()
+        if "SCI" in self.primary_header["HIERARCH ESO OBS NAME"]:
             return "science"
         else:
             return self.primary_header["HIERARCH ESO DPR CATG"].lower()
 
-    # TODO: Test if this works for multiple reductions of UTs/ATs
     @property
     def array_configuration(self) -> str:
         """Fetches the array's configuration from the primary header"""
@@ -173,7 +172,6 @@ class ReadoutFits:
             array = self.primary_header["HIERARCH ESO ISS BASELINE"]
         else:
             array = self.primary_header["HIERARCH ESO OBS BASELINE"]
-        print(array)
         return "uts" if "UT" in array else "ats"
 
     @property
