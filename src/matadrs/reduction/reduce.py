@@ -16,7 +16,7 @@ from ..mat_tools.mat_autoPipeline import mat_autoPipeline
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time, capitalise_to_index,\
-        get_execution_modes, get_fits_by_tag
+        get_execution_modes, get_fits_by_tag, move
 
 __all__ = ["get_readout_for_tpl_match", "get_tpl_starts", "in_catalog",
            "get_catalog_match", "prepare_catalogs", "set_script_arguments",
@@ -173,7 +173,6 @@ def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
     tpl_start: str
         The starting time of the observation
     """
-    # FIXME: Detects calibrator where science target should be detected
     readout = get_readout_for_tpl_match(raw_dir, tpl_start)
     if readout.is_calibrator():
         cprint(f"Calibrator '{readout.name}' detected!"
@@ -230,6 +229,32 @@ def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]
             f"{tel}{coh_nband}/spectralBinning={bin_nband}"
 
 
+def prepare_reduction(raw_dir: Path, calib_dir: Path,
+                      product_dir: Path, overwrite: bool) -> None:
+    """Prepares the reduction by removing removing old product files and sorting the raw
+    files by associated calibrations and observations
+
+    Parameters
+    ----------
+    raw_dir: Path
+        The direcotry containing the raw observation files
+    calib_dir: Path
+        The directory containing to the observation associated calibration files
+    product_dir: Path
+        The directory to contain the reduced files
+    overwrite: bool, optional
+        If 'True' overwrites present files from previous reduction
+    """
+    if not product_dir.exists():
+        product_dir.mkdir(parents=True)
+    if not calib_dir.exists():
+        calib_dir.mkdir(parents=True)
+
+    cprint("Moving calibration files into 'calib_files' folders...", "g")
+    for calibration_file in raw_dir.glob("M.*"):
+        move(calibration_file, calib_dir / calibration_file.name, overwrite)
+
+
 # FIXME: Implement removing properly
 def cleanup_reduction(product_dir: Path, mode: str,
                       band: str, overwrite: bool) -> None:
@@ -253,11 +278,7 @@ def cleanup_reduction(product_dir: Path, mode: str,
 
     for reduced_folder in product_dir.glob("Iter1/*.rb"):
         cprint(f"Moving folder '{reduced_folder.name}'...", "g")
-        if ((mode_and_band_dir / reduced_folder.name).exists()) and (not overwrite):
-            cprint(f"Could not move {reduced_folder},"
-                   " as directories from previous reduction exists!")
-        else:
-            shutil.move(reduced_folder, mode_and_band_dir)
+        move(reduced_folder, mode_and_band_dir, overwrite)
 
     # TODO: Remove this for loop? Maybe after properly implementing plotting?
     for reduced_folder in mode_and_band_dir.glob("*.rb"):
@@ -302,38 +323,14 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
         If 'True' overwrites present files from previous reduction
     """
     skip_L = True if band == "nband" else False
+    breakpoint()
     param_L, param_N = set_script_arguments(raw_dir, mode, tpl_start)
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
-    mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
-                     dirCalib=str(calib_dir), tplstartsel=tpl_start,
-                     nbCore=6, resol='', paramL=param_L, paramN=param_N,
-                     overwrite=0, maxIter=1, skipL=skip_L, skipN=(not skip_L))
-
+    # mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
+                     # dirCalib=str(calib_dir), tplstartsel=tpl_start,
+                     # nbCore=6, resol='', paramL=param_L, paramN=param_N,
+                     # overwrite=0, maxIter=1, skipL=skip_L, skipN=(not skip_L))
     cleanup_reduction(product_dir, mode, band, overwrite)
-
-
-def prepare_reduction(raw_dir: Path, calib_dir: Path,
-                      product_dir: Path, remove_previous: bool) -> None:
-    """Prepares the reduction by removing removing old product files and sorting the raw
-    files by associated calibrations and observations
-
-    Parameters
-    ----------
-    raw_dir: Path
-        The direcotry containing the raw observation files
-    calib_dir: Path
-        The directory containing to the observation associated calibration files
-    product_dir: Path
-        The directory to contain the reduced files
-    """
-    if not product_dir.exists():
-        product_dir.mkdir(parents=True)
-    if not calib_dir.exists():
-        calib_dir.mkdir(parents=True)
-
-    cprint("Moving calibration files into 'calib_files' folders...", "g")
-    for calibration_file in raw_dir.glob("M.*"):
-        shutil.move(calibration_file, calib_dir / calibration_file.name)
 
 
 @print_execution_time

@@ -1,10 +1,11 @@
 import time
+import shutil
 from datetime import timedelta
 from functools import wraps
 from pathlib import Path
 from typing import Callable, Tuple, List, Optional
 
-__all__ = ["cprint", "capitalise_to_index", "print_execution_time",
+__all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
            "get_execution_modes", "split_fits", "get_fits_by_tag", "check_if_target",
            "get_path_descriptor"]
 
@@ -35,6 +36,31 @@ def capitalise_to_index(string: str, index: int):
     if index == len(string):
         return string.capitalize()
     return string[:index].capitalize() + string[index:].lower()
+
+
+def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False)
+    """Moves source files/folders to the destination directory and overwrites them if
+    toggled
+
+    Parameters
+    ----------
+    source_file: Path
+        A file or directory to be moved
+    destination: Path
+        The destination directory of the source-file/-directory
+    overwrite: bool, optional
+        If this is toggled it will overwrite any existing files or directories with the
+        same name
+    """
+    if (destination / source_file.name).exists():
+        if overwrite:
+            shutil.copy2(source_file, destination / source_file.name)
+            os.remove(source_file)
+        else:
+            cprint(f"WARNING: '{source_file.name}' could not be moved, as it already"
+                   " exists at the destination!")
+    else:
+        shutil.move(source_file, destination / source_file.name)
 
 
 def print_execution_time(func: Callable):
