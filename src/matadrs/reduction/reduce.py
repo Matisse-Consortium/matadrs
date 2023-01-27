@@ -289,7 +289,6 @@ def cleanup_reduction(product_dir: Path, mode: str,
             plot_fits.add_cphase().add_vis().plot(save=True)
 
 
-# FIXME: Lband data is not reduced???
 @print_execution_time
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                          product_dir: Path, mode: bool,
@@ -322,14 +321,14 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     overwrite: bool, optional
         If 'True' overwrites present files from previous reduction
     """
-    skip_L = True if band == "nband" else False
-    breakpoint()
+    skip_L, skip_N = True if band == "nband" else False,\
+            True if band == "lband" else False
     param_L, param_N = set_script_arguments(raw_dir, mode, tpl_start)
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
-    # mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
-                     # dirCalib=str(calib_dir), tplstartsel=tpl_start,
-                     # nbCore=6, resol='', paramL=param_L, paramN=param_N,
-                     # overwrite=0, maxIter=1, skipL=skip_L, skipN=(not skip_L))
+    mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
+                     dirCalib=str(calib_dir), tplstartsel=tpl_start,
+                     nbCore=6, resol='', paramL=param_L, paramN=param_N,
+                     overwrite=0, maxIter=1, skipL=int(skip_L), skipN=int(skip_N))
     cleanup_reduction(product_dir, mode, band, overwrite)
 
 

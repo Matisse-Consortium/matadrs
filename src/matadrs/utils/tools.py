@@ -38,7 +38,7 @@ def capitalise_to_index(string: str, index: int):
     return string[:index].capitalize() + string[index:].lower()
 
 
-def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False)
+def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False):
     """Moves source files/folders to the destination directory and overwrites them if
     toggled
 
