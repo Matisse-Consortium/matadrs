@@ -2,16 +2,17 @@ import os
 import shutil
 import pkg_resources
 from pathlib import Path
-from typing import Set, Tuple, Union, Optional
+from typing import List, Set, Tuple, Union, Optional
 
 import numpy as np
 import astropy.units as u
+from astropy.time import Time
 from astropy.table import Table
 from astroquery.vizier import Vizier
 from astropy.coordinates import SkyCoord
 
 from ..mat_tools.libAutoPipeline import matisseType
-from ..mat_tools.mat_autoPipeline import mat_autoPipeline as mp
+from ..mat_tools.mat_autoPipeline import mat_autoPipeline
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time,\
@@ -70,7 +71,14 @@ def get_tpl_starts(raw_dir: Path) -> Set[str]:
     return set([ReadoutFits(fits_file).tpl_start for fits_file in raw_dir.glob("*.fits")])
 
 
-def remove_old_catalogs(catalog: Path, calib_dir: Path) -> bool:
+def find_catalogs(calib_dir: Path) -> List[Path]:
+    """Searches for JSDC-catalogs in the provided directory and returns their Paths"""
+    return [catalog for catalog in calib_dir.glob("*.fits") if
+            matisseType(ReadoutFits(catalog).primary_header) == "JSDC_CAT"]
+
+
+# FIXME: Test if the times are correct
+def remove_old_catalogs(catalog: Path, calib_dir: Path):
     """Checks if the latest catalog is already existing in the calibration directory and
     removes outdated iterations
 
@@ -78,22 +86,20 @@ def remove_old_catalogs(catalog: Path, calib_dir: Path) -> bool:
     ----------
     calib_dir: Path
         The directory containing to the observation associated calibration files
-
-    Returns
-    -------
-    outdated_catalogs_found: bool
-        Returns 'True' if outdated catalog has been found
     """
-    catalog_header = ReadoutFits(catalog).primary_header
-    for fits_file in calib_dir.glob("*.fits"):
-        header = ReadoutFits(fits_file).primary_header
-        if (matisseType(header) == "JSDC_CAT") and ("DATE" in (header and catalog_header)):
-            if header["DATE"] == catalog_header["DATE"]:
-                outdated_catalogs_found = False
+    newest_catalog_time = Time(ReadoutFits(catalog).primary_header["DATE"])\
+            if "DATE" in ReadoutFits(catalog).primary_header else ""
+    breakpoint()
+    for readout in list(map(lambda x: ReadoutFits(x), find_catalogs(calib_dir))):
+        catalog_time = Time(readout.primary_header["DATE"])\
+                if "DATE" in readout.primary_header else ""
+        if (newest_catalog_time and catalog_time):
+            if catalog_time < newest_catalog_time:
+                cprint(f"Removing outdated catalog...", "g")
+                os.remove(readout.fits_file)
         else:
-            outdated_catalogs_found = True
-            os.remove(str(fits_file))
-    return outdated_catalogs_found
+            cprint(f"Removing unspecified catalog...", "g")
+            os.remove(readout.fits_file)
 
 
 def in_catalog(readout: ReadoutFits,
@@ -153,7 +159,9 @@ def get_catalog_match(readout: ReadoutFits,
     return in_catalog(readout.coords, radius=radius, catalog=ADDITIONAL_CATALOG)
 
 
-# FIXME: Somehow the Science target is also detected to be a calibrator, or not?
+# NOTE: Is this function even necessary, it seems like the catalogs of the VLTI are
+# anyways newer than the ones online -> Check with Jozsef and check multiple files
+# FIXME: Science Targets are detected as calibrators, check why
 def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
     """Checks if the starting time given by 'tpl_start' corresponds to the observation of
     a science target/calibrator and removes/prepares the un/needed catalogs
@@ -167,14 +175,16 @@ def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
     tpl_start: str
         The starting time of the observation
     """
+    # FIXME: Detects calibrator where science target should be detected
     readout = get_readout_for_tpl_match(raw_dir, tpl_start)
+    breakpoint()
     if readout.is_calibrator():
         cprint(f"Calibrator '{readout.name}' detected!"
                f" Checking for catalog...", "g")
         catalog = get_catalog_match(readout)
         if catalog is not None:
-            outdated_catalogs_found = remove_old_catalogs(calib_dir)
-            if outdated_catalogs_found:
+            remove_old_catalogs(catalog, calib_dir)
+            if not find_catalogs(calib_dir):
                 cprint(f"Moving catalog to {calib_dir.name}...", "g")
                 shutil.copy(catalog, calib_dir / catalog.name)
             else:
@@ -208,6 +218,8 @@ def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]
     readout = get_readout_for_tpl_match(raw_dir, tpl_start)
     if readout.resolution == "high":
         resolution = f"{readout.resolution}_{readout.array_configuration}"
+    else:
+        resolution = readout.resolution
     tel = "/replaceTel=3" if readout.array_configuration == "ats" else "/replaceTel=0"
     coh_lband = coh_nband = ""
     if mode == "coherent":
@@ -219,6 +231,7 @@ def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]
             f"{tel}{coh_nband}/spectralBinning={bin_nband}"
 
 
+# FIXME: Implement removing properly
 def cleanup_reduction(product_dir: Path, mode: str,
                       band: str, overwrite: bool) -> None:
     """Moves the folders to their corresponding folders of structure '/mode/band' after
@@ -291,10 +304,10 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     skip_L = True if band == "nband" else False
     param_L, param_N = set_script_arguments(raw_dir, mode, tpl_start)
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
-    mp.mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
-                        dirCalib=str(calib_dir), tplstartsel=tpl_start,
-                        nbCore=6, resol='', paramL=param_L, paramN=param_N,
-                        overwrite=0, maxIter=1, skipL=skip_L, skipN=(not skip_L))
+    # mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
+                     # dirCalib=str(calib_dir), tplstartsel=tpl_start,
+                     # nbCore=6, resol='', paramL=param_L, paramN=param_N,
+                     # overwrite=0, maxIter=1, skipL=skip_L, skipN=(not skip_L))
 
     cleanup_reduction(product_dir, mode, band, overwrite)
     cprint(f"{'':-^50}", "lg")
@@ -314,16 +327,14 @@ def prepare_reduction(raw_dir: Path, calib_dir: Path,
     product_dir: Path
         The directory to contain the reduced files
     """
+    if not product_dir.exists():
+        product_dir.mkdir(parents=True)
     if not calib_dir.exists():
         calib_dir.mkdir(parents=True)
 
     cprint("Moving calibration files into 'calib_files' folders...", "g")
-    calibration_files = raw_dir.glob("M.*")
-    for calibration_file in calibration_files:
+    for calibration_file in raw_dir.glob("M.*"):
         shutil.move(calibration_file, calib_dir / calibration_file.name)
-
-    if not product_dir.exists():
-        product_dir.mkdir(parents=True)
 
 
 @print_execution_time
@@ -351,12 +362,11 @@ def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
     The reduction is executed on 6 cores in multiprocessing
     """
     raw_dir = Path(raw_dir).resolve()
-    calib_dir = raw_dir / "calib_files"
     product_dir = Path(product_dir / "reduced").resolve()
-    # TODO: Remove the old files during the loop? -> To make it more versatile?
-    prepare_reduction(raw_dir, calib_dir, product_dir, overwrite)
+    calib_dir = raw_dir / "calib_files"
     modes, bands = get_execution_modes(mode, band)
 
+    prepare_reduction(raw_dir, calib_dir, product_dir, overwrite)
     for tpl_start in sorted(list(get_tpl_starts(raw_dir))):
         cprint(f"{'':-^50}", "lg")
         cprint(f"Reducing data of tpl_start: {tpl_start}", "g")

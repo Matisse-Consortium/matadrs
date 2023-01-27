@@ -50,6 +50,7 @@ class ReadoutFits:
     ra
     dec
     coords
+    observation_type
     array_configuration
     bcd_configuration
     tpl_start
@@ -155,6 +156,12 @@ class ReadoutFits:
             self._coords = SkyCoord(self.ra*u.deg, self.dec*u.deg, frame="icrs")
         return self._coords
 
+    @property
+    def observation_type(self) -> str:
+        """Fetches the type of the observation, i.e., if the object is a science target or
+        calibrator"""
+        return self.primary_header["HIERARCH ESO DPR CATG"].lower()
+
     # TODO: Test if this works for multiple reductions of UTs/ATs
     @property
     def array_configuration(self) -> str:
@@ -163,6 +170,7 @@ class ReadoutFits:
             array = self.primary_header["HIERARCH ESO ISS BASELINE"]
         else:
             array = self.primary_header["HIERARCH ESO OBS BASELINE"]
+        print(array)
         return "uts" if "UT" in array else "ats"
 
     @property
@@ -294,7 +302,7 @@ class ReadoutFits:
         -------
         observed_as_calibrator: bool
         """
-        if self.primary_header["HIERARCH ESO DPR CATG"].lower() == "calib":
+        if self.observation_type == "calib":
             return True
         return False
 
