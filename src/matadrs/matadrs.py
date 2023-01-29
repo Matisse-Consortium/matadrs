@@ -80,9 +80,12 @@ def reduction_pipeline(raw_dirs: Union[List[Path], Path],
         cprint(f"{'':-^50}", "lg")
         if do_reduce:
             reduce(raw_dir, product_dir, mode, band, overwrite)
-        # if do_calibrate:
-            # calibrate(data_dir, stem_dir, target_dir,)
-        # if do_average:
-            # average(data_dir, stem_dir, target_dir)
-        # if do_merge:
-            # merge(data_dir, stem_dir, target_dir)
+        if do_calibrate:
+            calibrate(product_dir, mode, band, overwrite)
+        if do_average:
+            # average(product_dir, band, overwrite)
+            ...
+        if do_merge:
+            ...
+            # merge(product_dir)
+    cprint("Completed full data reduction!", "cy")

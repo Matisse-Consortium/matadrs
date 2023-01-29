@@ -1,3 +1,4 @@
+import os
 import time
 import shutil
 from datetime import timedelta
@@ -54,8 +55,13 @@ def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False
     """
     if (destination / source_file.name).exists():
         if overwrite:
-            shutil.copy2(source_file, destination / source_file.name)
-            os.remove(source_file)
+            if source_file.is_dir():
+                shutil.copytree(source_file, destination / source_file.name,
+                                dirs_exist_ok=True)
+                shutil.rmtree(source_file)
+            else:
+                shutil.copy2(source_file, destination / source_file.name)
+                os.remove(source_file)
         else:
             cprint(f"WARNING: '{source_file.name}' could not be moved, as it already"
                    " exists at the destination!")

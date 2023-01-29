@@ -287,9 +287,10 @@ def cleanup_reduction(product_dir: Path, mode: str,
             plot_fits = Plotter([fits_file],
                                 save_path=(mode_and_band_dir / reduced_folder.name))
             plot_fits.add_cphase().add_vis().plot(save=True)
+    cprint(f"Finished reducing {band} and {mode}", "lp")
+    cprint(f"{'':-^50}", "lp")
 
 
-@print_execution_time
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                          product_dir: Path, mode: bool,
                          band: str, tpl_start: str, overwrite: bool) -> None:
@@ -328,7 +329,8 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
                      dirCalib=str(calib_dir), tplstartsel=tpl_start,
                      nbCore=6, resol='', paramL=param_L, paramN=param_N,
-                     overwrite=0, maxIter=1, skipL=int(skip_L), skipN=int(skip_N))
+                     overwrite=int(overwrite), maxIter=1, skipL=int(skip_L),
+                     skipN=int(skip_N))
     cleanup_reduction(product_dir, mode, band, overwrite)
 
 
@@ -372,3 +374,4 @@ def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
                 cprint(f"Processing the {band.title()}...", "lp")
                 reduce_mode_and_band(raw_dir, calib_dir, product_dir,
                                      mode, band, tpl_start, overwrite)
+    cprint(f"Finished reducing {', '.join(bands)} and {', '.join(modes)}", "lp")
