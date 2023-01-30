@@ -170,7 +170,7 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
             average_files(directory, "flux", output_dir)
             average_files(directory, "vis", output_dir)
             bcd_calibration(directory, output_dir)
-            for fits_file in directory.glob("*.fits"):
+            for fits_file in get_fits_by_tag(directory, "CAL_INT"):
                 shutil.copy(str(fits_file), (output_dir / fits_file.name))
 
             cprint("Plotting averaged files...", "g")
