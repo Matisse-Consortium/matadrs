@@ -42,6 +42,7 @@ from shutil import copyfile
 
 import numpy as np
 import scipy.stats
+from scipy.special import j1
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve
@@ -260,7 +261,7 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile,
         create_skycalc_inputfile(fname_in_sci, airmass_sci, pwv_sci,
                                  wmin, wmax, wdelta=dlambda)
         print('Start SkyCalc (SCI).')
-        os.system(SKYCALC_CLI_CMD + ' -i ' + fname_in_sci + ' -o ' + fname_skycalc_out_sci)
+        os.system("skycalc_cli" + ' -i ' + fname_in_sci + ' -o ' + fname_skycalc_out_sci)
         figpath_out = outputdir+'/skycalc_output_sci_'+tag_sci+'.png'
         plot_skycalc_output(fname_skycalc_out_sci, figpath_out, airmass_sci, pwv_sci)
 
@@ -356,8 +357,7 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile,
         wav_cal_model = wav_cal_model[idx]
         kernel_width_px = 10.0
         if os.path.exists(output_fig_dir):
-            figpath_out = output_fig_dir+'/' + 'calibrator_'+band
-            +'_'+cal_name.replace(' ', '_')+'_spectrum_resampling.png'
+            figpath_out = output_fig_dir+'/' + 'calibrator_'+band +'_'+cal_name.replace(' ', '_')+'_spectrum_resampling.png'
             make_plot = True
         else:
             figpath_out = ''

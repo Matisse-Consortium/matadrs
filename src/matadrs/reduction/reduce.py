@@ -255,7 +255,6 @@ def prepare_reduction(raw_dir: Path, calib_dir: Path,
         move(calibration_file, calib_dir / calibration_file.name, overwrite)
 
 
-# FIXME: Implement removing properly
 def cleanup_reduction(product_dir: Path, mode: str,
                       band: str, overwrite: bool) -> None:
     """Moves the folders to their corresponding folders of structure '/mode/band' after
@@ -287,7 +286,7 @@ def cleanup_reduction(product_dir: Path, mode: str,
             plot_fits = Plotter([fits_file],
                                 save_path=(mode_and_band_dir / reduced_folder.name))
             plot_fits.add_cphase().add_vis().plot(save=True)
-    cprint(f"Finished reducing {band} and {mode}", "lp")
+    cprint(f"Finished reducing {band} in {mode}-mode", "lp")
     cprint(f"{'':-^50}", "lp")
 
 
@@ -374,4 +373,4 @@ def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
                 cprint(f"Processing the {band.title()}...", "lp")
                 reduce_mode_and_band(raw_dir, calib_dir, product_dir,
                                      mode, band, tpl_start, overwrite)
-    cprint(f"Finished reducing {', '.join(bands)} and {', '.join(modes)}", "lp")
+    cprint(f"Finished reducing {', '.join(bands)} for {', '.join(modes)}-mode(s)", "lp")

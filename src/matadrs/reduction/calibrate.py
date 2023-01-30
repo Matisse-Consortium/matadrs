@@ -111,7 +111,8 @@ def calibrate_visibilities(targets: List[Path],
         plot_fits.add_cphase().add_vis().plot(save=True)
 
 
-def calibrate_fluxes(targets: List[Path], calibrators, output_dir: Path) -> None:
+def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
+                     mode: str, output_dir: Path) -> None:
     """Calibrates the fluxes of all the provided files and saves it to the output
     directory
 
@@ -121,6 +122,9 @@ def calibrate_fluxes(targets: List[Path], calibrators, output_dir: Path) -> None
         The detected "TARGET_RAW"-files
     calibrators: List[Path]
         The detected "CALIB_RAW"-files
+    mode: str
+        The mode in which the reduction is to be executed. Either 'coherent',
+        'incoherent' or 'both'
     product_dir: Path
         The directory to contain the calibrated files
     """
@@ -132,7 +136,7 @@ def calibrate_fluxes(targets: List[Path], calibrators, output_dir: Path) -> None
         fluxcal(str(target), str(calibrator), str(output_file),
                 list(map(str, databases)), mode=MODE_NAMES[mode],
                 output_fig_dir=str(output_dir), do_airmass_correction=True)
-        cprint(f"Plotting file '{output_file}'...", "y")
+        cprint(f"Plotting file '{output_file.name}'...", "y")
         plot_fits = Plotter([output_file], save_path=output_dir)
         plot_fits.add_cphase().add_vis().plot(save=True)
 
@@ -176,7 +180,7 @@ def calibrate_files(reduced_dir: Path, target_dir: Path,
                                          targets[0], calibrators[0])
         if not output_dir.exists():
             output_dir.mkdir(parents=True, exist_ok=overwrite)
-        calibrate_fluxes(targets, calibrators, output_dir)
+        calibrate_fluxes(targets, calibrators, mode, output_dir)
         calibrate_visibilities(targets, calibrators, output_dir)
         cleanup_calibration(output_dir)
     else:
@@ -211,6 +215,8 @@ def calibrate_folders(reduced_dir: Path, band: str, mode: str) -> None:
     cprint(f"{'':-^50}", "lp")
 
 
+# TODO: Remove redundant checks for science targets as well as SCI-SCI or CAL-CAL. Skip
+# cals as checker generally
 # TODO: Implement checking for overwriting. Right now overwriting is by default
 @print_execution_time
 def calibrate(reduced_dir: Path,
