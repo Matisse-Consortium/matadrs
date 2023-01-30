@@ -25,7 +25,7 @@ from .avg_oifits import avg_oifits
 from .calib_BCD2 import calib_BCD
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
-from ..utils.tools import cprint, split_fits, get_fits_by_tag
+from ..utils.tools import cprint, split_fits, get_fits_by_tag, get_execution_modes
 
 
 HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
@@ -66,9 +66,17 @@ def sort_fits_by_bcd_configuration(fits_files: List[Path]) -> namedtuple:
     return BCDFits(in_in, in_out, out_in, out_out)
 
 
-def average_files(unchopped_fits: List[Path],
-                  chopped_fits: Optional[List[Path]], output_dir: Path) -> None:
+def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
     """Averages the unchopped (.fits)-files and the chopped (.fits)-files if given
+
+    Parameters
+    ----------
+    directory: Path
+        The directory to be searched in
+    file_type: str
+        Either 'flux' or 'vis' for the flux and visibility calibration, respectively
+    output_dir: Path
+        The directory to which the new files are saved to
 
     Notes
     -----
@@ -76,24 +84,18 @@ def average_files(unchopped_fits: List[Path],
     also chopped files. The files' names are with either 'INT' or 'INT_CHOPPED',
     respectively, and indicated that they are averaged by an 'AVG' in their name
 
-    Parameters
-    ----------
-    unchopped_fits: List[Path]
-        The unchopped (.fits)-files
-    chopped_fits: List[Path], optional
-        The chopped (.fits)-files
-    output_dir: Path
-        The directory to which the new files are saved to
 
     See also
     --------
     .avg_oifits.avg_oifits: Averaging for (.fits)-files
     """
-    if "FLUX" in unchopped_fits[0].name:
+    if file_type == "flux":
         cprint("Averaging flux calibration...", "g")
         outfile_name = "TARGET_AVG_FLUX"
+        unchopped_fits, chopped_fits = split_fits(directory, "TARGET_FLUX_CAL")
     else:
         cprint("Averaging visibility calibration...", "g")
+        unchopped_fits, chopped_fits = split_fits(directory, "TARGET_CAL")
         outfile_name = "TARGET_AVG_VIS"
 
     outfile_unchopped = output_dir / f"{outfile_name}_INT.fits"
@@ -104,16 +106,13 @@ def average_files(unchopped_fits: List[Path],
         avg_oifits(chopped_fits, outfile_chopped, headerval=HEADER_TO_REMOVE)
 
 
-def bcd_calibration(unchopped_fits: List[Path],
-                    chopped_fits: Optional[List[Path]], output_dir: Path) -> None:
+def bcd_calibration(directory: Path, output_dir: Path) -> None:
     """Executes the BCD-calibration for the the unchopped, visbility calibrated files
 
     Parameters
     ----------
-    unchopped_fits: List[Path]
-        The unchopped (.fits)-files
-    chopped_fits: List[Path], optional
-        The chopped (.fits)-files
+    directory: Path
+        The directory to be searched in
     output_dir: Path
         The directory to which the new files are saved to
 
@@ -128,6 +127,7 @@ def bcd_calibration(unchopped_fits: List[Path],
     .calib_BCD2.calib_BCD: BCD-calibration for closure phases
     """
     cprint("Executing BCD-calibration...", "g")
+    unchopped_fits, chopped_fits = split_fits(directory, "TARGET_CAL")
     outfile_unchopped_cphases = output_dir / "TARGET_AVG_T3PHI_INT.fits"
     bcd = sort_fits_by_bcd_configuration(unchopped_fits)
     if "lband" in str(unchopped_fits[0]):
@@ -144,40 +144,32 @@ def bcd_calibration(unchopped_fits: List[Path],
                   outfile_chopped_cphases, plot=False)
 
 
-def average_folders(observation_dir: Path, mode: str) -> None:
+def average_folders(calibrated_dir: Path, mode: str) -> None:
         """Iterates over the calibrated directories to
 
         Parameters
         ----------
-        observation_dir: Path
-            The directory containing all the observations products
-            (reduction and calibration)
-        band_dir: Path
-            The folder in which the calibrated data is contained
+        calibrated_dir: Path
+            The directory containing the calibration's products
+        mode: str, optional
+            The mode in which the reduction is to be executed. Either 'coherent',
+            'incoherent' or 'both'
         """
-        directories = (observation_dir / "calib" / mode).glob("*.rb")
-
-        for directory in directories:
-            # TODO: Make this into function
+        for directory in (calibrated_dir / "calib" / mode).glob("*.rb"):
             cprint(f"Averaging folder {directory.name}...", "g")
             cprint(f"{'':-^50}", "lg")
-
-            # TODO: Make check if vis-calibration or flux calibration did not work
-            unchopped_vis_fits, chopped_vis_fits = split_fits(directory, "TARGET_CAL")
-            unchopped_flux_fits, chopped_flux_fits = split_fits(directory,
-                                                                "TARGET_FLUXCAL")
 
             folder_split = directory.name.split(".")
             folder_split[0] += "-AVG"
             new_folder = ".".join(folder_split)
-            output_dir = observation_dir / "bcd_and_averaged" / mode / new_folder
+            output_dir = calibrated_dir / "bcd_and_averaged" / mode / new_folder
 
             if not output_dir.exists():
                 output_dir.mkdir(parents=True)
 
-            average_files(unchopped_vis_fits, chopped_vis_fits, output_dir)
-            average_files(unchopped_flux_fits, chopped_flux_fits, output_dir)
-            bcd_calibration(unchopped_vis_fits, output_dir)
+            average_files(directory, "flux", output_dir)
+            average_files(directory, "vis", output_dir)
+            bcd_calibration(directory, output_dir)
             for fits_file in directory.glob("*.fits"):
                 shutil.copy(str(fits_file), (output_dir / fits_file.name))
 
@@ -188,30 +180,25 @@ def average_folders(observation_dir: Path, mode: str) -> None:
             cprint(f"{'':-^50}", "lg")
 
 
-def average(observation_dir: Path, output_dir: Path, mode: Optional[str] = "both"):
-    """Calls Jozsef's code sequentially to average the reduced and calibrated data
+# TODO: Implement overwrite
+def average(calibrated_dir: Path,
+            mode: Optional[str] = "both", overwrite: Optional[bool] = False):
+    """Does the full averaging for all of the calibrated directories subdirectories
 
     Parameters
     ----------
-    observation_dir: Path
-        The directory containing all the observations products
-        (reduction and calibration)
+    calibrated_dir: Path
+        The directory containing the calibration's products
     mode: str, optional
         The mode in which the reduction is to be executed. Either 'coherent',
         'incoherent' or 'both'
+    overwrite: bool, optional
+        If 'True' overwrites present files from previous calibration
     """
-    if mode not in ["both", "coherent", "incoherent"]:
-        raise IOError(f"No mode named '{mode}' exists!")
-    modes = ["coherent", "incoherent"] if "both" else [mode]
-    for mode in modes:
+    for mode in get_execution_modes(mode)[0]:
         cprint("Averaging and BCD-calibration of"
-               f" {observation_dir.name} with mode={mode}", "lp")
+               f" {calibrated_dir.name} with mode={mode}", "lp")
         cprint(f"{'':-^50}", "lg")
-        average_folders(observation_dir, mode)
+        average_folders(calibrated_dir, mode)
     cprint("Averaging done!", "lp")
     cprint(f"{'':-^50}", "lg")
-
-
-if __name__ == "__main__":
-    observation_dir = ""
-    average(observation_dir)

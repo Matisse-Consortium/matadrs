@@ -83,9 +83,7 @@ def reduction_pipeline(raw_dirs: Union[List[Path], Path],
         if do_calibrate:
             calibrate(product_dir, mode, band, overwrite)
         if do_average:
-            # average(product_dir, band, overwrite)
-            ...
+            average(product_dir, mode, overwrite)
         if do_merge:
-            ...
-            # merge(product_dir)
+            merge(product_dir)
     cprint("Completed full data reduction!", "cy")

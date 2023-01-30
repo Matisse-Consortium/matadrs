@@ -223,7 +223,7 @@ def calibrate(reduced_dir: Path,
               mode: Optional[str] = "both",
               band: Optional[str] = "both",
               overwrite: Optional[bool] = False) -> None:
-    """Does the full calibration for all of the "cal_dir" subdirectories
+    """Does the full calibration for all of the reduced directories subdirectories
 
     Parameters
     ----------

@@ -45,6 +45,7 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     output_dir: Path
     """
     flux, vis = "TARGET_AVG_FLUX_INT.fits", "TARGET_AVG_VIS_INT.fits"
+    bcd_pipeline = "TARGET_CAL_INT_noBCD.fits"
     bcd = "TARGET_AVG_T3PHI_INT.fits"
     coherent_flux, incoherent_flux = [directory / flux for directory in directories]
     coherent_vis, incoherent_vis = [directory / vis for directory in directories]
@@ -143,15 +144,17 @@ def merge_folders(coherent_dirs: List[Path],
         cprint(f"{'':-^50}", "lg")
 
 
-def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
+def merge(averaged_dir: Path) -> None:
     """This merges two (.fits)-files together into one, i.e. the  "incoherent"
     and the "coherent" files
 
     Parameters
     ----------
-    root_dir: Path
-    stem_dir: Path
-    target_dir: Path
+    averaged_dir: Path
+        The directory containing the averaged products
+    mode: str, optional
+        The mode in which the reduction is to be executed. Either 'coherent',
+        'incoherent' or 'both'
     """
     root_dir = Path(root_dir, stem_dir, "products", target_dir)
     coherent_dirs = list((root_dir / "bcd_and_averaged" / "coherent").glob("*.rb"))
@@ -173,9 +176,3 @@ def merge(root_dir: Path, stem_dir: Path, target_dir: Path) -> None:
         plot_fits.add_cphase().add_vis().plot(save=True)
     cprint(f"{'':-^50}", "lg")
     cprint("Merging Done!", "lp")
-
-
-if __name__ == "__main__":
-    root_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20190514"
-    merge(root_dir, stem_dir, target_dir)
