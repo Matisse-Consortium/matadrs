@@ -252,7 +252,7 @@ def prepare_reduction(raw_dir: Path, calib_dir: Path,
 
     cprint("Moving calibration files into 'calib_files' folders...", "g")
     for calibration_file in raw_dir.glob("M.*"):
-        move(calibration_file, calib_dir / calibration_file.name, overwrite)
+        shutil.move(calibration_file, calib_dir / calibration_file.name)
 
 
 def cleanup_reduction(product_dir: Path, mode: str,
