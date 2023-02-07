@@ -218,7 +218,7 @@ def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]
         resolution = f"{readout.resolution}_{readout.array_configuration}"
     else:
         resolution = readout.resolution
-    tel = "/replaceTel=3/" if readout.array_configuration == "ats" else "/replaceTel=0/"
+    tel = "/replaceTel=3" if readout.array_configuration == "ats" else "/replaceTel=0"
     coh_lband = coh_nband = ""
     if mode == "coherent":
         coh_lband = "/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2/"
@@ -226,7 +226,7 @@ def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]
     compensate = 'compensate="[pb,rb,nl,if,bp,od]/"'
     bin_lband, bin_nband = SPECTRAL_BINNING[resolution]
     return f"{coh_lband}{compensate}spectralBinning={bin_lband}",\
-            f"{tel}{coh_nband}/spectralBinning={bin_nband}"
+            f"{tel}{coh_nband}spectralBinning={bin_nband}"
 
 
 def prepare_reduction(raw_dir: Path, calib_dir: Path,
