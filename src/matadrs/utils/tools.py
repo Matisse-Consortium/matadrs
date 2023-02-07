@@ -136,13 +136,15 @@ def split_fits(directory: Path, tag: str) -> Tuple[List[Path], Optional[List[Pat
     chopped_fits: List[Path] | None
         A list of Paths that are the unchopped (.fits)-files
     """
-    unchopped_fits = [fits_file for fits_file\
+    unchopped_fits = [fits_file for fits_file
                       in get_fits_by_tag(directory, tag) if not "BCD" in str(fits_file)]
     if len(unchopped_fits) == 6:
         return unchopped_fits[:4], unchopped_fits[4:]
     return unchopped_fits, None
 
 
+# TODO: Write function in such a way that it gets the name of the files from the headers
+# and then checks if they are correct
 def get_fits_by_tag(directory: Path, tag: str) -> List[Path]:
     """Searches a folder for a tag and returns the (.fits)-files matching it
 

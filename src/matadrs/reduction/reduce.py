@@ -77,7 +77,7 @@ def find_catalogs(calib_dir: Path) -> List[Path]:
             matisseType(ReadoutFits(catalog).primary_header) == "JSDC_CAT"]
 
 
-# FIXME: Test if the times are correct
+# TODO: Test if the times are correct
 def remove_old_catalogs(catalog: Path, calib_dir: Path):
     """Checks if the latest catalog is already existing in the calibration directory and
     removes outdated iterations
@@ -218,14 +218,14 @@ def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]
         resolution = f"{readout.resolution}_{readout.array_configuration}"
     else:
         resolution = readout.resolution
-    tel = "/replaceTel=3" if readout.array_configuration == "ats" else "/replaceTel=0"
+    tel = "/replaceTel=3/" if readout.array_configuration == "ats" else "/replaceTel=0/"
     coh_lband = coh_nband = ""
     if mode == "coherent":
-        coh_lband = "/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2"
-        coh_nband = "/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2"
-    compensate = '/compensate="[pb,rb,nl,if,bp,od]"'
+        coh_lband = "/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2/"
+        coh_nband = "/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2/"
+    compensate = 'compensate="[pb,rb,nl,if,bp,od]/"'
     bin_lband, bin_nband = SPECTRAL_BINNING[resolution]
-    return f"{coh_lband}{compensate}/spectralBinning={bin_lband}",\
+    return f"{coh_lband}{compensate}spectralBinning={bin_lband}",\
             f"{tel}{coh_nband}/spectralBinning={bin_nband}"
 
 
@@ -324,6 +324,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     skip_L, skip_N = True if band == "nband" else False,\
             True if band == "lband" else False
     param_L, param_N = set_script_arguments(raw_dir, mode, tpl_start)
+    breakpoint()
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
     mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
                      dirCalib=str(calib_dir), tplstartsel=tpl_start,
