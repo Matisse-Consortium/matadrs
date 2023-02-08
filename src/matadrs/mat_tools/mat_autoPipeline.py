@@ -58,7 +58,9 @@ def runEsorex(cmd: List) -> None:
     os.system("cd "+val[1]+";"+cmd+" > "+out+" 2> "+err)
 
 
+# FIXME: Check if parameters are parsed correctly
 def removeDoubleParameter(p):
+    """Removes any parameters that have been given twice or more times"""
     listP = p.split(' ')
     paramName = []
     paramsNew = ''
@@ -433,6 +435,8 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
                     print("outputDir "+outputDir+" does not exist. Creating it...\n")
                     os.mkdir(outputDir)
 
+                # FIXME: Fix bug that if too many '/' are given errs. Make this more
+                # robust
                 listNewParams = removeDoubleParameter(elt['param'].replace("/", " --"))
                 cmd = "esorex --output-dir="+outputDir+" "+elt['recipes']+" "+listNewParams+" "+sofname+"%"+resol
 

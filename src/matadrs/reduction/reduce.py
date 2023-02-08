@@ -296,7 +296,7 @@ def cleanup_reduction(product_dir: Path, mode: str,
         for fits_file in get_fits_by_tag(reduced_folder, "RAW_INT"):
             plot_fits = Plotter([fits_file],
                                 save_path=(mode_and_band_dir / reduced_folder.name))
-            plot_fits.add_cphase().add_vis().plot(save=True)
+            plot_fits.add_cphases().add_vis().plot(save=True)
     cprint(f"Finished reducing {band} in {mode}-mode", "lp")
     cprint(f"{'':-^50}", "lp")
 

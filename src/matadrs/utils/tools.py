@@ -39,6 +39,11 @@ def capitalise_to_index(string: str, index: int):
     return string[:index].capitalize() + string[index:].lower()
 
 
+# TODO: Implement this function
+def correct_phase_jumps():
+    ...
+
+
 def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False):
     """Moves source files/folders to the destination directory and overwrites them if
     toggled

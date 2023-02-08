@@ -191,7 +191,7 @@ class Plotter:
         self.components["Vis2"] = self.make_component("vis2", legend_format)
         return self
 
-    def add_cphase(self):
+    def add_cphases(self):
         """Plots all the closure phases into one plot"""
         self.components["Closure phases [$^{\circ}$]"] = self.make_component("cphase")
         return self
@@ -431,6 +431,6 @@ if __name__ == ('__main__'):
                   "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
     fits_files = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
     plot_fits = Plotter([fits_files[1]])
-    plot_fits.add_cphase().add_vis("short").plot()
+    plot_fits.add_cphases().add_vis("short").plot()
 
 
