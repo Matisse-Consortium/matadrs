@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This file is part of the Matisse pipeline GUI series
@@ -22,25 +21,31 @@ in the LICENCE.md file.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 """
-import argparse
 import filecmp
 import glob
 import os
 import shutil
 import sys
 from multiprocessing.pool import Pool
+from typing import List
 
 import numpy as np
-from tqdm import tqdm
 from astropy.io import fits
-from astropy.io.fits import getheader
 from astroquery.vizier import Vizier
+from tqdm import tqdm
 
 from .libAutoPipeline import matisseRecipes, matisseCalib, matisseAction, matisseType
 
 
 # Run esorex recipes
-def runEsorex(cmd):
+def runEsorex(cmd: List) -> None:
+    """Runs the given esorex command
+
+    Parameters
+    ----------
+    cmd: List
+        The esorex command
+    """
     spl = cmd.split("%")
     cmd = spl[0]
     print(cmd)
@@ -67,7 +72,7 @@ def removeDoubleParameter(p):
 
 def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
                      resol=0, paramL="", paramN="", overwrite=0, maxIter=0, skipL=0,
-                     skipN=0, tplstartsel="", tplidsel="", spectralBinning=""):
+                     skipN=0, tplstartsel="", tplidsel="", spectralBinning=[]):
     v = Vizier(columns=["med-Lflux", "med-Mflux", "med-Nflux"], catalog="II/361")
     # NOTE: Print meaningful error messages if something is wrong in the command line
     print("------------------------------------------------------------------------")
@@ -104,13 +109,14 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
         listArchive = glob.glob(dirCalib+"/*.fits")
     else:
         listArchive = []
+
     # NOTE: Sort listRaw using template ID and template start
     print("Sorting files according to constraints...")
     allhdr = []
     for filename in tqdm(listRaw, unit=" files", unit_scale=False, desc="Working on files"):
         try:
-            allhdr.append(getheader(filename, 0))
-        except:
+            allhdr.append(fits.getheader(filename, 0))
+        except Exception:
             print("\nWARNING: corrupt file!")
 
     listRawSorted = []
@@ -207,7 +213,7 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
         try:
             tplstart = hdr['HIERARCH ESO TPL START']
             chipname = hdr['HIERARCH ESO DET CHIP NAME']
-        except:
+        except Exception:
             print("WARNING, "+filename+" is not a valid MATISSE fits file!")
             continue
         # Reduction blocks are defined by template start and detector name
@@ -248,12 +254,14 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
 
         print("listing reduction blocks...")
         listRedBlocks = []
+
         # Reduction Blocks List Initialization
         cpt = 0
         for elt in keyTplStart:
             listRedBlocks.append({"action": " ", "recipes": " ", "param": " ", "input": [],
                                   "calib": [], "status": 0, "tplstart": " ",  "iter": listIterNumber[cpt]})
             cpt += 1
+
         # Fill the list of raw data in the Reduction Blocks List
         print("listing files in the reduction blocks...")
         for hdr, filename in zip(allhdr, listRaw):
@@ -264,7 +272,7 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
                 try:
                     chipname = hdr['HIERARCH ESO DET CHIP NAME']
                     stri = hdr['HIERARCH ESO TPL START']+'.'+chipname
-                except:
+                except Exception:
                     print("WARNING, "+filename+" is not a valid MATISSE fits file!")
                     continue
             tag = matisseType(hdr)
@@ -290,11 +298,17 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
                                             tel, resolution)
             elt["action"] = action
             elt["recipes"] = recipes
-            if action == " ACTION_MAT_RAW_ESTIMATES":
-                if (hdr['HIERARCH ESO DET CHIP NAME'] == "AQUARIUS"):
 
-                    if spectralBinning != "":
-                        paramN += " --spectralBinning="+spectralBinning
+            # NOTE: Chooses the action by the filetype that is given
+            if action == "ACTION_MAT_RAW_ESTIMATES":
+                try:
+                    spectralBinningL, spectralBinningN = spectralBinning
+                except ValueError:
+                    spectralBinningL, spectralBinningN = "", ""
+
+                if (hdr['HIERARCH ESO DET CHIP NAME'] == "AQUARIUS"):
+                    if spectralBinningN:
+                        paramN += " --spectralBinning="+str(spectralBinningN)
                     else:
                         paramN += " --spectralBinning=7"
 
@@ -303,8 +317,8 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
                     else:
                         elt["param"] = paramN + " " + param
                 else:
-                    if spectralBinning != "":
-                        paramL += " --spectralBinning="+spectralBinning
+                    if spectralBinningL:
+                        paramL += " --spectralBinning="+str(spectralBinningL)
                     else:
                         paramL += " --spectralBinning=5"
 
@@ -404,7 +418,7 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
                     print("Remove any previous logfile...")
                     try:
                         os.remove(os.path.join(outputDir, ".logfile"))
-                    except:
+                    except Exception:
                         print("Nothing to remove...")
                     if os.listdir(outputDir) == []:
                         print("outputDir is empty, continuing...")
@@ -474,7 +488,7 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
                 hdu[0].header['HIERARCH PRO MDFC FLUX M'] = (fluxM, 'Flux (Jy) in M band from MDFC catalog')
                 hdu[0].header['HIERARCH PRO MDFC FLUX N'] = (fluxN, 'Flux (Jy) in N band from MDFC catalog')
                 hdu.flush()
-            except:
+            except Exception:
                 print("Object "+targetname+" not found in MDFC catalog")
             hdu.close()
 
@@ -496,60 +510,3 @@ def mat_autoPipeline(dirRaw="", dirResult="", dirCalib="", nbCore=0,
                 tplstart, detector = elt["tplstart"].split('.')
                 print('%-24s' % (tplstart,), '%-14s' % (detector,), '%-30s' % (elt["action"],), msg)
             break
-
-
-if __name__ == '__main__':
-    print("Starting...")
-    parser = argparse.ArgumentParser(description='Automatic MATISSE pipeline implementation, allowing one to reduce entire nights of raw data into oifits files.')
-
-    parser.add_argument('dirRaw', default="",  \
-    help='The path to the directory containing your raw data.')
-
-    parser.add_argument('--dirCalib', default="",  \
-    help='Calibration Map Path')
-
-    parser.add_argument('--dirResult', default="", \
-    help='Results Path (default is current directory)')
-
-    parser.add_argument('--nbCore', default=0,type=int, \
-    help='Number Of Cores (default 1)')
-
-    parser.add_argument('--tplID', default="",  \
-    help='template ID')
-
-    parser.add_argument('--tplSTART', default="",  \
-    help='template start')
-
-    parser.add_argument('--overwrite', default=0,  \
-    help='overwrite existing files', action='store_true')
-
-    parser.add_argument('--skipL', default=0,  \
-    help='skip L band data', action='store_true')
-
-    parser.add_argument('--skipN', default=0,  \
-    help='skip N band data', action='store_true')
-
-    parser.add_argument('--resol', default="",  \
-                        help='reduce only a given spectral resolution. Can be any of LOW, MED or HIGH')
-    parser.add_argument('--spectralBinning', default="",  \
-                        help='Bin spectrally the data to improve SNR')
-    parser.add_argument('--maxIter', default=0,  \
-                        help='Maximum Number of Iteration (default 1)')
-    parser.add_argument('--paramN', default="/useOpdMod=TRUE",  \
-                        help='recipes parameters for N band (default /useOpdMod=TRUE for the UTs, and /replaceTel=3/useOpdMod=TRUE for the ATs)')
-    parser.add_argument('--paramL', default="/tartyp=57/useOpdMod=FALSE",  \
-                        help='recipes parameters for LM band (default /tartyp=57/useOpdMod=FALSE/compensate=[pb,nl,if,rb,bp,od]/hampelFilterKernel=10)')
-
-    try:
-        args = parser.parse_args()
-    except:
-        print("\n\033[93mRunning mat_autoPipeline.py --help to be kind with you:\033[0m\n")
-        parser.print_help()
-        print("\n     Example : python mat_autoPipeline.py /data/2018-05-19 --skipN --resol=LOW --nbCore=2 --paramN=/useOpdMod=TRUE/corrFlux=TRUE --paramL=/cumulBlock=TRUE")
-        sys.exit(0)
-
-    args.dirRaw = os.path.abspath(args.dirRaw)+"/"
-
-    mat_autoPipeline(args.dirRaw, args.dirResult, args.dirCalib, args.nbCore, args.resol,
-                     args.paramL, args.paramN, args.overwrite, int(args.maxIter),
-                     args.skipL, args.skipN, args.tplSTART, args.tplID, args.spectralBinning)

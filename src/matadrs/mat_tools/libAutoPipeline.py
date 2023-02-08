@@ -775,6 +775,3 @@ def matisseType(header):
     else:
         res=catg
     return res
-
-
-

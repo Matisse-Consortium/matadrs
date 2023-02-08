@@ -94,10 +94,10 @@ def remove_old_catalogs(catalog: Path, calib_dir: Path):
                 if "DATE" in readout.primary_header else ""
         if (newest_catalog_time and catalog_time):
             if catalog_time < newest_catalog_time:
-                cprint(f"Removing outdated catalog...", "g")
+                cprint("Removing outdated catalog...", "g")
                 os.remove(readout.fits_file)
         else:
-            cprint(f"Removing unspecified catalog...", "g")
+            cprint("Removing unspecified catalog...", "g")
             os.remove(readout.fits_file)
 
 
@@ -191,6 +191,29 @@ def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
         cprint(f"Science target '{readout.name}' detected! Removing catalogs...", "y")
 
 
+def get_spectral_binning(raw_dir, tpl_start) -> List[int]:
+    """Gets the spectral binning according to the integration times used in the
+    observation
+
+    Parameters
+    ----------
+    raw_dir: Path
+        The directory containing the raw observation files
+    tpl_start: str
+        The starting time of the observation
+
+    Returns
+    -------
+    spectral_binning: List[int]
+    """
+    readout = get_readout_for_tpl_match(raw_dir, tpl_start)
+    if readout.resolution == "high":
+        resolution = f"{readout.resolution}_{readout.array_configuration}"
+    else:
+        resolution = readout.resolution
+    return SPECTRAL_BINNING[resolution]
+
+
 def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]:
     """Sets the arguments that are then passed to the 'mat_autoPipeline.py' script
 
@@ -207,26 +230,14 @@ def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]
     Returns
     -------
     lband_params: str
-        The arguments passed to the MATISSE-pipline for the L-band
+        The additional arguments passed to the `mat_autoPipeline` for the L-band. For the
+        rest of the arguments see the `mat_autoPipeline`-script
     nband_params: str
-        The arguments passed to the MATISSE-pipline for the N-band
+        The additional arguments passed to the `mat_autoPipeline` for the N-band. For the
+        rest of the arguments see the `mat_autoPipeline`-script
     """
-    readout = get_readout_for_tpl_match(raw_dir, tpl_start)
-    cprint("INFO: Used telescopes - "
-           f"{capitalise_to_index(readout.array_configuration, 2)}", "lg")
-    if readout.resolution == "high":
-        resolution = f"{readout.resolution}_{readout.array_configuration}"
-    else:
-        resolution = readout.resolution
-    tel = "/replaceTel=3" if readout.array_configuration == "ats" else "/replaceTel=0"
-    coh_lband = coh_nband = ""
-    if mode == "coherent":
-        coh_lband = "/corrFlux=TRUE/useOpdMod=FALSE/coherentAlgo=2/"
-        coh_nband = "/corrFlux=TRUE/useOpdMod=TRUE/coherentAlgo=2/"
-    compensate = 'compensate="[pb,rb,nl,if,bp,od]/"'
-    bin_lband, bin_nband = SPECTRAL_BINNING[resolution]
-    return f"{coh_lband}{compensate}spectralBinning={bin_lband}",\
-            f"{tel}{coh_nband}spectralBinning={bin_nband}"
+    coh = "/corrFlux=TRUE/coherentAlgo=2/" if mode == "coherent" else ""
+    return coh, f"{coh}/useOpdMod=TRUE/"
 
 
 def prepare_reduction(raw_dir: Path, calib_dir: Path,
@@ -323,14 +334,14 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     """
     skip_L, skip_N = True if band == "nband" else False,\
             True if band == "lband" else False
-    param_L, param_N = set_script_arguments(raw_dir, mode, tpl_start)
-    breakpoint()
+    param_L, param_N = set_script_arguments(mode)
+    spectral_binning = get_spectral_binning(raw_dir, tpl_start)
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
     mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
                      dirCalib=str(calib_dir), tplstartsel=tpl_start,
                      nbCore=6, resol='', paramL=param_L, paramN=param_N,
                      overwrite=int(overwrite), maxIter=1, skipL=int(skip_L),
-                     skipN=int(skip_N))
+                     skipN=int(skip_N), spectralBinning=spectral_binning)
     cleanup_reduction(product_dir, mode, band, overwrite)
 
 
