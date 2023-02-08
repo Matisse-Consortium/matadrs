@@ -214,7 +214,7 @@ def get_spectral_binning(raw_dir, tpl_start) -> List[int]:
     return SPECTRAL_BINNING[resolution]
 
 
-def set_script_arguments(raw_dir: Path, mode: str, tpl_start: str) -> Tuple[str]:
+def set_script_arguments(mode: str) -> Tuple[str]:
     """Sets the arguments that are then passed to the 'mat_autoPipeline.py' script
 
     Parameters
