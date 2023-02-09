@@ -10,7 +10,7 @@ requires-python = ">=3.9"
 readme = "README.md"
 license = {file = "LICENSE"}
 
-keywords = ["astronomy", "data-reduction", "interferometry"]
+keywords = ["astronomy", "data-analysis", "data-reduction", "interferometry"]
 authors = [
 	{name = "Marten Scheuck", email = "martenscheuck@gmail.com"}
 ]
@@ -28,17 +28,29 @@ classifiers = [
 	"Topic :: Scientific/Engineering :: Physics",
 ]
 
-dependencies = [
-	'importlib-metadata; python_version<"3.8"',
-	"astropy >=5.1",
-    "astroquery >=0.4.6",
-    "pandas==1.5.2",
-	"matplotlib >=3.5.3",
+[options]
+install_requires = [
+	"importlib-metadata; python_version < '3.8'",
+	"astropy >= 5.1",
+    "astroquery >= 0.4.6",
+    "pandas == 1.5.2",
+	"matplotlib >= 3.5.3",
 	"numpy >=1.23.2",
 	"pip >=22.2.2",
 	"scipy >=1.9.1",
 	"tqdm >=4.64.0"
 ]
+
+[options.extras_require]
+dev = [
+    "pytest >= 7.2.1",
+    "pytest-cov >= 4.0.0",
+    "sphinx >= 6.1.3",
+    "sphinx-rtd-theme >= 1.2.0"
+]
+
+[tool.setuptools]
+include-package-data = true
 
 [project.urls]
 repository = "https://github.com/MBSck/matadrs"
