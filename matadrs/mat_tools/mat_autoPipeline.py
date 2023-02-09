@@ -66,7 +66,7 @@ def removeDoubleParameter(p):
     paramsNew = ''
     for elt in listP:
         idx = elt.find("=")
-        if (elt[0:idx] not in paramName and elt != ''):
+        if (elt[0:idx] not in paramName and elt != '' and elt != '--'):
             paramName.append(elt[0:idx])
             paramsNew = paramsNew + " " + elt
     return paramsNew
