@@ -138,7 +138,7 @@ def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
                 output_fig_dir=str(output_dir), do_airmass_correction=True)
         cprint(f"Plotting file '{output_file.name}'...", "y")
         plot_fits = Plotter([output_file], save_path=output_dir)
-        plot_fits.add_cphase().add_vis().plot(save=True)
+        plot_fits.add_cphases().add_vis().plot(save=True)
 
 
 # TODO: Find way to make this moving better than this -> Moves (.fits)-files
