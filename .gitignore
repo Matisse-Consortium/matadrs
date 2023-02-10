@@ -1,7 +1,6 @@
 # Folders to ignore
 __pycache__/
 *.egg-info/
-sphinx_build/
 docs/
 
 # Files to ignore
