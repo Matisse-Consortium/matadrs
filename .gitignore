@@ -1,13 +1,14 @@
 # Folders to ignore
 __pycache__/
 *.egg-info/
+sphinx_build/
+docs/
 
 # Files to ignore
 *.txt
 
 # Specific folders to ignore
-data/tests
-src/matadrs/jacob_files
+tests/
+matadrs/jacob_files
 
 # Specific files to ignore
-tests/data/*
