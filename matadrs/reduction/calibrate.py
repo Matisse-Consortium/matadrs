@@ -12,7 +12,7 @@ from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time, get_path_descriptor,\
         check_if_target, get_fits_by_tag, get_execution_modes, split_fits
 
-__all__ = ["create_visbility_sof", "check_file_match", "sort_fits_by_bcd_configuration",
+__all__ = ["create_visibility_sof", "check_file_match", "sort_fits_by_bcd_configuration",
            "calibrate_bcd", "calibrate_visibilities", "calibrate_fluxes",
            "cleanup_calibration", "calibrate_files", "calibrate_folders", "calibrate"]
 
@@ -31,8 +31,8 @@ MODE_NAMES = {"coherent": "corrflux", "incoherent": "flux"}
 # mat_target_list of newest edition for that (grep it via python api of google sheets)
 # Make a function for this
 # MAT_TARGET_LIST = DATA_DIR / "mat_target_list.xlsx"
-def create_visbility_sof(reduced_dir: Path,
-                         targets: List[Path], calibrators: List[Path]) -> Path:
+def create_visibility_sof(reduced_dir: Path,
+                          targets: List[Path], calibrators: List[Path]) -> Path:
     """Creates the (.sof)-file needed for the visibility calibration with 'mat_cal_oifits'
     and returns its path
 
@@ -120,7 +120,7 @@ def sort_fits_by_bcd_configuration(fits_files: List[Path]) -> namedtuple:
     return BCDFits(in_in, in_out, out_in, out_out)
 
 
-def calibrate_bcd(directory: Path, output_dir: Path) -> None:
+def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
     """Executes the BCD-calibration for the the unchopped/chopped, visbility calibrated
     files
 
@@ -147,10 +147,10 @@ def calibrate_bcd(directory: Path, output_dir: Path) -> None:
     .calib_BCD2.calib_BCD: BCD-calibration for closure phases
     """
     cprint("Executing BCD-calibration...", "g")
-    unchopped_fits, chopped_fits = split_fits(directory, "TARGET_CAL")
+    unchopped_fits, chopped_fits = split_fits(directory, "CAL_INT_000")
     outfile_unchopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
     bcd = sort_fits_by_bcd_configuration(unchopped_fits)
-    if "lband" in str(unchopped_fits[0]):
+    if band == "lband":
         calib_BCD(bcd.in_in, bcd.in_out,
                   bcd.out_in, bcd.out_out,
                   outfile_unchopped_cphases, plot=False)
@@ -160,7 +160,8 @@ def calibrate_bcd(directory: Path, output_dir: Path) -> None:
     if chopped_fits is not None:
         outfile_chopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_CHOPPED_INT.fits"
         bcd_chopped = sort_fits_by_bcd_configuration(chopped_fits)
-        calib_BCD(bcd_chopped.in_in, "", "", bcd_chopped.out_out,
+        calib_BCD(bcd_chopped.in_in, "",
+                  "", bcd_chopped.out_out,
                   outfile_chopped_cphases, plot=False)
 
 
@@ -179,7 +180,7 @@ def calibrate_visibilities(targets: List[Path],
         The directory to contain the calibrated files
     """
     cprint("Calibrating visibilities...", "g")
-    sof_file = create_visbility_sof(output_dir, targets, calibrators)
+    sof_file = create_visibility_sof(output_dir, targets, calibrators)
     subprocess.call(["esorex", f"--output-dir={str(output_dir)}",
                      "mat_cal_oifits", str(sof_file)],
                     stdout=subprocess.DEVNULL)
@@ -190,7 +191,7 @@ def calibrate_visibilities(targets: List[Path],
 
 
 def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
-                     mode: str, output_dir: Path) -> None:
+                     mode: str, band: str, output_dir: Path) -> None:
     """Calibrates the fluxes of all the provided files and saves it to the output
     directory
 
@@ -203,6 +204,9 @@ def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
     mode: str
         The mode in which the reduction is to be executed. Either 'coherent',
         'incoherent' or 'both'
+    band: str, optional
+        The band in which the reduction is to be executed. Either 'lband',
+        'nband' or 'both'
     product_dir: Path
         The directory to contain the calibrated files
     """
@@ -210,7 +214,7 @@ def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
         cprint(f"Processing {target.name} with {calibrator.name}...", "g")
         output_file = output_dir / f"TARGET_FLUX_CAL_INT_000{index}.fits"
-        databases = LBAND_DATABASES if "lband" else NBAND_DATABASES
+        databases = LBAND_DATABASES if band == "lband" else NBAND_DATABASES
         fluxcal(str(target), str(calibrator), str(output_file),
                 list(map(str, databases)), mode=MODE_NAMES[mode],
                 output_fig_dir=str(output_dir), do_airmass_correction=True)
@@ -234,7 +238,8 @@ def cleanup_calibration(output_dir: Path):
 # TODO: Make this better so it calibrates even if the calibrator or the science
 # target is chopped but the other is not
 def calibrate_files(reduced_dir: Path, target_dir: Path,
-                    calibrator_dir: Path, mode: str, overwrite: bool = False) -> None:
+                    calibrator_dir: Path, mode: str,
+                    band: str, overwrite: bool) -> None:
     """The total calibration for a target and a calibrator folder. Includes the flux-,
     visibility- and closure phase (bcd-) calibration
 
@@ -249,6 +254,11 @@ def calibrate_files(reduced_dir: Path, target_dir: Path,
     mode: str
         The mode of calibration. Either 'corrflux', 'flux' or 'both' depending
         if it is 'coherent' or 'incoherent' reduced data
+    band: str, optional
+        The band in which the reduction is to be executed. Either 'lband',
+        'nband' or 'both'
+    overwrite: bool, optional
+        If 'True' overwrites files from previous calibration
     """
     cprint(f"Calibrating {target_dir.name} with {calibrator_dir.name}...", "p")
     targets = get_fits_by_tag(target_dir, "TARGET_RAW_INT")
@@ -259,13 +269,13 @@ def calibrate_files(reduced_dir: Path, target_dir: Path,
                                          targets[0], calibrators[0])
         if not output_dir.exists():
             output_dir.mkdir(parents=True, exist_ok=overwrite)
-        calibrate_fluxes(targets, calibrators, mode, output_dir)
+        calibrate_fluxes(targets, calibrators, mode, band, output_dir)
         calibrate_visibilities(targets, calibrators, output_dir)
-        calibrate_bcd(reduced_dir, output_dir)
+        calibrate_bcd(output_dir, band, output_dir)
         cleanup_calibration(output_dir)
 
 
-def calibrate_folders(reduced_dir: Path, band: str, mode: str) -> None:
+def calibrate_folders(reduced_dir: Path, mode: str, band: str, overwrite: bool) -> None:
     """Calibrates a directory containing the scientific target with a directory containing
     the calibrator observation. Calibrates flux, visibility and closure phases (bcd)
 
@@ -279,6 +289,8 @@ def calibrate_folders(reduced_dir: Path, band: str, mode: str) -> None:
     band: str, optional
         The band in which the reduction is to be executed. Either 'lband',
         'nband' or 'both'
+    overwrite: bool, optional
+        If 'True' overwrites files from previous calibration
     """
     sub_dirs = sorted((reduced_dir / "reduced" / mode / band).glob("*.rb"))
     rotated_sub_directories = deque(sub_dirs.copy())
@@ -289,7 +301,8 @@ def calibrate_folders(reduced_dir: Path, band: str, mode: str) -> None:
         cprint(f"{'':-^50}", "lg")
         if check_if_target(directory):
             for rotated_directory in rotated_sub_directories:
-                calibrate_files(reduced_dir, directory, rotated_directory, mode)
+                calibrate_files(reduced_dir, directory,
+                                rotated_directory, mode, band, overwrite)
     cprint(f"Finished calibration of {band} and {mode}", "lp")
     cprint(f"{'':-^50}", "lp")
 
@@ -315,7 +328,7 @@ def calibrate(reduced_dir: Path,
         The band in which the reduction is to be executed. Either 'lband',
         'nband' or 'both'
     overwrite: bool, optional
-        If 'True' overwrites present files from previous calibration
+        If 'True' overwrites files from previous calibration
 
     Notes
     -----
@@ -325,7 +338,7 @@ def calibrate(reduced_dir: Path,
     modes, bands = get_execution_modes(mode, band)
     for mode in modes:
         for band in bands:
-            calibrate_folders(reduced_dir, band, mode)
+            calibrate_folders(reduced_dir, mode, band, overwrite)
     cprint(f"Finished calibration of {', '.join(bands)} and {', '.join(modes)}", "lp")
 
 
