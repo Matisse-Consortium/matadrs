@@ -1,18 +1,20 @@
 import shutil
 import subprocess
 import pkg_resources
+from collections import deque, namedtuple
 from pathlib import Path
 from typing import List, Optional
-from collections import deque
 
 from .fluxcal import fluxcal
+from .calib_BCD2 import calib_BCD
 from ..utils.plot import Plotter
+from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time, get_path_descriptor,\
-        check_if_target, get_fits_by_tag, get_execution_modes, print_execution_time
+        check_if_target, get_fits_by_tag, get_execution_modes, split_fits
 
-__all__ = ["create_visbility_sof", "check_file_match", "calibrate_visibilities",
-           "calibrate_fluxes", "cleanup_calibration", "calibrate_files",
-           "calibrate_folders", "calibrate"]
+__all__ = ["create_visbility_sof", "check_file_match", "sort_fits_by_bcd_configuration",
+           "calibrate_bcd", "calibrate_visibilities", "calibrate_fluxes",
+           "cleanup_calibration", "calibrate_files", "calibrate_folders", "calibrate"]
 
 DATABASE_DIR = Path(pkg_resources.resource_filename("matadrs", "data/calibrator_databases"))
 DATABASES = ["vBoekelDatabase.fits", "calib_spec_db_v10.fits",
@@ -86,6 +88,82 @@ def check_file_match(targets: List[Path], calibrators: List[Path]) -> bool:
     return True
 
 
+def sort_fits_by_bcd_configuration(fits_files: List[Path]) -> namedtuple:
+    """Sorts the input (.fits)-files by their BCD configuration
+
+    Parameters
+    ----------
+    fits_files: List[Path]
+        The (.fits)-files to be checked for their BCD-configuration
+
+    Returns
+    -------
+    bcd_configuration: namedtuple
+        A named tuple containing the (.fits)-files sorted by BCD-configuration. If none of
+        the specified configuration is found then the field is filled with an empty string
+    """
+    in_in, in_out, out_in, out_out = "", "", "", ""
+    BCDFits = namedtuple("BCDFits", ["in_in", "in_out", "out_in", "out_out"])
+    for fits_file in fits_files:
+        bcd_configuration = ReadoutFits(fits_file).bcd_configuration
+        if bcd_configuration == "in-in":
+            in_in = fits_file
+        elif bcd_configuration == "in-out":
+            in_out = fits_file
+        elif bcd_configuration == "out-in":
+            out_in = fits_file
+        elif bcd_configuration == "out-out":
+            out_out = fits_file
+        else:
+            cprint("BCD-configuration has not been found!", "r")
+            raise ValueError
+    return BCDFits(in_in, in_out, out_in, out_out)
+
+
+def calibrate_bcd(directory: Path, output_dir: Path) -> None:
+    """Executes the BCD-calibration for the the unchopped/chopped, visbility calibrated
+    files
+
+    Parameters
+    ----------
+    directory: Path
+        The directory to be searched in
+    output_dir: Path
+        The directory to which the new files are saved to
+
+    Notes
+    -----
+    This creates either one or two output files depending if there are only unchopped or
+    also chopped files. The files' names end with either 'INT' or 'INT_CHOPPED',
+    respectively, and indicated that they are averaged by an 'AVG' in their name
+
+    From MATISSE-pipeline version 1.7.6, the BCD-calibration is included in the
+    pipeline, however, for L-band it only takes into account the chopped files, and is
+    unreliable if they are not present, in which case the BCD-calibration is executed via
+    this script and the output of it merged into the final file
+
+    See also
+    --------
+    .calib_BCD2.calib_BCD: BCD-calibration for closure phases
+    """
+    cprint("Executing BCD-calibration...", "g")
+    unchopped_fits, chopped_fits = split_fits(directory, "TARGET_CAL")
+    outfile_unchopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
+    bcd = sort_fits_by_bcd_configuration(unchopped_fits)
+    if "lband" in str(unchopped_fits[0]):
+        calib_BCD(bcd.in_in, bcd.in_out,
+                  bcd.out_in, bcd.out_out,
+                  outfile_unchopped_cphases, plot=False)
+    else:
+        calib_BCD(bcd.in_in, "", "", bcd.out_out, outfile_unchopped_cphases, plot=False)
+
+    if chopped_fits is not None:
+        outfile_chopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_CHOPPED_INT.fits"
+        bcd_chopped = sort_fits_by_bcd_configuration(chopped_fits)
+        calib_BCD(bcd_chopped.in_in, "", "", bcd_chopped.out_out,
+                  outfile_chopped_cphases, plot=False)
+
+
 def calibrate_visibilities(targets: List[Path],
                            calibrators: List[Path], output_dir: Path) -> None:
     """Calibrates the visibilities of all the provided files and saves them to the output
@@ -157,7 +235,8 @@ def cleanup_calibration(output_dir: Path):
 # target is chopped but the other is not
 def calibrate_files(reduced_dir: Path, target_dir: Path,
                     calibrator_dir: Path, mode: str, overwrite: bool = False) -> None:
-    """The calibration for a target and a calibrator folder
+    """The total calibration for a target and a calibrator folder. Includes the flux-,
+    visibility- and closure phase (bcd-) calibration
 
     Parameters
     ----------
@@ -182,13 +261,13 @@ def calibrate_files(reduced_dir: Path, target_dir: Path,
             output_dir.mkdir(parents=True, exist_ok=overwrite)
         calibrate_fluxes(targets, calibrators, mode, output_dir)
         calibrate_visibilities(targets, calibrators, output_dir)
+        calibrate_bcd(reduced_dir, output_dir)
         cleanup_calibration(output_dir)
-    else:
-        return
 
 
 def calibrate_folders(reduced_dir: Path, band: str, mode: str) -> None:
-    """Takes two folders and calibrates their contents together
+    """Calibrates a directory containing the scientific target with a directory containing
+    the calibrator observation. Calibrates flux, visibility and closure phases (bcd)
 
     Parameters
     ----------

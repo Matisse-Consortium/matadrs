@@ -13,18 +13,14 @@ Examples
 --------
 """
 
-__all__ = ["sort_fits_by_bcd_configuration", "average_files",
-           "bcd_calibration", "average_folders", "average"]
+__all__ = ["copy_calibrated_files", "average_files", "average_folders", "average"]
 
 import shutil
-from collections import namedtuple
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional
 
 from .avg_oifits import avg_oifits
-from .calib_BCD2 import calib_BCD
 from ..utils.plot import Plotter
-from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, split_fits, get_fits_by_tag, get_execution_modes
 
 
@@ -34,36 +30,21 @@ HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
                     {'key': 'HIERARCH ESO INS BCD2 NAME', 'value': ' '}]
 
 
-def sort_fits_by_bcd_configuration(fits_files: List[Path]) -> namedtuple:
-    """Sorts the input (.fits)-files by their BCD configuration
+def copy_calibrated_files(directory: Path, output_dir: Path) -> None:
+    """Copies the bcd-calibrated files to the averaged directory
 
     Parameters
     ----------
-    fits_files: List[Path]
-        The (.fits)-files to be checked for their BCD-configuration
-
-    Returns
-    -------
-    bcd_configuration: namedtuple
-        A named tuple containing the (.fits)-files sorted by BCD-configuration. If none of
-        the specified configuration is found then the field is filled with an empty string
+    directory: Path
+        The directory to be searched in
+    output_dir: Path
+        The directory to which the new files are saved to
     """
-    in_in, in_out, out_in, out_out = "", "", "", ""
-    BCDFits = namedtuple("BCDFits", ["in_in", "in_out", "out_in", "out_out"])
-    for fits_file in fits_files:
-        bcd_configuration = ReadoutFits(fits_file).bcd_configuration
-        if bcd_configuration == "in-in":
-            in_in = fits_file
-        elif bcd_configuration == "in-out":
-            in_out = fits_file
-        elif bcd_configuration == "out-in":
-            out_in = fits_file
-        elif bcd_configuration == "out-out":
-            out_out = fits_file
-        else:
-            cprint("BCD-configuration has not been found!", "r")
-            raise ValueError
-    return BCDFits(in_in, in_out, out_in, out_out)
+    bcd_pip_files = get_fits_by_tag(directory, "CAL_INT_noBCD")
+    bcd_files = get_fits_by_tag(directory, "BCD_CAL")
+    for bcd_pip_file, bcd_file in zip(bcd_pip_files, bcd_files):
+        shutil.copy(str(bcd_pip_file), (output_dir / bcd_pip_file.name))
+        shutil.copy(str(bcd_file), (output_dir / bcd_file.name))
 
 
 def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
@@ -106,44 +87,6 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
         avg_oifits(chopped_fits, outfile_chopped, headerval=HEADER_TO_REMOVE)
 
 
-def bcd_calibration(directory: Path, output_dir: Path) -> None:
-    """Executes the BCD-calibration for the the unchopped, visbility calibrated files
-
-    Parameters
-    ----------
-    directory: Path
-        The directory to be searched in
-    output_dir: Path
-        The directory to which the new files are saved to
-
-    Notes
-    -----
-    This creates either one or two output files depending if there are only unchopped or
-    also chopped files. The files' names end with either 'INT' or 'INT_CHOPPED',
-    respectively, and indicated that they are averaged by an 'AVG' in their name
-
-    See also
-    --------
-    .calib_BCD2.calib_BCD: BCD-calibration for closure phases
-    """
-    cprint("Executing BCD-calibration...", "g")
-    unchopped_fits, chopped_fits = split_fits(directory, "TARGET_CAL")
-    outfile_unchopped_cphases = output_dir / "TARGET_AVG_T3PHI_INT.fits"
-    bcd = sort_fits_by_bcd_configuration(unchopped_fits)
-    if "lband" in str(unchopped_fits[0]):
-        calib_BCD(bcd.in_in, bcd.in_out,
-                  bcd.out_in, bcd.out_out,
-                  outfile_unchopped_cphases, plot=False)
-    else:
-        calib_BCD(bcd.in_in, "", "", bcd.out_out, outfile_unchopped_cphases, plot=False)
-
-    if chopped_fits is not None:
-        outfile_chopped_cphases = output_dir / "TARGET_AVG_T3PHI_CHOPPED_INT.fits"
-        bcd_chopped = sort_fits_by_bcd_configuration(chopped_fits)
-        calib_BCD(bcd_chopped.in_in, "", "", bcd_chopped.out_out,
-                  outfile_chopped_cphases, plot=False)
-
-
 def average_folders(calibrated_dir: Path, mode: str) -> None:
         """Iterates over the calibrated directories to
 
@@ -162,16 +105,14 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
             folder_split = directory.name.split(".")
             folder_split[0] += "-AVG"
             new_folder = ".".join(folder_split)
-            output_dir = calibrated_dir / "bcd_and_averaged" / mode / new_folder
+            output_dir = calibrated_dir / "averaged" / mode / new_folder
 
             if not output_dir.exists():
                 output_dir.mkdir(parents=True)
 
             average_files(directory, "flux", output_dir)
             average_files(directory, "vis", output_dir)
-            bcd_calibration(directory, output_dir)
-            for fits_file in get_fits_by_tag(directory, "CAL_INT"):
-                shutil.copy(str(fits_file), (output_dir / fits_file.name))
+            copy_calibrated_files(directory, output_dir)
 
             cprint("Plotting averaged files...", "g")
             for fits_file in get_fits_by_tag(output_dir, "AVG"):
