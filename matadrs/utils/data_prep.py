@@ -1,3 +1,4 @@
+import pkg_resources
 from pathlib import Path
 from typing import Optional, List
 
@@ -11,7 +12,7 @@ from .readout import ReadoutFits
 __all__ = []
 
 
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 
 
 # TODO: Keep all in Table format as long as possible but switch to np.ndarrays .when needed

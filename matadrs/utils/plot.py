@@ -8,14 +8,18 @@ import matplotlib.pyplot as plt
 from pandas import DataFrame
 from astropy.table import Column
 
-
-from ..utils.data_prep import DataPrep
+from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint
 
 
 DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 
+# Paranal lattitude in radians
+LATITUDE = -24.62587 * np.pi / 180.
 
+# TODO: Make this go away from class and just individual plotting functions? -> Maybe
+# easier for paper relevant plots, but first make unified class that makes nice data
+# reduction plots
 class Plotter:
     """Class that plots models as well as reduced data
 
@@ -23,20 +27,16 @@ class Plotter:
     ----------
     """
 
-    def __init__(self, fits_files: List[Path],
-                 flux_files: Optional[List[Path]] = None,
+    def __init__(self, fits_file: Path,
+                 flux_file: Optional[Path] = None,
                  plot_name: Optional[str] = None,
                  save_path: Optional[Path] = None) -> None:
         """Initialises the class instance"""
-        self.data_prep = DataPrep(fits_files)
+        self.readout = ReadoutFits(fits_file)
         self._band_mask = None
 
         # TODO: Make it that if multiple datasets are input that multiple plots are made
         # for the different bands -> See how to implement this
-        if len(fits_files) > 1:
-            cprint("There is more than one (.fits)-file detected."
-                   " WARNING: Only data of SAME BAND can be unified"
-                   " into one plot!", "y")
 
         if save_path is None:
             self.save_path = Path("").cwd()
@@ -45,9 +45,9 @@ class Plotter:
 
         # TODO: Improve this plot name giving. Only one fits file is respected in this
         if plot_name is None:
-            self.plot_name = f"{Path(fits_files[0]).stem}.pdf"
+            self.plot_name = f"{Path(fits_file[0]).stem}.pdf"
 
-        self.wl = self.data_prep.oi_wl["EFF_WAVE"].data[0]
+        self.wl = self.readout.oi_wl["EFF_WAVE"].data[0]
         self.components = {}
 
     @property
@@ -56,7 +56,6 @@ class Plotter:
 
     # TODO: Make this more modular for multiple files -> Right now only one wl is
     # respected
-    # FIXME: Make this work. Right now it is filtering all the values
     @property
     def band_mask(self):
         """The masking for the bands to make the plots visually readable"""
@@ -73,7 +72,7 @@ class Plotter:
                 self._band_mask = (wl > 8.5) & (wl < 12.5)
         return ~self._band_mask["wl"]
 
-    # TODO: This should not need to be a thing, but it doesn't work otherwise
+    # HACK: This should not need to be a thing, but it doesn't work otherwise
     def mask_dataframe(self, df: DataFrame, mask: np.ndarray) -> None:
         """Iterates through each row to mask a DataFrame"""
         for column in df.columns:
@@ -101,30 +100,30 @@ class Plotter:
         df: DataFrame
         """
         if data_name == "flux":
-            df = self.set_dataframe(self.data_prep.oi_flux["TEL_NAME"],
-                                    self.data_prep.oi_flux["FLUXDATA"])
+            df = self.set_dataframe(self.readout.oi_flux["TEL_NAME"],
+                                    self.readout.oi_flux["FLUXDATA"])
         elif (data_name == "vis") or (data_name == "vis2"):
             # TODO: Check if there are edge cases where oi_vis needs to be used
-            station_names = self.data_prep.oi_vis["DELAY_LINE"]
+            station_names = self.readout.oi_vis["DELAY_LINE"]
             if legend_format == "long":
-                baselines = np.around(self.data_prep.oi_vis["BASELINE"], 2)
-                u_coords = self.data_prep.oi_vis["UVCOORD"][:, 0]
-                v_coords = self.data_prep.oi_vis["UVCOORD"][:, 1]
+                baselines = np.around(self.readout.oi_vis["BASELINE"], 2)
+                u_coords = self.readout.oi_vis["UVCOORD"][:, 0]
+                v_coords = self.readout.oi_vis["UVCOORD"][:, 1]
                 pas = np.around((np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
                 # TODO: Make the variables into mathrm
                 labels = [fr"{station_name} $B_p$={baseline} m $\phi={pa}^\circ$"
-                          for station_name, baseline, pa in zip(station_names, baselines, pas)]
+                    for station_name, baseline, pa in zip(station_names, baselines, pas)]
             else:
                 labels = station_names
 
             if data_name == "vis":
-                df = self.set_dataframe(labels, self.data_prep.oi_vis["VISAMP"])
+                df = self.set_dataframe(labels, self.readout.oi_vis["VISAMP"])
             else:
-                df = self.set_dataframe(labels, self.data_prep.oi_vis2["VIS2DATA"])
+                df = self.set_dataframe(labels, self.readout.oi_vis2["VIS2DATA"])
             # TODO: Find out what this is exactly? Projected Baselines? Positional Angle?
         elif data_name == "cphase":
-            df = self.set_dataframe(self.data_prep.oi_t3["TRIANGLE"],
-                                    self.data_prep.oi_t3["T3PHI"])
+            df = self.set_dataframe(self.readout.oi_t3["TRIANGLE"],
+                                    self.readout.oi_t3["T3PHI"])
         else:
             raise ValueError("Input data name cannot be queried!")
         df["lambda"] = self.wl
@@ -239,194 +238,161 @@ class Plotter:
             # ax.set_ylabel('vis2')
             # ax.legend(loc='best')
 
-    # def plot_uv(self, ax) -> None:
-        # """Plots the uv-coordinates with an orientational compass and the synthethis
 
-        # Parameters
-        # ----------
-        # ax
-            # The axis anchor of matplotlib.pyplot
+# From menEWS: menEWS_utilities.py
+def calculate_uv_points(self, baselines, hour_angle):
+    """Calculates the earth rotation (synthesis) for the uv-point corresponding to the
+    baselines for the input hour angle(s)
 
-        # Returns
-        # -------
-        # None
-        # """
-        # ax.scatter(self.ucoords, self.vcoords)
-        # ax.scatter(-self.ucoords, -self.vcoords)
-        # ax.set_xlim([150, -150])
-        # ax.set_ylim([-150, 150])
-        # ax.set_ylabel('v [m]')
-        # ax.set_xlabel('u [m]')
+    Parameters
+    -----------
+    baselines
+    hour_angle
 
-        # # Compass for the directions
-        # cardinal_vectors = [(0,1), (0,-1), (1,0), (-1,0)]
-        # cardinal_colors  = ['black', 'green', 'blue', 'red']
-        # cardinal_directions = ['N', 'S', 'W', 'E']
-        # arrow_size, head_size = 40, 10
-        # x, y = (-85, 85)
+    Returns
+    -------
+    u_coords
+    v_coords
+    """
+    baseline_east, baseline_north, baseline_longest = baselines
 
-        # for vector, color, direction in zip(cardinal_vectors,
-                                            # cardinal_colors, cardinal_directions):
-            # dx, dy = vector[0]*arrow_size, vector[1]*arrow_size
-            # if vector[0] == 0:
-                # ax.text(x-dx-5, y+dy, direction)
-            # if vector[1] == 0:
-                # ax.text(x-dx, y+dy+5, direction)
-            # arrow_args = {"length_includes_head": True,
-                          # "head_width": head_size, "head_length": head_size,
-                          # "width": 1, "fc": color, "ec": color}
-            # ax.arrow(x, y, dx, dy, **arrow_args)
+    u_coords = baseline_east * np.cos(hour_angle) - baseline_north * np.sin(LATITUDE)\
+        * np.sin(hour_angle) + baseline_longest * np.cos(LATITUDE) * np.sin(hour_angle)
+    v_coords = baseline_east * np.sin(self.readout.dec) * np.sin(hour_angle)\
+        + baseline_north * (np.sin(LATITUDE) * np.sin(self.readout.dec) * np.cos(hour_angle)\
+            + np.cos(LATITUDE) * np.cos(self.readout.dec)) - baseline_longest * \
+            (np.cos(LATITUDE) * np.sin(self.readout.dec) * np.cos(hour_angle)\
+                - np.sin(LATITUDE) * np.cos(self.readout.dec))
+    return u_coords, v_coords
 
 
-# def rotation_synthesis_uv(inp):
-    # """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
+def make_uv_tracks(self, ax, uv_coords, baselines, flag, symbol, color):
+    """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
 
-    # Calculates uv-point corresponding to inp (see "get_header_info"),
-    # for hour angle(s) (ha)
-    # """
-    # ra, dec, BE, BN, BL, base = inp
-    # paranal_lat = -24.62587 * np.pi / 180.
+    From coordinate + ha (range), calculate uv tracks
 
-    # u = BE * np.cos(ha) -\
-            # BN * np.sin(lat) * np.sin(ha) + BL * np.cos(lat) * np.sin(ha)
-    # v = BE * np.sin(dec) * np.sin(ha) +\
-            # BN * (np.sin(lat) * np.sin(dec) * np.cos(ha) +\
-                  # np.cos(lat) * np.cos(dec)) - BL * \
-        # (np.cos(lat) * np.sin(dec) * np.cos(ha)- np.sin(lat) * np.cos(dec))
-    # return u, v
+    Parameters
+    ----------
+    uv_coords: List[]
+    baselines:
+        The baselines in the following order: Baselines east, -north, -longest
+    flags
+    symbol
+    color
+    """
+    mlim = 2.0  # airmass limit for tracks
 
+    # u, v = map(lambda x: x/sel_wl, uv_coords)
+    u_coords, v_coords = uv_coords
 
-# def make_uv_tracks(uv, inp, flag, ax, bases=[], symbol='x',color='',
-    # print_station_names=True,sel_wl=1.0,plot_Mlambda=False):
-    # """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
+    if not color:
+        if np.all(flag) == 'True':
+            color = 'r'
+        else:
+            color = 'g'
 
-    # From coordinate + ha (range), calculate uv tracks"""
+    if base not in bases:
+        hamax = np.arccos(abs((1. / mlim - np.sin(LATITUDE) * np.sin(self.readout.dec)) / \
+                              (np.cos(LATITUDE) * np.cos(self.readout.dec))))
+        hour_angles = np.linspace(-hamax, hamax, 1000)
 
-    # ra, dec, BE, BN, BL, base = inp
-    # paranal_lat = -24.62587 * np.pi / 180.
-    # mlim = 2.0  # airmass limit for tracks
+        ul, vl = calculate_uv_points(baselines, hour_angles)
+        # u, v = map(lambda x: x/sel_wl, ulvl)
 
-    # if plot_Mlambda == True:
-        # u, v = map(lambda x: x/sel_wl, uv)
-    # else:
-        # u, v = uv
+        ax.plot(ul, vl, '-', color='grey',alpha=0.5)
+        ax.plot(-ul, -vl, '-', color='grey',alpha=0.5)
+        ax.plot([0.], [0.], '+k', markersize=5, markeredgewidth=2,alpha=0.5)
 
-    # if not color:
-        # if np.all(flag) == 'True':
-            # color = 'r'
-        # else:
-            # color = 'g'
+        if print_station_names:
+            ax.text(-u-7, -v-3, base, color='0',alpha=0.8)
+        bases.append(base)
 
-    # if base not in bases:
-        # hamax = np.arccos(abs((1. / mlim - np.sin(lat) * np.sin(dec)) / \
-                              # (np.cos(lat) * np.cos(dec))))
-        # harng = np.linspace(-hamax, hamax, 1000)
+    ax.plot(u_coords, v_coords, symbol, color=color, markersize=10, markeredgewidth=3)
+    ax.plot(-u_coords, -v_coords, symbol, color=color, markersize=10, markeredgewidth=3)
 
-        # ul, vl = ulvl = calculate_uv_points(inp, harng)
-        # if plot_Mlambda == True:
-            # u, v = map(lambda x: x/sel_wl, ulvl)
-
-        # ax.plot(ul, vl, '-', color='grey',alpha=0.5)
-        # ax.plot(-ul, -vl, '-', color='grey',alpha=0.5)
-        # ax.plot([0.], [0.], '+k', markersize=5, markeredgewidth=2,alpha=0.5)
-
-        # if print_station_names:
-            # ax.text(-u-7, -v-3, base, color='0',alpha=0.8)
-        # bases.append(base)
-
-    # ax.plot(u, v, symbol, color=color, markersize=10, markeredgewidth=3)
-    # ax.plot(-u, -v, symbol, color=color, markersize=10, markeredgewidth=3)
-
-    # return bases
+    return bases
 
 
-# def make_uv_plot(dic,ax,verbose=False,annotate=True,B_lim=(np.nan,np.nan),figsize=(5,5),
-    # color='',print_station_names=True,sel_wl=1.0,plot_Mlambda=False):
-    # """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py)"""
-    # if plot_Mlambda==False:
-        # sel_wl = 1.0
-    # try:
-        # u = dic['VIS2']['U']
-        # v = dic['VIS2']['V']
-        # flag = dic['VIS2']['FLAG']
-        # sta_index = dic['VIS2']['STA_INDEX']
-        # mjd = dic['VIS2']['MJD']
-    # except KeyError as e:
-        # if verbose: print(e)
-        # u = [0.0]
-        # v = [0.0]
-        # flags = [False]
-        # sta_index = []
-        # mjd = [0.0]
+def plot_uv(self, ax):
+    """Makes the (u, v)-plots
 
-    # uvs = []
-    # inps = []
-    # flags = []
-    # umax = []
-    # vmax = []
-    # for j in range(len(u)):
-        # uvs.append([u[j],v[j]])
-        # try:
-            # BE, BN, BL = dic['STAXYZ'][sta_index[j, 0] == dic['STA_INDEX']][0] - \
-                # dic['STAXYZ'][sta_index[j, 1] == dic['STA_INDEX']][0]
-            # sta_label= dic['STA_NAME'][sta_index[j, 0] == dic['STA_INDEX']][0] + '-' + \
-                        # dic['STA_NAME'][sta_index[j, 1] == dic['STA_INDEX']][0]
-        # except IndexError as e:
-            # print('make_uv_plot STA_INDEX error.')
-            # print(e)
-            # BE, BN, BL = [np.nan,np.nan,np.nan]
-            # sta_label= ''
-        # inps.append( [dic['RA'] * np.pi / 180., dic['DEC'] * np.pi / 180., BE, BN, BL, sta_label]  )
-        # flags.append(flag[j])
-    # bases = []
-    # umax = np.nanmax(np.abs(u))
-    # vmax = np.nanmax(np.abs(v))
-    # if not (dic['MJD-OBS']):
-        # dic['MJD-OBS'] = np.amin(mjd[0])
-    # try:
-        # rel_time = (mjd - dic['MJD-OBS']) * 24.0 * 3600.0  # (s)
+    Parameters
+    ----------
+    """
+    uvcoords = self.readout.oi_vis2["UVCOORD"]
+    u, v = uvcoords[:, 0], uvcoords[:, 1]
+    flag = self.readout.oi_vis2["FLAG"]
+    sta_indices = self.readout.oi_vis2["STA_INDEX"]
+    sta_index = self.readout.oi_array["STA_INDEX"]
+    sta_name = self.readout.oi_array["STA_NAME"]
+    sta_xyz = self.readout.oi_array["STAXYZ"]
+
+    uvs, inps, flags, umax, vmax = [], [], [], [], []
+    for j in range(len(u)):
+        uvs.append([u[j], v[j]])
+        try:
+            BE, BN, BL = sta_xyz[sta_indices[j, 0] == sta_index][0] - \
+                sta_xyz[sta_indices[j, 1] == sta_index][0]
+            sta_label = sta_name[sta_indices[j, 0] == sta_index][0] + '-' + \
+                        sta_name[sta_indices[j, 1] == sta_index][0]
+        except IndexError as e:
+            print('make_uv_plot STA_INDEX error.')
+            print(e)
+            BE, BN, BL = [np.nan,np.nan,np.nan]
+            sta_label= ''
+        inps.append([self.readout.ra * np.pi / 180., self.readout.dec * np.pi / 180.,
+                    BE, BN, BL, sta_label])
+        flags.append(flag[j])
+
+    bases = []
+    umax = np.nanmax(np.abs(u))
+    vmax = np.nanmax(np.abs(v))
+    if self.readout.mjd is None:
+        mjd = np.amin(self.readout.oi_vis2["MJD"][0])
+    else:
+        mjd = self.readout.mjd
+    try:
+        
+        rel_time = (self.readout.vis2["MJD"] - mjd) * 24.0 * 3600.0  # (s)
         # dic['TREL'] = rel_time[0]
 
-        # for k, uv in enumerate(uvs):
-            # bases = make_uv_tracks(uv, inps[k], flags[k],ax, bases,
-            # color=color,print_station_names=print_station_names,
-            # sel_wl=sel_wl,plot_Mlambda=plot_Mlambda)
+        for k, uv in enumerate(uvs):
+            bases = make_uv_tracks(uv, inps[k], flags[k],ax, bases,
+            color=color,print_station_names=print_station_names,
+            sel_wl=sel_wl,plot_Mlambda=plot_Mlambda)
 
-        # if plot_Mlambda == False:
-            # xlabel ='$u$ (m)'
-            # ylabel ='$v$ (m)'
-        # else:
-            # xlabel ='$u$ ($M\lambda$)'
-            # ylabel ='$v$ ($M\lambda$)'
-        # ax.set_xlim((130, -130))
-        # ax.set_ylim((-130, 130))
-        # plotmax = 1.3*np.amax([umax,vmax])
+        if plot_Mlambda == False:
+            xlabel ='$u$ (m)'
+            ylabel ='$v$ (m)'
+        else:
+            xlabel ='$u$ ($M\lambda$)'
+            ylabel ='$v$ ($M\lambda$)'
+        ax.set_xlim((130, -130))
+        ax.set_ylim((-130, 130))
+        plotmax = 1.3*np.amax([umax,vmax])
 
-        # plot_title = dic['TARGET'] + "\n" + "date: " + dic['DATE-OBS'] + "\n" + "TPL start: " + dic['TPL_START'] + "\n" + dic['CATEGORY'] + ' ' +\
-            # dic['BAND'] + ' ' + dic['DISPNAME'] #+ ' ' + dic['BCD1'] + '-' + dic['BCD2']
-        # if math.isnan(B_lim[0]):
-            # xlim = (+plotmax/ sel_wl,-plotmax/ sel_wl)
-            # ylim = (-plotmax/ sel_wl,+plotmax/ sel_wl)
-        # else:
-            # xlim = (+B_lim[1]/ sel_wl,-B_lim[1]/ sel_wl)
-            # ylim = (-B_lim[1]/ sel_wl,+B_lim[1]/ sel_wl)
-        # #if plot_Mlambda == True:
-        # plot_config(xlabel, ylabel,plot_title, ax, dic,
-                    # ylim=ylim,xlim=xlim,plot_legend=False,annotate=annotate)
-    # except TypeError as e:
-        # if verbose: print('Unable to plot ' + 'uv')
-        # if verbose: print(e)
-        # return 1
-
-    # return 0
+        plot_title = dic['TARGET'] + "\n" + "date: " + dic['DATE-OBS'] + "\n" + "TPL start: " + dic['TPL_START'] + "\n" + dic['CATEGORY'] + ' ' +\
+            dic['BAND'] + ' ' + dic['DISPNAME'] #+ ' ' + dic['BCD1'] + '-' + dic['BCD2']
+        if math.isnan(B_lim[0]):
+            xlim = (+plotmax/ sel_wl,-plotmax/ sel_wl)
+            ylim = (-plotmax/ sel_wl,+plotmax/ sel_wl)
+        else:
+            xlim = (+B_lim[1]/ sel_wl,-B_lim[1]/ sel_wl)
+            ylim = (-B_lim[1]/ sel_wl,+B_lim[1]/ sel_wl)
+        #if plot_Mlambda == True:
+        plot_config(xlabel, ylabel,plot_title, ax, dic,
+                    ylim=ylim,xlim=xlim,plot_legend=False,annotate=annotate)
+    except TypeError as e:
+        if verbose: print('Unable to plot ' + 'uv')
+        if verbose: print(e)
 
 
 if __name__ == ('__main__'):
-    fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits",
+    fits_file = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits",
                   "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits",
                   "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
-    fits_files = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
-    plot_fits = Plotter([fits_files[1]])
+    fits_file = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
+    plot_fits = Plotter(fits_files[1])
     plot_fits.add_cphases().add_vis("short").plot()
 
 
