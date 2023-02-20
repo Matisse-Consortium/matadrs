@@ -51,4 +51,3 @@ if args.print_all_data is True:
             print()
         except:
             pass
-

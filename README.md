@@ -48,6 +48,6 @@ _Soon the to be upcoming docs as well!_
 ## Credit
 * J. Varga for his utmost helpful input and his `fluxcal`- and `avg_oifits`-scripts
 * R. van Boekel, J. Varga, A. Matter for their calibrator- and object catalogues as well as
-  the [JSDC-catalog ](https://cdsarc.cds.unistra.fr/viz-bin/cat/II/300)(JMMC Stellar Diameter Catalog) from Lafrasse et al.
+  the [JSDC-catalog](https://cdsarc.cds.unistra.fr/viz-bin/cat/II/300)(JMMC Stellar Diameter Catalog) from Lafrasse et al.
 * F. Millour for the `calib_BCD2`-script and J. Varga for his rework of the same
 * M. Neeser for the `getdata_ESO_archive`-script

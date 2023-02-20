@@ -1,24 +1,19 @@
-import os
+import pkg_resources
 from pathlib import Path
-from warnings import warn
 from typing import List, Optional
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pandas import DataFrame
-from astropy.table import Table, Column
+from astropy.table import Column
 
-# TODO: Find way to make this into a complete module -> More pythonic!
+
 from ..utils.data_prep import DataPrep
 from ..utils.tools import cprint
 
-# TODO: Make either model or fourier transform carry more info like the name of
-# the plot or similar -> Work more with classes
-# TODO: Facilitate the plotting by getting the data from the DataPrep class and putting it
-# into a pandas frame to easily plot it
 
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 
 
 class Plotter:
@@ -27,6 +22,7 @@ class Plotter:
     Attributes
     ----------
     """
+
     def __init__(self, fits_files: List[Path],
                  flux_files: Optional[List[Path]] = None,
                  plot_name: Optional[str] = None,
@@ -116,8 +112,8 @@ class Plotter:
                 v_coords = self.data_prep.oi_vis["UVCOORD"][:, 1]
                 pas = np.around((np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
                 # TODO: Make the variables into mathrm
-                labels = [fr"{station_name} $B_p$={baseline} m $\phi={pa}^\circ$"\
-                        for station_name, baseline, pa in zip(station_names, baselines, pas)]
+                labels = [fr"{station_name} $B_p$={baseline} m $\phi={pa}^\circ$"
+                          for station_name, baseline, pa in zip(station_names, baselines, pas)]
             else:
                 labels = station_names
 
@@ -127,8 +123,8 @@ class Plotter:
                 df = self.set_dataframe(labels, self.data_prep.oi_vis2["VIS2DATA"])
             # TODO: Find out what this is exactly? Projected Baselines? Positional Angle?
         elif data_name == "cphase":
-            df =  self.set_dataframe(self.data_prep.oi_t3["TRIANGLE"],
-                                     self.data_prep.oi_t3["T3PHI"])
+            df = self.set_dataframe(self.data_prep.oi_t3["TRIANGLE"],
+                                    self.data_prep.oi_t3["T3PHI"])
         else:
             raise ValueError("Input data name cannot be queried!")
         df["lambda"] = self.wl

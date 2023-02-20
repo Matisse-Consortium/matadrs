@@ -27,4 +27,3 @@ def get_gravity_data(fits_file: Path)
 
 if __name__ == "__main__":
     file = "C:/Users/perrautk/Documents/GRAVITY/GTO/HD100546/Myfile.fits"
-
