@@ -273,12 +273,11 @@ class ReadoutFits:
             self._oi_vis2 = self.get_table_for_fits("oi_vis2")
             self._oi_vis2.add_columns([self.get_delay_lines(self._oi_vis2),
                                        self.merge_uv_coords(self._oi_vis2),
-                                       self.get_baselines(self._oi_vis2), staxyz],
-                                      names=["DELAY_LINE", "UVCOORD",
-                                             "BASELINE", "STAXYZ"])
+                                       self.get_baselines(self._oi_vis2)],
+                                      names=["DELAY_LINE", "UVCOORD", "BASELINE"])
             self._oi_vis2.keep_columns(["VIS2DATA", "VIS2ERR",
                                         "UVCOORD", "DELAY_LINE",
-                                        "BASELINE", "MJD", "FLAG", "STAXYZ"])
+                                        "BASELINE", "MJD", "FLAG", "STA_INDEX"])
         return self._oi_vis2
 
     @property
