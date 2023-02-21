@@ -1,6 +1,6 @@
 import pkg_resources
 from pathlib import Path
-from typing import Tuple, List, Optional
+from typing import Callable, Tuple, List, Union, Optional
 
 import numpy as np
 import pandas as pd
@@ -79,165 +79,6 @@ class Plotter:
             df[column] = df[column].mask(mask)
         return df
 
-    def set_dataframe(self, labels: List[str], column: Column) -> DataFrame:
-        """Prepares each row in a column as a pandas DataFrame"""
-        return pd.DataFrame({label: array for label, array in zip(labels, column.data)})
-
-    def make_component(self, data_name: str,
-                       legend_format: Optional[str] = "long") -> DataFrame:
-        """Generates a pandas DataFrame that has all the plots' information
-
-        Parameters
-        ----------
-        data_name: str
-            The name of the data to be plotted. Determines the legend- and plot labels
-        legend_format: str
-            Sets the format of the legend: For all information set "long" and for only
-            station names set "short"
-
-        Returns
-        -------
-        df: DataFrame
-        """
-        if data_name == "flux":
-            df = self.set_dataframe(self.readout.oi_flux["TEL_NAME"],
-                                    self.readout.oi_flux["FLUXDATA"])
-        elif (data_name == "vis") or (data_name == "vis2"):
-            # TODO: Check if there are edge cases where oi_vis needs to be used
-            station_names = self.readout.oi_vis["DELAY_LINE"]
-            if legend_format == "long":
-                baselines = np.around(self.readout.oi_vis["BASELINE"], 2)
-                u_coords = self.readout.oi_vis["UVCOORD"][:, 0]
-                v_coords = self.readout.oi_vis["UVCOORD"][:, 1]
-                pas = np.around((np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
-                # TODO: Make the variables into mathrm
-                labels = [fr"{station_name} $B_p$={baseline} m $\phi={pa}^\circ$"
-                    for station_name, baseline, pa in zip(station_names, baselines, pas)]
-            else:
-                labels = station_names
-
-            if data_name == "vis":
-                df = self.set_dataframe(labels, self.readout.oi_vis["VISAMP"])
-            else:
-                df = self.set_dataframe(labels, self.readout.oi_vis2["VIS2DATA"])
-            # TODO: Find out what this is exactly? Projected Baselines? Positional Angle?
-        elif data_name == "cphase":
-            df = self.set_dataframe(self.readout.oi_t3["TRIANGLE"],
-                                    self.readout.oi_t3["T3PHI"])
-        else:
-            raise ValueError("Input data name cannot be queried!")
-        df["lambda"] = self.wl
-        # TODO: Why is this needed?
-        return self.mask_dataframe(df, self.band_mask)
-
-    def plot(self, save: Optional[bool] = False):
-        """Makes the plot from the components
-
-        Parameters
-        ----------
-        save: bool, optional
-            If toggled, saves the plot to the self.save_path file with the
-            self.plot_name
-        """
-        # TODO: Handle save structure differently -> with save_path and so
-        columns = 1 if self.number_of_plots == 1 else\
-                (3 if self.number_of_plots >= 3 else 2)
-        rows = np.ceil(self.number_of_plots/columns).astype(int)\
-                if not self.number_of_plots == 1 else 1
-        to_px = 1/plt.rcParams["figure.dpi"]
-        fig, axarr = plt.subplots(rows, columns,
-                                  constrained_layout=True,
-                                  figsize=(512*to_px*columns, 512*to_px*rows))
-        if not self.number_of_plots == 1:
-            # TODO: Make this more modular for future plots
-            # TODO: Implement flux np.nan detection and not plotting it
-            for ax, (name, dataframe) in zip(axarr.flatten(), self.components.items()):
-                dataframe.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
-                               ylabel=name, ax=ax, legend=True)
-                plt.legend(fontsize=6)
-        else:
-            # TODO: Make this more modular for future plots
-            name, dataframe = self.components[0].items()
-            dataframe.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
-                           ylabel=name, ax=axarr, legend=True)
-
-        fig.tight_layout()
-
-        if save:
-            plt.savefig(str(self.save_path / self.plot_name), format="pdf")
-        else:
-            plt.show()
-        plt.close()
-        # ax.legend(loc=1, prop={'size': 6}, ncol=ncol)
-
-    # TODO: Make somehow correlated flux and unit support in this component
-    def add_flux(self):
-        """Plots the flux """
-        self.components["Flux [Jy]"] = self.make_component("flux")
-        return self
-
-    def add_vis(self, legend_format: Optional[str] = "long"):
-        """Plots all the visibilities/correlated_fluxes in one plot """
-        self.components["Vis"] = self.make_component("vis", legend_format)
-        return self
-
-    def add_vis2(self, legend_format: Optional[str] = "long"):
-        """Plots all the visibilities squared in one plot"""
-        self.components["Vis2"] = self.make_component("vis2", legend_format)
-        return self
-
-    def add_cphases(self):
-        """Plots all the closure phases into one plot"""
-        self.components["Closure phases [$^{\circ}$]"] = self.make_component("cphase")
-        return self
-
-    # def get_plot_linestyle(self, already_chosen_linestyles: List):
-        # """Gets a linestyle, which is different from the already chosen one
-
-        # Parameters
-        # ----------
-        # already_chosen_linestyles: List
-            # A list that contains the linestyles that have already been applied
-        # """
-        # linestyles = ["-", "--", "-.", ":"]
-        # for linestyle in linestyles:
-            # if linestyle not in already_chosen_linestyles:
-                # return linestyle
-
-        # if all(linestyle in linestyles in already_chosen_linestyles):
-            # raise RuntimeError("No linestyle to pick as all have been picked already!")
-
-    # def plot_vis24baseline(self, ax, do_fit: Optional[bool] = True) -> None:
-        # """ Plot the mean visibility for one certain wavelength and fit it with a
-        # gaussian and airy disk
-
-        # Parameters
-        # ----------
-        # ax
-            # The matplotlib axis to be used for the plot
-        # do_fit: bool, optional
-            # Switches the fit mechanic on or off. DEFAULT "True"
-        # """
-        # ax.plot(self.baseline_distances, self.mean_bin_vis2, ls='None', marker='o')
-
-        # # TODO: Implement fit here
-        # if do_fit:
-            # ...
-
-        # ax.set_xlabel(fr'uv-distance [m] at $\lambda_0$={self.mean_wl:.2f} $\mu m$')
-        # ax.set_ylabel(r'$\bar{V}$')
-
-    # def plot_waterfall(self, ax) -> None:
-        # """Plots a waterfall with the mean wavelength for the different baselines"""
-        # for i in range(6):
-            # ax.errorbar(self.wl[self.si:self.ei]*1e06,
-                        # self.vis2data[i][self.si:self.ei],
-                        # yerr=np.nanstd(self.vis2data[i][self.si:self.ei]),
-                        # label=self.tel_vis2[i], ls='None', fmt='o')
-            # ax.set_xlabel(r'wl [micron]')
-            # ax.set_ylabel('vis2')
-            # ax.legend(loc='best')
-
     # TODO: Rename function at a future point
     def calculate_uv_points(self, baselines: List[float],
                             hour_angle: np.ndarray[float]) -> Tuple[np.ndarray]:
@@ -288,12 +129,6 @@ class Plotter:
         dec_rad = self.readout.dec*np.pi/180
         # u, v = map(lambda x: x/sel_wl, uv_coords)
         u_coords, v_coords = uv_coord
-
-        # if not color:
-        #     if np.all(flag) == 'True':
-        #         color = 'r'
-        #     else:
-        #         color = 'g'
 
         hamax = np.arccos(abs((1. / airmass_lim - np.sin(LATITUDE) * np.sin(dec_rad))/\
                               (np.cos(LATITUDE) * np.cos(dec_rad))))
@@ -379,6 +214,187 @@ class Plotter:
         # if plot_Mlambda == True:
         # plot_config(xlabel, ylabel,plot_title, ax, dic,
         #             ylim=ylim,xlim=xlim,plot_legend=False,annotate=annotate)
+
+    def set_dataframe(self, labels: List[str], column: Column) -> DataFrame:
+        """Prepares each row in a column as a pandas DataFrame"""
+        return pd.DataFrame({label: array for label, array in zip(labels, column.data)})
+
+    def make_component(self, data_name: str,
+                       legend_format: Optional[str] = "long"
+                       ) -> Union[Callable, DataFrame]:
+        """Generates a pandas DataFrame that has all the plots' information
+
+        Parameters
+        ----------
+        data_name: str
+            The name of the data to be plotted. Determines the legend- and plot labels
+        legend_format: str
+            Sets the format of the legend: For all information set "long" and for only
+            station names set "short"
+
+        Returns
+        -------
+        component: Callable | DataFrame
+        """
+        if data_name == "flux":
+            component = self.set_dataframe(self.readout.oi_flux["TEL_NAME"],
+                                           self.readout.oi_flux["FLUXDATA"])
+        elif (data_name == "vis") or (data_name == "vis2"):
+            # TODO: Check if there are edge cases where oi_vis2 needs to be used
+            station_names = self.readout.oi_vis["DELAY_LINE"]
+            if legend_format == "long":
+                baselines = np.around(self.readout.oi_vis["BASELINE"], 2)
+                u_coords = self.readout.oi_vis["UVCOORD"][:, 0]
+                v_coords = self.readout.oi_vis["UVCOORD"][:, 1]
+                # TODO: Find out what this is exactly? Projected Baselines? Positional Angle?
+                pas = np.around((np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
+                # TODO: Make the variables into mathrm
+                labels = [fr"{station_name} $B_p$={baseline} m $\phi={pa}^\circ$"
+                    for station_name, baseline, pa in zip(station_names, baselines, pas)]
+            else:
+                labels = station_names
+            if data_name == "vis":
+                component = self.set_dataframe(labels, self.readout.oi_vis["VISAMP"])
+            else:
+                component = self.set_dataframe(labels, self.readout.oi_vis2["VIS2DATA"])
+        elif data_name == "diff":
+            ...
+        elif data_name == "cphase":
+            component = self.set_dataframe(self.readout.oi_t3["TRIANGLE"],
+                                           self.readout.oi_t3["T3PHI"])
+        elif data_name == "uv":
+            component = self.plot_uv
+        else:
+            raise ValueError("Input data name cannot be queried!")
+        if isinstance(component, DataFrame):
+            # HACK: This is needed right now, but it should really be doable with easier
+            # operations
+            component["lambda"] = self.wl
+            return self.mask_dataframe(component, self.band_mask)
+        return component
+
+    # TODO: Find way to pass arguments via the component function
+    def plot(self, save: Optional[bool] = False):
+        """Makes the plot from the omponents
+
+        Parameters
+        ----------
+        save: bool, optional
+            If toggled, saves the plot to the self.save_path file with the
+            self.plot_name
+        """
+        # TODO: Handle save structure differently -> with save_path and so
+        columns = 1 if self.number_of_plots == 1 else\
+                (3 if self.number_of_plots >= 3 else 2)
+        rows = np.ceil(self.number_of_plots/columns).astype(int)\
+                if not self.number_of_plots == 1 else 1
+        to_px = 1/plt.rcParams["figure.dpi"]
+        fig, axarr = plt.subplots(rows, columns,
+                                  constrained_layout=True,
+                                  figsize=(512*to_px*columns, 512*to_px*rows))
+        if not self.number_of_plots == 1:
+            # TODO: Implement flux np.nan detection and not plotting it
+            for ax, (name, component) in zip(axarr.flatten(), self.components.items()):
+                if isinstance(component, DataFrame):
+                    component.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
+                                   ylabel=name, ax=ax, legend=True)
+                    plt.legend(fontsize=6)
+                else:
+                    component(ax)
+        else:
+            name, component = zip(*self.components.items())
+            if isinstance(component, DataFrame):
+                component.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
+                               ylabel=name, ax=axarr, legend=True)
+            else:
+                component[0](axarr)
+
+        fig.tight_layout()
+
+        if save:
+            plt.savefig(str(self.save_path / self.plot_name), format="pdf")
+        else:
+            plt.show()
+        plt.close()
+        # ax.legend(loc=1, prop={'size': 6}, ncol=ncol)
+
+    # TODO: Make somehow correlated flux and unit support in this component
+    def add_flux(self):
+        """Plots the flux """
+        self.components["Flux [Jy]"] = self.make_component("flux")
+        return self
+
+    def add_vis(self, legend_format: Optional[str] = "long"):
+        """Plots all the visibilities/correlated_fluxes in one plot """
+        self.components["Vis"] = self.make_component("vis", legend_format)
+        return self
+
+    def add_vis2(self, legend_format: Optional[str] = "long"):
+        """Plots all the visibilities squared in one plot"""
+        self.components["Vis2"] = self.make_component("vis2", legend_format)
+        return self
+
+    def add_diff_phases(self):
+        """Plots all the differential phases into one plot"""
+        self.components["Differential phases [$^{\circ}$]"] = self.make_component("diff")
+        return self
+
+    def add_cphases(self):
+        """Plots all the closure phases into one plot"""
+        self.components["Closure phases [$^{\circ}$]"] = self.make_component("cphase")
+        return self
+
+    def add_uv(self):
+        """Plots the (u, v)-coordinates"""
+        self.components["$(u, v)$-coordinates"] = self.make_component("uv")
+        return self
+
+    # def get_plot_linestyle(self, already_chosen_linestyles: List):
+        # """Gets a linestyle, which is different from the already chosen one
+
+        # Parameters
+        # ----------
+        # already_chosen_linestyles: List
+            # A list that contains the linestyles that have already been applied
+        # """
+        # linestyles = ["-", "--", "-.", ":"]
+        # for linestyle in linestyles:
+            # if linestyle not in already_chosen_linestyles:
+                # return linestyle
+
+        # if all(linestyle in linestyles in already_chosen_linestyles):
+            # raise RuntimeError("No linestyle to pick as all have been picked already!")
+
+    # def plot_vis24baseline(self, ax, do_fit: Optional[bool] = True) -> None:
+        # """ Plot the mean visibility for one certain wavelength and fit it with a
+        # gaussian and airy disk
+
+        # Parameters
+        # ----------
+        # ax
+            # The matplotlib axis to be used for the plot
+        # do_fit: bool, optional
+            # Switches the fit mechanic on or off. DEFAULT "True"
+        # """
+        # ax.plot(self.baseline_distances, self.mean_bin_vis2, ls='None', marker='o')
+
+        # # TODO: Implement fit here
+        # if do_fit:
+            # ...
+
+        # ax.set_xlabel(fr'uv-distance [m] at $\lambda_0$={self.mean_wl:.2f} $\mu m$')
+        # ax.set_ylabel(r'$\bar{V}$')
+
+    # def plot_waterfall(self, ax) -> None:
+        # """Plots a waterfall with the mean wavelength for the different baselines"""
+        # for i in range(6):
+            # ax.errorbar(self.wl[self.si:self.ei]*1e06,
+                        # self.vis2data[i][self.si:self.ei],
+                        # yerr=np.nanstd(self.vis2data[i][self.si:self.ei]),
+                        # label=self.tel_vis2[i], ls='None', fmt='o')
+            # ax.set_xlabel(r'wl [micron]')
+            # ax.set_ylabel('vis2')
+            # ax.legend(loc='best')
 
 
 if __name__ == ('__main__'):
