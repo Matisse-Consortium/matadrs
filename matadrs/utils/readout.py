@@ -1,3 +1,4 @@
+import pkg_resources
 import warnings
 from pathlib import Path
 from typing import Tuple, List, Optional
@@ -16,7 +17,7 @@ __all__ = ["ReadoutFits"]
 warnings.simplefilter("ignore", category=u.UnitsWarning)
 
 # TODO: Make this into a configuration file
-DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
+DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 
 # NOTE: All VLTI-baseline configurations by station indices to names
 SMALL = {1: "A0", 5: "B2", 13: "D0", 10: "C1"}
@@ -100,18 +101,15 @@ class ReadoutFits:
         self.fits_file = Path(fits_file)
         self.flux_file = Path(flux_file) if flux_file else None
 
-        self._name = None
-        self._ra, self._dec = None, None
-        self._coords = None
+        self._name, self._coords = None, None
 
-        self._oi_wl = None
+        self._oi_array, self._oi_wl = None, None
         self._oi_flux, self._oi_t3 = None, None
         self._oi_vis, self._oi_vis2 = None, None
 
         with fits.open(self.fits_file) as hdul:
             self.primary_header = hdul[0].header
 
-    # TODO: Use the either OB name or target instead
     @property
     def name(self) -> str:
         """Fetches the object's name from the primary header and if not found or not named
@@ -137,16 +135,19 @@ class ReadoutFits:
     @property
     def ra(self) -> str:
         """Fetches the right ascension from the primary header"""
-        if self._ra is None:
-            self._ra = self.primary_header["RA"]
-        return self._ra
+        return self.primary_header["RA"]
 
     @property
     def dec(self) -> str:
         """Fetches the declination from the primary header"""
-        if self._dec is None:
-            self._dec = self.primary_header["DEC"]
-        return self._dec
+        return self.primary_header["DEC"]
+
+    @property
+    def mjd(self) -> str:
+        """Fetches the observation's modified julian date from the primary header"""
+        if "MJD-OBS" in self.primary_header:
+            return self.primary_header["MJD-OBS"]
+        return None
 
     @property
     def coords(self) -> SkyCoord:
@@ -222,6 +223,13 @@ class ReadoutFits:
         return self._oi_wl
 
     @property
+    def oi_array(self) -> Table:
+        """Fetches the array's information"""
+        if self._oi_array is None:
+            self._oi_array = self.get_table_for_fits("oi_array")
+        return self._oi_array
+
+    @property
     def oi_flux(self) -> Table:
         """Fetches the flux table if given, and if not makes an empty one"""
         if self._oi_flux is None:
@@ -241,10 +249,7 @@ class ReadoutFits:
                                                      unit=u.Jy)
                     self._oi_flux.add_columns([[nan_array], [nan_array]],
                                               names=["FLUXDATA", "FLUXERR"])
-            self._oi_flux.add_column([self.get_table_for_fits("oi_array")["TEL_NAME"].astype(str)],
-                                     name="TEL_NAME")
-            self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "TEL_NAME"])
-        # TODO: Maybe remove "TEL_NAME"
+            self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR"])
         return self._oi_flux
 
     @property
@@ -257,7 +262,8 @@ class ReadoutFits:
                                       self.get_baselines(self._oi_vis)],
                                      names=["DELAY_LINE", "UVCOORD", "BASELINE"])
             self._oi_vis.keep_columns(["VISAMP", "VISAMPERR",
-                                        "UVCOORD", "DELAY_LINE", "BASELINE"])
+                                       "UVCOORD", "DELAY_LINE", "BASELINE",
+                                       "MJD", "FLAG", "STA_INDEX"])
         return self._oi_vis
 
     @property
@@ -270,7 +276,8 @@ class ReadoutFits:
                                        self.get_baselines(self._oi_vis2)],
                                       names=["DELAY_LINE", "UVCOORD", "BASELINE"])
             self._oi_vis2.keep_columns(["VIS2DATA", "VIS2ERR",
-                                        "UVCOORD", "DELAY_LINE", "BASELINE"])
+                                        "UVCOORD", "DELAY_LINE",
+                                        "BASELINE", "MJD", "FLAG", "STA_INDEX"])
         return self._oi_vis2
 
     @property
