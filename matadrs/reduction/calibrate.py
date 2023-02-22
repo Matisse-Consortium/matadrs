@@ -214,10 +214,13 @@ def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
         cprint(f"Processing {target.name} with {calibrator.name}...", "g")
         output_file = output_dir / f"TARGET_FLUX_CAL_INT_000{index}.fits"
-        databases = LBAND_DATABASES if band == "lband" else NBAND_DATABASES
+        databases, do_airmass = NBAND_DATABASES, True
+        if band == "lband":
+            databases, do_airmass = LBAND_DATABASES, False
         fluxcal(str(target), str(calibrator), str(output_file),
                 list(map(str, databases)), mode=MODE_NAMES[mode],
-                output_fig_dir=str(output_dir), do_airmass_correction=True)
+                output_fig_dir=str(output_dir),
+                do_airmass_correction=do_airmass)
         cprint(f"Plotting file '{output_file.name}'...", "y")
         plot_fits = Plotter(output_file, save_path=output_dir)
         plot_fits.add_cphases().add_vis().plot(save=True)
