@@ -237,9 +237,9 @@ class Plotter:
         component: Callable | DataFrame
         """
         if data_name == "flux":
-            component = self.set_dataframe(self.readout.oi_flux["TEL_NAME"],
+            component = self.set_dataframe(self.readout.oi_array["TEL_NAME"],
                                            self.readout.oi_flux["FLUXDATA"])
-        elif (data_name == "vis") or (data_name == "vis2"):
+        elif (data_name == "vis") or (data_name == "vis2") or (data_name == "diff"):
             # TODO: Check if there are edge cases where oi_vis2 needs to be used
             station_names = self.readout.oi_vis["DELAY_LINE"]
             if legend_format == "long":
@@ -255,10 +255,10 @@ class Plotter:
                 labels = station_names
             if data_name == "vis":
                 component = self.set_dataframe(labels, self.readout.oi_vis["VISAMP"])
-            else:
+            elif data_name == "vis2":
                 component = self.set_dataframe(labels, self.readout.oi_vis2["VIS2DATA"])
-        elif data_name == "diff":
-            ...
+            else:
+                component = self.set_dataframe(labels, self.readout.oi_vis["VISPHI"])
         elif data_name == "cphase":
             component = self.set_dataframe(self.readout.oi_t3["TRIANGLE"],
                                            self.readout.oi_t3["T3PHI"])

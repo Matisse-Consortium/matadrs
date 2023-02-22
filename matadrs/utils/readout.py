@@ -261,7 +261,7 @@ class ReadoutFits:
                                       self.merge_uv_coords(self._oi_vis),
                                       self.get_baselines(self._oi_vis)],
                                      names=["DELAY_LINE", "UVCOORD", "BASELINE"])
-            self._oi_vis.keep_columns(["VISAMP", "VISAMPERR",
+            self._oi_vis.keep_columns(["VISAMP", "VISAMPERR", "VISPHI", "VISPHIERR",
                                        "UVCOORD", "DELAY_LINE", "BASELINE",
                                        "MJD", "FLAG", "STA_INDEX"])
         return self._oi_vis
