@@ -41,18 +41,18 @@ import os
 import math
 from shutil import copyfile
 
-from astropy import units as u
+import astropy.units as u
 import numpy as np
 import scipy.stats
+from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
+from astroquery.simbad import Simbad
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator
+from numpy.polynomial.polynomial import polyval
 from scipy.special import j1
 from scipy.interpolate import interp1d
-from astroquery.simbad import Simbad
-from numpy.polynomial.polynomial import polyval
-from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve
 
 
 def get_spectrum_caldb(cal_database_path, cal_name, out_lst, ra: u.deg = np.nan,
