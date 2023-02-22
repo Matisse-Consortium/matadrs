@@ -1,5 +1,7 @@
 import os
+from pathlib import Path
 from shutil import copyfile
+from typing import List
 
 import numpy as np
 from astropy.io import fits
@@ -320,9 +322,9 @@ def avg_oifits(infile_list, outfile_path, headerval=[], avg_cflux=False):
 
 
 # NOTE: oi_types_list = [ ['vis2','t3'], ['visamp'] ]
-def oifits_patchwork(infile_list, outfile_path,
-                     oi_types_list=[['vis2', 'visamp', 'visphi', 't3', 'flux']],
-                     headerval=[]):
+def oifits_patchwork(infile_list: List, outfile_path: Path,
+                     oi_types_list: List = [],
+                     headerval: List = []):
     if os.path.exists(infile_list[0]):
         copyfile(infile_list[0], outfile_path)
     else:
@@ -380,6 +382,14 @@ def oifits_patchwork(infile_list, outfile_path,
                                     or (sta_index_visamp[k][::-1] == sta_index_visphi[l])):
                                     outhdul['OI_VIS'].data['VISPHI'][k] = inhdul2['OI_VIS'].data['VISPHI'][l]
                                     outhdul['OI_VIS'].data['VISPHIERR'][k] = inhdul2['OI_VIS'].data['VISPHIERR'][l]
+            if oi_type == 'corrflux':
+                corr_flux = fits.BinTableHDU()
+                corr_flux.header = inhdul['OI_VIS'].header.copy()
+                corr_flux.data = inhdul['OI_VIS'].data.copy()
+                corr_flux.name = "oi_cfx"
+                outhdul.append(corr_flux)
+                outhdul['OI_CFX'].header['AMPTYP'] = inhdul['OI_VIS'].header['AMPTYP']
+
             if oi_type == 'flux':
                 try:
                     outhdul['OI_FLUX'].data = inhdul['OI_FLUX'].data
