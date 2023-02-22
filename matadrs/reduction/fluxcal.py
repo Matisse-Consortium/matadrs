@@ -187,7 +187,7 @@ def fluxcal(inputfile_sci: Path, inputfile_cal: Path, outputfile: Path,
             mode='flux', output_fig_dir: Path = "",
             match_radius: u.arcsec = 25.0,
             do_airmass_correction: bool = False,
-            calc_spectrum_offset: bool = False) -> None:
+            calc_spectrum_offset: bool = False) -> int:
     """The flux calibration
 
     Parameters
