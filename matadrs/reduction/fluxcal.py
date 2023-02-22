@@ -29,16 +29,15 @@
 #
 # load vanBoekeldatabase: DONE
 # save calibrator spectrum in a plot: DONE
-#TODO: airmass correction: testing
-#TODO: calculate uncertainties
+# TODO: Airmass correction: testing
+# TODO: Calculate uncertainties
 #       partly implemented
 #       caveats: uncertainty in the calibrator spectrum is not taken into account
 #                uncertainty in calibrator diameter is not taken into account
-#TODO: treat if the cal database cannot be opened
+# TODO: Treat if the cal database cannot be opened
 # treat if there is no matching source in the database: DONE
-#TODO: FIX: some dec values are NULL in vBoekeldatabase
-#
-########################################################################
+#  FIX: Some dec values are NULL in vBoekeldatabase
+
 import os
 import math
 from shutil import copyfile
@@ -50,16 +49,17 @@ from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator
-from scipy.special import j0,j1
+from scipy.special import j1
 from scipy.interpolate import interp1d
 from astroquery.simbad import Simbad
 from numpy.polynomial.polynomial import polyval
-from astropy.convolution import Gaussian1DKernel,Box1DKernel,convolve
+from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve
+
 
 # match_radius [arcsec]
 # ra, dec [degree]
-def get_spectrum_caldb(cal_database_path,cal_name,out_lst,ra=np.nan,dec=np.nan,match_radius=20.0,band='L'):
-    # print(cal_database_path)
+def get_spectrum_caldb(cal_database_path, cal_name, out_lst, ra=np.nan,
+                       dec=np.nan, match_radius=20.0, band='L'):
     c_cal = SkyCoord(ra*u.deg, dec*u.deg, frame='icrs')
     caldb = fits.open(cal_database_path)
     caldb_file = os.path.basename(cal_database_path)
@@ -82,49 +82,49 @@ def get_spectrum_caldb(cal_database_path,cal_name,out_lst,ra=np.nan,dec=np.nan,m
         cal_dec_lst = caldb['SOURCES'].data['DECEPP']
 
     c_lst = SkyCoord(cal_ra_lst * u.deg, cal_dec_lst * u.deg, frame='icrs')
-    # print(c_lst)
-    # search for the calibrator in the calibrator database
+    # NOTE: Search for the calibrator in the calibrator database
     sep = c_cal.separation(c_lst)
     min_sep_idx = np.nanargmin(sep)
     min_sep = sep[min_sep_idx]
     if (min_sep < match_radius*u.deg/3600.0):
-        #match
-        print('Calibrator found in the database '+caldb_file+': '+cal_name_lst[min_sep_idx]+', separation: %.2f arcsec'%(3600.0*min_sep.value))
-        #get calibrator diameter
+        print('Calibrator found in the database '+caldb_file+': '\
+                  + cal_name_lst[min_sep_idx]\
+                  + ', separation: %.2f arcsec' % (3600.0*min_sep.value))
+        # NOTE: Get calibrator diameter
         if 'vBoekelDatabase' in caldb_file:
             offset = 9
             if 'fitsold' in caldb_file:
-                diam_cal =  1000.0*caldb[-2].data['DIAMETER'][min_sep_idx] #mas
-                diam_err_cal = 1000.0*caldb[-2].data['DIAMETER_ERR'][min_sep_idx] #mas
+                diam_cal = 1000.0*caldb[-2].data['DIAMETER'][min_sep_idx]
+                diam_err_cal = 1000.0*caldb[-2].data['DIAMETER_ERR'][min_sep_idx]
             else:
-                diam_cal =  1000.0*caldb['DIAMETERS'].data['DIAMETER'][min_sep_idx] #mas
-                diam_err_cal = 1000.0*caldb['DIAMETERS'].data['DIAMETER_ERR'][min_sep_idx] #mas
+                diam_cal = 1000.0*caldb['DIAMETERS'].data['DIAMETER'][min_sep_idx]
+                diam_err_cal = 1000.0*caldb['DIAMETERS'].data['DIAMETER_ERR'][min_sep_idx]
         elif 'calib_spec_db' in caldb_file:
             offset = 2
             if 'L' in band:
-                diam_cal = caldb['SOURCES'].data['UDDL_est'][min_sep_idx] #mas
-                diam_err_cal = caldb['SOURCES'].data['e_diam_est'][min_sep_idx] #mas
+                diam_cal = caldb['SOURCES'].data['UDDL_est'][min_sep_idx]
+                diam_err_cal = caldb['SOURCES'].data['e_diam_est'][min_sep_idx]
             if 'N' in band:
-                diam_cal = caldb['SOURCES'].data['UDDN_est'][min_sep_idx] #mas
-                diam_err_cal = caldb['SOURCES'].data['e_diam_est'][min_sep_idx] #mas
+                diam_cal = caldb['SOURCES'].data['UDDN_est'][min_sep_idx]
+                diam_err_cal = caldb['SOURCES'].data['e_diam_est'][min_sep_idx]
             if math.isnan(diam_cal):
-                diam_cal = caldb['SOURCES'].data['diam_midi'][min_sep_idx] #mas
-                diam_err_cal = caldb['SOURCES'].data['e_diam_midi'][min_sep_idx] #mas
+                diam_cal = caldb['SOURCES'].data['diam_midi'][min_sep_idx]
+                diam_err_cal = caldb['SOURCES'].data['e_diam_midi'][min_sep_idx]
             if math.isnan(diam_cal):
-                diam_cal = caldb['SOURCES'].data['diam_cohen'][min_sep_idx] #mas
-                diam_err_cal = caldb['SOURCES'].data['e_diam_cohen'][min_sep_idx] #mas
+                diam_cal = caldb['SOURCES'].data['diam_cohen'][min_sep_idx]
+                diam_err_cal = caldb['SOURCES'].data['e_diam_cohen'][min_sep_idx]
             if math.isnan(diam_cal):
-                diam_cal = caldb['SOURCES'].data['UDD_meas'][min_sep_idx] #mas
-                diam_err_cal = caldb['SOURCES'].data['e_diam_meas'][min_sep_idx] #mas
+                diam_cal = caldb['SOURCES'].data['UDD_meas'][min_sep_idx]
+                diam_err_cal = caldb['SOURCES'].data['e_diam_meas'][min_sep_idx]
             if math.isnan(diam_cal):
-                diam_cal = caldb['SOURCES'].data['diam_gaia'][min_sep_idx] #mas
-                diam_err_cal = diam_cal*0.1 #mas
-        #extract calibrator model spectrum
-        wav_cal = caldb[min_sep_idx+offset].data['WAVELENGTH'] #m
+                diam_cal = caldb['SOURCES'].data['diam_gaia'][min_sep_idx]
+                diam_err_cal = diam_cal*0.1
+        # NOTE: Extract calibrator model spectrum
+        wav_cal = caldb[min_sep_idx+offset].data['WAVELENGTH']
         spectrum_cal = caldb[min_sep_idx+offset].data['FLUX']
-        out_lst += [caldb[min_sep_idx+offset].header['NAME'],diam_cal,diam_err_cal,
-            wav_cal,spectrum_cal,caldb_file,3600.0*min_sep.value,
-            cal_ra_lst[min_sep_idx],cal_dec_lst[min_sep_idx]]
+        out_lst += [caldb[min_sep_idx+offset].header['NAME'], diam_cal, diam_err_cal,
+            wav_cal, spectrum_cal, caldb_file, 3600.0*min_sep.value,
+            cal_ra_lst[min_sep_idx], cal_dec_lst[min_sep_idx]]
         caldb.close()
         return True
     else:
@@ -133,94 +133,105 @@ def get_spectrum_caldb(cal_database_path,cal_name,out_lst,ra=np.nan,dec=np.nan,m
         caldb.close()
         return False
 
-def plot_spec(cal_name,cal_database_path,fig_dir ='.',ra=np.nan,dec=np.nan,match_radius=15.0,wl_lim=(np.nan,np.nan),xlog=False,ylog=False):
+def plot_spec(cal_name, cal_database_path, fig_dir ='.', ra=np.nan, dec=np.nan,
+              match_radius=15.0, wl_lim=(np.nan, np.nan), xlog=False, ylog=False):
     if math.isnan(ra):
         Simbad.reset_votable_fields()
         Simbad.remove_votable_fields('coordinates')
         Simbad.add_votable_fields('ra(d)', 'dec(d)')
-        res =  Simbad.query_object(cal_name)
+        res = Simbad.query_object(cal_name)
         ra = res['RA_d'][0]
         dec = res['DEC_d'][0]
-    out_lst =[]
-    match = get_spectrum_caldb(cal_database_path,cal_name,out_lst,ra=ra,dec=dec,match_radius=15.0,band='L')
+    out_lst = []
+    match = get_spectrum_caldb(cal_database_path, cal_name, out_lst, ra=ra,
+                               dec=dec, match_radius=15.0, band='L')
     if match:
-        cal_name_db,diam_cal,diam_err_cal,wav_cal,spectrum_cal,caldb_file,min_sep_arcsec,ra_cal_db,dec_cal_db = out_lst
+        cal_name_db, diam_cal, diam_err_cal, wav_cal, spectrum_cal, caldb_file, min_sep_arcsec, ra_cal_db, dec_cal_db = out_lst
         fig, ((axf)) = plt.subplots(1, 1, sharey=False, sharex=False, figsize=(5, 5))
-        plt.plot(wav_cal*1e6, spectrum_cal, '-k',lw=2.0)
+        plt.plot(wav_cal*1e6, spectrum_cal, '-k', lw=2.0)
         plt.ylabel('Flux (Jy)')
         plt.xlabel('$\lambda$ ($\mu$m)')
-        plt.title(cal_name_db+', diam = $%.2f \pm %.2f$ mas'%(diam_cal,diam_err_cal))
+        plt.title(cal_name_db+', diam = $%.2f \pm %.2f$ mas' % (diam_cal,diam_err_cal))
         if not math.isnan(wl_lim[0]):
             axf.set_xlim(wl_lim)
         else:
-            wl_lim=(np.min(wav_cal*1e6),np.max(wav_cal*1e6))
+            wl_lim = (np.min(wav_cal*1e6), np.max(wav_cal*1e6))
         wl_idx = np.logical_and(wav_cal*1e6 > wl_lim[0], wav_cal*1e6 < wl_lim[1])
         if xlog:
             axf.set_xscale('log')
         if ylog:
             axf.set_yscale('log')
         else:
-            axf.set_ylim((0.0,1.1*np.max(spectrum_cal[wl_idx])))
-        fig.savefig(fig_dir+'/' +cal_name_db.replace(' ','_')+'_%.1d-%.1d_um.png'%(wl_lim[0],wl_lim[1]), dpi=200)
-        # plt.show()
+            axf.set_ylim((0.0, 1.1*np.max(spectrum_cal[wl_idx])))
+        fig.savefig(fig_dir+'/' + cal_name_db.replace(' ', '_')\
+                        + '_%.1d-%.1d_um.png' % (wl_lim[0],wl_lim[1]), dpi=200)
 
-def plot_skycalc_output(fpath_in,figpath_out,airmass,pwv):
+
+def plot_skycalc_output(fpath_in, figpath_out, airmass, pwv):
     hdul = fits.open(fpath_in)
     wl_um = hdul[1].data['lam']*1e-3
     trans = hdul[1].data['trans']
     fig, ((axs)) = plt.subplots(1, 1, sharey=False, sharex=False, figsize=(5, 5))
-    plt.plot(wl_um , trans,lw=1.5)
+    plt.plot(wl_um, trans,lw=1.5)
     plt.ylabel('Transmission')
     plt.xlabel('$\lambda$ ($\mu$m)')
-    plt.title('Airmass = %.3f, pwv = %.2f mm'%(airmass,pwv))
-    axs.set_ylim([0.0,1.0])
+    plt.title('Airmass = %.3f, pwv = %.2f mm' % (airmass,pwv))
+    axs.set_ylim([0.0, 1.0])
     fig.savefig(figpath_out, dpi=200)
     hdul.close()
 
-#mode: 'flux','corrflux','both'
+# NOTE: Mode: 'flux','corrflux','both'
 def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
-    mode='flux',output_fig_dir='',match_radius=25.0,do_airmass_correction=False,calc_spectrum_offset=False):
-
-    # create the output oifits file
+            mode='flux', output_fig_dir='', match_radius=25.0,
+            do_airmass_correction=False, calc_spectrum_offset=False):
+    # NOTE: Create the output oifits file
     copyfile(inputfile_sci, outputfile)
     outhdul = fits.open(outputfile, mode='update')
 
-    # read in the input oifits files
+    # NOTE: Read in the input oifits files
     try:
         inhdul_sci = fits.open(inputfile_sci)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         print('Target reduced data file not found.')
         outhdul.close()
         os.remove(outputfile)
         return 3
     try:
         inhdul_cal = fits.open(inputfile_cal)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         print('Calibrator reduced data file not found.')
         inhdul_sci.close()
         outhdul.close()
         os.remove(outputfile)
         return 2
 
-    airmass_sci = (inhdul_sci[0].header['HIERARCH ESO ISS AIRM START']+inhdul_sci[0].header['HIERARCH ESO ISS AIRM END'])/2.0
-    pwv_sci = (inhdul_sci[0].header['HIERARCH ESO ISS AMBI IWV30D START']+inhdul_sci[0].header['HIERARCH ESO ISS AMBI IWV30D END'])/2.0
+    airmass_sci = (inhdul_sci[0].header['HIERARCH ESO ISS AIRM START']\
+        + inhdul_sci[0].header['HIERARCH ESO ISS AIRM END'])/2.0
+    pwv_sci = (inhdul_sci[0].header['HIERARCH ESO ISS AMBI IWV30D START']\
+        + inhdul_sci[0].header['HIERARCH ESO ISS AMBI IWV30D END'])/2.0
     sci_name = inhdul_sci['OI_TARGET'].data['TARGET'][0]
 
-    # extract calibrator information
+    # NOTE: Extract calibrator information
     cal_name = inhdul_cal['OI_TARGET'].data['TARGET'][0]
     ra_cal = inhdul_cal['OI_TARGET'].data['RAEP0'][0]
     dec_cal = inhdul_cal['OI_TARGET'].data['DECEP0'][0]
-    airmass_cal = (inhdul_cal[0].header['HIERARCH ESO ISS AIRM START']+inhdul_cal[0].header['HIERARCH ESO ISS AIRM END'])/2.0
-    pwv_cal = (inhdul_cal[0].header['HIERARCH ESO ISS AMBI IWV30D START']+inhdul_cal[0].header['HIERARCH ESO ISS AMBI IWV30D END'])/2.0
-    seeing_cal = (inhdul_cal[0].header['HIERARCH ESO ISS AMBI FWHM START']+inhdul_cal[0].header['HIERARCH ESO ISS AMBI FWHM END'])/2.0
-    tau0_cal = (inhdul_cal[0].header['HIERARCH ESO ISS AMBI TAU0 START']+inhdul_cal[0].header['HIERARCH ESO ISS AMBI TAU0 END'])/2.0
+    airmass_cal = (inhdul_cal[0].header['HIERARCH ESO ISS AIRM START']\
+        + inhdul_cal[0].header['HIERARCH ESO ISS AIRM END'])/2.0
+    pwv_cal = (inhdul_cal[0].header['HIERARCH ESO ISS AMBI IWV30D START']\
+        + inhdul_cal[0].header['HIERARCH ESO ISS AMBI IWV30D END'])/2.0
+    seeing_cal = (inhdul_cal[0].header['HIERARCH ESO ISS AMBI FWHM START']\
+        + inhdul_cal[0].header['HIERARCH ESO ISS AMBI FWHM END'])/2.0
+    tau0_cal = (inhdul_cal[0].header['HIERARCH ESO ISS AMBI TAU0 START']\
+        + inhdul_cal[0].header['HIERARCH ESO ISS AMBI TAU0 END'])/2.0
     tpl_start_cal = inhdul_cal[0].header['HIERARCH ESO TPL START']
-    band = inhdul_cal[0].header['HIERARCH ESO DET CHIP TYPE'] #'IR-LM' or 'IR-N'
-    print('SCI: %s, airmass = %.2f CAL: %s, RA = %.6f Dec = %.6f, airmass = %.2f'%(sci_name,airmass_sci,cal_name,ra_cal,dec_cal,airmass_cal))
-    print('CAL TPL START: '+tpl_start_cal)
+    # NOTE: 'IR-LM' or 'IR-N'
+    band = inhdul_cal[0].header['HIERARCH ESO DET CHIP TYPE']
+    print('SCI: %s, airmass = %.2f CAL: %s, RA = %.6f Dec = %.6f, airmass = %.2f'\
+              % (sci_name,airmass_sci,cal_name,ra_cal,dec_cal,airmass_cal))
+    print('CAL TPL START: ' + tpl_start_cal)
 
-    wav_cal = inhdul_cal['OI_WAVELENGTH'].data['EFF_WAVE']  # m
-    wav_sci = inhdul_sci['OI_WAVELENGTH'].data['EFF_WAVE']  # m
+    wav_cal = inhdul_cal['OI_WAVELENGTH'].data['EFF_WAVE']
+    wav_sci = inhdul_sci['OI_WAVELENGTH'].data['EFF_WAVE']
 
     if do_airmass_correction:
         print('Do airmass correction.')
@@ -229,7 +240,7 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
             os.makedirs(outputdir)
         tag_sci = os.path.splitext(os.path.basename(inputfile_sci))[0]
 
-        wmin = np.min(wav_sci)*1e9 #[nm]
+        wmin = np.min(wav_sci)*1e9
         wmax = np.max(wav_sci)*1e9
         margin = 0.1*(wmax-wmin)
         wmin = wmin-margin
@@ -238,11 +249,12 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
 
         fname_in_sci = outputdir+'/skycalc_input_sci_'+tag_sci+'.txt'
         fname_skycalc_out_sci = outputdir+'/skycalc_output_sci_'+tag_sci+'.fits'
-        create_skycalc_inputfile(fname_in_sci,airmass_sci,pwv_sci,wmin,wmax,wdelta=dlambda)
+        create_skycalc_inputfile(fname_in_sci, airmass_sci, pwv_sci,
+                                 wmin, wmax, wdelta=dlambda)
         print('Start SkyCalc (SCI).')
         os.system("skycalc_cli" + ' -i ' + fname_in_sci + ' -o ' + fname_skycalc_out_sci)
         figpath_out = outputdir+'/skycalc_output_sci_'+tag_sci+'.png'
-        plot_skycalc_output(fname_skycalc_out_sci,figpath_out,airmass_sci,pwv_sci)
+        plot_skycalc_output(fname_skycalc_out_sci, figpath_out, airmass_sci, pwv_sci)
 
         wmin = np.min(wav_cal)*1e9
         wmax = np.max(wav_cal)*1e9
@@ -254,25 +266,27 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
         tag_cal = os.path.splitext(os.path.basename(inputfile_cal))[0]
         fname_in_cal = outputdir+'/skycalc_input_cal_'+tag_cal+'.txt'
         fname_skycalc_out_cal = outputdir+'/skycalc_output_cal_'+tag_cal+'.fits'
-        create_skycalc_inputfile(fname_in_cal,airmass_cal,pwv_cal,wmin,wmax,wdelta=dlambda)
+        create_skycalc_inputfile(fname_in_cal, airmass_cal, pwv_cal,
+                                 wmin, wmax, wdelta=dlambda)
         print('Start SkyCalc (CAL).')
         os.system("skycalc_cli" + ' -i ' + fname_in_cal + ' -o ' + fname_skycalc_out_cal)
         figpath_out = outputdir+'/skycalc_output_cal_'+tag_cal+'.png'
-        plot_skycalc_output(fname_skycalc_out_cal,figpath_out,airmass_cal,pwv_cal)
+        plot_skycalc_output(fname_skycalc_out_cal, figpath_out, airmass_cal, pwv_cal)
 
-    # open the calibrator database which includes the spectra of calibrators
+    # NOTE: Open the calibrator database which includes the spectra of calibrators
     match = False
 
     out_lst = []
     match = False
     i = 0
-    #for cal_database_path in cal_database_paths:
-    while (match == False and i < len(cal_database_paths)):
-        match = get_spectrum_caldb(cal_database_paths[i],cal_name,out_lst,ra=ra_cal,dec=dec_cal,match_radius=match_radius,band=band)
+    # NOTE: For cal_database_path in cal_database_paths:
+    while (not match and i < len(cal_database_paths)):
+        match = get_spectrum_caldb(cal_database_paths[i], cal_name, out_lst, ra=ra_cal,
+                                   dec=dec_cal, match_radius=match_radius, band=band)
         i = i+1
 
-    if match == True:
-        cal_name_db,diam_cal,diam_err_cal,wav_cal_model,spectrum_cal,caldb_file,min_sep_arcsec,ra_cal_db,dec_cal_db = out_lst
+    if match:
+        cal_name_db, diam_cal, diam_err_cal, wav_cal_model, spectrum_cal, caldb_file, min_sep_arcsec, ra_cal_db, dec_cal_db = out_lst
         if math.isnan(diam_cal):
             print('Calibrator diameter not found.')
             if mode != 'flux':
@@ -282,11 +296,11 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
                 outhdul.close()
                 os.remove(outputfile)
                 return 4
-        print('Diameter = %.1f +/- %.1f mas (%s)'%(diam_cal,diam_err_cal,cal_name_db))
+        print('Diameter = %.1f +/- %.1f mas (%s)' % (diam_cal,diam_err_cal,cal_name_db))
 
         if 'calib_spec' in caldb_file:
             wav_cal_model = np.flip(wav_cal_model)
-            spectrum_cal = np.flip(spectrum_cal) #Jy
+            spectrum_cal = np.flip(spectrum_cal)
         wl = np.concatenate((np.array([wav_cal_model[0] - (wav_cal_model[1] - wav_cal_model[0])]), wav_cal_model))
         wh = np.concatenate((wav_cal_model, np.array([wav_cal_model[-1] + (wav_cal_model[-1] - wav_cal_model[-2])])))
         wm = (wh + wl) / 2
@@ -297,17 +311,18 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
         print('Calibrator not found in any of the databases')
         inhdul_cal.close()
         inhdul_sci.close()
-        outhdul.flush()  # changes are written back to fits
+        # NOTE: Changes are written back to fits
+        outhdul.flush()
         outhdul.close()
         os.remove(outputfile)
         return 1
-
 
     if np.min(wav_cal) < 0.0:
         print('ERROR (fluxcal): Wavelength grid in oifits file invalid.')
         inhdul_cal.close()
         inhdul_sci.close()
-        outhdul.flush()  # changes are written back to fits
+        # NOTE: Changes are written back to fits
+        outhdul.flush()
         outhdul.close()
         os.remove(outputfile)
         return 5
@@ -316,44 +331,40 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
         wav_cal = np.flip(wav_cal)
         wav_sci = np.flip(wav_sci)
 
-
-
-    # smooth and resample calibrator spectrum to match the spectral resolution and wavelength grid of the data
+    # NOTE: Smooth and resample calibrator spectrum to match the spectral resolution and wavelength grid of the data
     print('Resample the calibrator spectrum to match the data.')
     dl_coeffs = get_dl_coeffs(inhdul_cal)
     spectral_binning = get_spectral_binning(inhdul_cal)
     if not math.isnan(spectral_binning) and np.all(np.isfinite(dl_coeffs)):
-        # new way (2022 April)
-        #restrict calibrator spectrum wavelength range
+        # NOTE: restrict calibrator spectrum wavelength range (new since April 2022)
         idx = np.logical_and(wav_cal_model > 0.99*np.nanmin(wav_cal), wav_cal_model < 1.01*np.nanmax(wav_cal))
         spectrum_cal = spectrum_cal[idx]
         wav_cal_model = wav_cal_model[idx]
         kernel_width_px = 10.0
         if os.path.exists(output_fig_dir):
-            figpath_out = output_fig_dir+'/' + 'calibrator_'+band+'_'+cal_name.replace(' ','_')+'_spectrum_resampling.png'
+            figpath_out = output_fig_dir+'/' + 'calibrator_'+band+'_'\
+                + cal_name.replace(' ', '_')+'_spectrum_resampling.png'
             make_plot = True
         else:
             figpath_out = ''
             make_plot = False
-        spectrum_cal_resampled  = transform_spectrum_to_real_spectral_resolution(wav_cal_model*1e6,spectrum_cal,dl_coeffs,
-            kernel_width_px,wav_sci*1e6,spectral_binning,make_plot=make_plot,figpath_out=figpath_out,ylabel='Flux (Jy)',yscale='final')
+        spectrum_cal_resampled = transform_spectrum_to_real_spectral_resolution(wav_cal_model*1e6, spectrum_cal, dl_coeffs,
+                                                                                kernel_width_px, wav_sci*1e6, spectral_binning,
+                                                                                make_plot=make_plot, figpath_out=figpath_out, ylabel='Flux (Jy)', yscale='final')
     else:
-        # old way
-        #idx=np.logical_and(wav_cal_model > np.nanmin(wav_cal) , wav_cal_model < np.nanmax(wav_cal))
+        # NOTE: Old way
+        # idx=np.logical_and(wav_cal_model > np.nanmin(wav_cal) , wav_cal_model < np.nanmax(wav_cal))
         # print(len(wav_cal_model),np.nansum(idx),len(wav_cal))
-        idx=np.logical_and(wav_cal_model > np.nanmin(wav_cal) , wav_cal_model < np.nanmax(wav_cal))
+        idx = np.logical_and(wav_cal_model > np.nanmin(wav_cal) , wav_cal_model < np.nanmax(wav_cal))
         if 2.0*len(wav_cal_model) < np.nansum(idx):
-            #if the sampling of the MATISSE spectrum is much sparser than the sampling of the calibrator spectrum:
+            # NOTE: If the sampling of the MATISSE spectrum is much sparser than the sampling of the calibrator spectrum:
             wl = np.concatenate((np.array([wav_cal_model[0] - (wav_cal_model[1] - wav_cal_model[0])]), wav_cal_model))
-            wh = np.concatenate((wav_cal_model,np.array([wav_cal_model[-1] + (wav_cal_model[-1] - wav_cal_model[-2])])))
+            wh = np.concatenate((wav_cal_model, np.array([wav_cal_model[-1] + (wav_cal_model[-1] - wav_cal_model[-2])])))
             wm = (wh+wl)/2
             wav_bin_lower = wm[:-1]
             wav_bin_upper = wm[1:]
             d_wav = wav_bin_upper - wav_bin_lower
-            # print(wav_cal_model*1e6)
-            # print(wav_cal_model*1e6)
-
-            #resample model spectrum to the wavelengths of the observation
+            # NOTE: Resample model spectrum to the wavelengths of the observation
             spectrum_cal_resampled = wav_cal_model*0.0
             flux_calibrated_sci = wav_sci*0.0
             corrflux_calibrated_sci = wav_sci*0.0

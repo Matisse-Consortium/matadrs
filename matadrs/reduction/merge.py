@@ -138,14 +138,14 @@ def merge_folders(coherent_dirs: List[Path],
     incoherent_dir: List[Path]
     output_dir: Path
     """
-    cprint(f"Merging files...", "lp")
+    cprint("Merging files...", "lp")
     for coherent_dir, incoherent_dir in zip(coherent_dirs, incoherent_dirs):
         cprint(f"Merging files of folder {coherent_dir.name.split('/')[~0]}...",
                "lp")
         cprint(f"{'':-^50}", "lg")
-        cprint(f"Merging averaged files...", "g")
+        cprint("Merging averaged files...", "g")
         merge_averaged_files([coherent_dir, incoherent_dir], output_dir)
-        cprint(f"Merging non-averaged files...", "g")
+        cprint("Merging non-averaged files...", "g")
         merge_non_averaged_files(coherent_dir, incoherent_dir, output_dir)
 
 
