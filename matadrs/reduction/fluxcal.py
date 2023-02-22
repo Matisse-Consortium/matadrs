@@ -39,7 +39,9 @@ Arguments:
 
 import os
 import math
+from pathlib import Path
 from shutil import copyfile
+from typing import List
 
 import astropy.units as u
 import numpy as np
@@ -55,8 +57,10 @@ from scipy.special import j1
 from scipy.interpolate import interp1d
 
 
-def get_spectrum_caldb(cal_database_path, cal_name, out_lst, ra: u.deg = np.nan,
-                       dec: u.deg = np.nan, match_radius: u.arcsec = 20.0, band='L'):
+def get_spectrum_caldb(cal_database_path: Path, cal_name: str, out_lst: List,
+                       ra: u.deg = np.nan, dec: u.deg = np.nan,
+                       match_radius: u.arcsec = 20.0, band: str = 'L'):
+    """"""
     c_cal = SkyCoord(ra*u.deg, dec*u.deg, frame='icrs')
     caldb = fits.open(cal_database_path)
     caldb_file = os.path.basename(cal_database_path)
@@ -177,10 +181,28 @@ def plot_skycalc_output(fpath_in, figpath_out, airmass, pwv):
     fig.savefig(figpath_out, dpi=200)
     hdul.close()
 
-# NOTE: Mode: 'flux','corrflux','both'
-def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
-            mode='flux', output_fig_dir='', match_radius=25.0,
-            do_airmass_correction=False, calc_spectrum_offset=False):
+
+def fluxcal(inputfile_sci: Path, inputfile_cal: Path, outputfile: Path,
+            cal_database_paths: List[Path],
+            mode='flux', output_fig_dir: Path = "",
+            match_radius: u.arcsec = 25.0,
+            do_airmass_correction: bool = False,
+            calc_spectrum_offset: bool = False) -> None:
+    """The flux calibration
+
+    Parameters
+    -----------
+    inputfile_sci: Path
+    inputfile_cal: Path
+    outputfile: Path
+    cal_database_paths: List[Path]
+    mode: str
+        Either "flux", "corrflux" or "both"
+    output_fig_dir: Path
+    match_radius: u.arcsec
+    do_airmass_correction: bool
+    calc_spectrum_offset: bool
+    """
     # NOTE: Create the output oifits file
     copyfile(inputfile_sci, outputfile)
     outhdul = fits.open(outputfile, mode='update')
@@ -366,44 +388,27 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
             flux_calibrated_sci = wav_sci*0.0
             corrflux_calibrated_sci = wav_sci*0.0
             vis_cal = wav_cal_model*0.0
-            # print(wav_cal_model)
-            # idx=np.logical_and(wav_cal_model<13.0e-6,wav_cal_model>8.0e-6)
-            # print(wav_cal_model[idx]*1e6)
-            # print(wav_bin_upper_cal,wav_bin_lower_cal)
             for i in range(len(wav_cal_model)):
-                # print(wav_bin_lower[i],wav_bin_upper[i])
                 wu = (wav_bin_upper_cal - wav_bin_lower[i])
                 wl = (wav_bin_upper[i] - wav_bin_lower_cal)
                 wi = np.where(np.logical_and(wu > 0.0,wl > 0.0))
-                # print(wav_cal_model[wi])
-                # print(wi)
                 wi = wi[0]
-                # print(wi)
 
-                #sum up the spectral values within the wavelength bin with weighting
+                # NOTE: Sum up the spectral values within the wavelength bin with weighting
                 sum = 0.0
                 sum = sum + (wav_bin_upper_cal[wi[0]] - wav_bin_lower[i])*spectrum_cal[wi[0]]
                 sum = sum + (wav_bin_upper[i] - wav_bin_lower_cal[wi[-1]]) * spectrum_cal[wi[-1]]
                 for j in range(1,len(wi)-1):
                     sum = sum + spectrum_cal[wi[j]]*d_wav_cal[wi[j]]
                 spectrum_cal_resampled[i] = sum/d_wav[i]
-                # print(i,len(wi),sum,d_wav[i],spectrum_cal_resampled[i])
         else:
-            #if the sampling of the MATISSE spectrum comparable to or denser than the sampling of the calibrator spectrum
-            #do an interpolation
+            # NOTE: If the sampling of the MATISSE spectrum comparable to or denser than the sampling of the calibrator spectrum
+            # do an interpolation
             f = interp1d(wav_cal_model, spectrum_cal,kind='cubic')
-            # print(band)
-            # print(wav_cal_model)
-            # print(wav_cal)
-            # print( inputfile_cal)
             spectrum_cal_resampled = f(wav_sci)
 
 
-    # print(wav_cal_model[idx])
-    # print(wav_cal)
-    # print(spectrum_cal[idx])
-    # print(spectrum_cal_resampled)
-    # plot calibrator spectrum in the data wavelength range
+    # NOTE: Plot calibrator spectrum in the data wavelength range
     if os.path.exists(output_fig_dir):
         fig, ((ax1)) = plt.subplots(1, 1, sharey=False, sharex=False, figsize=(5, 5))
         if 2.0*len(wav_cal) < np.nansum(idx):
@@ -415,7 +420,7 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
     if do_airmass_correction:
         print('Calculate airmass correction factor')
         kernel_width_px = 10.0
-        #read in the saved atmospheric transmission curves
+        # NOTE: Read in the saved atmospheric transmission curves
         hdulc = fits.open(fname_skycalc_out_cal)
         wl_um_cal = hdulc[1].data['lam']*1e-3
         trans_cal = hdulc[1].data['trans']
@@ -423,7 +428,7 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
         wl_um_sci = hduls[1].data['lam']*1e-3
         trans_sci = hduls[1].data['trans']
 
-        #transform the transmission to the wavelength grid of the data (incl. spectral resolution & spectral binning)
+        # NOTE: Transform the transmission to the wavelength grid of the data (incl. spectral resolution & spectral binning)
         dl_coeffs = get_dl_coeffs(inhdul_sci)
         spectral_binning = get_spectral_binning(inhdul_sci)
         figpath_out = outputdir+'/skycalc_spec_transform_sci_'+tag_sci+'.png'
@@ -434,14 +439,11 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
         figpath_out = outputdir+'/skycalc_spec_transform_cal_'+tag_cal+'.png'
         trans_cal_final = transform_spectrum_to_real_spectral_resolution(wl_um_cal,trans_cal,dl_coeffs,
             kernel_width_px,wav_sci*1e6,spectral_binning,make_plot=True,figpath_out=figpath_out,ylabel='Transmission')
-        #txtpath_out = outputdir+'/skycalc__'+tag_cal+'.png'
-        #wertret
-        #write_spectrum_txt(trans_cal_final,wav_cal*1e6,txtpath_out)
 
-        #calculate the airmass_correction_factor
+        # NOTE: Calculate the airmass_correction_factor
         airmass_correction_factor = trans_cal_final/trans_sci_final
 
-        #plot the airmass_correction_factor
+        # NOTE: Plot the airmass_correction_factor
         tag_sci_final = os.path.splitext(os.path.basename(outputfile))[0]
         figa, ((axc)) = plt.subplots(1, 1, sharey=False, sharex=False, figsize=(5, 5))
         plt.plot(wav_sci*1e6 ,airmass_correction_factor)
@@ -451,12 +453,11 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
         LM_gap_idx = np.logical_and(wav_sci*1e6 > 4.1 ,wav_sci*1e6 < 4.6)
         idx = np.logical_and(wav_sci*1e6 > wl_min+wl_range*0.1,wav_sci*1e6 < wl_max-wl_range*0.1)
         range_idx = np.logical_and(idx,~LM_gap_idx)
-        pmin = np.nanmin(airmass_correction_factor[range_idx])  #np.nanpercentile(y_new, 10.0)
-        pmax = np.nanmax(airmass_correction_factor[range_idx])  #np.nanpercentile(y_new, 95.0)
+        pmin = np.nanmin(airmass_correction_factor[range_idx])
+        pmax = np.nanmax(airmass_correction_factor[range_idx])
         axc.set_ylim([pmin,pmax])
         axc.set_ylabel('Airmass correction factor')
         axc.set_xlabel('$\lambda$ ($\mu$m)')
-        #ax1.set_ylim([0.0,1.0])
         figpath_out = outputdir+'/skycalc_airmass_correction_factor_'+tag_sci_final+'.png'
         figa.savefig(figpath_out, dpi=200)
         hduls.close()
@@ -464,18 +465,18 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
     else:
         airmass_correction_factor = wav_sci*0.0+1.0
 
-    # calibrate total spectrum
+    # NOTE: Calibrate total spectrum
     if mode == 'flux' or mode == 'both':
         print('Calibrate total spectrum.')
-        #check if we have an 'OI_FLUX' table
+        # NOTE: Check if we have an 'OI_FLUX' table
         n_exp_sci = len(inhdul_sci['OI_VIS2'].data['VIS2DATA'])/6
         n_exp_cal = len(inhdul_cal['OI_VIS2'].data['VIS2DATA'])/6
         rp_list_sci=[]
         rp_list_cal=[]
         try:
             for j in range(len(inhdul_sci['OI_FLUX'].data['FLUXDATA'])):
-                flux_raw_sci = inhdul_sci['OI_FLUX'].data['FLUXDATA'][j] #*np.exp(airmass_sci)
-                flux_raw_cal = inhdul_cal['OI_FLUX'].data['FLUXDATA'][j] #*np.exp(airmass_cal)
+                flux_raw_sci = inhdul_sci['OI_FLUX'].data['FLUXDATA'][j]
+                flux_raw_cal = inhdul_cal['OI_FLUX'].data['FLUXDATA'][j]
                 fluxerr_raw_sci = inhdul_sci['OI_FLUX'].data['FLUXERR'][j]
                 fluxerr_raw_cal = inhdul_cal['OI_FLUX'].data['FLUXERR'][j]
                 if 'L' in band:
@@ -486,8 +487,7 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
 
                 if do_airmass_correction:
                     if calc_spectrum_offset:
-                        #calculate correlation between the raw spectrum, and the atmospheric transmission spectrum
-                        #shift_max = int(0.025*len(trans_cal_final))
+                        # NOTE: Calculate correlation between the raw spectrum, and the atmospheric transmission spectrum
                         shift_max = int(7.0*spectral_binning)
                         rp_list_cal.append(calc_corr_offset(trans_cal_final,flux_raw_cal,shift_max))
                         rp_list_sci.append(calc_corr_offset(trans_sci_final,flux_raw_sci,shift_max))
@@ -507,27 +507,27 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
 
             if do_airmass_correction:
                 if calc_spectrum_offset:
-                    #plot the correlation
+                    # NOTE: Plot the correlation
                     plot_corr_offset(rp_list_sci,np.arange(-shift_max,+shift_max),outputdir+'/skycalc_correlation_flux_'+tag_sci+'.png')
                     plot_corr_offset(rp_list_cal,np.arange(-shift_max,+shift_max),outputdir+'/skycalc_correlation_flux_'+tag_cal+'.png')
 
-        except KeyError as e:
+        except KeyError:
             print('No OI_FLUX table found.')
 
-    # calibrate correlated spectrum
+    # NOTE: Calibrate correlated spectrum
     if mode == 'corrflux' or mode == 'both':
         print('Calibrate correlated spectra.')
-        rp_list_sci=[]
-        rp_list_cal=[]
+        rp_list_sci = []
+        rp_list_cal = []
         for j in range(len(inhdul_sci['OI_VIS'].data['VISAMP'])):
             sta_index_sci = inhdul_sci['OI_VIS'].data['STA_INDEX'][j]
-            corrflux_raw_sci = inhdul_sci['OI_VIS'].data['VISAMP'][j] #*np.exp(airmass_sci)
+            corrflux_raw_sci = inhdul_sci['OI_VIS'].data['VISAMP'][j]
             corrfluxerr_raw_sci = inhdul_sci['OI_VIS'].data['VISAMPERR'][j]
             if 'L' in band:
                 corrflux_raw_sci = np.flip(corrflux_raw_sci)
                 corrfluxerr_raw_sci = np.flip(corrfluxerr_raw_sci)
 
-            # find calibrator data with matching station configuration
+            # NOTE: Find calibrator data with matching station configuration
             sta_indices_cal = inhdul_cal['OI_VIS'].data['STA_INDEX']
             for i in range(len(sta_indices_cal)):
                 if ((sta_index_sci[0] == sta_indices_cal[i][0]) and (sta_index_sci[1] == sta_indices_cal[i][1])) \
@@ -535,7 +535,7 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
                     idx_cal = i
                     break
 
-            corrflux_raw_cal = inhdul_cal['OI_VIS'].data['VISAMP'][idx_cal] #*np.exp(airmass_cal)
+            corrflux_raw_cal = inhdul_cal['OI_VIS'].data['VISAMP'][idx_cal]
             corrfluxerr_raw_cal = inhdul_cal['OI_VIS'].data['VISAMPERR'][idx_cal]
             if 'L' in band:
                 corrflux_raw_cal = np.flip(corrflux_raw_cal)
@@ -546,15 +546,11 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
 
             diam_cal_rad = diam_cal/1000.0/3600.0*math.pi/180.0
             spatial_frequency = B_p/wav_cal
-            # visibilities of the calibrator (uniform disk model)
+            # NOTE: Visibilities of the calibrator (uniform disk model)
             vis_cal = 2*j1(math.pi*diam_cal_rad*spatial_frequency) / (math.pi*diam_cal_rad*spatial_frequency)
-            # plt.figure()
-            # plt.plot(wav_cal, vis_cal, '-b')
-            # plt.show()
             if do_airmass_correction:
                 if calc_spectrum_offset:
-                    #calculate correlation between the raw spectrum, and the atmospheric transmission spectrum
-                    #shift_max = int(0.025*len(trans_cal_final))
+                    # NOTE: calculate correlation between the raw spectrum, and the atmospheric transmission spectrum
                     shift_max = int(7.0*spectral_binning)
                     if len(trans_cal_final) == len(corrflux_raw_cal):
                         rp_list_cal.append(calc_corr_offset(trans_cal_final,corrflux_raw_cal,shift_max))
@@ -563,22 +559,21 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
             corrflux_calibrated_sci = corrflux_raw_sci/corrflux_raw_cal*vis_cal*spectrum_cal_resampled*airmass_correction_factor
             if 'L' in band:
                 corrflux_calibrated_sci = np.flip(corrflux_calibrated_sci)
+            # NOTE: Uncertainty in calibrator diameter is not taken into account (in the
+            # following)
             corrfluxerr_calibrated_sci = np.abs(corrflux_raw_sci/corrflux_raw_cal)* \
                 np.sqrt((corrfluxerr_raw_sci/corrflux_raw_sci)**2 + (corrfluxerr_raw_cal/corrflux_raw_cal)**2)* \
-                vis_cal*spectrum_cal_resampled #uncertainty in calibrator diameter is not taken into account
+                vis_cal*spectrum_cal_resampled
             if 'L' in band:
                 corrfluxerr_calibrated_sci = np.flip(corrfluxerr_calibrated_sci)
             if os.path.exists(output_fig_dir):
                 plt.plot(wav_cal*1e6,vis_cal*spectrum_cal_resampled,'--',label='Resampl. corr., B_p = %.2f m'%B_p)
-            # plt.figure()
-            # plt.plot(wav_cal, vis_cal, '-b')
-            # plt.show()
             outhdul['OI_VIS'].data['VISAMP'][j] = corrflux_calibrated_sci
             outhdul['OI_VIS'].data['VISAMPERR'][j] = corrfluxerr_calibrated_sci
         outhdul['OI_VIS'].header['TUNIT5'] = 'Jy'
         outhdul['OI_VIS'].header['TUNIT6'] = 'Jy'
         if do_airmass_correction:
-            #plot the correlation
+            # NOTE: Plot the correlation
             if calc_spectrum_offset:
                 plot_corr_offset(rp_list_sci,np.arange(-shift_max,+shift_max),outputdir+'/skycalc_correlation_corrflux_'+tag_sci+'.png')
                 plot_corr_offset(rp_list_cal,np.arange(-shift_max,+shift_max),outputdir+'/skycalc_correlation_corrflux_'+tag_cal+'.png')
@@ -608,16 +603,24 @@ def fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths,
         ax1.set_ylim([0.7*np.min(spectrum_cal_resampled),1.1*np.max(spectrum_cal_resampled)])
         ax1.legend(loc='best', fontsize=8, fancybox=True, framealpha=0.5)
         fig.savefig(output_fig_dir+'/' + 'calibrator_'+band+'_'+cal_name.replace(' ','_')+'_spectrum.png', dpi=200)
-        # plt.show()
 
     inhdul_cal.close()
     inhdul_sci.close()
-    outhdul.flush()  # changes are written back to fits
+    # NOTE: Changes are written back to fits
+    outhdul.flush()
     outhdul.close()
     return 0
 
-def update_corrflux_from_vis2(inputfile, outputfile, flux_Jy):
-    # create the output oifits file
+
+def update_corrflux_from_vis2(inputfile: Path, outputfile: Path, flux_Jy: u.Jy) -> None:
+    """Create the output oifits file
+
+    Parameters
+    ----------
+    inputfile: Path
+    outputfile: Path
+    flux_Jy: u.Jy
+    """
     print(os.path.basename(inputfile))
     copyfile(inputfile, outputfile)
     inhdul = fits.open(inputfile)
@@ -629,11 +632,20 @@ def update_corrflux_from_vis2(inputfile, outputfile, flux_Jy):
         corrfluxerr = viserr*flux_Jy
         outhdul['OI_VIS'].data['VISAMP'][j] = corrflux
         outhdul['OI_VIS'].data['VISAMPERR'][j] = corrfluxerr
-    outhdul.flush()  # changes are written back to fits
+    # NOTE: Changes are written back to fits
+    outhdul.flush()
     outhdul.close()
 
-def update_vis2_from_corrflux(inputfile, outputfile, total_flux):
-    # create the output oifits file
+
+def update_vis2_from_corrflux(inputfile: Path, outputfile: Path, total_flux: u.Jy):
+    """Create the output oifits file
+
+    Parameters
+    ----------
+    inputfile: Path
+    outputfile: Path
+    total_flux: u.Jy
+    """
     print(os.path.basename(inputfile))
     copyfile(inputfile, outputfile)
     inhdul = fits.open(inputfile)
@@ -645,187 +657,201 @@ def update_vis2_from_corrflux(inputfile, outputfile, total_flux):
         viserr = corrfluxerr/total_flux
         outhdul['OI_VIS2'].data['VIS2DATA'][j] = vis**2
         outhdul['OI_VIS2'].data['VIS2ERR'][j] = 2.0*vis*viserr
-    outhdul.flush()  # changes are written back to fits
+    # NOTE: Changes are written back to fits
+    outhdul.flush()
     outhdul.close()
 
 #wmin, wmax [nm]
 #wgrid_mode: 'fixed_wavelength_step' or 'fixed_spectral_resolution'
 #lsf_type: 'none' or 'Gaussian' or 'Boxcar'
-def create_skycalc_inputfile(fname,airmass,pwv,wmin,wmax,
-        wgrid_mode='fixed_wavelength_step',wdelta=0.1,wres=20000.0,lsf_type='none',lsf_gauss_fwhm=5.0):
-    pwv_allowed_values = [0.05,0.1,0.25,0.5,1.0,1.5,2.5,3.5,5.0,7.5,10.0,20.0,30.0]
-    #print(pwv)
-    ofile = open(fname,'w')
-    mystr='airmass         :  '+'%f\n'%airmass
-    mystr+= 'pwv_mode        :  pwv \n'
-    mystr+='season          :  0 \n'
-    mystr+='time            :  0 \n'
+def create_skycalc_inputfile(fname: str, airmass: float, pwv: float, wmin: u.nm,
+                             wmax: u.nm, wgrid_mode: str = 'fixed_wavelength_step',
+                             wdelta: float = 0.1, wres: float = 20000.,
+                             lsf_type: str = 'none', lsf_gauss_fwhm: float = 5.) -> None:
+    pwv_allowed_values = [0.05, 0.1, 0.25, 0.5, 1.0, 1.5,
+                          2.5, 3.5, 5.0, 7.5, 10.0, 20.0, 30.0]
+    ofile = open(fname, 'w')
+    mystr = 'airmass         :  '+'%f\n' % airmass
+    mystr += 'pwv_mode        :  pwv \n'
+    mystr += 'season          :  0 \n'
+    mystr += 'time            :  0 \n'
     idx = find_nearest_idx(pwv_allowed_values, pwv)
-    #print(idx)
-    mystr+= 'pwv             :  ' +'%f\n'%pwv_allowed_values[idx]
-    mystr+= 'msolflux        :  130.0\n'
-    mystr+= 'incl_moon       :  Y\n'
-    mystr+= 'moon_sun_sep    :  90.0\n'
-    mystr+= 'moon_target_sep :  45.0\n'
-    mystr+= 'moon_alt        :  45.0\n'
-    mystr+= 'moon_earth_dist :  1.0\n'
-    mystr+= 'incl_starlight  :  Y\n'
-    mystr+= 'incl_zodiacal   :  Y\n'
-    mystr+= 'ecl_lon         :  135.0\n'
-    mystr+= 'ecl_lat         :  90.0\n'
-    mystr+= 'incl_loweratm   :  Y\n'
-    mystr+= 'incl_upperatm   :  Y\n'
-    mystr+= 'incl_airglow    :  Y\n'
-    mystr+= 'incl_therm      :  N\n'
-    mystr+= 'therm_t1        :  0.0\n'
-    mystr+= 'therm_e1        :  0.0\n'
-    mystr+= 'therm_t2        :  0.0\n'
-    mystr+= 'therm_e2        :  0.0\n'
-    mystr+= 'therm_t3        :  0.0\n'
-    mystr+= 'therm_e3        :  0.0\n'
-    mystr+= 'vacair          :  vac\n'
-    mystr+= 'wmin            :  '+'%f\n'%wmin
-    mystr+= 'wmax            :  '+'%f\n'%wmax
-    mystr+= 'wgrid_mode      :  '+'%s\n'%wgrid_mode
-    mystr+= 'wdelta          :  '+'%f\n'%wdelta
-    mystr+= 'wres            :  '+'%f\n'%wres
-    mystr+= 'lsf_type        :  '+'%s\n'%lsf_type
-    mystr+= 'lsf_gauss_fwhm  :  '+'%f\n'%lsf_gauss_fwhm
-    mystr+= 'lsf_boxcar_fwhm :  5.0\n'
-    mystr+= 'observatory     :  paranal'
-    ofile.write(mystr)
-    ofile.close()
+    mystr += 'pwv             :  ' +'%f\n' % pwv_allowed_values[idx]
+    mystr += 'msolflux        :  130.0\n'
+    mystr += 'incl_moon       :  Y\n'
+    mystr += 'moon_sun_sep    :  90.0\n'
+    mystr += 'moon_target_sep :  45.0\n'
+    mystr += 'moon_alt        :  45.0\n'
+    mystr += 'moon_earth_dist :  1.0\n'
+    mystr += 'incl_starlight  :  Y\n'
+    mystr += 'incl_zodiacal   :  Y\n'
+    mystr += 'ecl_lon         :  135.0\n'
+    mystr += 'ecl_lat         :  90.0\n'
+    mystr += 'incl_loweratm   :  Y\n'
+    mystr += 'incl_upperatm   :  Y\n'
+    mystr += 'incl_airglow    :  Y\n'
+    mystr += 'incl_therm      :  N\n'
+    mystr += 'therm_t1        :  0.0\n'
+    mystr += 'therm_e1        :  0.0\n'
+    mystr += 'therm_t2        :  0.0\n'
+    mystr += 'therm_e2        :  0.0\n'
+    mystr += 'therm_t3        :  0.0\n'
+    mystr += 'therm_e3        :  0.0\n'
+    mystr += 'vacair          :  vac\n'
+    mystr += 'wmin            :  '+'%f\n'%wmin
+    mystr += 'wmax            :  '+'%f\n'%wmax
+    mystr += 'wgrid_mode      :  '+'%s\n'%wgrid_mode
+    mystr += 'wdelta          :  '+'%f\n'%wdelta
+    mystr += 'wres            :  '+'%f\n'%wres
+    mystr += 'lsf_type        :  '+'%s\n'%lsf_type
+    mystr += 'lsf_gauss_fwhm  :  '+'%f\n'%lsf_gauss_fwhm
+    mystr += 'lsf_boxcar_fwhm :  5.0\n'
+    mystr += 'observatory     :  paranal'
+    ofile .write(mystr)
+    ofile .close()
 
-#return dlambda [nm]
-def get_dlambda(inhdul):
+
+def get_dlambda(inhdul) -> u.nm:
+    """
+
+    Returns
+    --------
+    dlambda: u.nm
+    """
     header = inhdul[0].header
     dl = np.nan
     if 'AQUARIUS' in header['HIERARCH ESO DET CHIP NAME']:
-        #band = 'N'
         dispname = header['HIERARCH ESO INS DIN NAME']
         if 'LOW' in dispname:
             dl = 30.0
         if 'HIGH' in dispname:
             dl = 3.0
     if 'HAWAII' in header['HIERARCH ESO DET CHIP NAME']:
-        #band = 'LM'
         dispname = header['HIERARCH ESO INS DIL NAME']
         if 'LOW' in dispname:
             dl = 8.0
         if 'MED' in dispname:
             dl = 0.6
+        # FIX: For high ??????????? -> Not np.nan?
         if 'HIGH' in dispname:
             if '+' in dispname:
-                np.nan #??????????????
+                np.nan
             else:
-                dl = np.nan #??????????????
+                dl = np.nan
     return dl
+
 
 def get_spectral_binning(inhdul):
     header = inhdul[0].header
     spectral_binning = np.nan
-    for i in range(1,17):
-        hdrkey = 'HIERARCH ESO PRO REC1 PARAM'+'%d'%i+' NAME'
+    for i in range(1, 17):
+        hdrkey = 'HIERARCH ESO PRO REC1 PARAM'+'%d' % i+' NAME'
         if hdrkey in header:
             if 'spectralBinning' in header[hdrkey]:
-                hdrkey2 = 'HIERARCH ESO PRO REC1 PARAM'+'%d'%i+' VALUE'
+                hdrkey2 = 'HIERARCH ESO PRO REC1 PARAM'+'%d' % i+' VALUE'
                 spectral_binning = float(header[hdrkey2])
-                #print(spectral_binning)
     return spectral_binning
 
+
 def get_dl_coeffs(inhdul):
+    """"""
     header = inhdul[0].header
-    dl_coeffs = [ np.nan]*4
+    dl_coeffs = [np.nan]*4
     if 'AQUARIUS' in header['HIERARCH ESO DET CHIP NAME']:
-        #band = 'N'
         dispname = header['HIERARCH ESO INS DIN NAME']
         if 'LOW' in dispname:
-            dl_coeffs = [ 0.10600484,  0.01502548,  0.00294806, -0.00021434]
+            dl_coeffs = [0.10600484,  0.01502548,  0.00294806, -0.00021434]
         if 'HIGH' in dispname:
             dl_coeffs = [-8.02282965e-05,  3.83260266e-03,  7.60090459e-05, -4.30753848e-07]
     if 'HAWAII' in header['HIERARCH ESO DET CHIP NAME']:
-        #band = 'LM'
         dispname = header['HIERARCH ESO INS DIL NAME']
         if 'LOW' in dispname:
-            dl_coeffs = [ 0.09200542, -0.03281159,  0.02166703, -0.00309248]
+            dl_coeffs = [0.09200542, -0.03281159,  0.02166703, -0.00309248]
         if 'MED' in dispname:
-            dl_coeffs = [ 2.73866174e-10,  2.00286100e-03,  1.33829137e-06, -4.46578231e-10]
+            dl_coeffs = [2.73866174e-10, 2.00286100e-03, 1.33829137e-06, -4.46578231e-10]
+        # TODO: !!!!!!!!!!!!!!!!!!!!! needs to be implemented
         if 'HIGH' in dispname:
             if '+' in dispname:
-                dl_coeffs = [ np.nan]*4 #!!!!!!!!!!!!!!!!!!!!! needs to be implemented
+                dl_coeffs = [np.nan]*4
             else:
                 dl_coeffs = [-1.08178909e-04,  6.44793559e-04 , 1.30502477e-04, -3.70606692e-06]
     return dl_coeffs
 
-#yscale: 'none' or 'final' or '0-1'
-def transform_spectrum_to_real_spectral_resolution(wl_orig,spec_orig,dl_coeffs,kernel_width_px,wl_final,spectral_binning,
-    make_plot=False,figpath_out='spectrum_plots.png',ylabel='',yscale='none'):
-    #make an uneven wavelength grid
-    #print('make an uneven wavelength grid')
+
+# NOTE: yscale: 'none' or 'final' or '0-1'
+def transform_spectrum_to_real_spectral_resolution(wl_orig: u.nm, spec_orig, dl_coeffs,
+                                                   kernel_width_px, wl_final,
+                                                   spectral_binning,
+                                                   make_plot=False,
+                                                   figpath_out='spectrum_plots.png',
+                                                   ylabel='', yscale='none') -> None:
+    # NOTE: Make an uneven wavelength grid
     min_wl = np.min(wl_orig)
     max_wl = np.max(wl_orig)
-    #print(min_wl,max_wl)
-    wl_new=[]
+    wl_new = []
     wl = min_wl
     wl_new.append(wl)
     while wl < max_wl:
-        wl = wl + polyval(wl,dl_coeffs)/kernel_width_px
+        wl = wl + polyval(wl, dl_coeffs)/kernel_width_px
         wl_new.append(wl)
     wl_new = np.array(wl_new)
-    #print(wl_orig,wl_new)
-    #interpolate the original spectrum to the new grid
-    f_spec_new = interp1d(wl_orig, spec_orig,kind='cubic',fill_value='extrapolate')
+    # NOTE: Interpolate the original spectrum to the new grid
+    f_spec_new = interp1d(wl_orig, spec_orig, kind='cubic', fill_value='extrapolate')
     spec_new = f_spec_new(wl_new)
-    #convolve with Gaussian kernel
+    # NOTE: Convolve with Gaussian kernel
     kernel = Gaussian1DKernel(stddev=kernel_width_px/(2.0*np.sqrt(2.0*np.log(2.0))))
     spec_new[0] = np.nanmedian(spec_new[0:int(kernel.dimension/2.0)])
     spec_new[-1] = np.nanmedian(spec_new[-1:-int(kernel.dimension/2.0)])
-    spec_convolved = convolve(spec_new,kernel,boundary='extend')
-    #interpolate the convolved spectrum to the input wavelength grid
-    f_spec_new = interp1d(wl_new, spec_convolved,kind='cubic',fill_value='extrapolate')
+    spec_convolved = convolve(spec_new, kernel, boundary='extend')
+    # NOTE: Interpolate the convolved spectrum to the input wavelength grid
+    f_spec_new = interp1d(wl_new, spec_convolved, kind='cubic', fill_value='extrapolate')
     spec_interp = f_spec_new(wl_final)
-    #apply spectral binning: convolve with a top-hat kernel of size spectral_binning
+    # NOTE: Apply spectral binning: convolve with a top-hat kernel of size spectral_binning
     if spectral_binning > 1:
         kernel = Box1DKernel(spectral_binning)
-        spec_final = convolve(spec_interp,kernel,boundary='extend')
+        spec_final = convolve(spec_interp, kernel, boundary='extend')
     else:
         spec_final = spec_interp
 
     if make_plot:
         fig, ((ax1)) = plt.subplots(1, 1, sharey=False, sharex=False, figsize=(20, 10))
-        plt.plot(wl_orig, spec_orig,label='1) original sp.')
-        plt.plot(wl_new, spec_new,label='2) regridded sp.')
-        plt.plot(wl_new, spec_convolved,label=r'3) convolved sp.'+r' ($R \approx %.0f$)'%np.nanmean(wl_final/polyval(wl_final,dl_coeffs)))
-        plt.plot(wl_final, spec_interp,label='4) convolved interp sp.')
-        plt.plot(wl_final, spec_final,label='5) binned sp.'+' (%d px)'%spectral_binning)
+        plt.plot(wl_orig, spec_orig, label='1) original sp.')
+        plt.plot(wl_new, spec_new, label='2) regridded sp.')
+        plt.plot(wl_new, spec_convolved, label=r'3) convolved sp.'+r' ($R \approx %.0f$)'%np.nanmean(wl_final/polyval(wl_final,dl_coeffs)))
+        plt.plot(wl_final, spec_interp, label='4) convolved interp sp.')
+        plt.plot(wl_final, spec_final, label='5) binned sp.'+' (%d px)'%spectral_binning)
         plt.ylabel(ylabel)
-        plt.xlabel('$\lambda$ ($\mu$m)')
-        ax1.set_xlim([np.nanmin(wl_final),np.nanmax(wl_final)])
+        plt.xlabel(r'$\lambda$ ($\mu$m)')
+        ax1.set_xlim([np.nanmin(wl_final), np.nanmax(wl_final)])
         if yscale == 'final':
-            ax1.set_ylim([0.95*np.nanmin(spec_final),1.05*np.nanmax(spec_final)])
+            ax1.set_ylim([0.95*np.nanmin(spec_final), 1.05*np.nanmax(spec_final)])
         if yscale == '0-1':
-            ax1.set_ylim([0.0,1.0])
+            ax1.set_ylim([0.0, 1.0])
         plt.legend()
         fig.savefig(figpath_out, dpi=200)
 
     return spec_final
 
-def calc_corr_offset(spectrum1,spectrum2,shift_max):
-    Ntr  = len(spectrum1)
+
+def calc_corr_offset(spectrum1, spectrum2, shift_max):
+    """"""
+    Ntr = len(spectrum1)
     rp = []
-    for k in range(-shift_max,+shift_max):
+    for k in range(-shift_max, +shift_max):
+        # NOTE: Pearson's
         if k < 0:
-            #print(j,Ntr,len(trans_cal_final[0:(Ntr+k)]),len(corrflux_raw_cal[-k:]))
-            rp.append(scipy.stats.pearsonr(spectrum1[0:(Ntr+k)],spectrum2[-k:])[0]) #Pearson's r
+            rp.append(scipy.stats.pearsonr(spectrum1[0:(Ntr+k)],spectrum2[-k:])[0])
         else:
-            rp.append(scipy.stats.pearsonr(spectrum1[k:],spectrum2[0:(Ntr-k)])[0]) #Pearson's r
+            rp.append(scipy.stats.pearsonr(spectrum1[k:],spectrum2[0:(Ntr-k)])[0])
     return rp
 
-def plot_corr_offset(rp_list,x,figpath_out):
+
+def plot_corr_offset(rp_list, x, figpath_out):
+    """"""
     if len(rp_list) > 0:
         fig, ((ax1)) = plt.subplots(1, 1, sharey=False, sharex=False, figsize=(5, 5))
         for rp in rp_list:
-            plt.step(x,np.array(rp),where='mid')
+            plt.step(x, np.array(rp), where='mid')
         plt.ylabel('Correlation')
         plt.xlabel('Wavelength offset (px)')
         tlocs, tlabels = plt.xticks()
@@ -839,9 +865,10 @@ def plot_corr_offset(rp_list,x,figpath_out):
         else:
             minor_locator = MultipleLocator(10)
         ax1.xaxis.set_minor_locator(minor_locator)
-        plt.grid(axis='x',color='0.95',which='minor')
-        plt.grid(axis='x',color='0.8',which='major')
+        plt.grid(axis='x', color='0.95', which='minor')
+        plt.grid(axis='x', color='0.8', which='major')
         fig.savefig(figpath_out, dpi=200)
+
 
 def find_nearest_idx(array, value):
     array = np.asarray(array)
