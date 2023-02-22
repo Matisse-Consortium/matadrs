@@ -1,34 +1,33 @@
-# Tool for flux and correlated flux calibration of VLTI/MATISSE data
-# Jozsef Varga, 2019-2022
-# varga@strw.leidenuniv.nl
-#
-# Example usage:
-# from fluxcal import fluxcal
-# inputfile_sci = 'path/to/raw/science/fits/file.fits'
-# inputfile_cal = 'path/to/raw/calibrator/fits/file.fits'
-# outputfile = 'path/to/calibrated/outputfile.fits'
-# cal_database_dir = 'path/to/calibrator/database/folder/'
-# cal_database_paths = [cal_database_dir+'vBoekelDatabase.fits',cal_database_dir+'calib_spec_db_v10.fits',cal_database_dir+'calib_spec_db_v10_supplement.fits']
-# output_fig_dir = 'path/to/figure/folder/'
-# fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths, mode='corrflux',output_fig_dir=output_fig_dir)
-#
-# Arguments:
-# inputfile_sci: path to the raw science oifits file.
-# inputfile_cal: path to the raw calibrator oifits file.
-# outputfile: path of the output calibrated file
-# cal_database_paths: list of paths to the calibrator databases, e.g., [caldb1_path,caldb2_path]
-# mode (optional):
-#   'flux': calibrates total flux (incoherently processed oifits file expected)
-#           results written in the OI_FLUX table (FLUXDATA column)
-#    'corrflux': calibrates correlated flux (coherently processed oifits file expected)
-#                results written in the OI_VIS table (VISAMP column)
-#    'both': calibrates both total and correlated fluxes
-# output_fig_dir (optional): if it is a valid path, the script will make a plot of the calibrator model spectrum there,
-#                            deafult: '' (= no figure made)
-#
-#
-# load vanBoekeldatabase: DONE
-# save calibrator spectrum in a plot: DONE
+"""Tool for flux and correlated flux calibration of VLTI/MATISSE data
+
+Jozsef Varga, 2019-2022
+varga@strw.leidenuniv.nl
+
+Example usage:
+--------------
+>>> from fluxcal import fluxcal
+>>> inputfile_sci = 'path/to/raw/science/fits/file.fits'
+>>> inputfile_cal = 'path/to/raw/calibrator/fits/file.fits'
+>>> outputfile = 'path/to/calibrated/outputfile.fits'
+>>> cal_database_dir = 'path/to/calibrator/database/folder/'
+>>> cal_database_paths = [cal_database_dir+'vBoekelDatabase.fits',cal_database_dir+'calib_spec_db_v10.fits',cal_database_dir+'calib_spec_db_v10_supplement.fits']
+>>> output_fig_dir = 'path/to/figure/folder/'
+>>> fluxcal(inputfile_sci, inputfile_cal, outputfile, cal_database_paths, mode='corrflux',output_fig_dir=output_fig_dir)
+
+Arguments:
+* inputfile_sci: path to the raw science oifits file.
+* inputfile_cal: path to the raw calibrator oifits file.
+* outputfile: path of the output calibrated file
+* cal_database_paths: list of paths to the calibrator databases, e.g., [caldb1_path, caldb2_path]
+* mode (optional):
+  'flux': calibrates total flux (incoherently processed oifits file expected)
+          results written in the OI_FLUX table (FLUXDATA column)
+  'corrflux': calibrates correlated flux (coherently processed oifits file expected)
+              results written in the OI_VIS table (VISAMP column)
+  'both': calibrates both total and correlated fluxes
+* output_fig_dir (optional): If it is a valid path, the script will make a plot of the calibrator model spectrum there,
+                             Default: '' (= no figure made)
+"""
 # TODO: Airmass correction: testing
 # TODO: Calculate uncertainties
 #       partly implemented
@@ -56,10 +55,8 @@ from numpy.polynomial.polynomial import polyval
 from astropy.convolution import Gaussian1DKernel, Box1DKernel, convolve
 
 
-# match_radius [arcsec]
-# ra, dec [degree]
-def get_spectrum_caldb(cal_database_path, cal_name, out_lst, ra=np.nan,
-                       dec=np.nan, match_radius=20.0, band='L'):
+def get_spectrum_caldb(cal_database_path, cal_name, out_lst, ra: u.deg = np.nan,
+                       dec: u.deg = np.nan, match_radius: u.arcsec = 20.0, band='L'):
     c_cal = SkyCoord(ra*u.deg, dec*u.deg, frame='icrs')
     caldb = fits.open(cal_database_path)
     caldb_file = os.path.basename(cal_database_path)
