@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from shutil import copyfile
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from astropy.io import fits
@@ -10,7 +10,8 @@ from ..utils.robust import mean as rbmean
 
 
 # NOTE: avg_cflux: if True, the function will average all the corr flux data (experimental)
-def avg_oifits(infile_list, outfile_path, headerval=[], avg_cflux=False):
+def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
+               headerval: Optional[List] = [], avg_cflux: Optional[bool] = False):
     if os.path.exists(infile_list[0]):
         copyfile(infile_list[0], outfile_path)
     else:
@@ -323,8 +324,8 @@ def avg_oifits(infile_list, outfile_path, headerval=[], avg_cflux=False):
 
 # NOTE: oi_types_list = [ ['vis2','t3'], ['visamp'] ]
 def oifits_patchwork(infile_list: List, outfile_path: Path,
-                     oi_types_list: List = [],
-                     headerval: List = []):
+                     oi_types_list: Optional[List] = [],
+                     headerval: Optional[List] = []):
     if os.path.exists(infile_list[0]):
         copyfile(infile_list[0], outfile_path)
     else:
@@ -407,7 +408,9 @@ def oifits_patchwork(infile_list: List, outfile_path: Path,
     inhdul2.close()
 
 
-def calc_vis_from_corrflux(input_corrflux_file, input_totalflux_file, outfile_path):
+def calc_vis_from_corrflux(input_corrflux_file: List[Path],
+                           input_totalflux_file: List[Path],
+                           outfile_path: Path):
     copyfile(input_corrflux_file, outfile_path)
     outhdul = fits.open(outfile_path, mode='update')
 
@@ -439,8 +442,11 @@ def calc_vis_from_corrflux(input_corrflux_file, input_totalflux_file, outfile_pa
     inhdul_tot.close()
 
 
-def oifits_restrict_wavelengths(infile_path, outfile_path, sel_wl=3.0,
-                                bandwidth=1000.0, wl_range=[], do_flag=False):
+def oifits_restrict_wavelengths(infile_path: Path, outfile_path: Path,
+                                sel_wl: Optional[float] = 3.,
+                                bandwidth: Optional[float] = 1000.,
+                                wl_range: Optional[List] = [],
+                                do_flag: Optional[bool] = False):
     copyfile(infile_path, outfile_path)
     outhdul = fits.open(outfile_path, mode='update')
 
