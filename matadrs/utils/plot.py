@@ -218,11 +218,13 @@ class Plotter:
 
     def set_dataframe(self, labels: List[str], column: Column) -> DataFrame:
         """Prepares each row in a column as a pandas DataFrame"""
-        return pd.DataFrame({label: array for label, array in zip(labels, column.data)})
+        if isinstance(column, Column):
+            data = column.data
+        return pd.DataFrame({label: array for label, array in zip(labels, column)})
 
     def make_component(self, data_name: str,
-                       legend_format: Optional[str] = "long"
-                       ) -> Union[Callable, DataFrame]:
+                       legend_format: Optional[str] = "long",
+                       unwrap: Optional[bool] = False) -> Union[Callable, DataFrame]:
         """Generates a pandas DataFrame that has all the plots' information
 
         Parameters
@@ -259,7 +261,11 @@ class Plotter:
             if data_name == "vis":
                 component = self.set_dataframe(labels, self.readout.oi_vis["VISAMP"])
             elif data_name == "diff":
-                component = self.set_dataframe(labels, self.readout.oi_vis["VISPHI"])
+                # TODO: Make this into a function
+                diff_phases = self.readout.oi_vis["VISPHI"]
+                if unwrap:
+                    diff_phases = np.unwrap(diff_phases)
+                component = self.set_dataframe(labels, diff_phases)
             elif data_name == "corrflux":
                 try:
                     component = self.set_dataframe(labels, self.readout.oi_cfx["VISAMP"])
@@ -270,8 +276,11 @@ class Plotter:
             else:
                 raise KeyError("No data-type of that data name exists!")
         elif data_name == "cphases":
-            component = self.set_dataframe(self.readout.oi_t3["TRIANGLE"],
-                                           self.readout.oi_t3["T3PHI"])
+            # TODO: Make this into a function
+            cphases = self.readout.oi_t3["T3PHI"]
+            if unwrap:
+                cphases = np.unwrap(cphases)
+            component = self.set_dataframe(self.readout.oi_t3["TRIANGLE"], cphases)
         elif data_name == "uv":
             component = self.plot_uv
         else:
@@ -283,7 +292,6 @@ class Plotter:
             return self.mask_dataframe(component, self.band_mask)
         return component
 
-    # TODO: Find way to pass arguments via the component function
     def plot(self, save: Optional[bool] = False):
         """Makes the plot from the omponents
 
@@ -349,14 +357,16 @@ class Plotter:
         self.components["Squared Visibility"] = self.make_component("vis2", legend_format)
         return self
 
-    def add_diff_phases(self):
+    def add_diff_phases(self, unwrap: Optional[bool] = False):
         """Plots all the differential phases into one plot"""
-        self.components["Differential phases [$^{\circ}$]"] = self.make_component("diff")
+        self.components["Differential phases [$^{\circ}$]"] =\
+                self.make_component("diff", unwrap=unwrap)
         return self
 
-    def add_cphases(self):
+    def add_cphases(self, unwrap: Optional[bool] = False):
         """Plots all the closure phases into one plot"""
-        self.components["Closure phases [$^{\circ}$]"] = self.make_component("cphases")
+        self.components["Closure phases [$^{\circ}$]"] =\
+                self.make_component("cphases", unwrap=unwrap)
         return self
 
     def add_uv(self):
