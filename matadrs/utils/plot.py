@@ -238,10 +238,12 @@ class Plotter:
         component: Callable | DataFrame
         """
         if data_name == "flux":
-            component = self.set_dataframe(self.readout.oi_array["TEL_NAME"],
-                                           self.readout.oi_flux["FLUXDATA"])
+            labels = self.readout.oi_array["TEL_NAME"]
+            flux = self.readout.oi_flux["FLUXDATA"]
+            if len(flux) == 1:
+                labels = ["Averaged"]
+            component = self.set_dataframe(labels, flux)
         elif data_name in ["vis", "vis2", "diff", "corrflux"]:
-            # TODO: Check if there are edge cases where oi_vis2 needs to be used
             station_names = self.readout.oi_vis["DELAY_LINE"]
             if legend_format == "long":
                 baselines = np.around(self.readout.oi_vis["BASELINE"], 2)
@@ -259,7 +261,10 @@ class Plotter:
             elif data_name == "diff":
                 component = self.set_dataframe(labels, self.readout.oi_vis["VISPHI"])
             elif data_name == "corrflux":
-                component = self.set_dataframe(labels, self.readout.oi_cfx["VISAMP"])
+                try:
+                    component = self.set_dataframe(labels, self.readout.oi_cfx["VISAMP"])
+                except KeyError:
+                    return self.make_component("vis", legend_format)
             elif data_name == "vis2":
                 component = self.set_dataframe(labels, self.readout.oi_vis2["VIS2DATA"])
             else:
@@ -329,14 +334,14 @@ class Plotter:
         self.components["Total Flux [Jy]"] = self.make_component("flux")
         return self
 
-    def add_vis(self, legend_format: Optional[str] = "long"):
+    def add_vis(self, corr_flux: Optional[bool] = False,
+                legend_format: Optional[str] = "long"):
         """Plots all the visibilities fluxes in one plot """
-        self.components["Visibility"] = self.make_component("vis", legend_format)
-        return self
-
-    def add_corr_flux(self, legend_format: Optional[str] = "long"):
-        """Plots all the correlated fluxes in one plot """
-        self.components["Correlated Flux [Jy]"] = self.make_component("corrflux", legend_format)
+        if corr_flux:
+            self.components["Correlated Flux [Jy]"] = self.make_component("corrflux",
+                                                                          legend_format)
+        else:
+            self.components["Visibility"] = self.make_component("vis", legend_format)
         return self
 
     def add_vis2(self, legend_format: Optional[str] = "long"):
