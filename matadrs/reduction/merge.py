@@ -14,7 +14,7 @@ HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
                     {'key': 'HIERARCH ESO INS BCD1 NAME', 'value': ' '},
                     {'key': 'HIERARCH ESO INS BCD2 NAME', 'value': ' '}]
 
-OI_TYPES = [["flux"], ["visamp"], ["visphi"], ["vis2"], ["t3"]]
+OI_TYPES = [["flux"], ["corrflux"], ["visphi"], ["visamp"], ["vis2"], ["t3"]]
 
 
 # TODO: Remove the folder's input and just get the data from the fits-file?
@@ -58,24 +58,19 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     out_file_pip = get_output_file_path(coherent_flux, output_dir, True)
 
     # NOTE: The files in the 'files_to_merge' list correspond to the 'OI_TYPE' list. Thus
-    # one can determine what is merged in what way
+    # one can determine what is merged
     if "lband" in str(directories[0]):
         files_to_merge = [incoherent_flux, coherent_flux,
-                          coherent_bcd_vis, incoherent_vis, incoherent_bcd_vis]
-        files_to_merge_pip = [incoherent_flux, coherent_flux,
-                              coherent_bcd_pip_vis, incoherent_vis, incoherent_bcd_pip_vis]
+                          coherent_bcd_vis, incoherent_vis,
+                          incoherent_vis, coherent_bcd_vis]
     else:
         files_to_merge = [incoherent_flux, coherent_flux,
-                          coherent_bcd_vis, incoherent_vis, coherent_bcd_vis]
-        files_to_merge_pip = [incoherent_flux, coherent_flux,
-                              coherent_bcd_pip_vis, incoherent_vis, coherent_bcd_pip_vis]
+                          coherent_bcd_pip_vis, incoherent_bcd_pip_vis,
+                          incoherent_bcd_pip_vis, coherent_bcd_pip_vis]
     if all([fits_file.exists() for fits_file in files_to_merge]):
         oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                          oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
 
-    if all([fits_file.exists() for fits_file in files_to_merge_pip]):
-        oifits_patchwork(list(map(str, files_to_merge)), str(out_file_pip),
-                         oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
     # TODO: Implement handling of chopped files
 
 
@@ -113,10 +108,12 @@ def merge_non_averaged_files(coherent_dir: Path,
 
         if "lband" in str(coherent_dir):
             files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
-                              coh_unchopped_vis, inc_unchopped_vis, inc_unchopped_vis]
+                              coh_unchopped_vis, inc_unchopped_vis,
+                              inc_unchopped_vis, coh_unchopped_vis]
         else:
             files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
-                              coh_unchopped_vis, inc_unchopped_vis, coh_unchopped_vis]
+                              coh_unchopped_vis, inc_unchopped_vis,
+                              inc_unchopped_vis, coh_unchopped_vis]
 
         if all([fits_file.exists() for fits_file in files_to_merge]):
             oifits_patchwork(list(map(str, files_to_merge)),
@@ -161,7 +158,7 @@ def merge(averaged_dir: Path) -> None:
         The mode in which the reduction is to be executed. Either 'coherent',
         'incoherent' or 'both'
     """
-    coherent_dirs = list((averaged_dir / "bcd_and_averaged" / "coherent").glob("*.rb"))
+    coherent_dirs = list((averaged_dir / "averaged" / "coherent").glob("*.rb"))
     incoherent_dirs = [Path(str(directory).replace("coherent", "incoherent"))\
                        for directory in coherent_dirs]
 
@@ -172,11 +169,10 @@ def merge(averaged_dir: Path) -> None:
     merge_folders(coherent_dirs, incoherent_dirs, output_dir)
     cprint("Plotting files...", "g")
     for fits_file in output_dir.glob("*.fits"):
-        plot_fits = Plotter([fits_file], save_path=output_dir)
-        plot_fits.add_cphases().add_vis().plot(save=True)
+        Plotter(fits_file, save_path=output_dir).add_mosaic().plot(save=True)
     for fits_file in (output_dir / "non_averaged").glob("*.fits"):
-        plot_fits = Plotter([fits_file], save_path=(output_dir / "non_averaged"))
-        plot_fits.add_cphases().add_vis().plot(save=True)
+        plot_fits = Plotter(fits_file, save_path=(output_dir / "non_averaged"))
+        plot_fits.add_uv().add_vis().add_cphases().plot(save=True)
     cprint(f"{'':-^50}", "lg")
     cprint("Merging Done!", "lp")
     cprint(f"{'':-^50}", "lg")

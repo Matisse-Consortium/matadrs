@@ -45,7 +45,7 @@ class Plotter:
 
         # TODO: Improve this plot name giving. Only one fits file is respected in this
         if plot_name is None:
-            self.plot_name = f"{Path(fits_file[0]).stem}.pdf"
+            self.plot_name = f"{Path(fits_file).stem}.pdf"
 
         self.wl = self.readout.oi_wl["EFF_WAVE"].data[0]
         self.components = {}
@@ -144,7 +144,8 @@ class Plotter:
                 markersize=10, markeredgewidth=3)
         ax.plot(-u_coords, -v_coords, symbol,
                 color=color, markersize=10, markeredgewidth=3)
-        ax.text(-u_coords-7, -v_coords-3, sta_label, color='0', alpha=0.8)
+        ax.text(-u_coords-7, -v_coords-3, sta_label,
+                fontsize="small", color='0', alpha=0.8)
 
     def plot_uv(self, ax, symbol: Optional[str] = "x",
                 color: Optional[str] = "b",
@@ -237,10 +238,12 @@ class Plotter:
         component: Callable | DataFrame
         """
         if data_name == "flux":
-            component = self.set_dataframe(self.readout.oi_array["TEL_NAME"],
-                                           self.readout.oi_flux["FLUXDATA"])
-        elif (data_name == "vis") or (data_name == "vis2") or (data_name == "diff"):
-            # TODO: Check if there are edge cases where oi_vis2 needs to be used
+            labels = self.readout.oi_array["TEL_NAME"]
+            flux = self.readout.oi_flux["FLUXDATA"]
+            if len(flux) == 1:
+                labels = ["Averaged"]
+            component = self.set_dataframe(labels, flux)
+        elif data_name in ["vis", "vis2", "diff", "corrflux"]:
             station_names = self.readout.oi_vis["DELAY_LINE"]
             if legend_format == "long":
                 baselines = np.around(self.readout.oi_vis["BASELINE"], 2)
@@ -255,17 +258,24 @@ class Plotter:
                 labels = station_names
             if data_name == "vis":
                 component = self.set_dataframe(labels, self.readout.oi_vis["VISAMP"])
+            elif data_name == "diff":
+                component = self.set_dataframe(labels, self.readout.oi_vis["VISPHI"])
+            elif data_name == "corrflux":
+                try:
+                    component = self.set_dataframe(labels, self.readout.oi_cfx["VISAMP"])
+                except KeyError:
+                    return self.make_component("vis", legend_format)
             elif data_name == "vis2":
                 component = self.set_dataframe(labels, self.readout.oi_vis2["VIS2DATA"])
             else:
-                component = self.set_dataframe(labels, self.readout.oi_vis["VISPHI"])
-        elif data_name == "cphase":
+                raise KeyError("No data-type of that data name exists!")
+        elif data_name == "cphases":
             component = self.set_dataframe(self.readout.oi_t3["TRIANGLE"],
                                            self.readout.oi_t3["T3PHI"])
         elif data_name == "uv":
             component = self.plot_uv
         else:
-            raise ValueError("Input data name cannot be queried!")
+            raise KeyError("Input data name cannot be queried!")
         if isinstance(component, DataFrame):
             # HACK: This is needed right now, but it should really be doable with easier
             # operations
@@ -293,12 +303,12 @@ class Plotter:
                                   constrained_layout=True,
                                   figsize=(512*to_px*columns, 512*to_px*rows))
         if not self.number_of_plots == 1:
-            # TODO: Implement flux np.nan detection and not plotting it
+            # TODO: Implement if flux is np.nan and not plotting it in that case
             for ax, (name, component) in zip(axarr.flatten(), self.components.items()):
                 if isinstance(component, DataFrame):
                     component.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
                                    ylabel=name, ax=ax, legend=True)
-                    plt.legend(fontsize=6)
+                    ax.legend(fontsize="x-small", loc="upper right")
                 else:
                     component(ax)
         else:
@@ -306,6 +316,7 @@ class Plotter:
             if isinstance(component, DataFrame):
                 component.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
                                ylabel=name, ax=axarr, legend=True)
+                axarr.legend(fontsize="x-small", loc="upper right")
             else:
                 component[0](axarr)
 
@@ -316,22 +327,26 @@ class Plotter:
         else:
             plt.show()
         plt.close()
-        # ax.legend(loc=1, prop={'size': 6}, ncol=ncol)
 
     # TODO: Make somehow correlated flux and unit support in this component
     def add_flux(self):
         """Plots the flux """
-        self.components["Flux [Jy]"] = self.make_component("flux")
+        self.components["Total Flux [Jy]"] = self.make_component("flux")
         return self
 
-    def add_vis(self, legend_format: Optional[str] = "long"):
-        """Plots all the visibilities/correlated_fluxes in one plot """
-        self.components["Vis"] = self.make_component("vis", legend_format)
+    def add_vis(self, corr_flux: Optional[bool] = False,
+                legend_format: Optional[str] = "long"):
+        """Plots all the visibilities fluxes in one plot """
+        if corr_flux:
+            self.components["Correlated Flux [Jy]"] = self.make_component("corrflux",
+                                                                          legend_format)
+        else:
+            self.components["Visibility"] = self.make_component("vis", legend_format)
         return self
 
     def add_vis2(self, legend_format: Optional[str] = "long"):
         """Plots all the visibilities squared in one plot"""
-        self.components["Vis2"] = self.make_component("vis2", legend_format)
+        self.components["Squared Visibility"] = self.make_component("vis2", legend_format)
         return self
 
     def add_diff_phases(self):
@@ -341,12 +356,18 @@ class Plotter:
 
     def add_cphases(self):
         """Plots all the closure phases into one plot"""
-        self.components["Closure phases [$^{\circ}$]"] = self.make_component("cphase")
+        self.components["Closure phases [$^{\circ}$]"] = self.make_component("cphases")
         return self
 
     def add_uv(self):
         """Plots the (u, v)-coordinates"""
         self.components["$(u, v)$-coordinates"] = self.make_component("uv")
+        return self
+
+    def add_mosaic(self, legend_format: Optional[str] = "long"):
+        """Prepares a combined mosaic-plot"""
+        self.add_uv().add_vis(legend_format).add_corr_flux(legend_format)
+        self.add_flux().add_cphases().add_diff_phases()
         return self
 
     # def get_plot_linestyle(self, already_chosen_linestyles: List):
@@ -395,12 +416,3 @@ class Plotter:
             # ax.set_xlabel(r'wl [micron]')
             # ax.set_ylabel('vis2')
             # ax.legend(loc='best')
-
-
-if __name__ == ('__main__'):
-    fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits",
-                  "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits",
-                  "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
-    fits_files = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
-    plot_fits = Plotter(fits_files[1])
-    plot_fits.add_cphases().add_vis("short").plot()
