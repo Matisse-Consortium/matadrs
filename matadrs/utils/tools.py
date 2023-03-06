@@ -6,8 +6,6 @@ from functools import wraps
 from pathlib import Path
 from typing import Callable, Tuple, List, Optional
 
-import numpy as np
-
 __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
            "get_execution_modes", "split_fits", "get_fits_by_tag", "check_if_target",
            "get_path_descriptor"]
@@ -41,39 +39,13 @@ def capitalise_to_index(string: str, index: int):
     return string[:index].capitalize() + string[index:].lower()
 
 
-@np.vectorize
-def modulate_phases(phases: np.ndarray, phase_range: Optional[int] = 180) -> np.ndarray:
-    """Corrects a 2D phase signal with jumps to be a continous line.
-
-    Parameters
-    ----------
-    phases: np.ndarray
-        The 2D-phase signal
-    phase_range: int, optional
-       The point at where the phase jumps
-
-     Returns
-     -------
-     corrected_phase: np.ndarray
-     """
-    return (phases + phase_range) % phase_range
-
-
-def shift_phases_by_difference(phases: np.array, phase_range: Optional[int] = 180,
-                               shift_range: Optional[int] = 10) -> np.ndarray:
-    """Shifts phases that have a big difference between two values"""
-    shift_condition = np.where(np.abs(np.diff(phases)) > (phase_range - shift_range))
-    phases[shift_condition] = 180 - phases[shift_condition]
-    return phases
-
-
 def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False):
     """Moves source files/folders to the destination directory and overwrites them if
     toggled
 
-    Parameters
+    parameters
     ----------
-    source_file: Path
+    source_file: path
         A file or directory to be moved
     destination: Path
         The destination directory of the source-file/-directory

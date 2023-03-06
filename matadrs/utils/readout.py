@@ -1,7 +1,7 @@
 import pkg_resources
 import warnings
 from pathlib import Path
-from typing import Tuple, List, Optional
+from typing import Dict, Tuple, List, Optional
 
 import numpy as np
 import astropy.units as u
@@ -20,16 +20,6 @@ warnings.simplefilter("ignore", category=u.UnitsWarning)
 DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 
 # NOTE: All VLTI-baseline configurations by station indices to names
-SMALL = {1: "A0", 5: "B2", 13: "D0", 10: "C1"}
-MED = {28: "K0", 18: "G1", 13: "D0", 24: "J3"}
-LARGE = {1: "A0", 18: "G1", 23: "J2", 24: "J3"}
-UT = {32: "UT1", 33: "UT2", 34: "UT3", 35: "UT4"}
-
-STATION_INDICES_TO_NAMES = {}
-STATION_INDICES_TO_NAMES.update(SMALL)
-STATION_INDICES_TO_NAMES.update(MED)
-STATION_INDICES_TO_NAMES.update(LARGE)
-STATION_INDICES_TO_NAMES.update(UT)
 
 
 # TODO: Add to fluxcalibration that it changes the unit to Jy not ADU -> Maybe in Jozsef's
@@ -103,7 +93,9 @@ class ReadoutFits:
         self.fits_file = Path(fits_file)
         self.flux_file = Path(flux_file) if flux_file else None
 
+        self._sta_to_tel = None
         self._name, self._coords = None, None
+        self._simbad_query = None
 
         self._oi_array, self._oi_wl = None, None
         self._oi_flux, self._oi_t3 = None, None
@@ -135,14 +127,29 @@ class ReadoutFits:
         return self._name
 
     @property
+    def simbad_query(self):
+        """The simbad_query property"""
+        if self._simbad_query is None:
+            simbad = Simbad.query_object(self.name)
+            ra, dec = simbad["RA"], simbad["DEC"]
+            self._simbad_query = SkyCoord(ra, dec, unit="deg")
+        return self._simbad_query
+
+    @property
     def ra(self) -> str:
         """Fetches the right ascension from the primary header"""
-        return self.primary_header["RA"]
+        if "RA" in self.primary_header:
+            return self.primary_header["RA"]
+        else:
+            return self.simbad_query.ra
 
     @property
     def dec(self) -> str:
         """Fetches the declination from the primary header"""
-        return self.primary_header["DEC"]
+        if "DEC" in self.primary_header:
+            return self.primary_header["DEC"]
+        else:
+            return self.simbad_query.dec
 
     @property
     def mjd(self) -> str:
@@ -221,8 +228,18 @@ class ReadoutFits:
             wl = self.get_table_for_fits("oi_wavelength")["EFF_WAVE"]
             self._oi_wl.add_column(self._oi_wl.Column([wl.data.astype(np.float64)],
                                                       unit=wl.unit), name="EFF_WAVE")
+            if self.oi_wl["EFF_WAVE"].unit is not u.m:
+                self.oi_wl["EFF_WAVE"] = self.oi_wl["EFF_WAVE"].value*u.m
             self._oi_wl["EFF_WAVE"] = self._oi_wl["EFF_WAVE"].to(u.um)
         return self._oi_wl
+
+    @property
+    def sta_to_tel(self) -> Dict[int, str]:
+        """Gets the telescope's station index to telescope name mapping"""
+        if self._sta_to_tel is None:
+            self._sta_to_tel = dict(zip(self.oi_array["STA_INDEX"],
+                                        self.oi_array["STA_NAME"]))
+        return self._sta_to_tel
 
     @property
     def oi_array(self) -> Table:
@@ -406,7 +423,8 @@ class ReadoutFits:
         -------
         delay_lines: List[str]
         """
-        return ["-".join(list(map(STATION_INDICES_TO_NAMES.get, station_index)))
+        return ["-".join(list(map(self.sta_to_tel.get, station_index)))
+                if all([index in self.sta_to_tel for index in station_index]) else ""
                 for station_index in table["STA_INDEX"]]
 
 

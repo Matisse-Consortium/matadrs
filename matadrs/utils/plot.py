@@ -9,13 +9,13 @@ from pandas import DataFrame
 from astropy.table import Column
 
 from ..utils.readout import ReadoutFits
-from ..utils.tools import cprint
 
 
 DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 
 # Paranal lattitude in radians
 LATITUDE = -24.62587 * np.pi / 180.
+
 
 # TODO: Make this go away from class and just individual plotting functions? -> Maybe
 # easier for paper relevant plots, but first make unified class that makes nice data
@@ -144,7 +144,7 @@ class Plotter:
                 markersize=10, markeredgewidth=3)
         ax.plot(-u_coords, -v_coords, symbol,
                 color=color, markersize=10, markeredgewidth=3)
-        ax.text(-u_coords-7, -v_coords-3, sta_label,
+        ax.text(-u_coords-3.5, -v_coords-1.5, sta_label,
                 fontsize="small", color='0', alpha=0.8)
 
     def plot_uv(self, ax, symbol: Optional[str] = "x",
@@ -160,9 +160,9 @@ class Plotter:
         color: str, optional
         sel_wl: float, optional
         """
-        uv_coords = self.readout.oi_vis2["UVCOORD"]
-        flags = self.readout.oi_vis2["FLAG"]
-        sta_indices = self.readout.oi_vis2["STA_INDEX"]
+        uv_coords = self.readout.oi_vis["UVCOORD"]
+        flags = self.readout.oi_vis["FLAG"]
+        sta_indices = self.readout.oi_vis["STA_INDEX"]
         sta_index = self.readout.oi_array["STA_INDEX"]
         sta_name = self.readout.oi_array["STA_NAME"]
         sta_xyz = self.readout.oi_array["STAXYZ"]
@@ -180,8 +180,9 @@ class Plotter:
             baselines.append(baseline)
             sta_labels.append(sta_label)
 
-        # umax = np.nanmax(np.abs(u))
-        # vmax = np.nanmax(np.abs(v))
+        # TODO: Determine the maximum for the (u, v)-plot and then use that to set the
+        # plot dimensions
+
         # if self.readout.mindexd is None:
         #     mindexd = np.amin(self.readout.oi_vis2["MindexD"][0])
         # else:
@@ -194,12 +195,12 @@ class Plotter:
                                 sta_labels[index], flags[index],
                                 symbol, color, sel_wl, airmass_lim)
 
-        xlabel = "$u$ (m)"
-        ylabel = "$v$ (m)"
-        # xlabel = r"$u$ ($M\lambda$)"
-        # ylabel = r"$v$ ($M\lambda$)"
-        ax.set_xlim((150, -150))
-        ax.set_ylim((-150, 150))
+        xlabel, ylabel = "$u$ (m)", "$v$ (m)"
+        # xlabel, ylabel = r"$u$ ($M\lambda$)", r"$v$ ($M\lambda$)"
+        uv_max = np.nanmax(np.abs(uv_coords)) + 15
+
+        ax.set_xlim((uv_max, -uv_max))
+        ax.set_ylim((-uv_max, uv_max))
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         # plotmax = 1.3*np.amax([umax, vmax])
@@ -335,7 +336,6 @@ class Plotter:
             plt.savefig(str(self.save_path / self.plot_name), format="pdf")
         else:
             plt.show()
-        plt.close()
 
     # TODO: Make somehow correlated flux and unit support in this component
     def add_flux(self):
