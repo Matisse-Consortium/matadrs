@@ -224,7 +224,8 @@ class Plotter:
 
     def make_component(self, data_name: str,
                        legend_format: Optional[str] = "long",
-                       unwrap: Optional[bool] = False) -> Union[Callable, DataFrame]:
+                       unwrap: Optional[bool] = False,
+                       period: Optional[int] = 360) -> Union[Callable, DataFrame]:
         """Generates a pandas DataFrame that has all the plots' information
 
         Parameters
@@ -264,7 +265,7 @@ class Plotter:
                 # TODO: Make this into a function
                 diff_phases = self.readout.oi_vis["VISPHI"]
                 if unwrap:
-                    diff_phases = np.unwrap(diff_phases)
+                    diff_phases = np.unwrap(diff_phases, period=period)
                 component = self.set_dataframe(labels, diff_phases)
             elif data_name == "corrflux":
                 try:
@@ -279,7 +280,7 @@ class Plotter:
             # TODO: Make this into a function
             cphases = self.readout.oi_t3["T3PHI"]
             if unwrap:
-                cphases = np.unwrap(cphases)
+                cphases = np.unwrap(cphases, period=period)
             component = self.set_dataframe(self.readout.oi_t3["TRIANGLE"], cphases)
         elif data_name == "uv":
             component = self.plot_uv
@@ -316,7 +317,7 @@ class Plotter:
                 if isinstance(component, DataFrame):
                     component.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
                                    ylabel=name, ax=ax, legend=True)
-                    ax.legend(fontsize="x-small", loc="upper right")
+                    ax.legend(fontsize="x-small", loc="upper right", framealpha=0.5)
                 else:
                     component(ax)
         else:
@@ -324,7 +325,7 @@ class Plotter:
             if isinstance(component, DataFrame):
                 component.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
                                ylabel=name, ax=axarr, legend=True)
-                axarr.legend(fontsize="x-small", loc="upper right")
+                axarr.legend(fontsize="x-small", loc="upper right", framealpha=0.5)
             else:
                 component[0](axarr)
 
@@ -342,6 +343,7 @@ class Plotter:
         self.components["Total Flux [Jy]"] = self.make_component("flux")
         return self
 
+    # TODO: Add option to remove the correlated flux if the component is empty
     def add_vis(self, corr_flux: Optional[bool] = False,
                 legend_format: Optional[str] = "long"):
         """Plots all the visibilities fluxes in one plot """
@@ -357,16 +359,16 @@ class Plotter:
         self.components["Squared Visibility"] = self.make_component("vis2", legend_format)
         return self
 
-    def add_diff_phases(self, unwrap: Optional[bool] = False):
+    def add_diff_phases(self, unwrap: Optional[bool] = False, period: Optional[int] = 360):
         """Plots all the differential phases into one plot"""
         self.components["Differential phases [$^{\circ}$]"] =\
-                self.make_component("diff", unwrap=unwrap)
+                self.make_component("diff", unwrap=unwrap, period=period)
         return self
 
-    def add_cphases(self, unwrap: Optional[bool] = False):
+    def add_cphases(self, unwrap: Optional[bool] = False, period: Optional[int] = 360):
         """Plots all the closure phases into one plot"""
         self.components["Closure phases [$^{\circ}$]"] =\
-                self.make_component("cphases", unwrap=unwrap)
+                self.make_component("cphases", unwrap=unwrap, period=period)
         return self
 
     def add_uv(self):
@@ -374,10 +376,11 @@ class Plotter:
         self.components["$(u, v)$-coordinates"] = self.make_component("uv")
         return self
 
-    def add_mosaic(self, legend_format: Optional[str] = "long"):
+    def add_mosaic(self, unwrap: Optional[bool] = False,
+                   legend_format: Optional[str] = "long"):
         """Prepares a combined mosaic-plot"""
-        self.add_uv().add_vis(legend_format).add_corr_flux(legend_format)
-        self.add_flux().add_cphases().add_diff_phases()
+        self.add_uv().add_vis(False, legend_format).add_vis(True, legend_format)
+        self.add_flux().add_cphases(unwrap).add_diff_phases(unwrap)
         return self
 
     # def get_plot_linestyle(self, already_chosen_linestyles: List):

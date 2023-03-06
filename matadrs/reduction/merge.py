@@ -169,10 +169,11 @@ def merge(averaged_dir: Path) -> None:
     merge_folders(coherent_dirs, incoherent_dirs, output_dir)
     cprint("Plotting files...", "g")
     for fits_file in output_dir.glob("*.fits"):
-        Plotter(fits_file, save_path=output_dir).add_mosaic().plot(save=True)
+        unwrap = True if "HAWAII" not in fits_file.name else False
+        Plotter(fits_file, save_path=output_dir).add_mosaic(unwrap=unwrap).plot(save=True)
     for fits_file in (output_dir / "non_averaged").glob("*.fits"):
         plot_fits = Plotter(fits_file, save_path=(output_dir / "non_averaged"))
-        plot_fits.add_uv().add_vis().add_cphases().plot(save=True)
+        plot_fits.add_uv().add_vis().add_cphases(unwrap=True).plot(save=True)
     cprint(f"{'':-^50}", "lg")
     cprint("Merging Done!", "lp")
     cprint(f"{'':-^50}", "lg")
