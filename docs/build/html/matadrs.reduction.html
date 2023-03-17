@@ -38,29 +38,768 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
 </section>
-<section id="matadrs-reduction-average-module">
-<h2>matadrs.reduction.average module<a class="headerlink" href="#matadrs-reduction-average-module" title="Permalink to this heading">¶</a></h2>
+<section id="module-matadrs.reduction.average">
+<span id="matadrs-reduction-average-module"></span><h2>matadrs.reduction.average module<a class="headerlink" href="#module-matadrs.reduction.average" title="Permalink to this heading">¶</a></h2>
+<section id="routine">
+<h3>Routine<a class="headerlink" href="#routine" title="Permalink to this heading">¶</a></h3>
+<p class="rubric">References</p>
+<p class="rubric">Examples</p>
 </section>
-<section id="matadrs-reduction-avg-oifits-module">
-<h2>matadrs.reduction.avg_oifits module<a class="headerlink" href="#matadrs-reduction-avg-oifits-module" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.average.average">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.average.</span></span><span class="sig-name descname"><span class="pre">average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibrated_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.average.average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the full averaging for all of the calibrated directories subdirectories</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>calibrated_dir</strong> (<em>Path</em>) – The directory containing the calibration’s products</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites present files from previous calibration</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.average.average_files">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.average.</span></span><span class="sig-name descname"><span class="pre">average_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.average.average_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Averages the unchopped (.fits)-files and the chopped (.fits)-files if given</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>Path</em>) – The directory to be searched in</p></li>
+<li><p><strong>file_type</strong> (<em>str</em>) – Either ‘flux’ or ‘vis’ for the flux and visibility calibration, respectively</p></li>
+<li><p><strong>output_dir</strong> (<em>Path</em>) – The directory to which the new files are saved to</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This creates either one or two output files depending if there are only unchopped or
+also chopped files. The files’ names are with either ‘INT’ or ‘INT_CHOPPED’,
+respectively, and indicated that they are averaged by an ‘AVG’ in their name</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#matadrs.reduction.avg_oifits.avg_oifits" title="matadrs.reduction.avg_oifits.avg_oifits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">avg_oifits.avg_oifits</span></code></a></dt><dd><p>Averaging for (.fits)-files</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.average.average_folders">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.average.</span></span><span class="sig-name descname"><span class="pre">average_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibrated_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.average.average_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates over the calibrated directories to</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>calibrated_dir</strong> (<em>Path</em>) – The directory containing the calibration’s products</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.average.copy_calibrated_files">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.average.</span></span><span class="sig-name descname"><span class="pre">copy_calibrated_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.average.copy_calibrated_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the bcd-calibrated files to the averaged directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>Path</em>) – The directory to be searched in</p></li>
+<li><p><strong>output_dir</strong> (<em>Path</em>) – The directory to which the new files are saved to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="matadrs-reduction-calib-bcd2-module">
-<h2>matadrs.reduction.calib_BCD2 module<a class="headerlink" href="#matadrs-reduction-calib-bcd2-module" title="Permalink to this heading">¶</a></h2>
+<section id="module-matadrs.reduction.avg_oifits">
+<span id="matadrs-reduction-avg-oifits-module"></span><h2>matadrs.reduction.avg_oifits module<a class="headerlink" href="#module-matadrs.reduction.avg_oifits" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.avg_oifits.avg_oifits">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.avg_oifits.</span></span><span class="sig-name descname"><span class="pre">avg_oifits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headerval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_cflux</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.avg_oifits.avg_oifits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.avg_oifits.calc_vis_from_corrflux">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.avg_oifits.</span></span><span class="sig-name descname"><span class="pre">calc_vis_from_corrflux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_corrflux_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_totalflux_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.avg_oifits.calc_vis_from_corrflux" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.avg_oifits.oifits_patchwork">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.avg_oifits.</span></span><span class="sig-name descname"><span class="pre">oifits_patchwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oi_types_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headerval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.avg_oifits.oifits_patchwork" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.avg_oifits.oifits_restrict_wavelengths">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.avg_oifits.</span></span><span class="sig-name descname"><span class="pre">oifits_restrict_wavelengths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sel_wl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wl_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_flag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.avg_oifits.oifits_restrict_wavelengths" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="matadrs-reduction-calibrate-module">
-<h2>matadrs.reduction.calibrate module<a class="headerlink" href="#matadrs-reduction-calibrate-module" title="Permalink to this heading">¶</a></h2>
+<section id="module-matadrs.reduction.calib_BCD2">
+<span id="matadrs-reduction-calib-bcd2-module"></span><h2>matadrs.reduction.calib_BCD2 module<a class="headerlink" href="#module-matadrs.reduction.calib_BCD2" title="Permalink to this heading">¶</a></h2>
+<p>Created on Apr 11 2019</p>
+<p>&#64;author: fmillour</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calib_BCD2.calib_BCD">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calib_BCD2.</span></span><span class="sig-name descname"><span class="pre">calib_BCD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iifile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iofile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oifile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oofile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/scheuck/toto.fits'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.calib_BCD2.calib_BCD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="matadrs-reduction-fluxcal-module">
-<h2>matadrs.reduction.fluxcal module<a class="headerlink" href="#matadrs-reduction-fluxcal-module" title="Permalink to this heading">¶</a></h2>
+<section id="module-matadrs.reduction.calibrate">
+<span id="matadrs-reduction-calibrate-module"></span><h2>matadrs.reduction.calibrate module<a class="headerlink" href="#module-matadrs.reduction.calibrate" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the full calibration for all of the reduced directories subdirectories</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reduced_dir</strong> (<em>Path</em>) – The path to multiple folders that need to be cross correlated</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites files from previous calibration</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The mode of calibration can either be ‘coherent’ or ‘incoherent’, which corresponds to
+either the calibration of the correlated fluxes or the total flux</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_bcd">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_bcd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_bcd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes the BCD-calibration for the the unchopped/chopped, visbility calibrated
+files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>Path</em>) – The directory to be searched in</p></li>
+<li><p><strong>output_dir</strong> (<em>Path</em>) – The directory to which the new files are saved to</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This creates either one or two output files depending if there are only unchopped or
+also chopped files. The files’ names end with either ‘INT’ or ‘INT_CHOPPED’,
+respectively, and indicated that they are averaged by an ‘AVG’ in their name</p>
+<p>From MATISSE-pipeline version 1.7.6, the BCD-calibration is included in the
+pipeline, however, for L-band it only takes into account the chopped files, and is
+unreliable if they are not present, in which case the BCD-calibration is executed via
+this script and the output of it merged into the final file</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#matadrs.reduction.calib_BCD2.calib_BCD" title="matadrs.reduction.calib_BCD2.calib_BCD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calib_BCD2.calib_BCD</span></code></a></dt><dd><p>BCD-calibration for closure phases</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_files">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrator_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>The total calibration for a target and a calibrator folder. Includes the flux-,
+visibility- and closure phase (bcd-) calibration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reduced_dir</strong> (<em>Path</em>) – The path to multiple folders that need to be cross correlated</p></li>
+<li><p><strong>target_dir</strong> (<em>Path</em>) – The directory of the science target</p></li>
+<li><p><strong>calibrator_dir</strong> (<em>Path</em>) – The directory of the calibrator</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – The mode of calibration. Either ‘corrflux’, ‘flux’ or ‘both’ depending
+if it is ‘coherent’ or ‘incoherent’ reduced data</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites files from previous calibration</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_fluxes">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_fluxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_fluxes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calibrates the fluxes of all the provided files and saves it to the output
+directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – The detected “TARGET_RAW”-files</p></li>
+<li><p><strong>calibrators</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – The detected “CALIB_RAW”-files</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’</p></li>
+<li><p><strong>product_dir</strong> (<em>Path</em>) – The directory to contain the calibrated files</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_folders">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calibrates a directory containing the scientific target with a directory containing
+the calibrator observation. Calibrates flux, visibility and closure phases (bcd)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reduced_dir</strong> (<em>Path</em>) – The path to multiple folders that need to be cross correlated</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites files from previous calibration</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_visibilities">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_visibilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_visibilities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calibrates the visibilities of all the provided files and saves them to the output
+directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – The detected “TARGET_RAW”-files</p></li>
+<li><p><strong>calibrators</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – The detected “CALIB_RAW”-files</p></li>
+<li><p><strong>product_dir</strong> (<em>Path</em>) – The directory to contain the calibrated files</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.check_file_match">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">check_file_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#matadrs.reduction.calibrate.check_file_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if all needed files exist in the directories and if the number of both
+directories is the same</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – The detected “TARGET_RAW”-files</p></li>
+<li><p><strong>calibrators</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – The detected “CALIB_RAW”-files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>files_match</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.cleanup_calibration">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">cleanup_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.calibrate.cleanup_calibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves any (.fits)-files created by ‘esorex’ and the esorex (.log)-files to the
+calibrated folder</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.create_visibility_sof">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">create_visibility_sof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#matadrs.reduction.calibrate.create_visibility_sof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the (.sof)-file needed for the visibility calibration with ‘mat_cal_oifits’
+and returns its path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reduced_dir</strong> (<em>Path</em>) – The direcotry containing the, by the pipeline, reduced data</p></li>
+<li><p><strong>targets</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – The ‘TARGET_RAW_INT’-files</p></li>
+<li><p><strong>calibrators</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – The ‘CALIB_RAW_INT’-files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sof_file</strong> – The Path to the (.sof)-file used for visibility calibration</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.sort_fits_by_bcd_configuration">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">sort_fits_by_bcd_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">namedtuple</span></span></span><a class="headerlink" href="#matadrs.reduction.calibrate.sort_fits_by_bcd_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the input (.fits)-files by their BCD configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fits_files</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – The (.fits)-files to be checked for their BCD-configuration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>bcd_configuration</strong> – A named tuple containing the (.fits)-files sorted by BCD-configuration. If none of
+the specified configuration is found then the field is filled with an empty string</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>namedtuple</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="matadrs-reduction-merge-module">
-<h2>matadrs.reduction.merge module<a class="headerlink" href="#matadrs-reduction-merge-module" title="Permalink to this heading">¶</a></h2>
+<section id="module-matadrs.reduction.fluxcal">
+<span id="matadrs-reduction-fluxcal-module"></span><h2>matadrs.reduction.fluxcal module<a class="headerlink" href="#module-matadrs.reduction.fluxcal" title="Permalink to this heading">¶</a></h2>
+<p>Tool for flux and correlated flux calibration of VLTI/MATISSE data</p>
+<p>Jozsef Varga, 2019-2022
+<a class="reference external" href="mailto:varga&#37;&#52;&#48;strw&#46;leidenuniv&#46;nl">varga<span>&#64;</span>strw<span>&#46;</span>leidenuniv<span>&#46;</span>nl</a></p>
+<section id="example-usage">
+<h3>Example usage:<a class="headerlink" href="#example-usage" title="Permalink to this heading">¶</a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fluxcal</span> <span class="kn">import</span> <span class="n">fluxcal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inputfile_sci</span> <span class="o">=</span> <span class="s1">&#39;path/to/raw/science/fits/file.fits&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inputfile_cal</span> <span class="o">=</span> <span class="s1">&#39;path/to/raw/calibrator/fits/file.fits&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outputfile</span> <span class="o">=</span> <span class="s1">&#39;path/to/calibrated/outputfile.fits&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cal_database_dir</span> <span class="o">=</span> <span class="s1">&#39;path/to/calibrator/database/folder/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cal_database_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">cal_database_dir</span><span class="o">+</span><span class="s1">&#39;vBoekelDatabase.fits&#39;</span><span class="p">,</span><span class="n">cal_database_dir</span><span class="o">+</span><span class="s1">&#39;calib_spec_db_v10.fits&#39;</span><span class="p">,</span><span class="n">cal_database_dir</span><span class="o">+</span><span class="s1">&#39;calib_spec_db_v10_supplement.fits&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output_fig_dir</span> <span class="o">=</span> <span class="s1">&#39;path/to/figure/folder/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fluxcal</span><span class="p">(</span><span class="n">inputfile_sci</span><span class="p">,</span> <span class="n">inputfile_cal</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">,</span> <span class="n">cal_database_paths</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;corrflux&#39;</span><span class="p">,</span><span class="n">output_fig_dir</span><span class="o">=</span><span class="n">output_fig_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Arguments:
+* inputfile_sci: path to the raw science oifits file.
+* inputfile_cal: path to the raw calibrator oifits file.
+* outputfile: path of the output calibrated file
+* cal_database_paths: list of paths to the calibrator databases, e.g., [caldb1_path, caldb2_path]
+* mode (optional):</p>
+<blockquote>
+<div><dl class="simple">
+<dt>‘flux’: calibrates total flux (incoherently processed oifits file expected)</dt><dd><p>results written in the OI_FLUX table (FLUXDATA column)</p>
+</dd>
+<dt>‘corrflux’: calibrates correlated flux (coherently processed oifits file expected)</dt><dd><p>results written in the OI_VIS table (VISAMP column)</p>
+</dd>
+</dl>
+<p>‘both’: calibrates both total and correlated fluxes</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>output_fig_dir (optional): If it is a valid path, the script will make a plot of the calibrator model spectrum there,</dt><dd><p>Default: ‘’ (= no figure made)</p>
+</dd>
+</dl>
+</li>
+</ul>
 </section>
-<section id="matadrs-reduction-reduce-module">
-<h2>matadrs.reduction.reduce module<a class="headerlink" href="#matadrs-reduction-reduce-module" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.calc_corr_offset">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">calc_corr_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectrum2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.calc_corr_offset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.create_skycalc_inputfile">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">create_skycalc_inputfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airmass</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('nm')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('nm')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wgrid_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fixed_wavelength_step'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wdelta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wres</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lsf_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lsf_gauss_fwhm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.fluxcal.create_skycalc_inputfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.find_nearest_idx">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">find_nearest_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.find_nearest_idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.fluxcal">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">fluxcal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile_sci</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputfile_cal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cal_database_paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flux'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_fig_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('arcsec')</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">25.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_airmass_correction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_spectrum_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#matadrs.reduction.fluxcal.fluxcal" title="Permalink to this definition">¶</a></dt>
+<dd><p>The flux calibration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputfile_sci</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>inputfile_cal</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>outputfile</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>cal_database_paths</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – </p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – Either “flux”, “corrflux” or “both”</p></li>
+<li><p><strong>output_fig_dir</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>match_radius</strong> (<em>u.arcsec</em>) – </p></li>
+<li><p><strong>do_airmass_correction</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>calc_spectrum_offset</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.get_dl_coeffs">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">get_dl_coeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inhdul</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.get_dl_coeffs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.get_dlambda">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">get_dlambda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inhdul</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.get_dlambda" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dlambda</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>u.nm</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.get_spectral_binning">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">get_spectral_binning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inhdul</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.get_spectral_binning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.get_spectrum_caldb">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">get_spectrum_caldb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cal_database_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cal_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_lst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('deg')</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('deg')</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('arcsec')</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'L'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.get_spectrum_caldb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.plot_corr_offset">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">plot_corr_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rp_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figpath_out</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.plot_corr_offset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.plot_skycalc_output">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">plot_skycalc_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fpath_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figpath_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airmass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pwv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.plot_skycalc_output" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.plot_spec">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">plot_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cal_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cal_database_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wl_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(nan,</span> <span class="pre">nan)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.plot_spec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.transform_spectrum_to_real_spectral_resolution">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">transform_spectrum_to_real_spectral_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wl_orig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('nm')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec_orig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl_coeffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_width_px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wl_final</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_binning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figpath_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spectrum_plots.png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.fluxcal.transform_spectrum_to_real_spectral_resolution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.update_corrflux_from_vis2">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">update_corrflux_from_vis2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux_Jy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('Jy')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.fluxcal.update_corrflux_from_vis2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the output oifits file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputfile</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>outputfile</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>flux_Jy</strong> (<em>u.Jy</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.fluxcal.update_vis2_from_corrflux">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.fluxcal.</span></span><span class="sig-name descname"><span class="pre">update_vis2_from_corrflux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_flux</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('Jy')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.reduction.fluxcal.update_vis2_from_corrflux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the output oifits file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputfile</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>outputfile</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>total_flux</strong> (<em>u.Jy</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">¶</a></h2>
+<section id="module-matadrs.reduction.merge">
+<span id="matadrs-reduction-merge-module"></span><h2>matadrs.reduction.merge module<a class="headerlink" href="#module-matadrs.reduction.merge" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.get_output_file_path">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">get_output_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#matadrs.reduction.merge.get_output_file_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the output file’s Path from the information from the input (.fits)-file
+and the directory it is contained in</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fits_file</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>output_dir</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>pipeline</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>output_file</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.merge">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">averaged_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.merge.merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>This merges two (.fits)-files together into one, i.e. the  “incoherent”
+and the “coherent” files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>averaged_dir</strong> (<em>Path</em>) – The directory containing the averaged products</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.merge_averaged_files">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">merge_averaged_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.merge.merge_averaged_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges the averaged files of visibility-, flux- and bcd-calibration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directories</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – List of the Paths to the coherent- and incoherent directory</p></li>
+<li><p><strong>output_dir</strong> (<em>Path</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.merge_folders">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">merge_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coherent_dirs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incoherent_dirs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.merge.merge_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges the averaged files of the given folders as well as the non-averaged files,
+which are looked up</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coherent_dirs</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – </p></li>
+<li><p><strong>incoherent_dir</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – </p></li>
+<li><p><strong>output_dir</strong> (<em>Path</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.merge_non_averaged_files">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">merge_non_averaged_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coherent_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incoherent_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.merge.merge_non_averaged_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges the non-averaged individual files of the visibility and flux calibration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coherent_dir</strong> (<em>Path</em>) – The coherently reduced and calibrated directories</p></li>
+<li><p><strong>incoherent_dir</strong> (<em>Path</em>) – The incoherently reduced and calibrated directories</p></li>
+<li><p><strong>output_dir</strong> (<em>Path</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-matadrs.reduction.reduce">
+<span id="matadrs-reduction-reduce-module"></span><h2>matadrs.reduction.reduce module<a class="headerlink" href="#module-matadrs.reduction.reduce" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.cleanup_reduction">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">cleanup_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">product_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.cleanup_reduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the folders to their corresponding folders of structure ‘/mode/band’ after
+the reduction has been finished and plots the (.fits)-files contained in them</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites present files from previous reduction</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.get_catalog_match">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">get_catalog_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout:</span> <span class="pre">~matadrs.utils.readout.ReadoutFits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius:</span> <span class="pre">Unit(&quot;arcsec&quot;)</span> <span class="pre">=</span> <span class="pre">&lt;Quantity</span> <span class="pre">20.</span> <span class="pre">arcsec&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.get_catalog_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the given calibrator is contained in the ‘jsdc_v2’-catalog. If otherwise
+searches the local, supplementary calibrator databases instead. If nothing is found
+returns None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>readout</strong> (<a class="reference internal" href="matadrs.utils.html#matadrs.utils.readout.ReadoutFits" title="matadrs.utils.readout.ReadoutFits"><em>ReadoutFits</em></a>) – A class wrapping a (.fits)-file, that reads out its information</p></li>
+<li><p><strong>radius</strong> (<em>u.arcsec</em>) – The radius in which targets are queried from the catalog</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>catalog</strong> – The catalog in which the object has been found in</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.get_readout_for_tpl_match">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">get_readout_for_tpl_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tpl_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.get_readout_for_tpl_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the readout of a singular (.fits)-file matching the ‘tpl_start’, i.e.,
+the starting time of the observation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_dir</strong> (<em>Path</em>) – The directory containing the raw-files</p></li>
+<li><p><strong>tpl_start</strong> (<em>str</em>) – The starting time of the observation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>fits_file</strong> – A (.fits)-file matching the input</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.get_tpl_starts">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">get_tpl_starts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.get_tpl_starts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates through all files and gets their ‘tpl_start’, i.e, the starting time of
+the individual observations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raw_dir</strong> (<em>Path</em>) – The directory containing the raw-files</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>tpl_starts</strong> – The starting times of all the observations given by the raw-files</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.in_catalog">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">in_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="matadrs.utils.html#matadrs.utils.readout.ReadoutFits" title="matadrs.utils.readout.ReadoutFits"><span class="pre">ReadoutFits</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('arcsec')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.in_catalog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if calibrator is in the given supplementary catalog</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>readout</strong> (<a class="reference internal" href="matadrs.utils.html#matadrs.utils.readout.ReadoutFits" title="matadrs.utils.readout.ReadoutFits"><em>ReadoutFits</em></a>) – A class wrapping a (.fits)-file, that reads out its information</p></li>
+<li><p><strong>radius</strong> (<em>u.arcsec</em>) – The radius in which targets are queried from the catalog</p></li>
+<li><p><strong>catlog</strong> (<em>Path</em>) – The catalog which is to be queried from the catalog</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>catalog</strong> – The catalog in which the object has been found in.
+Returns None if object not found</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.prepare_catalogs">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">prepare_catalogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calib_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tpl_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.prepare_catalogs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the starting time given by ‘tpl_start’ corresponds to the observation of
+a science target/calibrator and removes/prepares the un/needed catalogs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_dir</strong> (<em>Path</em>) – The direcotry containing the raw observation files</p></li>
+<li><p><strong>calib_dir</strong> (<em>Path</em>) – The directory containing to the observation associated calibration files</p></li>
+<li><p><strong>tpl_start</strong> (<em>str</em>) – The starting time of the observation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.prepare_reduction">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">prepare_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calib_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.prepare_reduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares the reduction by removing removing old product files and sorting the raw
+files by associated calibrations and observations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_dir</strong> (<em>Path</em>) – The direcotry containing the raw observation files</p></li>
+<li><p><strong>calib_dir</strong> (<em>Path</em>) – The directory containing to the observation associated calibration files</p></li>
+<li><p><strong>product_dir</strong> (<em>Path</em>) – The directory to contain the reduced files</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites present files from previous reduction</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.reduce">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the pipeline for the data reduction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_dir</strong> (<em>Path</em>) – The directory containing the raw observation files</p></li>
+<li><p><strong>product_dir</strong> (<em>Path</em>) – The directory to contain the reduced files</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites present files from previous reduction</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The reduction is executed on 6 cores in multiprocessing</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.reduce_mode_and_band">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">reduce_mode_and_band</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calib_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tpl_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.reduce_mode_and_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduces either the L- and/or the N-band data for either the ‘coherent’ and/or
+‘incoherent’ setting for a single iteration/epoch.</p>
+<p class="rubric">Notes</p>
+<p>Removes the old (.sof)-files to ensure proper reduction and then creates folders in
+the ‘res_dir’-directory. After this, it starts the reduction with the specified
+settings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_dir</strong> (<em>Path</em>) – The direcotry containing the raw observation files</p></li>
+<li><p><strong>calib_dir</strong> (<em>Path</em>) – The directory containing to the observation associated calibration files</p></li>
+<li><p><strong>product_dir</strong> (<em>Path</em>) – The directory to contain the reduced files</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+<li><p><strong>band</strong> (<em>str</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’</p></li>
+<li><p><strong>tpl_star</strong> (<em>str</em>) – The starting time of observations</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites present files from previous reduction</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.reduce.set_script_arguments">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">set_script_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#matadrs.reduction.reduce.set_script_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the arguments that are then passed to the ‘mat_autoPipeline.py’ script</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_dir</strong> (<em>Path</em>) – The directory containing the raw observation files</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’</p></li>
+<li><p><strong>tpl_start</strong> (<em>str</em>) – The starting time of the observation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lband_params</strong> (<em>str</em>) – The additional arguments passed to the <cite>mat_autoPipeline</cite> for the L-band. For the
+rest of the arguments see the <cite>mat_autoPipeline</cite>-script</p></li>
+<li><p><strong>nband_params</strong> (<em>str</em>) – The additional arguments passed to the <cite>mat_autoPipeline</cite> for the N-band. For the
+rest of the arguments see the <cite>mat_autoPipeline</cite>-script</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-matadrs.reduction">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-matadrs.reduction" title="Permalink to this heading">¶</a></h2>
 </section>
 </section>
 

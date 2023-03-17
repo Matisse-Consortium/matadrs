@@ -38,14 +38,103 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
 </section>
-<section id="matadrs-mat-tools-libautopipeline-module">
-<h2>matadrs.mat_tools.libAutoPipeline module<a class="headerlink" href="#matadrs-mat-tools-libautopipeline-module" title="Permalink to this heading">¶</a></h2>
+<section id="module-matadrs.mat_tools.libAutoPipeline">
+<span id="matadrs-mat-tools-libautopipeline-module"></span><h2>matadrs.mat_tools.libAutoPipeline module<a class="headerlink" href="#module-matadrs.mat_tools.libAutoPipeline" title="Permalink to this heading">¶</a></h2>
+<p>This file is part of the Matisse pipeline GUI series
+Copyright (C) 2017- Observatoire de la Côte d’Azur</p>
+<p>Created in 2016
+&#64;author: pbe, fmillour, ame</p>
+<p>Automatic MATISSE pipeline library !</p>
+<p>Please contact <a class="reference external" href="mailto:florentin&#46;millour&#37;&#52;&#48;oca&#46;eu">florentin<span>&#46;</span>millour<span>&#64;</span>oca<span>&#46;</span>eu</a> for any question</p>
+<p>This software is a computer program whose purpose is to show oifits
+files from the MATISSE instrument.</p>
+<p>This software is governed by the CeCILL license under French law and
+abiding by the rules of distribution of free software.</p>
+<p>You can use, modify and/ or redistribute the software under the
+terms of the CeCILL license as circulated by CEA, CNRS and INRIA at
+the following URL “<a class="reference external" href="http://www.cecill.info">http://www.cecill.info</a>”. You have a copy of the
+licence in the LICENCE.md file.</p>
+<p>The fact that you are presently reading this means that you have had
+knowledge of the CeCILL license and that you accept its terms.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="matadrs.mat_tools.libAutoPipeline.headerCache">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matadrs.mat_tools.libAutoPipeline.</span></span><span class="sig-name descname"><span class="pre">headerCache</span></span><a class="headerlink" href="#matadrs.mat_tools.libAutoPipeline.headerCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="matadrs.mat_tools.libAutoPipeline.headerCache.size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#matadrs.mat_tools.libAutoPipeline.headerCache.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the size of the cache</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.mat_tools.libAutoPipeline.headerCache.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.mat_tools.libAutoPipeline.headerCache.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.mat_tools.libAutoPipeline.matisseAction">
+<span class="sig-prename descclassname"><span class="pre">matadrs.mat_tools.libAutoPipeline.</span></span><span class="sig-name descname"><span class="pre">matisseAction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.mat_tools.libAutoPipeline.matisseAction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.mat_tools.libAutoPipeline.matisseCalib">
+<span class="sig-prename descclassname"><span class="pre">matadrs.mat_tools.libAutoPipeline.</span></span><span class="sig-name descname"><span class="pre">matisseCalib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listCalibFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibPrevious</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.mat_tools.libAutoPipeline.matisseCalib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.mat_tools.libAutoPipeline.matisseRecipes">
+<span class="sig-prename descclassname"><span class="pre">matadrs.mat_tools.libAutoPipeline.</span></span><span class="sig-name descname"><span class="pre">matisseRecipes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">det</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.mat_tools.libAutoPipeline.matisseRecipes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.mat_tools.libAutoPipeline.matisseType">
+<span class="sig-prename descclassname"><span class="pre">matadrs.mat_tools.libAutoPipeline.</span></span><span class="sig-name descname"><span class="pre">matisseType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.mat_tools.libAutoPipeline.matisseType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="matadrs-mat-tools-mat-autopipeline-module">
-<h2>matadrs.mat_tools.mat_autoPipeline module<a class="headerlink" href="#matadrs-mat-tools-mat-autopipeline-module" title="Permalink to this heading">¶</a></h2>
+<section id="module-matadrs.mat_tools.mat_autoPipeline">
+<span id="matadrs-mat-tools-mat-autopipeline-module"></span><h2>matadrs.mat_tools.mat_autoPipeline module<a class="headerlink" href="#module-matadrs.mat_tools.mat_autoPipeline" title="Permalink to this heading">¶</a></h2>
+<p>This file is part of the Matisse pipeline GUI series
+Copyright (C) 2017- Observatoire de la Côte d’Azur</p>
+<p>Created in 2016
+&#64;author: pbe, fmi</p>
+<p>Automatic MATISSE pipeline !</p>
+<p>Please contact <a class="reference external" href="mailto:florentin&#46;millour&#37;&#52;&#48;oca&#46;eu">florentin<span>&#46;</span>millour<span>&#64;</span>oca<span>&#46;</span>eu</a> for any question</p>
+<p>This software is governed by the CeCILL license under French law and
+abiding by the rules of distribution of free software.</p>
+<p>You can use, modify and/ or redistribute the software under the terms
+of the CeCILL license as circulated by CEA, CNRS and INRIA at the
+following URL “<a class="reference external" href="http://www.cecill.info">http://www.cecill.info</a>”. You have a copy of the licence
+in the LICENCE.md file.</p>
+<p>The fact that you are presently reading this means that you have had
+knowledge of the CeCILL license and that you accept its terms.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.mat_tools.mat_autoPipeline.mat_autoPipeline">
+<span class="sig-prename descclassname"><span class="pre">matadrs.mat_tools.mat_autoPipeline.</span></span><span class="sig-name descname"><span class="pre">mat_autoPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dirRaw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirResult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirCalib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbCore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paramL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paramN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxIter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tplstartsel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tplidsel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectralBinning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.mat_tools.mat_autoPipeline.mat_autoPipeline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.mat_tools.mat_autoPipeline.removeDoubleParameter">
+<span class="sig-prename descclassname"><span class="pre">matadrs.mat_tools.mat_autoPipeline.</span></span><span class="sig-name descname"><span class="pre">removeDoubleParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.mat_tools.mat_autoPipeline.removeDoubleParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes any parameters that have been given twice or more times</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.mat_tools.mat_autoPipeline.runEsorex">
+<span class="sig-prename descclassname"><span class="pre">matadrs.mat_tools.mat_autoPipeline.</span></span><span class="sig-name descname"><span class="pre">runEsorex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#matadrs.mat_tools.mat_autoPipeline.runEsorex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the given esorex command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cmd</strong> (<em>List</em>) – The esorex command</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">¶</a></h2>
+<section id="module-matadrs.mat_tools">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-matadrs.mat_tools" title="Permalink to this heading">¶</a></h2>
 </section>
 </section>
 
