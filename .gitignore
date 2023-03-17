@@ -1,7 +1,6 @@
 # Folders to ignore
 __pycache__/
 *.egg-info/
-docs/
 
 # Files to ignore
 *.txt

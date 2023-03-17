@@ -5,6 +5,8 @@ and easily in as few steps as possible with the least knowledge required. To mak
 possible for seasoned MATISSE users to quickly and easily reduce data and giving others
 who are interested in MATISSE data the opportunity to do so as well.
 
+For Documentation see: https://matadrs.readthedocs.io/en/latest/
+
 ## Features
 ### Raw-data fetching from ESO-Archive
 > _To be implemented_
