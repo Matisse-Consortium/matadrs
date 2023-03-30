@@ -27,9 +27,7 @@ classifiers = [
 	"Topic :: Scientific/Engineering :: Astronomy",
 	"Topic :: Scientific/Engineering :: Physics",
 ]
-
-[options]
-install_requires = [
+dependencies = [
     "importlib-metadata; python_version < '3.8'",
     "astropy >= 5.1",
     "astroquery >= 0.4.6",

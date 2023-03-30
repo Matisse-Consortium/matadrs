@@ -25,16 +25,25 @@ DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 # TODO: Add to fluxcalibration that it changes the unit to Jy not ADU -> Maybe in Jozsef's
 # script?
 class ReadoutFits:
-    """Reads out the Cards of a (.fits)-file from the MATISSE-pipeline as Tables as well
-    as the primary header and makes certain keys from the same available as properties
+    """Reads out the Cards as Tables as well as the primary header of a
+    (.fits)-file and makes certain keys from the primary header available
+    as properties of the class
+
+    Parameters
+    ----------
+    fits_file: Path
+        The (.fits)-file from which data is sourced
+    flux_file: Path, optional
+        Additional flux file, that replaces the total flux data for the
+        (.fits)-file
 
     Attributes
     ----------
     fits_file: Path
-        The (.fits)-file to be read out
+        The (.fits)-file that has been read in
     flux_file: Path, optional
-        If provided, substitutes the values of the 'oi_flux' Table with the ones provided
-        in the flux file
+        If provided, substitutes the columns of the 'oi_flux' Table with the
+        values from the flux file
     primary_header:
         The primary header of the (.fits)-file
     name
@@ -221,6 +230,14 @@ class ReadoutFits:
         return np.max(self.oi_wl["EFF_WAVE"].shape)
 
     @property
+    def sta_to_tel(self) -> Dict[int, str]:
+        """Gets the telescope's station index to telescope name mapping"""
+        if self._sta_to_tel is None:
+            self._sta_to_tel = dict(zip(self.oi_array["STA_INDEX"],
+                                        self.oi_array["STA_NAME"]))
+        return self._sta_to_tel
+
+    @property
     def oi_wl(self) -> Table:
         """Gets the wavelength table and reforms it into one entry"""
         if self._oi_wl is None:
@@ -232,14 +249,6 @@ class ReadoutFits:
                 self.oi_wl["EFF_WAVE"] = self.oi_wl["EFF_WAVE"].value*u.m
             self._oi_wl["EFF_WAVE"] = self._oi_wl["EFF_WAVE"].to(u.um)
         return self._oi_wl
-
-    @property
-    def sta_to_tel(self) -> Dict[int, str]:
-        """Gets the telescope's station index to telescope name mapping"""
-        if self._sta_to_tel is None:
-            self._sta_to_tel = dict(zip(self.oi_array["STA_INDEX"],
-                                        self.oi_array["STA_NAME"]))
-        return self._sta_to_tel
 
     @property
     def oi_array(self) -> Table:
@@ -257,16 +266,16 @@ class ReadoutFits:
                 self._oi_flux = self.get_table_for_fits("oi_flux")
             except KeyError:
                 self._oi_flux = Table()
-                if self.flux_file is not None:
-                    flux, flux_err = self.get_flux_data_from_flux_file()
-                    self._oi_flux.add_columns([self._oi_flux.Column([flux], unit=u.Jy),
-                                              self._oi_flux.Column([flux_err], unit=u.Jy)],
-                                              names=["FLUXDATA", "FLUXERR"])
-                else:
+                if self.flux_file not in ["", None]:
                     # TODO: Make this work so the unit is Jy -> Right now it has no effect
                     nan_array = self._oi_flux.Column(np.full(self.longest_entry, np.nan),
                                                      unit=u.Jy)
                     self._oi_flux.add_columns([[nan_array], [nan_array]],
+                                              names=["FLUXDATA", "FLUXERR"])
+                else:
+                    flux, flux_err = self.get_flux_data_from_flux_file()
+                    self._oi_flux.add_columns([self._oi_flux.Column([flux], unit=u.Jy),
+                                              self._oi_flux.Column([flux_err], unit=u.Jy)],
                                               names=["FLUXDATA", "FLUXERR"])
             self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR"])
         return self._oi_flux

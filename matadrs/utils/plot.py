@@ -1,17 +1,16 @@
-import pkg_resources
 from pathlib import Path
 from typing import Callable, Tuple, List, Union, Optional
 
+import astropy.units as u
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pandas import DataFrame
+from astropy.coordinates import EarthLocation
 from astropy.table import Column
 
-from ..utils.readout import ReadoutFits
+from ..utils.data_prep import DataPrep
 
-
-DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 
 # Paranal lattitude in radians
 LATITUDE = -24.62587 * np.pi / 180.
@@ -23,31 +22,37 @@ LATITUDE = -24.62587 * np.pi / 180.
 class Plotter:
     """Class that plots models as well as reduced data
 
+    Parameters
+    ----------
+
     Attributes
     ----------
+
+    Methods
+    -------
     """
 
-    def __init__(self, fits_file: Path,
+    def __init__(self, fits_files: Path | List[Path],
                  flux_file: Optional[Path] = None,
                  plot_name: Optional[str] = None,
                  save_path: Optional[Path] = None) -> None:
         """Initialises the class instance"""
-        self.readout = ReadoutFits(fits_file)
+        self.data_prep = DataPrep(fits_files)
         self._band_mask = None
-
-        # TODO: Make it that if multiple datasets are input that multiple plots are made
-        # for the different bands -> See how to implement this
 
         if save_path is None:
             self.save_path = Path("").cwd()
         else:
             self.save_path = Path(save_path)
 
-        # TODO: Improve this plot name giving. Only one fits file is respected in this
-        if plot_name is None:
-            self.plot_name = f"{Path(fits_file).stem}.pdf"
+        if plot_name is not None:
+            self.plot_name = plot_name
+        elif isinstance(fits_files, List) and len(fits_files) > 1:
+            self.plot_name = "combined_fits.pdf"
+        else:
+            self.plot_name = f"{Path(fits_files).stem}.pdf"
 
-        self.wl = self.readout.oi_wl["EFF_WAVE"].data[0]
+        self.wl = self.data_prep.oi_wl["EFF_WAVE"].data[0]
         self.components = {}
 
     @property
@@ -63,7 +68,8 @@ class Plotter:
             wl = pd.DataFrame({"wl": self.wl})
             if np.any(wl < 7.):
                 if np.any(wl < 2.) and np.any(wl > 3.):
-                    self._band_mask = (wl > 1.6) & (wl < 1.8) & (wl > 3.) & (wl < 4.)
+                    self._band_mask = (wl > 1.6) & (
+                        wl < 1.8) & (wl > 3.) & (wl < 4.)
                 elif np.any(wl < 2.):
                     self._band_mask = (wl > 1.6) & (wl < 1.8)
                 else:
@@ -81,14 +87,18 @@ class Plotter:
 
     # TODO: Rename function at a future point
     def calculate_uv_points(self, baselines: List[float],
-                            hour_angle: np.ndarray[float]) -> Tuple[np.ndarray]:
-        """Calculates the earth rotation (synthesis) for the uv-point corresponding to the
-        baselines for the input hour angle(s)
+                            hour_angle: np.ndarray[float],
+                            latitude: u.rad) -> Tuple[np.ndarray]:
+        """Calculates the earth rotation (synthesis) for the uv-point
+        corresponding to the baselines for the input hour angle(s)
 
         Parameters
         -----------
-        baselines: List[np.ndarray]
+        baselines: List[float]
+            The baselines in the following order: Baselines east, -north, -longest
         hour_angle: np.ndarray[float]
+        latitude: u.rad
+            The latitude of the site
 
         Returns
         -------
@@ -96,17 +106,18 @@ class Plotter:
         v_coords: np.ndarray
         """
         baseline_east, baseline_north, baseline_longest = baselines
-        dec_rad = self.readout.dec*np.pi/180
+        dec_rad = self.data_prep.dec*np.pi/180
 
-        u_coords = baseline_east * np.cos(hour_angle) - baseline_north * np.sin(LATITUDE)\
-            * np.sin(hour_angle) + baseline_longest * np.cos(LATITUDE) * np.sin(hour_angle)
+        u_coords = baseline_east * np.cos(hour_angle) - baseline_north * np.sin(latitude)\
+            * np.sin(hour_angle) + baseline_longest * np.cos(latitude) * np.sin(hour_angle)
         v_coords = baseline_east * np.sin(dec_rad) * np.sin(hour_angle)\
-            + baseline_north * (np.sin(LATITUDE) * np.sin(dec_rad) * np.cos(hour_angle)\
-                + np.cos(LATITUDE) * np.cos(dec_rad)) - baseline_longest * \
-                (np.cos(LATITUDE) * np.sin(dec_rad) * np.cos(hour_angle)\
-                    - np.sin(LATITUDE) * np.cos(dec_rad))
+            + baseline_north * (np.sin(latitude) * np.sin(dec_rad) * np.cos(hour_angle)
+                                + np.cos(latitude) * np.cos(dec_rad)) - baseline_longest * \
+            (np.cos(latitude) * np.sin(dec_rad) * np.cos(hour_angle)
+             - np.sin(latitude) * np.cos(dec_rad))
         return u_coords, v_coords
 
+    # TODO: Add proper docs
     def make_uv_tracks(self, ax, uv_coord: np.ndarray[float],
                        baselines: List[np.ndarray],
                        sta_label: List[np.ndarray], flag: bool,
@@ -120,20 +131,28 @@ class Plotter:
         ----------
         uv_coords: np.ndarray[float]
         baselines: List[np.ndarray]
-            The baselines in the following order: Baselines east, -north, -longest
+            The baselines in the following order: Baselines east, -north,
+            -longest
         sta_labels: List[np.ndarray]
         flag: bool
         symbol: str
         color: str
+        sel_wl: float
+        airmass_lim: float
         """
-        dec_rad = self.readout.dec*np.pi/180
+        # TODO: Find a way how to make this calculation possible for different datasets
+        dec_rad = self.data_prep.dec*np.pi/180
         # u, v = map(lambda x: x/sel_wl, uv_coords)
         u_coords, v_coords = uv_coord
-
-        hamax = np.arccos(abs((1. / airmass_lim - np.sin(LATITUDE) * np.sin(dec_rad))/\
-                              (np.cos(LATITUDE) * np.cos(dec_rad))))
+        latitude_paranal = EarthLocation.of_site(
+            "paranal").geodetic.lat.to(u.rad)
+        hamax = np.arccos(abs((1./airmass_lim-np.sin(latitude_paranal)
+                               * np.sin(dec_rad))/(np.cos(latitude_paranal)
+                                                   * np.cos(dec_rad))))
         hour_angles = np.linspace(-hamax, hamax, 1000)
-        u_coord_tracks, v_coord_tracks = self.calculate_uv_points(baselines, hour_angles)
+        u_coord_tracks, v_coord_tracks = self.calculate_uv_points(baselines,
+                                                                  hour_angles,
+                                                                  latitude_paranal)
         # u, v = map(lambda x: x/sel_wl, ulvl)
 
         ax.plot(u_coord_tracks, v_coord_tracks, '-', color='grey', alpha=0.5)
@@ -148,32 +167,38 @@ class Plotter:
                 fontsize="small", color='0', alpha=0.8)
 
     def plot_uv(self, ax, symbol: Optional[str] = "x",
-                color: Optional[str] = "b",
+                color: Optional[str | List[str]] = "b",
                 sel_wl: Optional[float] = None,
-                airmass_lim: Optional[float] = 2.):
-        """Makes the (u, v)-plots
+                airmass_lim: Optional[float] = 2.) -> None:
+        """Plots the (u, v)-coordinates and their corresponding tracks
 
         Parameters
         ----------
         ax
         symbol: str, optional
-        color: str, optional
+            The symbol that markes the coordinates of the (u, v)-point
+        color: str | List[str], optional
+            Set the color/colors of the uv-coords. In case of multiple
+            (.fits)-files the colors can be specified as a list with entries
+            for each file
         sel_wl: float, optional
+            The wavelength to convert meter to Mlambda. If None then no
+            conversion is done
         """
-        uv_coords = self.readout.oi_vis["UVCOORD"]
-        flags = self.readout.oi_vis["FLAG"]
-        sta_indices = self.readout.oi_vis["STA_INDEX"]
-        sta_index = self.readout.oi_array["STA_INDEX"]
-        sta_name = self.readout.oi_array["STA_NAME"]
-        sta_xyz = self.readout.oi_array["STAXYZ"]
+        uv_coords = self.data_prep.oi_vis["UVCOORD"]
+        flags = self.data_prep.oi_vis["FLAG"]
+        sta_indices = self.data_prep.oi_vis["STA_INDEX"]
+        sta_index = self.data_prep.oi_array["STA_INDEX"]
+        sta_name = self.data_prep.oi_array["STA_NAME"]
+        sta_xyz = self.data_prep.oi_array["STAXYZ"]
 
         baselines, sta_labels = [], []
         for index, _ in enumerate(uv_coords):
             try:
                 baseline = sta_xyz[sta_indices[index, 0] == sta_index][0]\
-                            - sta_xyz[sta_indices[index, 1] == sta_index][0]
+                    - sta_xyz[sta_indices[index, 1] == sta_index][0]
                 sta_label = sta_name[sta_indices[index, 0] == sta_index][0] + '-'\
-                            + sta_name[sta_indices[index, 1] == sta_index][0]
+                    + sta_name[sta_indices[index, 1] == sta_index][0]
             except IndexError:
                 baseline, sta_label = [np.nan, np.nan, np.nan], ""
 
@@ -190,7 +215,10 @@ class Plotter:
         # rel_time = (self.readout.vis2["MindexD"] - mindexd) * 24.0 * 3600.0  # (s)
         # dic['TREL'] = rel_time[0]
 
+        fits_index = 0
         for index, uv_coord in enumerate(uv_coords):
+            if index+1 % 6 == 0:
+                fits_index += 1
             self.make_uv_tracks(ax, uv_coord, baselines[index],
                                 sta_labels[index], flags[index],
                                 symbol, color, sel_wl, airmass_lim)
@@ -242,47 +270,52 @@ class Plotter:
         component: Callable | DataFrame
         """
         if data_name == "flux":
-            labels = self.readout.oi_array["TEL_NAME"]
-            flux = self.readout.oi_flux["FLUXDATA"]
+            labels = self.data_prep.oi_array["TEL_NAME"]
+            flux = self.data_prep.oi_flux["FLUXDATA"]
             if len(flux) == 1:
                 labels = ["Averaged"]
             component = self.set_dataframe(labels, flux)
         elif data_name in ["vis", "vis2", "diff", "corrflux"]:
-            station_names = self.readout.oi_vis["DELAY_LINE"]
+            station_names = self.data_prep.oi_vis["DELAY_LINE"]
             if legend_format == "long":
-                baselines = np.around(self.readout.oi_vis["BASELINE"], 2)
-                u_coords = self.readout.oi_vis["UVCOORD"][:, 0]
-                v_coords = self.readout.oi_vis["UVCOORD"][:, 1]
+                baselines = np.around(self.data_prep.oi_vis["BASELINE"], 2)
+                u_coords = self.data_prep.oi_vis["UVCOORD"][:, 0]
+                v_coords = self.data_prep.oi_vis["UVCOORD"][:, 1]
                 # TODO: Find out what this is exactly? Projected Baselines? Positional Angle?
-                pas = np.around((np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
+                pas = np.around(
+                    (np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
                 # TODO: Make the variables into mathrm
                 labels = [fr"{station_name} $B_p$={baseline} m $\phi={pa}^\circ$"
-                    for station_name, baseline, pa in zip(station_names, baselines, pas)]
+                          for station_name, baseline, pa in zip(station_names, baselines, pas)]
             else:
                 labels = station_names
             if data_name == "vis":
-                component = self.set_dataframe(labels, self.readout.oi_vis["VISAMP"])
+                component = self.set_dataframe(
+                    labels, self.data_prep.oi_vis["VISAMP"])
             elif data_name == "diff":
                 # TODO: Make this into a function
-                diff_phases = self.readout.oi_vis["VISPHI"]
+                diff_phases = self.data_prep.oi_vis["VISPHI"]
                 if unwrap:
                     diff_phases = np.unwrap(diff_phases, period=period)
                 component = self.set_dataframe(labels, diff_phases)
             elif data_name == "corrflux":
                 try:
-                    component = self.set_dataframe(labels, self.readout.oi_cfx["VISAMP"])
+                    component = self.set_dataframe(
+                        labels, self.data_prep.oi_cfx["VISAMP"])
                 except KeyError:
                     return self.make_component("vis", legend_format)
             elif data_name == "vis2":
-                component = self.set_dataframe(labels, self.readout.oi_vis2["VIS2DATA"])
+                component = self.set_dataframe(
+                    labels, self.data_prep.oi_vis2["VIS2DATA"])
             else:
                 raise KeyError("No data-type of that data name exists!")
         elif data_name == "cphases":
             # TODO: Make this into a function
-            cphases = self.readout.oi_t3["T3PHI"]
+            cphases = self.data_prep.oi_t3["T3PHI"]
             if unwrap:
                 cphases = np.unwrap(cphases, period=period)
-            component = self.set_dataframe(self.readout.oi_t3["TRIANGLE"], cphases)
+            component = self.set_dataframe(
+                self.data_prep.oi_t3["TRIANGLE"], cphases)
         elif data_name == "uv":
             component = self.plot_uv
         else:
@@ -305,9 +338,9 @@ class Plotter:
         """
         # TODO: Handle save structure differently -> with save_path and so
         columns = 1 if self.number_of_plots == 1 else\
-                (3 if self.number_of_plots >= 3 else 2)
+            (3 if self.number_of_plots >= 3 else 2)
         rows = np.ceil(self.number_of_plots/columns).astype(int)\
-                if not self.number_of_plots == 1 else 1
+            if not self.number_of_plots == 1 else 1
         to_px = 1/plt.rcParams["figure.dpi"]
         fig, axarr = plt.subplots(rows, columns,
                                   constrained_layout=True,
@@ -318,7 +351,8 @@ class Plotter:
                 if isinstance(component, DataFrame):
                     component.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
                                    ylabel=name, ax=ax, legend=True)
-                    ax.legend(fontsize="x-small", loc="upper right", framealpha=0.5)
+                    ax.legend(fontsize="x-small",
+                              loc="upper right", framealpha=0.5)
                 else:
                     component(ax)
         else:
@@ -326,7 +360,8 @@ class Plotter:
             if isinstance(component, DataFrame):
                 component.plot(x="lambda", xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
                                ylabel=name, ax=axarr, legend=True)
-                axarr.legend(fontsize="x-small", loc="upper right", framealpha=0.5)
+                axarr.legend(fontsize="x-small",
+                             loc="upper right", framealpha=0.5)
             else:
                 component[0](axarr)
 
@@ -351,24 +386,26 @@ class Plotter:
             self.components["Correlated Flux [Jy]"] = self.make_component("corrflux",
                                                                           legend_format)
         else:
-            self.components["Visibility"] = self.make_component("vis", legend_format)
+            self.components["Visibility"] = self.make_component(
+                "vis", legend_format)
         return self
 
     def add_vis2(self, legend_format: Optional[str] = "long"):
         """Plots all the visibilities squared in one plot"""
-        self.components["Squared Visibility"] = self.make_component("vis2", legend_format)
+        self.components["Squared Visibility"] = self.make_component(
+            "vis2", legend_format)
         return self
 
     def add_diff_phases(self, unwrap: Optional[bool] = False, period: Optional[int] = 360):
         """Plots all the differential phases into one plot"""
         self.components["Differential phases [$^{\circ}$]"] =\
-                self.make_component("diff", unwrap=unwrap, period=period)
+            self.make_component("diff", unwrap=unwrap, period=period)
         return self
 
     def add_cphases(self, unwrap: Optional[bool] = False, period: Optional[int] = 360):
         """Plots all the closure phases into one plot"""
         self.components["Closure phases [$^{\circ}$]"] =\
-                self.make_component("cphases", unwrap=unwrap, period=period)
+            self.make_component("cphases", unwrap=unwrap, period=period)
         return self
 
     def add_uv(self):
@@ -389,15 +426,15 @@ class Plotter:
         # Parameters
         # ----------
         # already_chosen_linestyles: List
-            # A list that contains the linestyles that have already been applied
+        # A list that contains the linestyles that have already been applied
         # """
         # linestyles = ["-", "--", "-.", ":"]
         # for linestyle in linestyles:
-            # if linestyle not in already_chosen_linestyles:
-                # return linestyle
+        # if linestyle not in already_chosen_linestyles:
+        # return linestyle
 
         # if all(linestyle in linestyles in already_chosen_linestyles):
-            # raise RuntimeError("No linestyle to pick as all have been picked already!")
+        # raise RuntimeError("No linestyle to pick as all have been picked already!")
 
     # def plot_vis24baseline(self, ax, do_fit: Optional[bool] = True) -> None:
         # """ Plot the mean visibility for one certain wavelength and fit it with a
@@ -406,15 +443,15 @@ class Plotter:
         # Parameters
         # ----------
         # ax
-            # The matplotlib axis to be used for the plot
+        # The matplotlib axis to be used for the plot
         # do_fit: bool, optional
-            # Switches the fit mechanic on or off. DEFAULT "True"
+        # Switches the fit mechanic on or off. DEFAULT "True"
         # """
         # ax.plot(self.baseline_distances, self.mean_bin_vis2, ls='None', marker='o')
 
         # # TODO: Implement fit here
         # if do_fit:
-            # ...
+        # ...
 
         # ax.set_xlabel(fr'uv-distance [m] at $\lambda_0$={self.mean_wl:.2f} $\mu m$')
         # ax.set_ylabel(r'$\bar{V}$')
@@ -422,10 +459,10 @@ class Plotter:
     # def plot_waterfall(self, ax) -> None:
         # """Plots a waterfall with the mean wavelength for the different baselines"""
         # for i in range(6):
-            # ax.errorbar(self.wl[self.si:self.ei]*1e06,
-                        # self.vis2data[i][self.si:self.ei],
-                        # yerr=np.nanstd(self.vis2data[i][self.si:self.ei]),
-                        # label=self.tel_vis2[i], ls='None', fmt='o')
-            # ax.set_xlabel(r'wl [micron]')
-            # ax.set_ylabel('vis2')
-            # ax.legend(loc='best')
+        # ax.errorbar(self.wl[self.si:self.ei]*1e06,
+        # self.vis2data[i][self.si:self.ei],
+        # yerr=np.nanstd(self.vis2data[i][self.si:self.ei]),
+        # label=self.tel_vis2[i], ls='None', fmt='o')
+        # ax.set_xlabel(r'wl [micron]')
+        # ax.set_ylabel('vis2')
+        # ax.legend(loc='best')
