@@ -24,6 +24,10 @@ from ..utils.plot import Plotter
 from ..utils.tools import cprint, split_fits, get_fits_by_tag, get_execution_modes
 
 
+# TODO: Make averaging of the right calibrator for the different bands -> If there are two
+# or more folders that contain calibrated information, make only calibration for the right
+# band
+
 HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
                     {'key': 'HIERARCH ESO INS BCD2 ID', 'value': ' '},
                     {'key': 'HIERARCH ESO INS BCD1 NAME', 'value': ' '},

@@ -1,7 +1,7 @@
 import shutil
 import subprocess
 import pkg_resources
-from collections import deque, namedtuple
+from collections import namedtuple
 from pathlib import Path
 from typing import List, Optional
 
@@ -278,6 +278,8 @@ def calibrate_files(reduced_dir: Path, target_dir: Path,
         cleanup_calibration(output_dir)
 
 
+
+# TODO: Think of calibrating a CAL with a CAL to check observation quality?? Good idea?
 def calibrate_folders(reduced_dir: Path, mode: str, band: str, overwrite: bool) -> None:
     """Calibrates a directory containing the scientific target with a directory containing
     the calibrator observation. Calibrates flux, visibility and closure phases (bcd)
@@ -296,16 +298,18 @@ def calibrate_folders(reduced_dir: Path, mode: str, band: str, overwrite: bool) 
         If 'True' overwrites files from previous calibration
     """
     sub_dirs = sorted((reduced_dir / "reduced" / mode / band).glob("*.rb"))
-    rotated_sub_directories = deque(sub_dirs.copy())
-    rotated_sub_directories.rotate(1)
+
+    for index, directory in enumerate(sub_dirs):
+        if check_if_target(directory):
+            target_directory = directory
+            del sub_dirs[index]
+            break
 
     for directory in sub_dirs:
         cprint(f"Calibration of {directory.name} in '{mode}' mode", "lp")
         cprint(f"{'':-^50}", "lg")
-        if check_if_target(directory):
-            for rotated_directory in rotated_sub_directories:
-                calibrate_files(reduced_dir, directory,
-                                rotated_directory, mode, band, overwrite)
+        calibrate_files(reduced_dir, target_dir,
+                        directory, mode, band, overwrite)
     cprint(f"Finished calibration of {band} and {mode}", "lp")
     cprint(f"{'':-^50}", "lp")
 
