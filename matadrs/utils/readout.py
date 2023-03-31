@@ -70,21 +70,23 @@ class ReadoutFits:
     Methods
     -------
     is_calibrator()
-        Fetches the object's observation mode and returns true if it has been observed
-        in 'CALIB' mode
+        Fetches the object's observation mode and returns true if it has been
+        observed in 'CALIB' mode
     get_flux_data_from_flux_file():
         Reads the flux data from the flux file and then interpolates it to the
         wavelength solution used by MATISSE
-    get_table_for_fits(header)
-        Fetches a Card by its header and then reads its information into a Table
+    get_table_for_fits(header: str)
+        Fetches a Card by its header and then reads its information into a
+        Table
     merge_uv_coords(table)
-        Fetches the u- and v-coordinates from a Table and the merges them into a set
-        of (u, v)-coordinates
+        Fetches the u- and v-coordinates from a Table and the merges them into
+        a set of (u, v)-coordinates
     get_baselines(table)
-        Fetches the u- and v-coordinates from a Table and calculates their baselines
+        Fetches the u- and v-coordinates from a Table and calculates their
+        baselines
     get_delay_lines(table)
-        Fetches the station indices from a Table and returns the telescope's delay
-        line configuration
+        Fetches the station indices from a Table and returns the telescope's
+        delay line configuration
     """
 
     def __init__(self, fits_file: Path, flux_file: Optional[Path] = "") -> None:
@@ -95,8 +97,8 @@ class ReadoutFits:
         fits_file: Path
             The (.fits)-file to be read out
         flux_file: Path, optional
-            If provided, substitutes the values of the 'oi_flux' Table with the ones
-            provided in the flux file
+            If provided, substitutes the values of the 'oi_flux' Table with the
+            ones provided in the flux file
         """
         # TODO: Maybe rename fits file to file? or Path?
         self.fits_file = Path(fits_file)
