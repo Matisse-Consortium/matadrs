@@ -5,9 +5,10 @@ import astropy.units as u
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pandas import DataFrame
 from astropy.coordinates import EarthLocation
 from astropy.table import Column
+from matplotlib.axes import Axes
+from pandas import DataFrame
 
 from ..utils.readout import ReadoutFits
 
@@ -15,55 +16,55 @@ from ..utils.readout import ReadoutFits
 # TODO: Make this go away from class and just individual plotting functions? -> Maybe
 # easier for paper relevant plots, but first make unified class that makes nice data
 # reduction plots
+# TODO: Implement text plotter with the information on the observation
 class Plotter:
     """Class that plots models as well as reduced data
 
     Parameters
     ----------
-    fits_files: Path | List[Path]
-    flux_files: Path | List[Path]. optional
-    plot_name: str, optional
-    save_path: Path, optional
+    fits_files : pathlib.Path or list of pathlib.Path
+    flux_files : pathlib.Path or list of pathlib.Path, optional
+    plot_name : str, optional
+    save_path : pathlib.Path, optional
 
     Attributes
     ----------
-    num_components: int
+    num_components : int
 
     Methods
     -------
     band_mask(wl)
-        The masking for the bands to make the plots visually readable
+        The masking for the bands to make the plots visually readable.
     mask_dataframe(df, column_mask)
     calculate_uv_points(baselines, hour_angle, latitude)
     make_uv_tracks(ax, uv_coord, baselines, sta_label, flag,
-                       symbol, color, sel_wl, airmass_lim)
+                   symbol, color, sel_wl, airmass_lim)
     plot_uv(ax, symbol, color, sel_wl, airmass_lim)
     set_dataframe(self, labels, column)
-        Prepares each row in a column as a pandas DataFrame
+        Prepares each row in a column as a pandas DataFrame.
     make_component(data_name, legend_format, unwrap, period)
-        Generates a pandas DataFrame that has all the plots' information
+        Generates a pandas DataFrame that has all the plots' information.
     add_flux()
-        Adds the total flux(es) as a subplot
+        Adds the total flux(es) as a subplot.
     add_vis(corr_flux=False, legend_format="long")
-        Adds the visibilities/correlated fluxes as a subplot
+        Adds the visibilities/correlated fluxes as a subplot.
     add_vis2(legend_format="long")
-        Adds the squared visibilities as a subplot
+        Adds the squared visibilities as a subplot.
     add_cphases(unwrap=False, period=360)
-        Adds the closure phases as a subplot
+        Adds the closure phases as a subplot.
     add_diff_phases(unwrap=False, period=360)
-        Adds the differential phases as a subplot
+        Adds the differential phases as a subplot.
     add_uv()
-        Adds the (u, v)-coordinates as a subplot
+        Adds the (u, v)-coordinates as a subplot.
     add_text()
-        To be implemented
+        To be implemented.
     add_mosaic(unwrap=False, legend_format="long")
-        Combines multiple subplots to produce a mosaic plot
+        Combines multiple subplots to produce a mosaic plot.
     get_plot_linestyle(already_chosen_linestyles)
-        Gets a linestyle, which is different from the already chosen one
+        Gets a linestyle, which is different from the already chosen one.
     plot(self, save=False)
-        Combines the individual components into one plot
+        Combines the individual components into one plot.
     """
-    # TODO: Implement text plotter with the information on the observation
 
     def __init__(self, fits_files: Path | List[Path],
                  flux_files: Optional[Path | List[Path]] = None,
@@ -113,6 +114,7 @@ class Plotter:
 
     @property
     def num_components(self):
+        """The number of componets contained"""
         return len(self.components)
 
     # TODO: Rename function at a future point
@@ -125,17 +127,17 @@ class Plotter:
 
         Parameters
         -----------
-        baselines: List[float]
-            The baselines in the following order: Baselines east, -north, -longest
-        hour_angle: np.ndarray[float]
-        latitude: u.rad
+        baselines : list of float
+            The baselines in the following order: Baselines east, -north, -longest.
+        hour_angle : numpy.ndarray of float
+        latitude : astropy.units.rad
             The latitude of the site
-        declination: u.rad
+        declination : astropy.units.rad
 
         Returns
         -------
-        u_coords: np.ndarray
-        v_coords: np.ndarray
+        u_coords : numpy.ndarray
+        v_coords : numpy.ndarray
         """
         baseline_east, baseline_north, baseline_longest = baselines
 
@@ -161,17 +163,17 @@ class Plotter:
 
         Parameters
         ----------
-        uv_coords: np.ndarray[float]
-        baselines: List[np.ndarray]
+        uv_coords : numpy.ndarray of float
+        baselines : list of numpy.ndarray
             The baselines in the following order: Baselines east, -north,
-            -longest
-        sta_labels: List[np.ndarray]
-        declination: float
-        flag: bool
-        symbol: str
-        color: str
-        sel_wl: float
-        airmass_lim: float
+            -longest.
+        sta_labels : list of numpy.ndarray
+        declination : float
+        flag : bool
+        symbol : str
+        color : str
+        sel_wl : float
+        airmass_lim : float
         """
         # u, v = map(lambda x: x/sel_wl, uv_coords)
         u_coords, v_coords = uv_coord
@@ -198,7 +200,7 @@ class Plotter:
         ax.text(-u_coords-3.5, -v_coords-1.5, sta_label,
                 fontsize="small", color='0', alpha=0.8)
 
-    def plot_uv(self, ax, symbol: Optional[str] = "x",
+    def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
                 color: Optional[str | List[str]] = "b",
                 sel_wl: Optional[float] = None,
                 airmass_lim: Optional[float] = 2.) -> None:
@@ -206,16 +208,16 @@ class Plotter:
 
         Parameters
         ----------
-        ax
-        symbol: str, optional
-            The symbol that markes the coordinates of the (u, v)-point
-        color: str | List[str], optional
+        ax : matplotlib.axes.Axes
+        symbol : str, optional
+            The symbol that markes the coordinates of the (u, v)-point.
+        color : str or list of str, optional
             Set the color/colors of the uv-coords. In case of multiple
             (.fits)-files the colors can be specified as a list with entries
-            for each file
-        sel_wl: float, optional
+            for each file.
+        sel_wl : float, optional
             The wavelength to convert meter to Mlambda. If None then no
-            conversion is done
+            conversion is done.
         """
         for index, readout in enumerate(self.readouts):
             uv_coords = readout.oi_vis["UVCOORD"]
@@ -274,7 +276,7 @@ class Plotter:
 
         Returns
         -------
-        component: List[Callable | DataFrame]
+        component: list of either Callable or DataFrame
         """
         component = []
         for readout in self.readouts:

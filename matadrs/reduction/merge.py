@@ -1,3 +1,4 @@
+"""  """
 from typing import List
 from pathlib import Path
 
@@ -20,17 +21,18 @@ OI_TYPES = [["flux"], ["corrflux"], ["visphi"], ["visamp"], ["vis2"], ["t3"]]
 # TODO: Remove the folder's input and just get the data from the fits-file?
 def get_output_file_path(fits_file: Path, output_dir: Path, pipeline: bool = False) -> Path:
     """Makes the output file's Path from the information from the input (.fits)-file
-    and the directory it is contained in
+    and the directory it is contained in.
 
     Parameters
     ----------
-    fits_file: Path
-    output_dir: Path
-    pipeline: bool, optional
+    fits_file : pathlib.Path
+    output_dir : pathlib.Path
+    pipeline : bool, optional
 
     Returns
     -------
-    output_file: Path"""
+    output_file : pathlib.Path
+    """
     readout = ReadoutFits(fits_file)
     tpl_start_cal, detector, tpl_start_sci = str(fits_file.parent.name).split(".")[2:-1]
     if pipeline:
@@ -40,13 +42,13 @@ def get_output_file_path(fits_file: Path, output_dir: Path, pipeline: bool = Fal
 
 
 def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
-    """Merges the averaged files of visibility-, flux- and bcd-calibration
+    """Merges the averaged files of visibility-, flux- and bcd-calibration.
 
     Parameters
     ----------
-    directories: List[Path]
-        List of the Paths to the coherent- and incoherent directory
-    output_dir: Path
+    directories : list of pathlib.Path
+        List of the Paths to the coherent- and incoherent directory.
+    output_dir : pathlib.Path
     """
     flux, vis = "TARGET_AVG_FLUX_INT.fits", "TARGET_AVG_VIS_INT.fits"
     bcd, bcd_pip = "TARGET_AVG_T3PHI_INT.fits", "TARGET_CAL_INT_noBCD.fits"
@@ -76,15 +78,16 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
 
 def merge_non_averaged_files(coherent_dir: Path,
                              incoherent_dir: Path, output_dir: Path) -> None:
-    """Merges the non-averaged individual files of the visibility and flux calibration
+    """Merges the non-averaged individual files of the visibility and flux
+    calibration.
 
     Parameters
     ----------
-    coherent_dir: Path
-        The coherently reduced and calibrated directories
-    incoherent_dir: Path
-        The incoherently reduced and calibrated directories
-    output_dir: Path
+    coherent_dir : pathlib.Path
+        The coherently reduced and calibrated directories.
+    incoherent_dir : pathlib.Path
+        The incoherently reduced and calibrated directories.
+    output_dir : pathlib.Path
     """
     output_dir = output_dir / "non_averaged"
     flux_tag, vis_tag = "TARGET_FLUX_CAL", "TARGET_CAL"
@@ -127,13 +130,13 @@ def merge_non_averaged_files(coherent_dir: Path,
 def merge_folders(coherent_dirs: List[Path],
                   incoherent_dirs: List[Path], output_dir: Path) -> None:
     """Merges the averaged files of the given folders as well as the non-averaged files,
-    which are looked up
+    which are looked up.
 
     Parameters
     ----------
-    coherent_dirs: List[Path]
-    incoherent_dir: List[Path]
-    output_dir: Path
+    coherent_dirs : list of pathlib.Path
+    incoherent_dir : list of pathlib.Path
+    output_dir : Path
     """
     cprint("Merging files...", "lp")
     for coherent_dir, incoherent_dir in zip(coherent_dirs, incoherent_dirs):
@@ -148,15 +151,15 @@ def merge_folders(coherent_dirs: List[Path],
 
 def merge(averaged_dir: Path) -> None:
     """This merges two (.fits)-files together into one, i.e. the  "incoherent"
-    and the "coherent" files
+    and the "coherent" files.
 
     Parameters
     ----------
-    averaged_dir: Path
-        The directory containing the averaged products
-    mode: str, optional
+    averaged_dir : pathlib.Path
+        The directory containing the averaged products.
+    mode : str, optional
         The mode in which the reduction is to be executed. Either 'coherent',
-        'incoherent' or 'both'
+        'incoherent' or 'both'.
     """
     coherent_dirs = list((averaged_dir / "averaged" / "coherent").glob("*.rb"))
     incoherent_dirs = [Path(str(directory).replace("coherent", "incoherent"))\

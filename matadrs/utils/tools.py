@@ -12,13 +12,14 @@ __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
 
 
 def cprint(message: str, color: Optional[str] = None) -> None:
-    """Makes use of ascii-codes to print messages in color
+    """Makes use of ascii-codes to print messages in color.
+
     Parameters
     ----------
-    message: str
-        The message to be printed
-    color: str
-        The name of the color to be used
+    message : str
+        The message to be printed.
+    color : str, optional
+        The name of the color to be used.
     """
     color_dict = {"r": ["\033[91m", "\033[00m"], "g": ["\033[92m", "\033[00m"],
                   "y": ["\033[93m", "\033[00m"], "lp": ["\033[94m", "\033[00m"],
@@ -33,7 +34,7 @@ def cprint(message: str, color: Optional[str] = None) -> None:
 
 
 def capitalise_to_index(string: str, index: int):
-    """Capitalises a string until a certain index"""
+    """Capitalises a string until a certain index."""
     if index == len(string):
         return string.capitalize()
     return string[:index].capitalize() + string[index:].lower()
@@ -41,17 +42,17 @@ def capitalise_to_index(string: str, index: int):
 
 def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False):
     """Moves source files/folders to the destination directory and overwrites them if
-    toggled
+    toggled.
 
-    parameters
+    Parameters
     ----------
-    source_file: path
-        A file or directory to be moved
-    destination: Path
-        The destination directory of the source-file/-directory
-    overwrite: bool, optional
+    source_file : pathlib.Path
+        A file or directory to be moved.
+    destination : pathlib.Path
+        The destination directory of the source-file/-directory.
+    overwrite : bool, optional
         If this is toggled it will overwrite any existing files or directories with the
-        same name
+        same name.
     """
     if (destination / source_file.name).exists():
         if overwrite:
@@ -70,7 +71,7 @@ def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False
 
 
 def print_execution_time(func: Callable):
-    """Prints the execution time of the input function"""
+    """Prints the execution time of the input function."""
     @wraps(func)
     def inner(*args, **kwargs):
         overall_start_time = time.perf_counter()
@@ -87,23 +88,23 @@ def print_execution_time(func: Callable):
 def get_execution_modes(mode: Optional[str] = None,
                         band: Optional[str] = None) -> Tuple[List[str], List[str]]:
     """Determines the mode- and band configurations used by the users input. Returns
-    either one or two lists depending on the input
+    either one or two lists depending on the input.
 
     Parameters
     ----------
-    mode: str, optional
+    mode : str, optional
         The mode in which the reduction is to be executed. Either 'coherent',
-        'incoherent' or 'both'
-    band: str, optional
+        'incoherent' or 'both'.
+    band : str, optional
         The band in which the reduction is to be executed. Either 'lband',
-        'nband' or 'both'
+        'nband' or 'both'.
 
     Returns
     -------
-    modes: List[str]
-        A list of the modes to be enhanced
-    bands: List[str]
-        A list of the bands to be enhanced
+    modes : list of str
+        A list of the modes to be enhanced.
+    bands : list of str
+        A list of the bands to be enhanced.
     """
     modes, bands = [], []
     if mode is not None:
@@ -120,21 +121,21 @@ def get_execution_modes(mode: Optional[str] = None,
 def split_fits(directory: Path, tag: str) -> Tuple[List[Path], Optional[List[Path]]]:
     """Searches a folder for a tag and if files are found it returns the non-chopped
     and chopped (.fits)-files. If there are only non-chopped (.fits)-files it will return
-    'None' for the chopped-files
+    'None' for the chopped-files.
 
     Parameters
     ----------
-    directory: Path
-        The directory to be searched in
-    tag: str
-        The tag that is contained in the file names
+    directory : pathlib.Path
+        The directory to be searched in.
+    tag : str
+        The tag that is contained in the file names.
 
     Returns
     ----------
-    unchopped_fits: List[Path]
-        A list of Paths that are the chopped (.fits)-files
-    chopped_fits: List[Path] | None
-        A list of Paths that are the unchopped (.fits)-files
+    unchopped_fits : list of pathlib.Path
+        A list of Paths that are the chopped (.fits)-files.
+    chopped_fits : list of pathlib.Path, optional
+        A list of Paths that are the unchopped (.fits)-files.
     """
     unchopped_fits = [fits_file for fits_file in get_fits_by_tag(directory, tag)]
     if len(unchopped_fits) == 6:
@@ -145,34 +146,34 @@ def split_fits(directory: Path, tag: str) -> Tuple[List[Path], Optional[List[Pat
 # TODO: Write function in such a way that it gets the name of the files from the headers
 # and then checks if they are correct
 def get_fits_by_tag(directory: Path, tag: str) -> List[Path]:
-    """Searches a folder for a tag and returns the (.fits)-files matching it
+    """Searches a folder for a tag and returns the (.fits)-files matching it.
 
     Parameters
     ----------
-    directory: Path
-        The directory to be searched in
-    tag: str
-        The tag that is contained in the file names
+    directory : pathlib.Path
+        The directory to be searched in.
+    tag : str
+        The tag that is contained in the file names.
 
     Returns
     ----------
-    files: List[Path]
+    files : list of pathlib.Path
         A list of files that contain the tag in their names
     """
     return sorted(directory.glob(f"*{tag}*.fits"), key=lambda x: x.name[-8:])
 
 
 def check_if_target(target_dir: Path) -> bool:
-    """Checks if the given directory contains 'TARGET_RAW_INT'-files
+    """Checks if the given directory contains 'TARGET_RAW_INT'-files.
 
     Parameters
     ----------
-    target_dir: Path
-        The directory that is to be checked for 'TARGET_RAW_INT' files
+    target_dir : pathlib.Path
+        The directory that is to be checked for 'TARGET_RAW_INT' files.
 
     Returns
     -------
-    contains_target: bool
+    contains_target : bool
     """
     return True if target_dir.glob("TARGET_RAW_INT*") else False
 
@@ -180,23 +181,23 @@ def check_if_target(target_dir: Path) -> bool:
 def get_path_descriptor(root_dir: Path, descriptor: Path,
                         tar_dir: Path, cal_dir: Path) -> Path:
     """Assembles the names for the new directories that will contain the
-    calibrated files and returns the 'output_dir'
+    calibrated files and returns the 'output_dir'.
 
     Parameters
     ----------
-    root_dir: Path
-        The root directory of the PRODUCT
-    descriptor: Path
-        The desired name 'TAR-CAL' directory
-    tar_dir: Path
-        The target directory
-    cal_dir: Path
-        The calibrator directory
+    root_dir : pathlib.Path
+        The root directory of the PRODUCT.
+    descriptor : pathlib.Path
+        The desired name 'TAR-CAL' directory.
+    tar_dir : pathlib.Path
+        The target directory.
+    cal_dir : pathlib.Path
+        The calibrator directory.
 
     Returns
     -------
-    output_dir: Path
-        The path for the output directory
+    output_dir : pathlib.Path
+        The path for the output directory.
     """
     mode_and_band = str(tar_dir.parents[1]).split("/")[-2:]
     dir_name, time_stamp_sci, detector = str(tar_dir.parent).split(".")[:-1]

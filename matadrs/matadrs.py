@@ -18,38 +18,38 @@ def reduction_pipeline(raw_dirs: Union[List[Path], Path],
                        do_merge: Optional[bool] = True) -> None:
     """Combines all the facettes of data reduction into one executable function that takes
     a single or a list of epochs to be reduced via the MATISSE pipeline, then calibrates,
-    merges and averages them, in succession
+    merges and averages them, in succession.
 
     Parameters
     ----------
-    raw_dirs: List[Path] | Path
+    raw_dirs : list of Path or Path
         The directory/ies to either the raw, reduced, calibrated or averaged files depending
-        on which step is selected for the pipeline, for the respective observation/s
-    product_dirs: List[Path] | Path
+        on which step is selected for the pipeline, for the respective observation/s.
+    product_dirs : list of Path or Path
         The directory/ies to contain the reduced, calibrated, averaged, and merged files
-        for the respective observation/s
-    mode: str, optional
+        for the respective observation/s.
+    mode : str, optional
         The mode in which the reduction is to be executed. Either 'coherent',
-        'incoherent' or 'both'
-    band: str, optional
+        'incoherent' or 'both'.
+    band : str, optional
         The band in which the reduction is to be executed. Either 'lband',
-        'nband' or 'both'
-    overwrite: bool, optional
-        If 'True' overwrites present files from previous reduction
-    do_reduce: bool, optional
-        Execute the reduction step
-    do_calibrate: bool, optional
-        Execute the calibration step
-    do_average: bool, optional
-        Execute the averaging step
-    do_merge: bool, optional
-        Execute the merging step
+        'nband' or 'both'.
+    overwrite : bool, optional
+        If 'True' overwrites present files from previous reduction.
+    do_reduce : bool, optional
+        Execute the reduction step.
+    do_calibrate : bool, optional
+        Execute the calibration step.
+    do_average : bool, optional
+        Execute the averaging step.
+    do_merge : bool, optional
+        Execute the merging step.
 
     Notes
     -----
-    WARNING: All files in a given folder from any previous reduction will be REMOVED.
+    WARNING : All files in a given folder from any previous reduction will be REMOVED.
     Subdirectories for the individual steps ('reduced', 'calib', 'averaged', 'final')
-    will be AUTOMATICALLY created in the 'product_dir'
+    will be AUTOMATICALLY created in the 'product_dir'.
     """
     if isinstance(raw_dirs, list):
         if not all(list(map(lambda x: isinstance(x, Path), raw_dirs))):
