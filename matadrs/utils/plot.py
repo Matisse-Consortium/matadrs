@@ -12,6 +12,8 @@ from pandas import DataFrame
 
 from ..utils.readout import ReadoutFits
 
+# TODO: Rewrite all of this to encompass errors and suplots as well
+
 
 # TODO: Make this go away from class and just individual plotting functions? -> Maybe
 # easier for paper relevant plots, but first make unified class that makes nice data
@@ -69,7 +71,8 @@ class Plotter:
     def __init__(self, fits_files: Path | List[Path],
                  flux_files: Optional[Path | List[Path]] = None,
                  plot_name: Optional[str] = None,
-                 save_path: Optional[Path] = None) -> None:
+                 save_path: Optional[Path] = None,
+                 lband: Optional[bool] = False) -> None:
         """The class's constructor"""
         self.fits_files = [fits_files]\
             if not isinstance(fits_files, List) else fits_files
@@ -81,6 +84,8 @@ class Plotter:
                           "the (.fits)-files provided")
         else:
             self.flux_files = flux_files
+
+        self.lband = lband
 
         if save_path is None:
             self.save_path = Path("").cwd()
@@ -112,10 +117,27 @@ class Plotter:
         """The class's string representation"""
         return self.__repr__()
 
+
     @property
     def num_components(self):
         """The number of componets contained"""
         return len(self.components)
+
+    def mask_dataframe(self, df: DataFrame, wl) -> None:
+        """Iterates through each row to mask a DataFrame"""
+        band_mask = None
+        wl = pd.DataFrame({"wl": wl})
+        if np.any(wl < 7.):
+            if np.any(wl < 2.) and np.any(wl > 3.):
+                self._band_mask = (wl > 1.6) & (wl < 1.8) & (wl > 3.) & (wl < 4.)
+            elif np.any(wl < 2.):
+                self._band_mask = (wl > 1.6) & (wl < 1.8)
+            else:
+                self._band_mask = (wl > 3.) & (wl < 4.)
+        band_mask = ~self._band_mask["wl"]
+        for column in df.columns:
+            df[column] = df[column].mask(band_mask)
+        return df
 
     # TODO: Rename function at a future point
     def calculate_uv_points(self, baselines: List[float],
@@ -203,7 +225,8 @@ class Plotter:
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
                 color: Optional[str | List[str]] = "b",
                 sel_wl: Optional[float] = None,
-                airmass_lim: Optional[float] = 2.) -> None:
+                airmass_lim: Optional[float] = 2.,
+                show_text: Optional[bool] = False) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
 
         Parameters
@@ -219,8 +242,11 @@ class Plotter:
             The wavelength to convert meter to Mlambda. If None then no
             conversion is done.
         """
+        uv_max = 0
         for index, readout in enumerate(self.readouts):
             uv_coords = readout.oi_vis["UVCOORD"]
+            if uv_max < (tmp_uv_max := uv_coords.max()):
+                uv_max = tmp_uv_max
             flags = readout.oi_vis["FLAG"]
             sta_indices = readout.oi_vis["STA_INDEX"]
             sta_index = readout.oi_array["STA_INDEX"]
@@ -249,34 +275,35 @@ class Plotter:
                                     self.colors[index], sel_wl, airmass_lim)
 
             xlabel, ylabel = "$u$ (m)", "$v$ (m)"
-            uv_max = np.nanmax(np.abs(uv_coords)) + 15
+            uv_extent = int(uv_max + uv_max*0.25)
 
-            ax.set_xlim((uv_max, -uv_max))
-            ax.set_ylim((-uv_max, uv_max))
+            ax.set_xlim([uv_extent, -uv_extent])
+            ax.set_ylim([-uv_extent, uv_extent])
             ax.set_xlabel(xlabel)
             ax.set_ylabel(ylabel)
 
     def set_dataframe(self, labels: List[str], column: Column) -> DataFrame:
         """Prepares each row in a column as a pandas DataFrame"""
-        return pd.DataFrame({label: array for label, array in zip(labels, column)})
+        return pd.DataFrame(dict(zip(labels, column)))
 
     def make_component(self, data_name: str,
                        legend_format: Optional[str] = "long",
                        unwrap: Optional[bool] = False,
-                       period: Optional[int] = 360) -> Union[Callable, DataFrame]:
+                       period: Optional[int] = 360, **kwargs) -> Union[Callable, DataFrame]:
         """Generates a pandas DataFrame that has all the plots' information
 
         Parameters
         ----------
-        data_name: str
+        data_name : str
             The name of the data to be plotted. Determines the legend- and plot labels
-        legend_format: str
+        unwrap : bool, optional
+        legend_format : str
             Sets the format of the legend: For all information set "long" and for only
             station names set "short"
 
         Returns
         -------
-        component: list of either Callable or DataFrame
+        component : list of either Callable or DataFrame
         """
         component = []
         for readout in self.readouts:
@@ -316,11 +343,10 @@ class Plotter:
                     raise KeyError("No data-type of that data name exists!")
             elif data_name == "cphases":
                 # TODO: Make this into a function
-                cphases = readout.oi_t3["T3PHI"]
+                cphases, cphases_err = readout.oi_t3["T3PHI"], readout.oi_t3["T3PHIERR"]
                 if unwrap:
-                    cphases = np.unwrap(cphases, period=period)
-                sub_component = self.set_dataframe(readout.oi_t3["TRIANGLE"],
-                                                   cphases)
+                    cphases, cphases_err = map(lambda x: np.unwrap(x, period=period), [cphases, cphases_err])
+                sub_component = self.set_dataframe(readout.oi_t3["TRIANGLE"], cphases)
             elif data_name == "uv":
                 sub_component = self.plot_uv
             else:
@@ -333,50 +359,58 @@ class Plotter:
         return component
 
     # TODO: Make unit support in this component
-    def add_flux(self):
-        """Adds the total flux(es) as a subplot"""
-        self.components["Total Flux [Jy]"] = self.make_component("flux")
+    def add_flux(self, **kwargs):
+        """Adds the total flux(es) as a subplot
+
+        See Also
+        --------
+        """
+        self.components["Total Flux [Jy]"] =\
+            self.make_component("flux", **kwargs)
         return self
 
     # TODO: Add option to automatically set label depending on what the flux is
-    def add_vis(self, corr_flux: Optional[bool] = False,
-                legend_format: Optional[str] = "long"):
+    def add_vis(self, corr_flux: Optional[bool] = False, **kwargs):
         """Adds the visibilities/correlated fluxes as a subplot"""
         label = "Correlated Flux [Jy]" if corr_flux else "Visibility"
-        self.components[label] = self.make_component("vis", legend_format)
+        self.components[label] =\
+            self.make_component("vis", **kwargs)
         return self
 
-    def add_vis2(self, legend_format: Optional[str] = "long"):
+    def add_vis2(self, **kwargs):
         """Adds the squared visibilities as a subplot"""
-        self.components["Squared Visibility"] = self.make_component(
-            "vis2", legend_format)
+        self.components["Squared Visibility"] =\
+            self.make_component("vis2", **kwargs)
         return self
 
-    def add_cphases(self, unwrap: Optional[bool] = False, period: Optional[int] = 360):
+    def add_cphases(self, **kwargs):
         """Adds the closure phases as a subplot"""
         self.components[r"Closure phases [$^{\circ}$]"] =\
-            self.make_component("cphases", unwrap=unwrap, period=period)
+            self.make_component("cphases", **kwargs)
         return self
 
-    def add_diff_phases(self, unwrap: Optional[bool] = False, period: Optional[int] = 360):
+    def add_diff_phases(self, **kwargs):
         """Adds the differential phases as a subplot"""
         self.components[r"Differential phases [$^{\circ}$]"] =\
-            self.make_component("diff", unwrap=unwrap, period=period)
+            self.make_component("diff", **kwargs)
         return self
 
-    def add_uv(self):
+    def add_uv(self, **kwargs):
         """Adds the (u, v)-coordinates as a subplot"""
-        self.components["$(u, v)$-coordinates"] = self.make_component("uv")
+        self.components["$(u, v)$-coordinates"] =\
+            self.make_component("uv", **kwargs)
         return self
 
-    def add_mosaic(self, unwrap: Optional[bool] = False,
-                   legend_format: Optional[str] = "long"):
+    def add_mosaic(self, **kwargs):
         """Combines multiple subplots to produce a mosaic plot"""
-        self.add_uv().add_vis(False, legend_format).add_vis(True, legend_format)
-        self.add_flux().add_cphases(unwrap).add_diff_phases(unwrap)
+        self.add_uv(**kwargs).add_vis(corr_flux=False, **kwargs).add_vis(corr_flux=True, **kwargs)
+        self.add_flux(**kwargs).add_cphases(**kwargs).add_diff_phases(**kwargs)
         return self
 
-    def plot(self, save: Optional[bool] = False):
+    # TODO: Sharex , sharey and suplots should be added
+    def plot(self, save: Optional[bool] = False,
+             error: Optional[bool] = False,
+             no_xlabel: Optional[bool] = False, **kwargs):
         """Combines the individual components into one plot.
 
         The size and dimension of the plot is automatically determined
@@ -386,35 +420,52 @@ class Plotter:
         save: bool, optional
             If toggled, saves the plot to the self.save_path file with the
             self.plot_name
+        **kwargs: dict, optional
         """
         columns = 1 if self.num_components == 1 else\
             (3 if self.num_components >= 3 else 2)
         rows = np.ceil(self.num_components/columns).astype(int)\
-            if not self.num_components == 1 else 1
+            if self.num_components != 1 else 1
         to_px = 1/plt.rcParams["figure.dpi"]
         fig, axarr = plt.subplots(rows, columns,
                                   constrained_layout=True,
                                   figsize=(512*to_px*columns, 512*to_px*rows))
-        # TODO: Add color and line support here
-        if not self.num_components == 1:
+
+        if self.num_components != 1:
             for ax, (name, component) in zip(axarr.flatten(), self.components.items()):
                 for index, sub_component in enumerate(component):
                     if isinstance(sub_component, DataFrame):
+                        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
+
+                        ymin, ymax = [0 if self.lband else None for _ in range(2)]
+                        if self.lband:
+                            wl = sub_component["lambda"].astype(float)
+                            sub_component_wo_telluric = self.mask_dataframe(sub_component, wl)
+                            ymax_tmp, ymin_tmp = (sub_component_wo_telluric.max()).max(), (sub_component_wo_telluric.min()).min()
+                            if ymax_tmp > ymax:
+                                ymax = ymax_tmp
+                            if ymin_tmp < ymin:
+                                ymin = ymin_tmp
+
                         sub_component.plot.line(x="lambda",
-                                                xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
-                                                ylabel=name, ax=ax, legend=True,
+                                                xlabel=xlabel,
+                                                ylabel=name,
+                                                ax=ax, legend=True, ylim=[ymin, ymax],
                                                 linestyle=self.linestyles[index])
+
                         ax.legend(fontsize="x-small",
                                   loc="upper right", framealpha=0.5)
                     else:
                         sub_component(ax)
+
         else:
             name, component = map(
                 lambda x: x[0], zip(*self.components.items()))
             for index, sub_component in enumerate(component):
                 if isinstance(sub_component, DataFrame):
+                    xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
                     sub_component.plot.line(x="lambda",
-                                            xlabel=r"$\lambda$ [$\mathrm{\mu}$m]",
+                                            xlabel=xlabel,
                                             ylabel=name, ax=axarr, legend=True,
                                             linestyle=self.linestyles[index])
                     axarr.legend(fontsize="x-small",
@@ -424,6 +475,6 @@ class Plotter:
         fig.tight_layout()
 
         if save:
-            plt.savefig(str(self.save_path / self.plot_name), format="pdf")
+            plt.savefig(self.save_path / self.plot_name, format="pdf")
         else:
             plt.show()
