@@ -383,14 +383,6 @@ def oifits_patchwork(infile_list: List, outfile_path: Path,
                                     or (sta_index_visamp[k][::-1] == sta_index_visphi[l])):
                                     outhdul['OI_VIS'].data['VISPHI'][k] = inhdul2['OI_VIS'].data['VISPHI'][l]
                                     outhdul['OI_VIS'].data['VISPHIERR'][k] = inhdul2['OI_VIS'].data['VISPHIERR'][l]
-            if oi_type == 'corrflux':
-                corr_flux = fits.BinTableHDU()
-                corr_flux.header = inhdul['OI_VIS'].header.copy()
-                corr_flux.data = inhdul['OI_VIS'].data.copy()
-                corr_flux.name = "oi_cfx"
-                outhdul.append(corr_flux)
-                outhdul['OI_CFX'].header['AMPTYP'] = inhdul['OI_VIS'].header['AMPTYP']
-
             if oi_type == 'flux':
                 try:
                     outhdul['OI_FLUX'].data = inhdul['OI_FLUX'].data
