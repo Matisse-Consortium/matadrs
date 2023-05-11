@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Tuple, List, Union, Optional
 
@@ -12,7 +13,18 @@ from pandas import DataFrame
 
 from ..utils.readout import ReadoutFits
 
+
 # TODO: Rewrite all of this to encompass errors and suplots as well
+@dataclass
+class PlotComponent:
+    labels: List = None
+    x_values: List = None
+    y_values: List = None
+    y_errors: List = None
+
+
+def unwrap_phases(phase, error, period=360):
+    return map(lambda x: np.unwrap(x, period=period), [phase, error])
 
 
 # TODO: Make this go away from class and just individual plotting functions? -> Maybe
@@ -178,7 +190,7 @@ class Plotter:
                        sta_label: List[np.ndarray],
                        declination: float, flag: bool,
                        symbol: str, color: str, sel_wl: float,
-                       airmass_lim: float) -> None:
+                       airmass_lim: float, show_text: bool) -> None:
         """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
 
         From coordinate + ha (range), calculate uv tracks
@@ -219,8 +231,9 @@ class Plotter:
                 markersize=10, markeredgewidth=3)
         ax.plot(-u_coords, -v_coords, symbol,
                 color=color, markersize=10, markeredgewidth=3)
-        ax.text(-u_coords-3.5, -v_coords-1.5, sta_label,
-                fontsize="small", color='0', alpha=0.8)
+        if show_text:
+            ax.text(-u_coords-3.5, -v_coords-1.5, sta_label,
+                    fontsize="small", color='0', alpha=0.8)
 
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
                 color: Optional[str | List[str]] = "b",
@@ -271,8 +284,8 @@ class Plotter:
             for uv_index, uv_coord in enumerate(uv_coords):
                 self.make_uv_tracks(ax, uv_coord, baselines[uv_index],
                                     sta_labels[uv_index], readout.dec*np.pi/180,
-                                    flags[uv_index], symbol,
-                                    self.colors[index], sel_wl, airmass_lim)
+                                    flags[uv_index], symbol, self.colors[index],
+                                    sel_wl, airmass_lim, show_text)
 
             xlabel, ylabel = "$u$ (m)", "$v$ (m)"
             uv_extent = int(uv_max + uv_max*0.25)
@@ -281,10 +294,6 @@ class Plotter:
             ax.set_ylim([-uv_extent, uv_extent])
             ax.set_xlabel(xlabel)
             ax.set_ylabel(ylabel)
-
-    def set_dataframe(self, labels: List[str], column: Column) -> DataFrame:
-        """Prepares each row in a column as a pandas DataFrame"""
-        return pd.DataFrame(dict(zip(labels, column)))
 
     def make_component(self, data_name: str,
                        legend_format: Optional[str] = "long",
@@ -307,12 +316,12 @@ class Plotter:
         """
         component = []
         for readout in self.readouts:
+            sub_component = PlotComponent(x_values=readout.oi_wl["EFF_WAVE"].data.squeeze())
             if data_name == "flux":
-                labels = readout.oi_array["TEL_NAME"]
-                fluxes = readout.oi_flux["FLUXDATA"]
-                if len(fluxes) == 1:
-                    labels = ["Averaged"]
-                sub_component = self.set_dataframe(labels, fluxes)
+                sub_component.y_values = readout.oi_flux["FLUXDATA"]
+                sub_component.y_errors = readout.oi_flux["FLUXERR"]
+                sub_component.labels = readout.oi_array["TEL_NAME"]\
+                    if len(sub_component.y_values) > 1 else ["Averaged"]
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
                 station_names = readout.oi_vis["DELAY_LINE"]
                 if legend_format == "long":
@@ -327,34 +336,35 @@ class Plotter:
                               for station_name, baseline, pa in zip(station_names, baselines, pas)]
                 else:
                     labels = station_names
+                sub_component.labels = labels
                 if data_name == "vis":
-                    sub_component = self.set_dataframe(
-                        labels, readout.oi_vis["VISAMP"])
+                    sub_component.y_values = readout.oi_vis["VISAMP"]
+                    sub_component.y_errors = readout.oi_vis["VISAMPERR"]
                 elif data_name == "diff":
-                    # TODO: Make this into a function
                     diff_phases = readout.oi_vis["VISPHI"]
+                    diff_phases_err = readout.oi_vis["VISPHIERR"]
                     if unwrap:
-                        diff_phases = np.unwrap(diff_phases, period=period)
-                    sub_component = self.set_dataframe(labels, diff_phases)
+                        diff_phases, diff_phases_err = unwrap_phases(diff_phases,
+                                                                     diff_phases_err, period)
+                    sub_component.y_values = diff_phases
+                    sub_component.y_errors = diff_phases_err
                 elif data_name == "vis2":
-                    sub_component = self.set_dataframe(labels,
-                                                       readout.oi_vis2["VIS2DATA"])
+                    sub_component.y_values = readout.oi_vis2["VIS2DATA"]
+                    sub_component.y_errors = readout.oi_vis2["VIS2DATAERR"]
                 else:
                     raise KeyError("No data-type of that data name exists!")
             elif data_name == "cphases":
-                # TODO: Make this into a function
                 cphases, cphases_err = readout.oi_t3["T3PHI"], readout.oi_t3["T3PHIERR"]
                 if unwrap:
-                    cphases, cphases_err = map(lambda x: np.unwrap(x, period=period), [cphases, cphases_err])
-                sub_component = self.set_dataframe(readout.oi_t3["TRIANGLE"], cphases)
+                    cphases, cphases_err = unwrap_phases(cphases,
+                                                         cphases_err, period)
+                sub_component.labels = readout.oi_t3["TRIANGLE"]
+                sub_component.y_values = cphases
+                sub_component.y_errors = cphases_err
             elif data_name == "uv":
                 sub_component = self.plot_uv
             else:
                 raise KeyError("Input data name cannot be queried!")
-
-            if isinstance(sub_component, DataFrame):
-                sub_component["lambda"] = readout.oi_wl["EFF_WAVE"].data.squeeze()
-
             component.append(sub_component)
         return component
 
@@ -375,12 +385,6 @@ class Plotter:
         label = "Correlated Flux [Jy]" if corr_flux else "Visibility"
         self.components[label] =\
             self.make_component("vis", **kwargs)
-        return self
-
-    def add_vis2(self, **kwargs):
-        """Adds the squared visibilities as a subplot"""
-        self.components["Squared Visibility"] =\
-            self.make_component("vis2", **kwargs)
         return self
 
     def add_cphases(self, **kwargs):
@@ -407,10 +411,33 @@ class Plotter:
         self.add_flux(**kwargs).add_cphases(**kwargs).add_diff_phases(**kwargs)
         return self
 
+    def plot_component(self, ax, name: str,
+                       component: Union[Callable, PlotComponent],
+                       no_xlabel: Optional[bool] = False,
+                       error: Optional[bool] = False):
+        """"""
+        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
+        for index, sub_component in enumerate(component):
+            if isinstance(sub_component, PlotComponent):
+                for label, y_value, y_error in zip(sub_component.labels,
+                                                   sub_component.y_values,
+                                                   sub_component.y_errors):
+                    ax.plot(sub_component.x_values, y_value, label=label)
+                    if error:
+                        ax.fill_between(sub_component.x_values, 
+                                        y_value+y_error, y_value-y_error, alpha=0.2)
+                    ax.legend(fontsize="x-small", loc="upper right", framealpha=0.5)
+                ax.set_xlabel(r"$\lambda$ ($\mu$m)")
+                ax.set_ylabel(name)
+            else:
+                sub_component(ax)
+
+
     # TODO: Sharex , sharey and suplots should be added
     def plot(self, save: Optional[bool] = False,
              error: Optional[bool] = False,
-             no_xlabel: Optional[bool] = False, **kwargs):
+             no_xlabel: Optional[bool] = False,
+             show_text: Optional[bool] = True, **kwargs):
         """Combines the individual components into one plot.
 
         The size and dimension of the plot is automatically determined
@@ -433,45 +460,11 @@ class Plotter:
 
         if self.num_components != 1:
             for ax, (name, component) in zip(axarr.flatten(), self.components.items()):
-                for index, sub_component in enumerate(component):
-                    if isinstance(sub_component, DataFrame):
-                        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
-
-                        ymin, ymax = [0 if self.lband else None for _ in range(2)]
-                        if self.lband:
-                            wl = sub_component["lambda"].astype(float)
-                            sub_component_wo_telluric = self.mask_dataframe(sub_component, wl)
-                            ymax_tmp, ymin_tmp = (sub_component_wo_telluric.max()).max(), (sub_component_wo_telluric.min()).min()
-                            if ymax_tmp > ymax:
-                                ymax = ymax_tmp
-                            if ymin_tmp < ymin:
-                                ymin = ymin_tmp
-
-                        sub_component.plot.line(x="lambda",
-                                                xlabel=xlabel,
-                                                ylabel=name,
-                                                ax=ax, legend=True, ylim=[ymin, ymax],
-                                                linestyle=self.linestyles[index])
-
-                        ax.legend(fontsize="x-small",
-                                  loc="upper right", framealpha=0.5)
-                    else:
-                        sub_component(ax)
-
+                self.plot_component(ax, name, component, no_xlabel, error)
         else:
             name, component = map(
                 lambda x: x[0], zip(*self.components.items()))
-            for index, sub_component in enumerate(component):
-                if isinstance(sub_component, DataFrame):
-                    xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
-                    sub_component.plot.line(x="lambda",
-                                            xlabel=xlabel,
-                                            ylabel=name, ax=axarr, legend=True,
-                                            linestyle=self.linestyles[index])
-                    axarr.legend(fontsize="x-small",
-                                 loc="upper right", framealpha=0.5)
-                else:
-                    sub_component(axarr)
+            self.plot_component(ax, name, component, no_xlabel, error)
         fig.tight_layout()
 
         if save:
