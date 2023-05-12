@@ -10,6 +10,7 @@ from matplotlib.axes import Axes
 
 from .readout import ReadoutFits
 from .tools import unwrap_phases, calculate_uv_points
+from .options import options
 
 
 # TODO: Add proper docs
@@ -179,15 +180,14 @@ class Plotter:
             indices_low = np.where((wavelength <= 4.8) & (wavelength >= 4.5))
             indices_high = np.where((wavelength >= 3.) & (wavelength <= 3.8))
             indices = np.hstack((indices_low, indices_high))
-        ymin, ymax = np.min(data[:, indices]), np.max(data[:, indices])
+        ymin, ymax = data[:, indices].min(), data[:, indices].max()
         spacing = np.linalg.norm(ymax-ymin)*margin
         return ymin-spacing, ymax+spacing
 
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
-                color: Optional[str | List[str]] = "b",
                 sel_wl: Optional[float] = None,
                 airmass_lim: Optional[float] = 2.,
-                show_text: Optional[bool] = False) -> None:
+                show_text: Optional[List] = None) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
 
         Parameters
@@ -223,7 +223,6 @@ class Plotter:
                         + sta_name[sta_indices[uv_index, 1] == sta_index][0]
                 except IndexError:
                     baseline, sta_label = [np.nan, np.nan, np.nan], ""
-
                 baselines.append(baseline)
                 sta_labels.append(sta_label)
 
@@ -232,7 +231,7 @@ class Plotter:
             for uv_index, uv_coord in enumerate(uv_coords):
                 make_uv_tracks(ax, uv_coord, baselines[uv_index],
                                sta_labels[uv_index], readout.dec*np.pi/180,
-                               flags[uv_index], symbol, self.colors[index],
+                               flags[uv_index], symbol, options["colors"][index],
                                sel_wl, airmass_lim, show_text)
 
             xlabel, ylabel = "$u$ (m)", "$v$ (m)"
