@@ -6,9 +6,16 @@ from functools import wraps
 from pathlib import Path
 from typing import Callable, Tuple, List, Optional
 
+import astropy.units as u
+import numpy as np
+
 __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
            "get_execution_modes", "split_fits", "get_fits_by_tag", "check_if_target",
            "get_path_descriptor"]
+
+
+def unwrap_phases(phase, error, period=360):
+    return map(lambda x: np.unwrap(x, period=period), [phase, error])
 
 
 def cprint(message: str, color: Optional[str] = None) -> None:
@@ -206,3 +213,37 @@ def get_path_descriptor(root_dir: Path, descriptor: Path,
     new_dir_name = '.'.join([descriptor, dir_name,
                              time_stamp_sci, detector, time_stamp_cal, "rb"])
     return root_dir / "calib" / mode_and_band[0] / new_dir_name
+
+
+# TODO: Rename function at a future point
+def calculate_uv_points(baselines: List[float],
+                        hour_angle: np.ndarray[float],
+                        latitude: u.rad,
+                        declination: u.rad) -> Tuple[np.ndarray]:
+    """Calculates the earth rotation (synthesis) for the uv-point
+    corresponding to the baselines for the input hour angle(s)
+
+    Parameters
+    -----------
+    baselines : list of float
+        The baselines in the following order: Baselines east, -north, -longest.
+    hour_angle : numpy.ndarray of float
+    latitude : astropy.units.rad
+        The latitude of the site
+    declination : astropy.units.rad
+
+    Returns
+    -------
+    u_coords : numpy.ndarray
+    v_coords : numpy.ndarray
+    """
+    baseline_east, baseline_north, baseline_longest = baselines
+
+    u_coords = baseline_east * np.cos(hour_angle) - baseline_north * np.sin(latitude)\
+        * np.sin(hour_angle) + baseline_longest * np.cos(latitude) * np.sin(hour_angle)
+    v_coords = baseline_east * np.sin(declination) * np.sin(hour_angle)\
+        + baseline_north * (np.sin(latitude) * np.sin(declination) * np.cos(hour_angle)
+                            + np.cos(latitude) * np.cos(declination)) - baseline_longest * \
+        (np.cos(latitude) * np.sin(declination) * np.cos(hour_angle)
+         - np.sin(latitude) * np.cos(declination))
+    return u_coords, v_coords
