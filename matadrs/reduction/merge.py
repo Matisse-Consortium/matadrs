@@ -14,7 +14,8 @@ HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
                     {'key': 'HIERARCH ESO INS BCD1 NAME', 'value': ' '},
                     {'key': 'HIERARCH ESO INS BCD2 NAME', 'value': ' '}]
 
-OI_TYPES = [["flux"], ["visphi"], ["visamp"], ["vis2"], ["t3"]]
+
+OI_TYPES = [['flux'], ['visamp'], ['visphi'], ['vis2'], ['t3']]
 
 
 # TODO: Remove the folder's input and just get the data from the fits-file?
@@ -62,12 +63,12 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     if "lband" in str(directories[0]):
         files_to_merge = [incoherent_flux, coherent_flux,
                           coherent_bcd_vis, incoherent_vis,
-                          incoherent_vis, coherent_bcd_vis]
+                          coherent_bcd_vis]
     else:
         files_to_merge = [incoherent_flux, coherent_flux,
                           coherent_bcd_pip_vis, incoherent_bcd_pip_vis,
-                          incoherent_bcd_pip_vis, coherent_bcd_pip_vis]
-    if all([fits_file.exists() for fits_file in files_to_merge]):
+                          coherent_bcd_pip_vis]
+    if all(fits_file.exists() for fits_file in files_to_merge):
         oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                          oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
 
@@ -109,11 +110,11 @@ def merge_non_averaged_files(coherent_dir: Path,
         if "lband" in str(coherent_dir):
             files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
                               coh_unchopped_vis, inc_unchopped_vis,
-                              inc_unchopped_vis, coh_unchopped_vis]
+                              coh_unchopped_vis]
         else:
             files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
                               coh_unchopped_vis, inc_unchopped_vis,
-                              inc_unchopped_vis, coh_unchopped_vis]
+                              coh_unchopped_vis]
 
         if all(fits_file.exists() for fits_file in files_to_merge):
             oifits_patchwork(list(map(str, files_to_merge)),
