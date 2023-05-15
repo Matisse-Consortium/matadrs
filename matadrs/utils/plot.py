@@ -272,11 +272,11 @@ class Plotter:
                 sub_component.labels = readout.oi_array["TEL_NAME"]\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
-                station_names = readout.oi_cfx["DELAY_LINE"]
+                station_names = readout.oi_vis["DELAY_LINE"]
                 if legend_format == "long":
-                    baselines = np.around(readout.oi_cfx["BASELINE"], 2)
-                    u_coords = readout.oi_cfx["UVCOORD"][:, 0]
-                    v_coords = readout.oi_cfx["UVCOORD"][:, 1]
+                    baselines = np.around(readout.oi_vis["BASELINE"], 2)
+                    u_coords = readout.oi_vis["UVCOORD"][:, 0]
+                    v_coords = readout.oi_vis["UVCOORD"][:, 1]
                     # TODO: Find out what this is exactly? Projected Baselines? Positional Angle?
                     pas = np.around(
                         (np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
@@ -287,8 +287,8 @@ class Plotter:
                     labels = station_names
                 sub_component.labels = labels
                 if data_name == "vis":
-                    sub_component.y_values = readout.oi_cfx["VISAMP"]
-                    sub_component.y_errors = readout.oi_cfx["VISAMPERR"]
+                    sub_component.y_values = readout.oi_vis["VISAMP"]
+                    sub_component.y_errors = readout.oi_vis["VISAMPERR"]
                 elif data_name == "diff":
                     diff_phases = readout.oi_vis["VISPHI"]
                     diff_phases_err = readout.oi_vis["VISPHIERR"]

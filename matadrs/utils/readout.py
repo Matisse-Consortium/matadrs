@@ -63,7 +63,6 @@ class ReadoutFits:
     oi_array
     oi_flux
     oi_t3
-    oi_cfx
     oi_vis
     oi_vis2
 
@@ -101,7 +100,7 @@ class ReadoutFits:
 
         self._oi_array, self._oi_wl = None, None
         self._oi_flux, self._oi_t3 = None, None
-        self._oi_vis, self._oi_cfx, self._oi_vis2 = None, None, None
+        self._oi_vis, self._oi_vis2 = None, None
 
         with fits.open(self.fits_file) as hdul:
             self.primary_header = hdul[0].header
@@ -272,20 +271,6 @@ class ReadoutFits:
                                               names=["FLUXDATA", "FLUXERR"])
             self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR"])
         return self._oi_flux
-
-    @property
-    def oi_cfx(self) -> Table:
-        """Fetches the visibility table."""
-        if self._oi_cfx is None:
-            self._oi_cfx = self.get_table_for_fits("oi_cfx")
-            self._oi_cfx.add_columns([self.get_delay_lines(self._oi_cfx),
-                                      self.merge_uv_coords(self._oi_cfx),
-                                      self.get_baselines(self._oi_cfx)],
-                                     names=["DELAY_LINE", "UVCOORD", "BASELINE"])
-            self._oi_cfx.keep_columns(["VISAMP", "VISAMPERR", "VISPHI", "VISPHIERR",
-                                       "UVCOORD", "DELAY_LINE", "BASELINE",
-                                       "MJD", "FLAG", "STA_INDEX"])
-        return self._oi_cfx
 
     @property
     def oi_vis(self) -> Table:
