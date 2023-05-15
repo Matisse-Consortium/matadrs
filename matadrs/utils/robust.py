@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 Small collection of robust statistical estimators based on functions from
 Henry Freudenriech (Hughes STX) statistics library (called ROBLIB) that have
@@ -35,8 +34,7 @@ __epsilon = 1.0e-20
 
 
 def biweightMean(inputData, axis=None, dtype=None):
-    """
-    Calculate the mean of a data set using bisquare weighting.
+    """Calculate the mean of a data set using bisquare weighting.
 
     Based on the biweight_mean routine from the AstroIDL User's
     Library.
@@ -45,7 +43,6 @@ def biweightMean(inputData, axis=None, dtype=None):
         Added the 'axis' and 'dtype' keywords to make this function more
         compatible with numpy.mean()
     """
-
     if axis is not None:
         fnc = lambda x: biweightMean(x, dtype=dtype)
         y0 = numpy.apply_along_axis(fnc, axis, inputData)
@@ -89,8 +86,7 @@ def biweightMean(inputData, axis=None, dtype=None):
 
 
 def mean(inputData, Cut=3.0, axis=None, dtype=None):
-    """
-    Robust estimator of the mean of a data set.  Based on the
+    """Robust estimator of the mean of a data set.  Based on the
     resistant_mean function from the AstroIDL User's Library.
 
     .. versionchanged:: 1.0.3
@@ -150,12 +146,10 @@ def mean(inputData, Cut=3.0, axis=None, dtype=None):
 
 
 def mode(inputData, axis=None, dtype=None):
-    """
-    Robust estimator of the mode of a data set using the half-sample mode.
+    """Robust estimator of the mode of a data set using the half-sample mode.
 
     .. versionadded: 1.0.3
     """
-
     if axis is not None:
         fnc = lambda x: mode(x, dtype=dtype)
         dataMode = numpy.apply_along_axis(fnc, axis, inputData)
@@ -201,8 +195,7 @@ def mode(inputData, axis=None, dtype=None):
 
 
 def std(inputData, Zero=False, axis=None, dtype=None):
-    """
-    Robust estimator of the standard deviation of a data set.
+    """Robust estimator of the standard deviation of a data set.
 
     Based on the robust_sigma function from the AstroIDL User's Library.
 
@@ -210,7 +203,6 @@ def std(inputData, Zero=False, axis=None, dtype=None):
         Added the 'axis' and 'dtype' keywords to make this function more
         compatible with numpy.std()
     """
-
     if axis is not None:
         fnc = lambda x: std(x, dtype=dtype)
         sigma = numpy.apply_along_axis(fnc, axis, inputData)
@@ -254,8 +246,7 @@ def std(inputData, Zero=False, axis=None, dtype=None):
 
 
 def checkfit(inputData, inputFit, epsilon, delta, BisquareLimit=6.0):
-    """
-    Determine the quality of a fit and biweights.  Returns a tuple
+    """Determine the quality of a fit and biweights.  Returns a tuple
     with elements:
       0. Robust standard deviation analog
       1. Fractional median absolute deviation of the residuals
@@ -266,7 +257,6 @@ def checkfit(inputData, inputFit, epsilon, delta, BisquareLimit=6.0):
     This function is based on the rob_checkfit routine from the AstroIDL
     User's Library.
     """
-
     data = inputData.ravel()
     fit = inputFit.ravel()
     if type(data).__name__ == "MaskedArray":
@@ -300,12 +290,10 @@ def checkfit(inputData, inputFit, epsilon, delta, BisquareLimit=6.0):
 
 
 def linefit(inputX, inputY, iterMax=25, Bisector=False, BisquareLimit=6.0, CloseFactor=0.03):
-    """
-    Outlier resistance two-variable linear regression function.
+    """Outlier resistance two-variable linear regression function.
 
     Based on the robust_linefit routine in the AstroIDL User's Library.
     """
-
     xIn = inputX.ravel()
     yIn = inputY.ravel()
     if type(yIn).__name__ == "MaskedArray":
@@ -488,8 +476,7 @@ def linefit(inputX, inputY, iterMax=25, Bisector=False, BisquareLimit=6.0, Close
 
 
 def polyfit(inputX, inputY, order, iterMax=25):
-    """
-    Outlier resistance two-variable polynomial function fitter.
+    """Outlier resistance two-variable polynomial function fitter.
 
     Based on the robust_poly_fit routine in the AstroIDL User's
     Library.
@@ -499,7 +486,6 @@ def polyfit(inputX, inputY, order, iterMax=25):
     data.  For the weighted fitting, the SciPy Orthogonal Distance
     Regression module (scipy.odr) is used.
     """
-
     from scipy import odr
 
     def polyFunc(B, x, order=order):

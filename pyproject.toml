@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "matadrs"
-version = "0.1.0"
+version = "0.1.1"
 description = "An extended, fully automated MATISSE-data reduction pipeline"
 requires-python = ">=3.9"
 readme = "README.md"
@@ -16,7 +16,7 @@ authors = [
 ]
 
 classifiers = [
-	"Development Status :: 1 - Planning",
+	"Development Status :: 2 - Alpha",
 	"Framework :: Pytest",
 	"Framework :: Sphinx",
 	"License :: OSI Approved :: MIT License",
@@ -27,13 +27,11 @@ classifiers = [
 	"Topic :: Scientific/Engineering :: Astronomy",
 	"Topic :: Scientific/Engineering :: Physics",
 ]
-
-[options]
-install_requires = [
+dependencies = [
     "importlib-metadata; python_version < '3.8'",
     "astropy >= 5.1",
     "astroquery >= 0.4.6",
-    "pandas == 1.5.2",
+    "pandas >= 1.5.2",
     "matplotlib >= 3.5.3",
     "numpy >=1.23.2",
     "pip >=22.2.2",
