@@ -1,9 +1,10 @@
 import shutil
 import subprocess
-import pkg_resources
 from collections import namedtuple
 from pathlib import Path
 from typing import List, Optional
+
+import pkg_resources
 
 from .fluxcal import fluxcal
 from .calib_BCD2 import calib_BCD
@@ -298,6 +299,7 @@ def calibrate_folders(reduced_dir: Path, mode: str, band: str, overwrite: bool) 
         If 'True' overwrites files from previous calibration
     """
     sub_dirs = sorted((reduced_dir / "reduced" / mode / band).glob("*.rb"))
+    breakpoint()
 
     for index, directory in enumerate(sub_dirs):
         if check_if_target(directory):

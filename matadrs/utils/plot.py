@@ -1,10 +1,10 @@
-import pkg_resources
 from pathlib import Path
 from typing import Callable, Tuple, List, Union, Optional
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import pkg_resources
 from pandas import DataFrame
 from astropy.table import Column
 

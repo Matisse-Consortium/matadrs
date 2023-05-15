@@ -1,21 +1,21 @@
 import os
 import shutil
-import pkg_resources
 from pathlib import Path
 from typing import List, Set, Tuple, Union, Optional
 
-import numpy as np
 import astropy.units as u
+import numpy as np
+import pkg_resources
+from astropy.coordinates import SkyCoord
 from astropy.time import Time
 from astropy.table import Table
 from astroquery.vizier import Vizier
-from astropy.coordinates import SkyCoord
 
 from ..mat_tools.libAutoPipeline import matisseType
 from ..mat_tools.mat_autoPipeline import mat_autoPipeline
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
-from ..utils.tools import cprint, print_execution_time, capitalise_to_index,\
+from ..utils.tools import cprint, print_execution_time,\
         get_execution_modes, get_fits_by_tag, move
 
 __all__ = ["get_readout_for_tpl_match", "get_tpl_starts", "in_catalog",

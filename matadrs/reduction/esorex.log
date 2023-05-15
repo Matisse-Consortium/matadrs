@@ -1,9 +1,0 @@
-
-Start time     : 2023-03-28T17:05:59
-Program name   : esorex
-Severity level : [ INFO  ] 
-
-17:05:59 [ INFO  ] : [tid=000] This is EsoRex, version 3.13.6
-17:05:59 [ INFO  ] : [tid=000] using the libraries: CPL = 7.2.3, CFITSIO = 3.49, WCSLIB = 7.6, FFTW (normal precision) = 3.3.9-sse2, FFTW (single precision) = 3.3.9-sse2, OPENMP = 201107
-17:05:59 [ INFO  ] : [tid=000] Invocation command line was: esorex --help mat_cal_oifits
-17:05:59 [ INFO  ] mat_cal_oifits_create: [tid=000] Parameters created.

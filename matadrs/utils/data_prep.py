@@ -1,9 +1,9 @@
-import pkg_resources
 from pathlib import Path
 from typing import Optional, List
 
-import numpy as np
 import astropy.units as u
+import numpy as np
+import pkg_resources
 from astropy.table import Table, vstack
 from astropy.table.np_utils import TableMergeError
 

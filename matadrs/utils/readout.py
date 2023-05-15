@@ -1,10 +1,9 @@
-import pkg_resources
 import warnings
 from pathlib import Path
 from typing import Dict, Tuple, List, Optional
 
-import numpy as np
 import astropy.units as u
+import numpy as np
 from astropy.io import fits
 from astroquery.simbad import Simbad
 from astropy.table import Table
