@@ -279,8 +279,6 @@ def calibrate_files(reduced_dir: Path, target_dir: Path,
         cleanup_calibration(output_dir)
 
 
-
-# TODO: Think of calibrating a CAL with a CAL to check observation quality?? Good idea?
 def calibrate_folders(reduced_dir: Path, mode: str, band: str, overwrite: bool) -> None:
     """Calibrates a directory containing the scientific target with a directory containing
     the calibrator observation. Calibrates flux, visibility and closure phases (bcd)
@@ -299,19 +297,14 @@ def calibrate_folders(reduced_dir: Path, mode: str, band: str, overwrite: bool) 
         If 'True' overwrites files from previous calibration
     """
     sub_dirs = sorted((reduced_dir / "reduced" / mode / band).glob("*.rb"))
-    breakpoint()
+    target_dir = [directory for directory in sub_dirs if check_if_target(directory)][0]
+    calibrator_dirs = [directory for directory in sub_dirs if not check_if_target(directory)]
 
-    for index, directory in enumerate(sub_dirs):
-        if check_if_target(directory):
-            target_directory = directory
-            del sub_dirs[index]
-            break
-
-    for directory in sub_dirs:
-        cprint(f"Calibration of {directory.name} in '{mode}' mode", "lp")
+    for calibrator_dir in calibrator_dirs:
+        cprint(f"Calibration of {calibrator_dir.name} in '{mode}' mode", "lp")
         cprint(f"{'':-^50}", "lg")
         calibrate_files(reduced_dir, target_dir,
-                        directory, mode, band, overwrite)
+                        calibrator_dir, mode, band, overwrite)
     cprint(f"Finished calibration of {band} and {mode}", "lp")
     cprint(f"{'':-^50}", "lp")
 
