@@ -300,6 +300,11 @@ def calibrate_folders(reduced_dir: Path, mode: str, band: str, overwrite: bool) 
     target_dir = [directory for directory in sub_dirs if check_if_target(directory)][0]
     calibrator_dirs = [directory for directory in sub_dirs if not check_if_target(directory)]
 
+    # TODO: Check via name if calibrator is N-band or L-band, and if not in name
+    # then ask user.
+    if len(calibrator_dirs) > 1:
+        ...
+
     for calibrator_dir in calibrator_dirs:
         cprint(f"Calibration of {calibrator_dir.name} in '{mode}' mode", "lp")
         cprint(f"{'':-^50}", "lg")

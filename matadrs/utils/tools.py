@@ -174,7 +174,7 @@ def check_if_target(target_dir: Path) -> bool:
     -------
     contains_target: bool
     """
-    return True if target_dir.glob("TARGET_RAW_INT*") else False
+    return True if list(target_dir.glob("TARGET_RAW_INT*")) else False
 
 
 def get_path_descriptor(root_dir: Path, descriptor: Path,

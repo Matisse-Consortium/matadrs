@@ -4,6 +4,7 @@ from typing import Dict, Tuple, List, Optional
 
 import astropy.units as u
 import numpy as np
+import pkg_resources
 from astropy.io import fits
 from astroquery.simbad import Simbad
 from astropy.table import Table

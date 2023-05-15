@@ -336,6 +336,7 @@ class Plotter:
             plt.savefig(str(self.save_path / self.plot_name), format="pdf")
         else:
             plt.show()
+        plt.close()
 
     # TODO: Make somehow correlated flux and unit support in this component
     def add_flux(self):
