@@ -433,3 +433,4 @@ class Plotter:
             plt.savefig(self.save_path / self.plot_name, format="pdf")
         else:
             plt.show()
+        plt.close()
