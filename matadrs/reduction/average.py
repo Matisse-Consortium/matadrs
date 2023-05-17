@@ -120,7 +120,7 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
             cprint("Plotting averaged files...", "g")
             for fits_file in get_fits_by_tag(output_dir, "AVG"):
                 plot_fits = Plotter(fits_file, save_path=output_dir)
-                plot_fits.add_cphases().add_vis().plot(save=True)
+                plot_fits.add_cphases().add_vis().plot(save=True, error=True)
             cprint(f"{'':-^50}", "lg")
 
 
