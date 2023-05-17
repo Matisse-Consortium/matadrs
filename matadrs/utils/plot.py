@@ -127,8 +127,8 @@ class Plotter:
         Combines the individual components into one plot.
     """
 
-    def __init__(self, fits_files: Path | List[Path],
-                 flux_files: Optional[Path | List[Path]] = None,
+    def __init__(self, fits_files: Union[Path, List[Path]],
+                 flux_files: Optional[Union[Path, List[Path]]] = None,
                  plot_name: Optional[str] = None,
                  save_path: Optional[Path] = None) -> None:
         """The class's constructor"""
@@ -299,7 +299,7 @@ class Plotter:
                     sub_component.y_errors = diff_phases_err
                 elif data_name == "vis2":
                     sub_component.y_values = readout.oi_vis2["VIS2DATA"]
-                    sub_component.y_errors = readout.oi_vis2["VIS2DATAERR"]
+                    sub_component.y_errors = readout.oi_vis2["VIS2ERR"]
                 else:
                     raise KeyError("No data-type of that data name exists!")
             elif data_name == "cphases":
@@ -334,6 +334,12 @@ class Plotter:
             self.make_component("vis", **kwargs)
         return self
 
+    def add_vis2(self, corr_flux: Optional[bool] = False, **kwargs):
+        """Adds the squared visibilities as a subplot"""
+        self.components["Squared visibilities"] =\
+            self.make_component("vis2", **kwargs)
+        return self
+
     def add_cphases(self, **kwargs):
         """Adds the closure phases as a subplot"""
         self.components[r"Closure phases [$^{\circ}$]"] =\
@@ -354,7 +360,7 @@ class Plotter:
 
     def add_mosaic(self, **kwargs):
         """Combines multiple subplots to produce a mosaic plot"""
-        self.add_uv(**kwargs).add_vis(corr_flux=False, **kwargs).add_vis(corr_flux=True, **kwargs)
+        self.add_uv(**kwargs).add_vis(corr_flux=True, **kwargs).add_vis2(**kwargs)
         self.add_flux(**kwargs).add_cphases(**kwargs).add_diff_phases(**kwargs)
         return self
 

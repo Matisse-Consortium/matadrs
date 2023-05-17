@@ -115,6 +115,8 @@ def merge_non_averaged_files(coherent_dir: Path,
                               coh_unchopped_vis, inc_unchopped_vis,
                               coh_unchopped_vis]
         else:
+
+
             files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
                               coh_unchopped_vis, inc_unchopped_vis,
                               coh_unchopped_vis]
@@ -177,7 +179,7 @@ def merge(averaged_dir: Path) -> None:
         Plotter(fits_file, save_path=output_dir).add_mosaic(unwrap=unwrap).plot(save=True, error=True)
     for fits_file in (output_dir / "non_averaged").glob("*.fits"):
         plot_fits = Plotter(fits_file, save_path=(output_dir / "non_averaged"))
-        plot_fits.add_uv().add_vis().add_cphases(unwrap=True).plot(save=True, error=True)
+        plot_fits.add_uv().add_vis(corr_flux=True).add_vis2().add_cphases(unwrap=True).plot(save=True, error=True)
     cprint(f"{'':-^50}", "lg")
     cprint("Merging Done!", "lp")
     cprint(f"{'':-^50}", "lg")
