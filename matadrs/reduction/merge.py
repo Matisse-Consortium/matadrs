@@ -64,12 +64,13 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     # one can determine what is merged
     if "lband" in str(directories[0]):
         files_to_merge = [incoherent_flux, coherent_flux,
-                          coherent_bcd_vis, incoherent_vis,
+                          incoherent_vis, incoherent_vis,
                           coherent_bcd_vis]
     else:
         files_to_merge = [incoherent_flux, coherent_flux,
-                          coherent_bcd_pip_vis, incoherent_bcd_pip_vis,
-                          coherent_bcd_pip_vis]
+                          incoherent_bcd_pip_vis,
+                          incoherent_bcd_pip_vis, coherent_bcd_pip_vis]
+
     if all(fits_file.exists() for fits_file in files_to_merge):
         oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                          oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
