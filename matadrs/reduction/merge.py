@@ -42,6 +42,32 @@ def get_output_file_path(fits_file: Path, output_dir: Path, pipeline: bool = Fal
         return output_dir / f"{readout.name}_{tpl_start_cal}:{tpl_start_sci}_{detector}_FINAL_TARGET_INT.fits"
 
 
+def merge_files(directory: Path, ):
+    coherent_flux, incoherent_flux = [directory / flux for directory in directories]
+    _, incoherent_vis = [directory / vis for directory in directories]
+    coherent_bcd_vis, _ = [directory / bcd for directory in directories]
+    coherent_bcd_pip_vis, incoherent_bcd_pip_vis = [directory / bcd_pip for
+                                                    directory in directories]
+    out_file = get_output_file_path(coherent_flux, output_dir)
+
+    flux_chopped, vis_chopped = map(lambda x: x.replace("INT", "INT_CHOPPED"),
+                                   [flux, vis])
+    bcd_chopped, bcd_pip_chopped = map(lambda x: x.replace("INT", "INT_CHOPPED"),
+                                      [bcd, bcd_pip])
+
+    # NOTE: The files in the 'files_to_merge' list correspond to the 'OI_TYPE' list. Thus
+    # one can determine what is merged
+    if "HAWAII" in str(directories[0]):
+        files_to_merge = [incoherent_flux, coherent_flux,
+                          coherent_bcd_vis, incoherent_vis,
+                          coherent_bcd_vis]
+    else:
+        files_to_merge = [incoherent_flux, coherent_flux,
+                          coherent_bcd_pip_vis,
+                          incoherent_bcd_pip_vis,
+                          coherent_bcd_pip_vis]
+
+
 def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     """Merges the averaged files of visibility-, flux- and bcd-calibration.
 
@@ -55,49 +81,6 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     # TODO: Make this into one function that takes care of both chopped and unchopped case
     flux, vis = "TARGET_AVG_FLUX_INT.fits", "TARGET_AVG_VIS_INT.fits"
     bcd, bcd_pip = "TARGET_AVG_T3PHI_INT.fits", "TARGET_CAL_INT_noBCD.fits"
-    coherent_flux, incoherent_flux = [directory / flux for directory in directories]
-    _, incoherent_vis = [directory / vis for directory in directories]
-    coherent_bcd_vis, _ = [directory / bcd for directory in directories]
-    coherent_bcd_pip_vis, incoherent_bcd_pip_vis = [directory / bcd_pip for
-                                                    directory in directories]
-    out_file_unchopped = get_output_file_path(coherent_flux, output_dir)
-
-    flux_chopped, vis_chopped = map(lambda x: x.replace("INT", "INT_CHOPPED"),
-                                   [flux, vis])
-    bcd_chopped, bcd_pip_chopped = map(lambda x: x.replace("INT", "INT_CHOPPED"),
-                                      [bcd, bcd_pip])
-    coherent_flux_chopped, incoherent_flux_chopped = [directory / flux_chopped
-                                                      for directory in directories]
-    _, incoherent_vis_chopped = [directory / vis_chopped for
-                                 directory in directories]
-    coherent_bcd_vis_chopped, _ = [directory / bcd_chopped for
-                                   directory in directories]
-    coherent_bcd_pip_vis_chopped, incoherent_bcd_pip_vis_chopped =\
-        [directory / bcd_pip_chopped for directory in directories]
-    out_file_chopped = get_output_file_path(coherent_flux, output_dir)
-
-    # NOTE: The files in the 'files_to_merge' list correspond to the 'OI_TYPE' list. Thus
-    # one can determine what is merged
-    if "lband" in str(directories[0]):
-        files_to_merge_unchopped = [incoherent_flux, coherent_flux,
-                                    coherent_bcd_vis, incoherent_vis,
-                                    coherent_bcd_vis]
-
-        files_to_merge_chopped = [incoherent_flux_chopped,
-                                  coherent_flux_chopped,
-                                  coherent_bcd_vis_chopped,
-                                  incoherent_vis_chopped,
-                                  coherent_bcd_vis_chopped]
-    else:
-        files_to_merge_unchopped = [incoherent_flux, coherent_flux,
-                                    coherent_bcd_pip_vis,
-                                    incoherent_bcd_pip_vis,
-                                    coherent_bcd_pip_vis]
-        files_to_merge_chopped = [incoherent_flux_chopped,
-                                  coherent_flux_chopped,
-                                  coherent_bcd_pip_vis_chopped,
-                                  incoherent_bcd_pip_vis_chopped,
-                                  coherent_bcd_pip_vis_chopped]
 
     try:
         oifits_patchwork(list(map(str, files_to_merge_unchopped)), str(out_file_unchopped),
