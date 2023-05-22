@@ -1,9 +1,10 @@
-"""  """
+import re
 import shutil
 import subprocess
 from collections import deque, namedtuple
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional, Dict, List
+from warnings import warn
 
 import pkg_resources
 
@@ -83,11 +84,11 @@ def check_file_match(targets: List[Path], calibrators: List[Path]) -> bool:
                " step). SKIPPING!", "y")
         cprint(f"{'':-^50}", "lg")
         return False
-    if len(targets) != len(calibrators):
-        cprint("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-files. SKIPPING!",
-               "y")
-        cprint(f"{'':-^50}", "lg")
+    if len(targets) < 4:
+        warn("# 'TARGET_RAW_INT'-files is lower than 4! Indicates problems with reduction. SKIPPING!")
         return False
+    if len(targets) != len(calibrators):
+        warn("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-files!")
     return True
 
 
@@ -122,6 +123,22 @@ def sort_fits_by_bcd_configuration(fits_files: List[Path]) -> namedtuple:
             cprint("BCD-configuration has not been found!", "r")
             raise ValueError
     return BCDFits(in_in, in_out, out_in, out_out)
+
+
+def match_targets_to_calibrators(targets: List[Path],
+                                 calibrators: List[Path]) -> Dict[str, str]:
+    """Matches the 'TARGET_RAW_INT'- to the 'CALIB_RAW_INT'-files."""
+    first_dict = {}
+    for target in targets:
+        numerical_part = re.search(r'\d+', target).group()
+        first_dict[numerical_part] = target
+
+    matched_entries = {}
+    for calibrator in calibrators:
+        numerical_part = re.search(r'\d+', calibrator).group()
+        if numerical_part in first_dict:
+            matched_entries[first_dict[numerical_part]] = calibrator
+    return matched_entries
 
 
 def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
@@ -216,6 +233,8 @@ def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
     product_dir : pathlib.Path
         The directory to contain the calibrated files.
     """
+    # TODO: Implement check that automatically detects what chopped and non-chopped
+    # files there are.
     cprint("Calibrating fluxes...", "g")
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
         cprint(f"Processing {target.name} with {calibrator.name}...", "g")
@@ -274,6 +293,8 @@ def calibrate_files(reduced_dir: Path, target_dir: Path,
     calibrators = get_fits_by_tag(calibrator_dir, "CALIB_RAW_INT")
 
     if check_file_match(targets, calibrators):
+        matches = match_targets_to_calibrators(targets, calibrators)
+        targets, calibrators = map(list, [matches.keys(), matches.values()])
         output_dir = get_path_descriptor(reduced_dir, "TAR-CAL",
                                          targets[0], calibrators[0])
         if not output_dir.exists():
@@ -322,10 +343,10 @@ def calibrate_folders(reduced_dir: Path, mode: str,
 # cals as checker generally
 # TODO: Implement checking for overwriting. Right now overwriting is by default
 @print_execution_time
-def calibrate(reduced_dir: Path,
-              mode: Optional[str] = "both",
-              band: Optional[str] = "both",
-              overwrite: Optional[bool] = False) -> None:
+def calibration_pipeline(reduced_dir: Path,
+                         mode: Optional[str] = "both",
+                         band: Optional[str] = "both",
+                         overwrite: Optional[bool] = False) -> None:
     """Does the full calibration for all of the reduced directories
     subdirectories.
 

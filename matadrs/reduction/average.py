@@ -125,9 +125,9 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
 
 
 # TODO: Implement overwrite
-def average(calibrated_dir: Path,
-            mode: Optional[str] = "both",
-            overwrite: Optional[bool] = False):
+def averaging_pipeline(calibrated_dir: Path,
+                       mode: Optional[str] = "both",
+                       overwrite: Optional[bool] = False):
     """Does the full averaging for all of the calibrated directories
     subdirectories.
 

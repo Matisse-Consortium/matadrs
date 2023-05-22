@@ -350,8 +350,8 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
 
 
 @print_execution_time
-def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
-           band: Optional[str] = "both", overwrite: Optional[bool] = False) -> None:
+def reduction_pipeline(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
+                       band: Optional[str] = "both", overwrite: Optional[bool] = False) -> None:
     """Runs the pipeline for the data reduction.
 
     Parameters

@@ -1,1 +1,1 @@
-from .matadrs import reduction_pipeline
+from .matadrs import matadrs_pipeline

@@ -152,7 +152,7 @@ def merge_folders(coherent_dirs: List[Path],
         merge_non_averaged_files(coherent_dir, incoherent_dir, output_dir)
 
 
-def merge(averaged_dir: Path) -> None:
+def merging_pipeline(averaged_dir: Path) -> None:
     """This merges two (.fits)-files together into one, i.e. the  "incoherent"
     and the "coherent" files.
 
