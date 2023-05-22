@@ -4,8 +4,8 @@ from matadrs import reduction_pipeline
 
 
 # Specify the path to the directory containing the data
-data_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/lPup")
-raw_dirs = [data_dir / "raw/2020-02-15"]
+data_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd142666")
+raw_dirs = [data_dir / "raw/UTs/2022-04-23"]
 
 # Specify the raw-directory, containing the raw data
 # raw_dirs = list(map(lambda x: data_dir / "raw" / x, observation_dirs))
@@ -16,4 +16,4 @@ product_dirs = list(map(lambda x: Path(str(x).replace("raw", "product")), raw_di
 
 # Call the reduction_pipeline
 reduction_pipeline(raw_dirs, product_dirs, overwrite=True, do_reduce=False,
-                   do_calibrate=True, do_average=True, do_merge=True)
+                   do_calibrate=False, do_average=False, do_merge=True)
