@@ -51,30 +51,59 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
         List of the Paths to the coherent- and incoherent directory.
     output_dir : pathlib.Path
     """
+    # TODO: If pipeline does not have a BCD-output use calibBCD2
+    # TODO: Make this into one function that takes care of both chopped and unchopped case
     flux, vis = "TARGET_AVG_FLUX_INT.fits", "TARGET_AVG_VIS_INT.fits"
     bcd, bcd_pip = "TARGET_AVG_T3PHI_INT.fits", "TARGET_CAL_INT_noBCD.fits"
     coherent_flux, incoherent_flux = [directory / flux for directory in directories]
-    coherent_vis, incoherent_vis = [directory / vis for directory in directories]
-    coherent_bcd_vis, incoherent_bcd_vis = [directory / bcd for directory in directories]
-    coherent_bcd_pip_vis, incoherent_bcd_pip_vis = [directory / bcd_pip for directory in directories]
-    out_file = get_output_file_path(coherent_flux, output_dir)
-    out_file_pip = get_output_file_path(coherent_flux, output_dir, True)
+    _, incoherent_vis = [directory / vis for directory in directories]
+    coherent_bcd_vis, _ = [directory / bcd for directory in directories]
+    coherent_bcd_pip_vis, incoherent_bcd_pip_vis = [directory / bcd_pip for
+                                                    directory in directories]
+    out_file_unchopped = get_output_file_path(coherent_flux, output_dir)
+
+    flux_chopped, vis_chopped = map(lambda x: x.replace("INT", "INT_CHOPPED"))
+    bcd_chopped, bcd_pip_chopped = map(lambda x: x.replace("INT", "INT_CHOPPED"))
+    coherent_flux_chopped, incoherent_flux_chopped = [directory / flux_chopped
+                                                      for directory in directories]
+    _, incoherent_vis_chopped = [directory / vis_chopped for
+                                 directory in directories]
+    coherent_bcd_vis_chopped, _ = [directory / bcd_chopped for
+                                   directory in directories]
+    coherent_bcd_pip_vis_chopped, incoherent_bcd_pip_vis_chopped =\
+        [directory / bcd_pip_chopped for directory in directories]
+    out_file_chopped = get_output_file_path(coherent_flux, output_dir)
 
     # NOTE: The files in the 'files_to_merge' list correspond to the 'OI_TYPE' list. Thus
     # one can determine what is merged
     if "lband" in str(directories[0]):
-        files_to_merge = [incoherent_flux, coherent_flux,
-                          coherent_bcd_vis, incoherent_vis,
-                          coherent_bcd_vis]
-    else:
-        files_to_merge = [incoherent_flux, coherent_flux,
-                          coherent_bcd_pip_vis, incoherent_bcd_pip_vis,
-                          coherent_bcd_pip_vis]
-    if all(fits_file.exists() for fits_file in files_to_merge):
-        oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
-                         oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
+        files_to_merge_unchopped = [incoherent_flux, coherent_flux,
+                                    coherent_bcd_vis, incoherent_vis,
+                                    coherent_bcd_vis]
 
-    # TODO: Implement handling of chopped files
+        files_to_merge_chopped = [incoherent_flux_chopped,
+                                  coherent_flux_chopped,
+                                  coherent_bcd_vis_chopped,
+                                  incoherent_vis_chopped,
+                                  coherent_bcd_vis_chopped]
+    else:
+        files_to_merge_unchopped = [incoherent_flux, coherent_flux,
+                                    coherent_bcd_pip_vis,
+                                    incoherent_bcd_pip_vis,
+                                    coherent_bcd_pip_vis]
+        files_to_merge_chopped = [incoherent_flux_chopped,
+                                  coherent_flux_chopped,
+                                  coherent_bcd_pip_vis_chopped,
+                                  incoherent_bcd_pip_vis_chopped,
+                                  coherent_bcd_pip_vis_chopped]
+
+    oifits_patchwork(list(map(str, files_to_merge_unchopped)), str(out_file_unchopped),
+                     oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
+    try:
+        oifits_patchwork(list(map(str, files_to_merge_chopped)), str(out_file_chopped),
+                         oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
+    except Exception:
+        pass
 
 
 def merge_non_averaged_files(coherent_dir: Path,
@@ -95,39 +124,48 @@ def merge_non_averaged_files(coherent_dir: Path,
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
 
-    coherent_unchopped_vis_fits,\
-            coherent_chopped_vis_fits = split_fits(coherent_dir, vis_tag)
-    coherent_unchopped_flux_fits,\
-            coherent_chopped_flux_fits = split_fits(coherent_dir, flux_tag)
-    incoherent_unchopped_vis_fits,\
-            incoherent_chopped_vis_fits = split_fits(incoherent_dir, vis_tag)
-    incoherent_unchopped_flux_fits,\
-            incoherent_chopped_flux_fits = split_fits(incoherent_dir, flux_tag)
+    coherent_unchopped_vis_fits, coherent_chopped_vis_fits =\
+        split_fits(coherent_dir, vis_tag)
+    coherent_unchopped_flux_fits, coherent_chopped_flux_fits =\
+        split_fits(coherent_dir, flux_tag)
+    incoherent_unchopped_vis_fits, incoherent_chopped_vis_fits =\
+        split_fits(incoherent_dir, vis_tag)
+    incoherent_unchopped_flux_fits, incoherent_chopped_flux_fits =\
+        split_fits(incoherent_dir, flux_tag)
 
-    for index, (coh_unchopped_vis, inc_unchopped_vis, coh_unchopped_flux, inc_unchopped_flux)\
+    for index, (coh_unchopped_vis, inc_unchopped_vis, coh_chopped_vis, inc_chopped_vis,
+                coh_unchopped_flux, inc_unchopped_flux, coh_chopped_flux, inc_chopped_flux)\
             in enumerate(zip(coherent_unchopped_vis_fits, incoherent_unchopped_vis_fits,
-                             coherent_unchopped_flux_fits, incoherent_unchopped_flux_fits), start=1):
-        out_file = get_output_file_path(coh_unchopped_vis, output_dir)
-        out_file = out_file.parent / f"{out_file.stem}_00{index}.fits"
+                             coherent_chopped_vis_fits, incoherent_chopped_vis_fits,
+                             coherent_unchopped_flux_fits, incoherent_unchopped_flux_fits,
+                             coherent_chopped_flux_fits, incoherent_chopped_flux_fits), start=1):
+        out_file_unchopped = get_output_file_path(coh_unchopped_vis, output_dir)
+        out_file_unchopped = out_file_unchopped.parent / f"{out_file_unchopped.stem}_00{index}.fits"
+        out_file_chopped = get_output_file_path(coh_chopped_vis, output_dir)
+        out_file_chopped = out_file_chopped.parent / f"{out_file_chopped.stem}_00{index}.fits"
 
         if "lband" in str(coherent_dir):
-            files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
-                              coh_unchopped_vis, inc_unchopped_vis,
-                              coh_unchopped_vis]
+            files_to_merge_unchopped = [inc_unchopped_flux, coh_unchopped_flux,
+                                        coh_unchopped_vis, inc_unchopped_vis,
+                                        coh_unchopped_vis]
+            files_to_merge_chopped = [inc_chopped_flux, coh_chopped_flux,
+                                      coh_chopped_vis, inc_chopped_vis,
+                                      coh_chopped_vis]
         else:
+            files_to_merge_unchopped = [inc_unchopped_flux, coh_unchopped_flux,
+                                        coh_unchopped_vis, inc_unchopped_vis,
+                                        coh_unchopped_vis]
+            files_to_merge_chopped = [inc_chopped_flux, coh_chopped_flux,
+                                      coh_chopped_vis, inc_chopped_vis,
+                                      coh_chopped_vis]
 
-
-            files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
-                              coh_unchopped_vis, inc_unchopped_vis,
-                              coh_unchopped_vis]
-
-        if all(fits_file.exists() for fits_file in files_to_merge):
-            oifits_patchwork(list(map(str, files_to_merge)),
-                             str(out_file), oi_types_list=OI_TYPES)
-        else:
-            raise FileNotFoundError("Files haven't been found: 'oifits_patchwork'"
-                                    " cannot be executed!")
-        # TODO: Implement handling of chopped files
+        oifits_patchwork(list(map(str, files_to_merge_unchopped)),
+                         str(out_file_unchopped), oi_types_list=OI_TYPES)
+        try:
+            oifits_patchwork(list(map(str, files_to_merge_chopped)),
+                             str(out_file_chopped), oi_types_list=OI_TYPES)
+        except Exception:
+            pass
 
 
 def merge_folders(coherent_dirs: List[Path],

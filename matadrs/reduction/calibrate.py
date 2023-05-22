@@ -170,7 +170,7 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
     .calib_BCD2.calib_BCD : BCD-calibration for closure phases.
     """
     cprint("Executing BCD-calibration...", "g")
-    unchopped_fits, chopped_fits = split_fits(directory, "CAL_INT_000")
+    unchopped_fits, chopped_fits = split_fits(directory, "CAL_INT")
     outfile_unchopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
     bcd = sort_fits_by_bcd_configuration(unchopped_fits)
     if band == "lband":
@@ -233,8 +233,6 @@ def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
     product_dir : pathlib.Path
         The directory to contain the calibrated files.
     """
-    # TODO: Implement check that automatically detects what chopped and non-chopped
-    # files there are.
     cprint("Calibrating fluxes...", "g")
     for index, (target, calibrator) in enumerate(zip(targets, calibrators), start=1):
         cprint(f"Processing {target.name} with {calibrator.name}...", "g")
@@ -263,8 +261,6 @@ def cleanup_calibration(output_dir: Path):
     cprint(f"{'':-^50}", "lg")
 
 
-# TODO: Make this better so it calibrates even if the calibrator or the science
-# target is chopped but the other is not
 def calibrate_files(reduced_dir: Path, target_dir: Path,
                     calibrator_dir: Path, mode: str,
                     band: str, overwrite: bool) -> None:
