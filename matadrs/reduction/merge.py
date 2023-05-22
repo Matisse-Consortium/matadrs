@@ -16,7 +16,7 @@ HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
                     {'key': 'HIERARCH ESO INS BCD2 NAME', 'value': ' '}]
 
 
-OI_TYPES = [['flux'], ['visamp'], ['visphi'], ['vis2'], ['t3']]
+OI_TYPES = [["flux"], ["visamp"], ["visphi"], ["vis2"], ["t3"]]
 
 
 # TODO: Remove the folder's input and just get the data from the fits-file?
@@ -62,14 +62,14 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
 
     # NOTE: The files in the 'files_to_merge' list correspond to the 'OI_TYPE' list. Thus
     # one can determine what is merged
-    if "lband" in str(directories[0]):
+    if "HAWAII" in str(directories[0]):
         files_to_merge = [incoherent_flux, coherent_flux,
-                          incoherent_vis, incoherent_vis,
-                          coherent_bcd_vis]
+                          coherent_bcd_vis, incoherent_vis,
+                          incoherent_bcd_vis]
     else:
         files_to_merge = [incoherent_flux, coherent_flux,
-                          incoherent_bcd_pip_vis,
-                          incoherent_bcd_pip_vis, coherent_bcd_pip_vis]
+                          coherent_bcd_pip_vis, incoherent_bcd_pip_vis,
+                          coherent_bcd_pip_vis]
 
     if all(fits_file.exists() for fits_file in files_to_merge):
         oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
@@ -93,6 +93,8 @@ def merge_non_averaged_files(coherent_dir: Path,
     """
     output_dir = output_dir / "non_averaged"
     flux_tag, vis_tag = "TARGET_FLUX_CAL", "TARGET_CAL"
+    coherent_dir, incoherent_dir = map(lambda x: Path(str(x).replace("averaged", "calib").replace("-AVG", "")),
+                                       [coherent_dir, incoherent_dir])
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
 
@@ -111,13 +113,11 @@ def merge_non_averaged_files(coherent_dir: Path,
         out_file = get_output_file_path(coh_unchopped_vis, output_dir)
         out_file = out_file.parent / f"{out_file.stem}_00{index}.fits"
 
-        if "lband" in str(coherent_dir):
+        if "HAWAII" in str(coherent_dir):
             files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
                               coh_unchopped_vis, inc_unchopped_vis,
-                              coh_unchopped_vis]
+                              inc_unchopped_vis]
         else:
-
-
             files_to_merge = [inc_unchopped_flux, coh_unchopped_flux,
                               coh_unchopped_vis, inc_unchopped_vis,
                               coh_unchopped_vis]

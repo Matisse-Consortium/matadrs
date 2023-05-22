@@ -177,8 +177,8 @@ class Plotter:
         if np.min(wavelength) >= 6:
             indices = np.where((wavelength > 8.5) | (wavelength < 12.5))
         else:
-            indices_low = np.where((wavelength <= 4.8) & (wavelength >= 4.5))
-            indices_high = np.where((wavelength >= 3.) & (wavelength <= 3.8))
+            indices_low = np.where((wavelength < 4.8) & (wavelength > 4.5))
+            indices_high = np.where((wavelength > 3.) & (wavelength < 3.8))
             indices = np.hstack((indices_low, indices_high))
         ymin, ymax = data[:, indices].min(), data[:, indices].max()
         spacing = np.linalg.norm(ymax-ymin)*margin
@@ -391,10 +391,10 @@ class Plotter:
                         ax.fill_between(sub_component.x_values,
                                         y_value+y_error, y_value-y_error, alpha=0.2)
                     ax.legend(fontsize="xx-small", loc="upper right", framealpha=0.5)
-                test = self._set_y_limits(sub_component.x_values,
-                                          sub_component.y_values,
-                                          margin=margin)
-                ax.set_ylim(*test)
+                    limits = self._set_y_limits(sub_component.x_values,
+                                                sub_component.y_values,
+                                                margin=margin)
+                ax.set_ylim(*limits)
                 ax.set_xlabel(xlabel)
                 ax.set_ylabel(name)
             else:
