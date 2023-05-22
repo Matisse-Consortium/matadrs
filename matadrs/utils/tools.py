@@ -145,7 +145,7 @@ def split_fits(directory: Path, tag: str) -> Tuple[List[Path], Optional[List[Pat
         A list of Paths that are the unchopped (.fits)-files.
     """
     unchopped_fits = [fits_file for fits_file in get_fits_by_tag(directory, tag)]
-    if len(unchopped_fits) == 6:
+    if len(unchopped_fits) > 4:
         return unchopped_fits[:4], unchopped_fits[4:]
     return unchopped_fits, None
 

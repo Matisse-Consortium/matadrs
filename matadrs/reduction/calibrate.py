@@ -130,12 +130,12 @@ def match_targets_to_calibrators(targets: List[Path],
     """Matches the 'TARGET_RAW_INT'- to the 'CALIB_RAW_INT'-files."""
     first_dict = {}
     for target in targets:
-        numerical_part = re.search(r'\d+', target).group()
+        numerical_part = re.search(r'\d+', target.name).group()
         first_dict[numerical_part] = target
 
     matched_entries = {}
     for calibrator in calibrators:
-        numerical_part = re.search(r'\d+', calibrator).group()
+        numerical_part = re.search(r'\d+', calibrator.name).group()
         if numerical_part in first_dict:
             matched_entries[first_dict[numerical_part]] = calibrator
     return matched_entries
@@ -329,6 +329,8 @@ def calibrate_folders(reduced_dir: Path, mode: str,
         cprint(f"{'':-^50}", "lg")
         if check_if_target(directory):
             for rotated_directory in rotated_sub_directories:
+                if directory == rotated_directory:
+                    continue
                 calibrate_files(reduced_dir, directory,
                                 rotated_directory, mode, band, overwrite)
     cprint(f"Finished calibration of {band} and {mode}", "lp")

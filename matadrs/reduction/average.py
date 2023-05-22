@@ -79,12 +79,11 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
         unchopped_fits, chopped_fits = split_fits(directory, "TARGET_FLUX_CAL")
     else:
         cprint("Averaging visibility calibration...", "g")
-        unchopped_fits, chopped_fits = split_fits(directory, "TARGET_CAL")
+        unchopped_fits, chopped_fits = split_fits(directory, "TARGET_CAL_INT_0")
         outfile_name = "TARGET_AVG_VIS"
 
     outfile_unchopped = output_dir / f"{outfile_name}_INT.fits"
     avg_oifits(unchopped_fits, outfile_unchopped, headerval=HEADER_TO_REMOVE)
-    breakpoint()
 
     if chopped_fits is not None:
         outfile_chopped = output_dir / f"{outfile_name}_INT_CHOPPED.fits"
@@ -114,15 +113,15 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
-            average_files(directory, "flux", output_dir)
-            average_files(directory, "vis", output_dir)
-            copy_calibrated_files(directory, output_dir)
+        average_files(directory, "flux", output_dir)
+        average_files(directory, "vis", output_dir)
+        copy_calibrated_files(directory, output_dir)
 
-            cprint("Plotting averaged files...", "g")
-            for fits_file in get_fits_by_tag(output_dir, "AVG"):
-                plot_fits = Plotter(fits_file, save_path=output_dir)
-                plot_fits.add_cphases().add_vis(corr_flux=True).add_vis2().plot(save=True, error=True)
-            cprint(f"{'':-^50}", "lg")
+        cprint("Plotting averaged files...", "g")
+        for fits_file in get_fits_by_tag(output_dir, "AVG"):
+            plot_fits = Plotter(fits_file, save_path=output_dir)
+            plot_fits.add_cphases().add_vis(corr_flux=True).add_vis2().plot(save=True, error=True)
+        cprint(f"{'':-^50}", "lg")
 
 
 # TODO: Implement overwrite
