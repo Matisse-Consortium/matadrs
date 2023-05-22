@@ -61,17 +61,18 @@ def execute_multiple_merges(fluxes: List[Path], visibilities: List[Path],
                             chopped: bool, output_dir: Path) -> None:
     """Executes a merge for multiple, non-averaged files."""
     try:
-        for index, (flux, visibility)\
-                in enumerate(zip(fluxes, visibilities), start=1):
-            execute_merge(output_dir, flux, visibility, chopped=chopped, index=index)
+        for index, observables in enumerate(zip(*fluxes, *visibilities), start=1):
+            flux, vis = observables[:2], observables[2:]
+            execute_merge(output_dir, flux, vis, chopped=chopped, index=index)
     except Exception:
         pass
 
 
 def prepare_multiple_merges(directories: Path, output_dir: Path):
     """Gets the non-averaged (.fits)-files and executes multiple merges with it."""
-    flux_tag, vis_tag = "TARGET_FLUX_CAL", "TARGET_CAL"
-    coherent_dir, incoherent_dir = directories
+    flux_tag, vis_tag = "TARGET_FLUX_CAL", "TARGET_CAL_INT_0"
+    coherent_dir, incoherent_dir = map(lambda x: Path(str(x).replace("averaged", "calib").replace("-AVG", "")),
+                                       directories)
     coherent_unchopped_vis, coherent_chopped_vis=\
         split_fits(coherent_dir, vis_tag)
     coherent_unchopped_flux, coherent_chopped_flux=\

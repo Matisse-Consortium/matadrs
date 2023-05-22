@@ -80,8 +80,8 @@ def check_file_match(targets: List[Path], calibrators: List[Path]) -> bool:
     files_match : bool
     """
     if not targets:
-        cprint("No 'TARGET_RAW_INT*'-files found (Check for error in first reduction"
-               " step). SKIPPING!", "y")
+        cprint("No 'TARGET_RAW_INT*'-files found (Maybe calibrator? If not check for"
+               " error in first reduction step). SKIPPING!", "y")
         cprint(f"{'':-^50}", "lg")
         return False
     if len(targets) < 4:
@@ -170,22 +170,22 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
     .calib_BCD2.calib_BCD : BCD-calibration for closure phases.
     """
     cprint("Executing BCD-calibration...", "g")
-    unchopped_fits, chopped_fits = split_fits(directory, "CAL_INT")
+    unchopped_fits, chopped_fits = split_fits(directory, "CAL_INT_0")
     outfile_unchopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
     bcd = sort_fits_by_bcd_configuration(unchopped_fits)
     if band == "lband":
         calib_BCD(bcd.in_in, bcd.in_out,
                   bcd.out_in, bcd.out_out,
                   outfile_unchopped_cphases, plot=False)
+
+        if chopped_fits is not None:
+            outfile_chopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_CHOPPED_INT.fits"
+            bcd_chopped = sort_fits_by_bcd_configuration(chopped_fits)
+            calib_BCD(bcd_chopped.in_in, "",
+                      "", bcd_chopped.out_out,
+                      outfile_chopped_cphases, plot=False)
     else:
         calib_BCD(bcd.in_in, "", "", bcd.out_out, outfile_unchopped_cphases, plot=False)
-
-    if chopped_fits is not None:
-        outfile_chopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_CHOPPED_INT.fits"
-        bcd_chopped = sort_fits_by_bcd_configuration(chopped_fits)
-        calib_BCD(bcd_chopped.in_in, "",
-                  "", bcd_chopped.out_out,
-                  outfile_chopped_cphases, plot=False)
 
 
 def calibrate_visibilities(targets: List[Path],

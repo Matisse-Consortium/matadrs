@@ -40,10 +40,11 @@ def copy_calibrated_files(directory: Path, output_dir: Path) -> None:
     output_dir : pathlib.Path
         The directory to which the new files are saved to.
     """
-    bcd_pip_files = get_fits_by_tag(directory, "CAL_INT_noBCD")
+    bcd_pip_file = get_fits_by_tag(directory, "CAL_INT_noBCD")[0]
+    shutil.copy(str(bcd_pip_file), (output_dir / bcd_pip_file.name))
+
     bcd_files = get_fits_by_tag(directory, "BCD_CAL")
-    for bcd_pip_file, bcd_file in zip(bcd_pip_files, bcd_files):
-        shutil.copy(str(bcd_pip_file), (output_dir / bcd_pip_file.name))
+    for bcd_file in bcd_files:
         shutil.copy(str(bcd_file), (output_dir / bcd_file.name))
 
 
