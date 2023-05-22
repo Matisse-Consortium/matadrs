@@ -47,8 +47,7 @@ def get_averaged_files(directories: List[Path], chopped: bool):
     if chopped:
         flux, vis = map(lambda x: x.replace("INT", "INT_CHOPPED"),
                         [flux, vis])
-        bcd, bcd_pip = map(lambda x: x.replace("INT", "INT_CHOPPED"),
-                           [bcd, bcd_pip])
+        bcd = bcd.replace("INT", "INT_CHOPPED")
 
     fluxes = [directory / flux for directory in directories]
     visibilities = [directory / vis for directory in directories]
@@ -114,11 +113,13 @@ def execute_merge(output_dir: Path, fluxes: List[Path],
             files_to_merge = [incoherent_flux, coherent_flux,
                               coherent_vis, incoherent_vis, coherent_vis]
     else:
+        if bcd_visibilities is not None:
+            coherent_vis, incoherent_vis = bcd_visibilities
         if bcd_pip_visibilities is not None:
-            coherent_bcd_vis, incoherent_bcd_vis = bcd_pip_visibilities
+            coherent_vis, incoherent_vis = bcd_pip_visibilities
         files_to_merge = [incoherent_flux, coherent_flux,
-                          coherent_bcd_vis, incoherent_bcd_vis,
-                          coherent_bcd_vis]
+                          coherent_vis, incoherent_vis,
+                          coherent_vis]
 
     oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                      oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
@@ -142,7 +143,8 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
 
     try:
         execute_merge(output_dir,
-                      *get_averaged_files(directories, chopped=True))
+                      *get_averaged_files(directories, chopped=True),
+                      chopped=True)
     except Exception:
         pass
 
