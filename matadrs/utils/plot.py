@@ -152,9 +152,9 @@ class Plotter:
         if plot_name is not None:
             self.plot_name = plot_name
         elif isinstance(fits_files, List) and len(fits_files) > 1:
-            self.plot_name = "combined_fits.pdf"
+            self.plot_name = "combined_fits"
         else:
-            self.plot_name = f"{Path(fits_files).stem}.pdf"
+            self.plot_name = f"{Path(fits_files).stem}"
 
         self.readouts = [ReadoutFits(fits_file, flux_file)
                          for fits_file, flux_file
@@ -187,7 +187,7 @@ class Plotter:
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
                 sel_wl: Optional[float] = None,
                 airmass_lim: Optional[float] = 2.,
-                show_text: Optional[List] = None) -> None:
+                show_text: Optional[List] = False) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
 
         Parameters
@@ -368,7 +368,8 @@ class Plotter:
                        component: Union[Callable, PlotComponent],
                        no_xlabel: Optional[bool] = False,
                        error: Optional[bool] = False,
-                       margin: Optional[float] = 0.05) -> None:
+                       margin: Optional[float] = 0.05,
+                       **kwargs) -> None:
         """Plots all the data of a single component.
 
         Parameters
@@ -379,6 +380,7 @@ class Plotter:
         no_xlabel : bool, optional
         error : bool, optional
         margin : bool, optional
+        kwargs: dict
         """
         xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
         for index, sub_component in enumerate(component):
@@ -398,12 +400,13 @@ class Plotter:
                 ax.set_xlabel(xlabel)
                 ax.set_ylabel(name)
             else:
-                sub_component(ax)
+                sub_component(ax, **kwargs)
 
     # TODO: Sharex, sharey and subplots should be added
     def plot(self, save: Optional[bool] = False,
              subplots: Optional[bool] = False,
-             sharex: Optional[bool] = False, **kwargs):
+             sharex: Optional[bool] = False,
+             format: Optional[str] = "pdf", **kwargs):
         """Combines the individual components into one plot.
 
         The size and dimension of the plot is automatically determined
@@ -432,11 +435,12 @@ class Plotter:
         else:
             name, component = map(
                 lambda x: x[0], zip(*self.components.items()))
-            self.plot_component(ax, name, component, **kwargs)
+            self.plot_component(axarr, name, component, **kwargs)
         fig.tight_layout()
 
         if save:
-            plt.savefig(self.save_path / self.plot_name, format="pdf")
+            plt.savefig(self.save_path / (self.plot_name + f".{format}"),
+                        format=format)
         else:
             plt.show()
         plt.close()
