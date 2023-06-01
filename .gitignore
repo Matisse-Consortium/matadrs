@@ -1,0 +1,15 @@
+# Folders to ignore
+__pycache__/
+*.egg-info/
+examples/
+matadrs/
+doc/
+tests/
+
+# Files to ignore
+README.md
+MANIFEST.in
+LICENSE
+pyproject.toml
+.gitattributes
+
