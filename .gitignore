@@ -1,8 +1,6 @@
-# Folders to ignore
+# General folders to ignore
 __pycache__/
 *.egg-info/
-docs/
-doc/
 
 # Files to ignore
 *.txt
@@ -10,5 +8,6 @@ doc/
 # Specific folders to ignore
 tests/
 matadrs/jacob_files
+doc/
 
 # Specific files to ignore
