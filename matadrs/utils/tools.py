@@ -4,7 +4,7 @@ import shutil
 from datetime import timedelta
 from functools import wraps
 from pathlib import Path
-from typing import Callable, Tuple, List, Optional
+from typing import Optional, Callable, Tuple, List
 
 import astropy.units as u
 import numpy as np
