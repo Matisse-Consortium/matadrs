@@ -81,11 +81,20 @@ class headerCache:
             warn("Cache is full, new value will not be added!")
 
 
-cacheHdr = headerCache()
+CACHE_HDR = headerCache()
 
 
 def matisseCalib(header, action, listCalibFile, calibPrevious):
-    global cacheHdr
+    """
+
+    Parameters
+    ----------
+    header : str
+    action :
+    listCalibFile :
+    calibPrevious :
+    """
+    global CACHE_HDR
     keyDetReadCurname = header['HIERARCH ESO DET READ CURNAME']
     keyDetChipName = header['HIERARCH ESO DET CHIP NAME']
     keyDetSeq1Dit = header['HIERARCH ESO DET SEQ1 DIT']
@@ -110,10 +119,10 @@ def matisseCalib(header, action, listCalibFile, calibPrevious):
 
     allhdr = []
     for elt in listCalibFile:
-        if elt not in cacheHdr:
+        if elt not in CACHE_HDR:
             value = getheader(elt,0);
-            cacheHdr.update(elt,value)
-        allhdr.append(cacheHdr.cache[elt]['value'])
+            CACHE_HDR.update(elt,value)
+        allhdr.append(CACHE_HDR.cache[elt]['value'])
 
     if (action == "ACTION_MAT_IM_BASIC" or
         action == "ACTION_MAT_IM_EXTENDED" or
@@ -695,7 +704,11 @@ def matisseRecipes(action, det, tel, resol):
     return ["",""]
 
 def matisseAction(header,tag):
+    """
 
+    Parameters
+    ----------
+    """
     keyDetName        = header['HIERARCH ESO DET NAME']
     keyDetReadCurname = header['HIERARCH ESO DET READ CURNAME']
 
@@ -741,7 +754,18 @@ def matisseAction(header,tag):
         return "ACTION_MAT_IM_REM"
     return "NO-ACTION"
 
-def matisseType(header):
+def matisseType(header: str) -> str:
+    """
+
+    Parameters
+    ----------
+    header : str
+
+    Return
+    ------
+    res : str
+        The type of the (.fits)-file.
+    """
     res  = ""
     catg = None
     typ  = None
