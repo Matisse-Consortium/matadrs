@@ -1,8 +1,7 @@
-"""  """
 import os
 import shutil
 from pathlib import Path
-from typing import List, Set, Tuple, Union, Optional
+from typing import Optional, Tuple, List, Set
 
 import astropy.units as u
 import numpy as np
@@ -16,15 +15,17 @@ from ..mat_tools.libAutoPipeline import matisseType
 from ..mat_tools.mat_autoPipeline import mat_autoPipeline
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
-from ..utils.tools import cprint, print_execution_time, capitalise_to_index,\
-        get_execution_modes, get_fits_by_tag, move
+from ..utils.tools import cprint, print_execution_time, \
+    get_execution_modes, get_fits_by_tag, move
 
 __all__ = ["get_readout_for_tpl_match", "get_tpl_starts", "in_catalog",
            "get_catalog_match", "prepare_catalogs", "set_script_arguments",
-           "cleanup_reduction", "reduce_mode_and_band", "prepare_reduction", "reduce"]
+           "cleanup_reduction", "reduce_mode_and_band", "prepare_reduction",
+           "reduce"]
 
 
-CATALOG_DIR = Path(pkg_resources.resource_filename("matadrs", "data/catalogues"))
+CATALOG_DIR = Path(
+    pkg_resources.resource_filename("matadrs", "data/catalogues"))
 JSDC_V2_CATALOG = Vizier(catalog="II/346/jsdc_v2")
 JSDC_CATALOG = CATALOG_DIR / "jsdc_v2_catalog_20170303.fits"
 ADDITIONAL_CATALOG = CATALOG_DIR / "supplementary_catalog_202207.fits"
@@ -33,8 +34,8 @@ SPECTRAL_BINNING = {"low": [5, 7], "high_uts": [5, 38], "high_ats": [5, 98]}
 
 
 def get_readout_for_tpl_match(raw_dir: Path, tpl_start: str) -> Path:
-    """Gets the readout of a singular (.fits)-file matching the 'tpl_start', i.e.,
-    the starting time of the observation.
+    """Gets the readout of a singular (.fits)-file matching the "tpl_start"
+    (i.e, the starting time of the individual observations).
 
     Parameters
     ----------
@@ -46,18 +47,19 @@ def get_readout_for_tpl_match(raw_dir: Path, tpl_start: str) -> Path:
     Returns
     -------
     fits_file : pathlib.Path
-        A (.fits)-file matching the input.
+        A (.fits)-file matching the input "tpl_start".
     """
     for fits_file in raw_dir.glob("*.fits"):
         readout = ReadoutFits(fits_file)
         if tpl_start == readout.tpl_start:
             return readout
-    raise FileNotFoundError(f"No file with matching tpl_start: '{tpl_start}' exists!")
+    raise FileNotFoundError(
+        f"No file with matching tpl_start: '{tpl_start}' exists!")
 
 
 def get_tpl_starts(raw_dir: Path) -> Set[str]:
-    """Iterates through all files and gets their 'tpl_start', i.e, the starting time of
-    the individual observations.
+    """Iterates through all files and gets their "tpl_start"
+    (i.e, the starting time of the individual observations).
 
     Parameters
     ----------
@@ -69,30 +71,45 @@ def get_tpl_starts(raw_dir: Path) -> Set[str]:
     tpl_starts : set of str
         The starting times of all the observations given by the raw-files.
     """
-    return set([ReadoutFits(fits_file).tpl_start for fits_file in raw_dir.glob("*.fits")])
+    return {ReadoutFits(fits_file).tpl_start
+            for fits_file in raw_dir.glob("*.fits")}
 
 
 def find_catalogs(calib_dir: Path) -> List[Path]:
-    """Searches for JSDC-catalogs in the provided directory and returns their Paths."""
-    return [catalog for catalog in calib_dir.glob("*.fits") if
-            matisseType(ReadoutFits(catalog).primary_header) == "JSDC_CAT"]
-
-
-# TODO: Test if the times are correct
-def remove_old_catalogs(catalog: Path, calib_dir: Path):
-    """Checks if the latest catalog is already existing in the calibration directory and
-    removes outdated iterations.
+    """Searches for JSDC-catalogs in the provided directory
+    and returns their Paths.
 
     Parameters
     ----------
     calib_dir : pathlib.Path
-        The directory containing to the observation associated calibration files.
+        The directory containing the with the observation
+        associated calibration files.
+
+    Returns
+    -------
+    catalogs : list of pathlib.Path
+        A list of the catalog's paths.
+    """
+    return [catalog for catalog in calib_dir.glob("*.fits") if
+            matisseType(ReadoutFits(catalog).primary_header) == "JSDC_CAT"]
+
+
+# TODO: Test if the times are correct -> None file check.
+def remove_old_catalogs(catalog: Path, calib_dir: Path):
+    """Checks if the latest catalog is already existing
+    in the calibration directory and removes outdated iterations.
+
+    Parameters
+    ----------
+    calib_dir : pathlib.Path
+        The directory containing the with the observation
+        associated calibration files.
     """
     newest_catalog_time = Time(ReadoutFits(catalog).primary_header["DATE"])\
-            if "DATE" in ReadoutFits(catalog).primary_header else ""
-    for readout in list(map(lambda x: ReadoutFits(x), find_catalogs(calib_dir))):
+        if "DATE" in ReadoutFits(catalog).primary_header else ""
+    for readout in list(map(ReadoutFits, find_catalogs(calib_dir))):
         catalog_time = Time(readout.primary_header["DATE"])\
-                if "DATE" in readout.primary_header else ""
+            if "DATE" in readout.primary_header else ""
         if (newest_catalog_time and catalog_time):
             if catalog_time < newest_catalog_time:
                 cprint("Removing outdated catalog...", "g")
@@ -126,7 +143,9 @@ def in_catalog(readout: ReadoutFits,
                               unit=(u.hourangle, u.deg), frame="icrs")
     separation = readout.coords.separation(coords_catalog)
     if separation[np.nanargmin(separation)] < radius.to(u.deg):
-        cprint(f"Calibrator '{readout.name}' found in supplementary catalog!", "g")
+        cprint(
+            f"Calibrator '{readout.name}' found"
+            " in supplementary catalog!", "g")
         return catalog
     cprint(f"Calibrator '{readout.name}' not found in any catalogs!"
            " No TF2 and the 'mat_cal_oifits'-recipe will fail", "r")
@@ -134,10 +153,12 @@ def in_catalog(readout: ReadoutFits,
 
 
 def get_catalog_match(readout: ReadoutFits,
-                      radius: u.arcsec = 20*u.arcsec) -> Union[Path, None]:
-    """Checks if the given calibrator is contained in the 'jsdc_v2'-catalog. If otherwise
-    searches the local, supplementary calibrator databases instead. If nothing is found
-    returns None.
+                      radius: u.arcsec = 20*u.arcsec) -> Optional[Path]:
+    """Checks if the given calibrator is contained in the 'jsdc_v2'-catalog.
+    If otherwise searches the local, supplementary calibrator databases
+    instead.
+
+    If nothing is found returns None.
 
     Parameters
     ----------
@@ -154,23 +175,28 @@ def get_catalog_match(readout: ReadoutFits,
     match = JSDC_V2_CATALOG.query_region(readout.coords, radius=radius)
     if match:
         if len(match[0]) > 0:
-            cprint(f"Calibrator '{match[0]['Name'][0]}' found in JSDC v2 catalog!", "y")
+            cprint(
+                f"Calibrator '{match[0]['Name'][0]}'"
+                " found in JSDC v2 catalog!", "y")
         return JSDC_CATALOG
-    return in_catalog(readout.coords, radius=radius, catalog=ADDITIONAL_CATALOG)
+    return in_catalog(readout.coords, radius=radius,
+                      catalog=ADDITIONAL_CATALOG)
 
 
 # NOTE: Is this function even necessary, it seems like the catalogs of the VLTI are
 # anyways newer than the ones online -> Check with Jozsef and check multiple files
 def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
-    """Checks if the starting time given by 'tpl_start' corresponds to the observation of
-    a science target/calibrator and removes/prepares the un/needed catalogs
+    """Checks if the starting time given by "tpl_start" (i.e, the starting
+    time of the individual observations) corresponds to the observation of
+    a science target/calibrator and removes/prepares the un/needed catalogs.
 
     Parameters
     ----------
     raw_dir : pathlib.Path
         The direcotry containing the raw observation files.
     calib_dir : pathlib.Path
-        The directory containing to the observation associated calibration files.
+        The directory containing the with the observation
+        associated calibration files.
     tpl_start : str
         The starting time of the observation.
     """
@@ -189,7 +215,9 @@ def prepare_catalogs(raw_dir: Path, calib_dir: Path, tpl_start: str) -> None:
     else:
         for catalog in calib_dir.glob("*catalog*"):
             os.remove(catalog)
-        cprint(f"Science target '{readout.name}' detected! Removing catalogs...", "y")
+        cprint(
+            f"Science target '{readout.name}' detected! Removing catalogs...",
+            "y")
 
 
 def get_spectral_binning(raw_dir, tpl_start) -> List[int]:
@@ -201,11 +229,13 @@ def get_spectral_binning(raw_dir, tpl_start) -> List[int]:
     raw_dir : pathlib.Path
         The directory containing the raw observation files.
     tpl_start : str
-        The starting time of the observation.
+        The starting time of the individual observations.
 
     Returns
     -------
     spectral_binning : list of int
+        The spectral binning corresponding to the resolution of the
+        observation.
     """
     readout = get_readout_for_tpl_match(raw_dir, tpl_start)
     if readout.resolution == "high":
@@ -216,7 +246,8 @@ def get_spectral_binning(raw_dir, tpl_start) -> List[int]:
 
 
 def set_script_arguments(mode: str) -> Tuple[str]:
-    """Sets the arguments that are then passed to the 'mat_autoPipeline.py' script.
+    """Sets the arguments that are then passed to the
+    "mat_autoPipeline" function.
 
     Parameters
     ----------
@@ -236,6 +267,11 @@ def set_script_arguments(mode: str) -> Tuple[str]:
     nband_params : str
         The additional arguments passed to the `mat_autoPipeline` for the N-band. For the
         rest of the arguments see the `mat_autoPipeline`-script.
+
+    See Also
+    --------
+    ..mat_tools.mat_autoPipeline.mat_autoPipeline
+        A wrapper around esorex to execute the MATISSE-pipeline.
     """
     coh = "/corrFlux=TRUE/coherentAlgo=2/" if mode == "coherent" else ""
     return coh, f"{coh}/useOpdMod=TRUE/"
@@ -253,11 +289,12 @@ def prepare_reduction(raw_dir: Path,
     raw_dir : pathlib.Path
         The direcotry containing the raw observation files.
     calib_dir : pathlib.Path
-        The directory containing to the observation associated calibration files.
+        The directory containing the with the observation
+        associated calibration files.
     product_dir : pathlib.Path
         The directory to contain the reduced files.
     overwrite : bool, optional
-        If 'True' overwrites present files from previous reduction.
+        If toggled, overwrites any files from previous reductions.
     """
     if not product_dir.exists():
         product_dir.mkdir(parents=True)
@@ -272,19 +309,20 @@ def prepare_reduction(raw_dir: Path,
 def cleanup_reduction(product_dir: Path,
                       mode: str, band: str,
                       overwrite: Optional[bool]) -> None:
-    """Moves the folders to their corresponding folders of structure '/mode/band' after
-    the reduction has been finished and plots the (.fits)-files contained in them
+    """Moves the folders to their corresponding folders of structure
+    "/mode/band" after the reduction has been finished and plots the
+    (.fits)-files contained in them.
 
     Parameters
     ----------
     mode : str, optional
-        The mode in which the reduction is to be executed. Either 'coherent',
-        'incoherent' or 'both'.
+        The mode in which the reduction is to be executed. Either "coherent",
+        "incoherent" or "both".
     band : str, optional
-        The band in which the reduction is to be executed. Either 'lband',
-        'nband' or 'both'.
+        The band in which the reduction is to be executed. Either "lband",
+        "nband" or "both".
     overwrite : bool, optional
-        If 'True' overwrites present files from previous reduction.
+        If toggled, overwrites any files from previous reductions.
     """
     mode_and_band_dir = product_dir / mode / band
     if not mode_and_band_dir.exists():
@@ -299,8 +337,9 @@ def cleanup_reduction(product_dir: Path,
         cprint(f"Plotting files of folder {reduced_folder.name}...", "g")
         for fits_file in get_fits_by_tag(reduced_folder, "RAW_INT"):
             plot_fits = Plotter(fits_file,
-                                save_path=(mode_and_band_dir / reduced_folder.name))
-            plot_fits.add_cphases().add_vis().add_vis2().plot(save=True, error=True)
+                                save_path=mode_and_band_dir / reduced_folder.name)
+            plot_fits.add_cphases().add_vis().add_vis2()
+            plot_fits.plot(save=True, error=True)
     cprint(f"Finished reducing {band} in {mode}-mode", "lp")
     cprint(f"{'':-^50}", "lp")
 
@@ -308,36 +347,36 @@ def cleanup_reduction(product_dir: Path,
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                          product_dir: Path, mode: bool,
                          band: str, tpl_start: str, overwrite: bool) -> None:
-    """Reduces either the L- and/or the N-band data for either the 'coherent' and/or
-    'incoherent' setting for a single iteration/epoch.
+    """Reduces either the L- and/or the N-band data for either the "coherent"
+    and/or "incoherent" setting for a single iteration/epoch.
 
     Notes
     -----
-    Removes the old (.sof)-files to ensure proper reduction and then creates folders in
-    the 'res_dir'-directory. After this, it starts the reduction with the specified
-    settings.
+    Removes the old (.sof)-files to ensure proper reduction and then creates
+    folders in the 'res_dir'-directory. After this, it starts the reduction
+    with the specified settings.
 
     Parameters
     ----------
     raw_dir : pathlib.Path
         The direcotry containing the raw observation files.
     calib_dir : pathlib.Path
-        The directory containing to the observation associated calibration files.
+        The directory containing the with the observation
+        associated calibration files.
     product_dir : pathlib.Path
         The directory to contain the reduced files.
     mode : str
-        The mode in which the reduction is to be executed. Either 'coherent',
-        'incoherent' or 'both'.
+        The mode in which the reduction is to be executed. Either "coherent",
+        "incoherent" or "both".
     band : str
-        The band in which the reduction is to be executed. Either 'lband',
-        'nband' or 'both'.
+        The band in which the reduction is to be executed. Either "lband",
+        "nband" or "both".
     tpl_star : str
         The starting time of observations.
     overwrite : bool, optional
-        If 'True' overwrites present files from previous reduction.
+        If toggled, overwrites any files from previous reductions.
     """
-    skip_L, skip_N = True if band == "nband" else False,\
-            True if band == "lband" else False
+    skip_L, skip_N = band == "nband", band == "lband"
     param_L, param_N = set_script_arguments(mode)
     spectral_binning = get_spectral_binning(raw_dir, tpl_start)
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
@@ -350,9 +389,11 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
 
 
 @print_execution_time
-def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
-           band: Optional[str] = "both", overwrite: Optional[bool] = False) -> None:
-    """Runs the pipeline for the data reduction.
+def reduce(raw_dir: Path, product_dir: Path,
+           mode: Optional[str] = "both",
+           band: Optional[str] = "both",
+           overwrite: Optional[bool] = False) -> None:
+    """Does the full reduction for all of the raw directories.
 
     Parameters
     ----------
@@ -361,13 +402,13 @@ def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
     product_dir : pathlib.Path
         The directory to contain the reduced files.
     mode : str, optional
-        The mode in which the reduction is to be executed. Either 'coherent',
-        'incoherent' or 'both'.
+        The mode in which the reduction is to be executed. Either "coherent",
+        "incoherent" or "both".
     band : str, optional
-        The band in which the reduction is to be executed. Either 'lband',
-        'nband' or 'both'.
+        The band in which the reduction is to be executed. Either "lband",
+        "nband" or "both".
     overwrite : bool, optional
-        If 'True' overwrites present files from previous reduction.
+        If toggled, overwrites any files from previous reductions.
 
     Notes
     -----
@@ -389,4 +430,6 @@ def reduce(raw_dir: Path, product_dir: Path, mode: Optional[str] = "both",
                 cprint(f"Processing the {band.title()}...", "lp")
                 reduce_mode_and_band(raw_dir, calib_dir, product_dir,
                                      mode, band, tpl_start, overwrite)
-    cprint(f"Finished reducing {', '.join(bands)} for {', '.join(modes)}-mode(s)", "lp")
+    cprint(
+        f"Finished reducing {', '.join(bands)} for {', '.join(modes)}-mode(s)",
+        "lp")

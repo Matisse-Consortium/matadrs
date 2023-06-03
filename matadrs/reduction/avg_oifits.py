@@ -9,9 +9,24 @@ from astropy.io import fits
 from ..utils.robust import mean as rbmean
 
 
-# NOTE: avg_cflux: if True, the function will average all the corr flux data (experimental)
-def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
-               headerval: Optional[List] = [], avg_cflux: Optional[bool] = False):
+def avg_oifits(infile_list: List[Path],
+               outfile_path: List[Path],
+               headerval: Optional[List] = [],
+               avg_cflux: Optional[bool] = False) -> None:
+    """This takes multiple (.fits)-files averages their
+    HDULISTs and creates a unified, averaged file.
+
+    Parameters
+    ----------
+    infile_list : list of pathlib.Path
+        The files to be averaged over.
+    outfile_path : list of pathlib.Path
+        The averaged output file.
+    headerval : list, optional
+    avg_clfux : bool, optional
+        If True, the function will average over all
+        the correlated flux data (this is still experimental).
+    """
     if os.path.exists(infile_list[0]):
         copyfile(infile_list[0], outfile_path)
     else:
@@ -147,9 +162,10 @@ def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
         avg_flux = rbmean(flux_arr, axis=0)
         if len(flux_arr) > 3:
             # NOTE: Combine two error sources: standard deviation over the different BCDs, and average error (calculated by the pipeline)
-            avg_fluxerr = np.sqrt(np.nanstd(flux_arr, axis=0)**2.0 + np.nanmean(fluxerr_arr, axis=0)**2.0)
+            avg_fluxerr = np.sqrt(
+                np.nanstd(flux_arr, axis=0)**2.0 + np.nanmean(fluxerr_arr, axis=0)**2.0)
         else:
-            #WARNING: It may be not the best method for error calculation
+            # WARNING: It may be not the best method for error calculation
             avg_fluxerr = np.nanmean(fluxerr_arr, axis=0)
         outhdul['OI_FLUX'].data = outhdul['OI_FLUX'].data[0:1]
         outhdul['OI_FLUX'].data['FLUXDATA'] = avg_flux
@@ -167,8 +183,8 @@ def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
     ucoord_unique_lst.append(ucoord[0])
     vcoord_unique_lst.append(vcoord[0])
     for i in range(1, len(sta_index)):
-        if not ((sta_index[i] in sta_index_unique_lst)\
-            or (sta_index[i][::-1] in sta_index_unique_lst)):
+        if not ((sta_index[i] in sta_index_unique_lst)
+                or (sta_index[i][::-1] in sta_index_unique_lst)):
             sta_index_unique_lst.append(sta_index[i])
             ucoord_unique_lst.append(ucoord[i])
             vcoord_unique_lst.append(vcoord[i])
@@ -183,8 +199,8 @@ def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
         visphi_lst_sta = []
         visphierr_lst_sta = []
         for i in range(len(visamp_sta_index_lst)):
-            if (((sta_index_unique_lst[k][0] == visamp_sta_index_lst[i][0]) and (sta_index_unique_lst[k][1] == visamp_sta_index_lst[i][1])) \
-            or ((sta_index_unique_lst[k][0] == visamp_sta_index_lst[i][1]) and (sta_index_unique_lst[k][1] == visamp_sta_index_lst[i][0]))):
+            if (((sta_index_unique_lst[k][0] == visamp_sta_index_lst[i][0]) and (sta_index_unique_lst[k][1] == visamp_sta_index_lst[i][1]))
+                    or ((sta_index_unique_lst[k][0] == visamp_sta_index_lst[i][1]) and (sta_index_unique_lst[k][1] == visamp_sta_index_lst[i][0]))):
                 visamp_lst_sta.append(visamp_lst[i])
                 visamperr_lst_sta.append(visamperr_lst[i])
                 visphi_lst_sta.append(visphi_lst[i])
@@ -194,10 +210,13 @@ def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
         visphi_arr = np.array(visphi_lst_sta)
         visphierr_arr = np.array(visphierr_lst_sta)
         avg_visamp = np.nanmean(visamp_arr, axis=0)
-        avg_visphi = np.arctan2(np.nanmean(np.sin(visphi_arr*np.pi/180.0), axis=0), np.nanmean(np.cos(visphi_arr*np.pi/180.0), axis=0))*180.0/np.pi
+        avg_visphi = np.arctan2(np.nanmean(np.sin(visphi_arr*np.pi/180.0), axis=0),
+                                np.nanmean(np.cos(visphi_arr*np.pi/180.0), axis=0))*180.0/np.pi
         if len(visamp_arr) > 3:
-            avg_visamperr = np.sqrt(np.nanstd(visamp_arr, axis=0)**2.0 + np.nanmean(visamperr_arr, axis=0)**2.0)
-            avg_visphierr = np.sqrt(np.nanstd(visphi_arr, axis=0)**2.0 + np.nanmean(visphierr_arr, axis=0)**2.0)
+            avg_visamperr = np.sqrt(
+                np.nanstd(visamp_arr, axis=0)**2.0 + np.nanmean(visamperr_arr, axis=0)**2.0)
+            avg_visphierr = np.sqrt(
+                np.nanstd(visphi_arr, axis=0)**2.0 + np.nanmean(visphierr_arr, axis=0)**2.0)
             # NOTE: Combine two error sources: standard deviation over the different BCDs, and average error (calculated by the pipeline)
         else:
             # WARNING: It may be not the best method for error calculation
@@ -223,8 +242,8 @@ def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
     ucoord_unique_lst.append(ucoord[0])
     vcoord_unique_lst.append(vcoord[0])
     for i in range(1, len(sta_index)):
-        if not ((sta_index[i] in sta_index_unique_lst) \
-        or (sta_index[i][::-1] in sta_index_unique_lst)):
+        if not ((sta_index[i] in sta_index_unique_lst)
+                or (sta_index[i][::-1] in sta_index_unique_lst)):
             sta_index_unique_lst.append(sta_index[i])
             ucoord_unique_lst.append(ucoord[i])
             vcoord_unique_lst.append(vcoord[i])
@@ -237,8 +256,8 @@ def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
         vis2_lst_sta = []
         vis2err_lst_sta = []
         for i in range(len(vis2_sta_index_lst)):
-            if (((sta_index_unique_lst[k][0] == vis2_sta_index_lst[i][0]) and (sta_index_unique_lst[k][1] == vis2_sta_index_lst[i][1])) \
-            or ((sta_index_unique_lst[k][0] == vis2_sta_index_lst[i][1]) and (sta_index_unique_lst[k][1] == vis2_sta_index_lst[i][0]))):
+            if (((sta_index_unique_lst[k][0] == vis2_sta_index_lst[i][0]) and (sta_index_unique_lst[k][1] == vis2_sta_index_lst[i][1]))
+                    or ((sta_index_unique_lst[k][0] == vis2_sta_index_lst[i][1]) and (sta_index_unique_lst[k][1] == vis2_sta_index_lst[i][0]))):
                 vis2_lst_sta.append(vis2_lst[i])
                 vis2err_lst_sta.append(vis2err_lst[i])
         vis2_arr = np.array(vis2_lst_sta)
@@ -246,7 +265,8 @@ def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
         avg_vis2 = np.nanmean(vis2_arr, axis=0)
         if len(vis2_arr) > 3:
             # combine two error sources: standard deviation over the different BCDs, and average error (calculated by the pipeline)
-            avg_vis2err = np.sqrt(np.nanstd(vis2_arr, axis=0)**2.0 + np.nanmean(vis2err_arr, axis=0)**2.0)
+            avg_vis2err = np.sqrt(
+                np.nanstd(vis2_arr, axis=0)**2.0 + np.nanmean(vis2err_arr, axis=0)**2.0)
         else:
             # WARNING: it may be not the best method for error calculation
             avg_vis2err = np.nanmean(vis2err_arr, axis=0)
@@ -297,10 +317,12 @@ def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
                 t3phierr_lst_sta.append(t3phierr_lst[i])
         t3phi_arr = np.array(t3phi_lst_sta)
         t3phierr_arr = np.array(t3phierr_lst_sta)
-        avg_t3phi = np.arctan2(np.nanmean(np.sin(t3phi_arr*np.pi/180.0),axis=0),np.nanmean(np.cos(t3phi_arr*np.pi/180.0),axis=0))*180.0/np.pi
+        avg_t3phi = np.arctan2(np.nanmean(np.sin(t3phi_arr*np.pi/180.0), axis=0),
+                               np.nanmean(np.cos(t3phi_arr*np.pi/180.0), axis=0))*180.0/np.pi
         if len(t3phi_arr) > 3:
             # NOTE: Combine two error sources: standard deviation over the different BCDs, and average error (calculated by the pipeline)
-            avg_t3phierr = np.sqrt(np.nanstd(t3phi_arr, axis=0)**2.0 + np.nanmean(t3phierr_arr, axis=0)**2.0)
+            avg_t3phierr = np.sqrt(
+                np.nanstd(t3phi_arr, axis=0)**2.0 + np.nanmean(t3phierr_arr, axis=0)**2.0)
         else:
             # WARNING: it may be not the best method for error calculation
             avg_t3phierr = np.nanmean(t3phierr_arr, axis=0)
@@ -323,9 +345,21 @@ def avg_oifits(infile_list: List[Path], outfile_path: List[Path],
 
 
 # NOTE: oi_types_list = [ ['vis2','t3'], ['visamp'] ]
-def oifits_patchwork(infile_list: List, outfile_path: Path,
+def oifits_patchwork(infile_list: List[Path], outfile_path: Path,
                      oi_types_list: Optional[List] = [],
                      headerval: Optional[List] = []):
+    """This takes multiple (.fits)-files and merges certain
+    HDULISTs from them into one merged (.fits)-file.
+
+    Parameters
+    ----------
+    infile_list : list of pathlib.Path
+        The files to be merged.
+    outfile_path : list of pathlib.Path
+        The merged output file.
+    oi_types_list : list, optional
+    headerval : list, optional
+    """
     if os.path.exists(infile_list[0]):
         copyfile(infile_list[0], outfile_path)
     else:
@@ -374,13 +408,15 @@ def oifits_patchwork(infile_list: List, outfile_path: Path,
                         visphierr = inhdul2['OI_VIS'].data['VISPHIERR']
                         # NOTE: Match station indices
                         sta_index_visamp = outhdul['OI_VIS'].data['STA_INDEX']
-                        sta_index_visamp = [list(item) for item in sta_index_visamp]
+                        sta_index_visamp = [list(item)
+                                            for item in sta_index_visamp]
                         sta_index_visphi = inhdul2['OI_VIS'].data['STA_INDEX']
-                        sta_index_visphi = [list(item) for item in sta_index_visphi]
+                        sta_index_visphi = [list(item)
+                                            for item in sta_index_visphi]
                         for k in range(len(sta_index_visamp)):
                             for l in range(len(sta_index_visphi)):
-                                if ((sta_index_visamp[k] == sta_index_visphi[l])\
-                                    or (sta_index_visamp[k][::-1] == sta_index_visphi[l])):
+                                if ((sta_index_visamp[k] == sta_index_visphi[l])
+                                        or (sta_index_visamp[k][::-1] == sta_index_visphi[l])):
                                     outhdul['OI_VIS'].data['VISPHI'][k] = inhdul2['OI_VIS'].data['VISPHI'][l]
                                     outhdul['OI_VIS'].data['VISPHIERR'][k] = inhdul2['OI_VIS'].data['VISPHIERR'][l]
             if oi_type == 'flux':
@@ -403,6 +439,17 @@ def oifits_patchwork(infile_list: List, outfile_path: Path,
 def calc_vis_from_corrflux(input_corrflux_file: List[Path],
                            input_totalflux_file: List[Path],
                            outfile_path: Path):
+    """Calculates the visibilities from the correlated fluxes.
+
+    Parameters
+    ----------
+    input_corrflux_file : list of pathlib.Path
+        The files containing the correlated fluxes.
+    input_totalflux_file : list of pathlib.Path
+        The files containing the total fluxes.
+    outfile_path : pathlib.Path
+        The file that will contain the visibilities.
+    """
     copyfile(input_corrflux_file, outfile_path)
     outhdul = fits.open(outfile_path, mode='update')
 
@@ -418,7 +465,8 @@ def calc_vis_from_corrflux(input_corrflux_file: List[Path],
     for k in range(len(outhdul['OI_VIS'].data['VISAMP'])):
         # NOTE: Collect and average matching vis2 data
         vis = (corrflux[k]/flux)
-        viserr = vis*np.sqrt((corrfluxerr[k]/corrflux[k])**2 + (fluxerr/flux)**2)
+        viserr = vis * \
+            np.sqrt((corrfluxerr[k]/corrflux[k])**2 + (fluxerr/flux)**2)
         vis2 = vis**2.0
         vis2err = 2.0*vis*viserr
         outhdul['OI_VIS2'].data['VIS2DATA'][k] = vis2
@@ -439,6 +487,28 @@ def oifits_restrict_wavelengths(infile_path: Path, outfile_path: Path,
                                 bandwidth: Optional[float] = 1000.,
                                 wl_range: Optional[List] = [],
                                 do_flag: Optional[bool] = False):
+    """Restrictes the wavelength range of an input (.fits)-file
+    and writes the restricted (.fits)-file to the output path.
+
+    Parameters
+    ----------
+    infile_path : pathlib.Path
+        The file to be restricted in wavelength.
+    outfile_path : pathlib.Path
+        The file to which the restricted wavelenght information is
+        to be written to.
+    sel_wl : float, optional
+        The central wavelength around which the file is restricted.
+    bandwidth : float, optional
+        The bandwidth around the central wavelength to which the file
+        is restricted.
+    wl_range : list, optional
+        Specifies a wavelength range to restric the file to.
+        If this is specified then it will take precendent over
+        the "sel_wl" and the "bandwidth".
+    do_flag : bool, optional
+        If toggled, all flagged wavelength values will be excluded.
+    """
     copyfile(infile_path, outfile_path)
     outhdul = fits.open(outfile_path, mode='update')
 
@@ -454,7 +524,8 @@ def oifits_restrict_wavelengths(infile_path: Path, outfile_path: Path,
     if wl_range:
         idx = np.logical_and(wl*1e6 > (wl_range[0]), wl*1e6 <= wl_range[1])
     else:
-        idx = np.logical_or(wl*1e6 < (sel_wl-bandwidth/2.0), wl*1e6 >= (sel_wl+bandwidth/2.0))
+        idx = np.logical_or(wl*1e6 < (sel_wl-bandwidth/2.0),
+                            wl*1e6 >= (sel_wl+bandwidth/2.0))
 
     if do_flag:
         # NOTE: Flag the wavelengths we do not want to use
@@ -493,7 +564,8 @@ def oifits_restrict_wavelengths(infile_path: Path, outfile_path: Path,
 
     else:
         new_wave = hdu['OI_WAVELENGTH'].data['EFF_WAVE'][idx]
-        outhdul['OI_WAVELENGTH'].data = np.resize(outhdul['OI_WAVELENGTH'].data,(len(new_wave),))
+        outhdul['OI_WAVELENGTH'].data = np.resize(
+            outhdul['OI_WAVELENGTH'].data, (len(new_wave),))
         outhdul['OI_WAVELENGTH'].data['EFF_WAVE'] = new_wave
         outhdul['OI_WAVELENGTH'].data['EFF_BAND'] = hdu['OI_WAVELENGTH'].data['EFF_BAND'][idx]
 
@@ -647,7 +719,7 @@ def oifits_restrict_wavelengths(infile_path: Path, outfile_path: Path,
             for j in range(NV2):
                 outhdul['TF2'].data['TF2'][j] = hdu['TF2'].data['TF2'][j][idx]
                 outhdul['TF2'].data['TF'][j] = hdu['TF2'].data['TF'][j][idx]
-                outhdul['TF2'].data['TF2ERR'][j]= hdu['TF2'].data['TF2ERR'][j][idx]
+                outhdul['TF2'].data['TF2ERR'][j] = hdu['TF2'].data['TF2ERR'][j][idx]
                 outhdul['TF2'].data['TFERR'][j] = hdu['TF2'].data['TFERR'][j][idx]
 
         if 'OI_FLUX' in hdu:

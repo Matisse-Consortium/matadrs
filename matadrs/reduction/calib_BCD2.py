@@ -4,16 +4,37 @@ Created on Apr 11 2019
 @author: fmillour
 """
 import os
+from pathlib import Path
 from shutil import copyfile
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
 
 
-def calib_BCD(iifile, iofile, oifile, oofile,
-              outputfile=os.getenv("HOME")+"/toto.fits", lim=180, plot=1):
-    """"""
+def calib_BCD(iifile: Path, iofile: Path,
+              oifile: Path, oofile: Path,
+              outputfile: Optional[Path] = os.getenv("HOME")+"/toto.fits",
+              lim: Optional[int] = 180,
+              do_plot: Optional[bool] = False) -> None:
+    """Does the BCD-calibration for the different fringe exposures.
+
+    iifile : pathlib.Path
+        The IN-IN exposures file.
+    iofile : pathlib.Path
+        The IN-OUT exposures file.
+    oifile : pathlib.Path
+        The OUT-IN exposures file.
+    oofile : pathlib.Path
+        The OUT-OUT exposures file.
+    outputfile : pathlib.Path, optional
+        The BCD-calibrated file.
+    lim : int, optional
+
+    do_plot : bool, optional
+        If toggled, plots the outputfile.
+    """
     copyfile(iifile, outputfile)
     outhdu = fits.open(outputfile, mode='update')
 
@@ -74,7 +95,7 @@ def calib_BCD(iifile, iofile, oifile, oofile,
 
     iitwl = dinin['OI_WAVELENGTH'].data['EFF_WAVE']
 
-    nwlen = np.shape(iit3p)[1];
+    nwlen = np.shape(iit3p)[1]
     # NOTE: Addup the different exposures
     nrepeatii = int(np.shape(iit3p)[0]/4)
     nrepeatii = int(np.shape(iiv2)[0]/6)
@@ -135,13 +156,14 @@ def calib_BCD(iifile, iofile, oifile, oofile,
 
     # NOTE: Treat closure phases
     idx = np.array([[0, 0, 3, 3], [1, 2, 1, 2], [2, 1, 2, 1], [3, 3, 0, 0]])
-    sign = np.array([[1, -1, 1, -1], [1, 1, -1, -1], [1, 1, -1, -1], [1, -1, 1, -1]])
+    sign = np.array([[1, -1, 1, -1], [1, 1, -1, -1],
+                    [1, 1, -1, -1], [1, -1, 1, -1]])
 
     # NOTE: Initialize closure phase with same shape as input
     sin_avg = np.zeros((4, nwlen))
     cos_avg = np.zeros((4, nwlen))
     closfinal = np.zeros((4, nwlen))
-    if plot:
+    if do_plot:
         plt.figure(51)
 
     for i in np.arange(4):
@@ -149,12 +171,12 @@ def calib_BCD(iifile, iofile, oifile, oofile,
                          + sign[i, 1] * sin_oit3p[idx[i, 1], :]
                          + sign[i, 2] * sin_iot3p[idx[i, 2], :]
                          + sign[i, 3] * sin_oot3p[idx[i, 3], :]) /\
-                          (nrepeatii+nrepeatoi+nrepeatio+nrepeatoo)
+            (nrepeatii+nrepeatoi+nrepeatio+nrepeatoo)
         cos_avg[i, :] = (1.0 * cos_iit3p[idx[i, 0], :] + 1.0 * cos_oit3p[idx[i, 1], :] +
                          1.0 * cos_iot3p[idx[i, 2], :] + 1.0 * cos_oot3p[idx[i, 3], :]) /\
                         (nrepeatii+nrepeatoi+nrepeatio+nrepeatoo)
         closfinal[i, :] = np.arctan2(sin_avg[i, :], cos_avg[i, :])*180.0/np.pi
-        if plot:
+        if do_plot:
             plt.subplot(2, 2, i+1)
             plt.plot(iitwl*1e6, iit3p[i, :], label='II')
             plt.plot(iitwl * 1e6, oot3p[i, :], label='OO')
@@ -174,19 +196,19 @@ def calib_BCD(iifile, iofile, oifile, oofile,
     sin_avg = np.zeros((6, nwlen))
     cos_avg = np.zeros((6, nwlen))
     dpfinal = np.zeros((6, nwlen))
-    if plot:
+    if do_plot:
         plt.figure(52)
     for i in np.arange(6):
         sin_avg[i, :] = (sign[i, 0] * sin_iidp[idx[i, 0], :]
                          + sign[i, 1] * sin_oidp[idx[i, 1], :]
                          + sign[i, 2] * sin_iodp[idx[i, 2], :]
                          + sign[i, 3] * sin_oodp[idx[i, 3], :]) /\
-                                 (nrepeatii+nrepeatoi+nrepeatio+nrepeatoo)
+            (nrepeatii+nrepeatoi+nrepeatio+nrepeatoo)
         cos_avg[i, :] = (1.0 * cos_iidp[idx[i, 0], :] + 1.0 * cos_oidp[idx[i, 1], :] +
                          1.0 * cos_iodp[idx[i, 2], :] + 1.0 * cos_oodp[idx[i, 3], :]) /\
                         (nrepeatii+nrepeatoi+nrepeatio+nrepeatoo)
         dpfinal[i, :] = np.arctan2(sin_avg[i, :], cos_avg[i, :])*180.0/np.pi
-        if plot:
+        if do_plot:
             plt.subplot(3, 2, i+1)
             plt.plot(iitwl * 1e6, iidp[i, :], label='II')
             plt.plot(iitwl * 1e6, oodp[i, :], label='OO')
@@ -200,12 +222,12 @@ def calib_BCD(iifile, iofile, oifile, oofile,
     # NOTE: Treat visamp (or correlated fluxes)
     vafinal = np.zeros((6, nwlen))
 
-    if plot:
+    if do_plot:
         plt.figure(53)
     for i in np.arange(6):
         vafinal[i, :] = (iiva[i, :] + oiva[idx[i, 1], :] + iova[idx[i, 2], :]
                          + oova[idx[i, 3], :]) / (nrepeatii+nrepeatoi+nrepeatio+nrepeatoo)
-        if plot:
+        if do_plot:
             plt.subplot(3, 2, i + 1)
             plt.plot(iitwl * 1e6, iiva[i, :], label='II')
             plt.plot(iitwl * 1e6, oova[i, :], label='OO')
@@ -218,13 +240,13 @@ def calib_BCD(iifile, iofile, oifile, oofile,
     # NOTE: Treat visibilities
     v2final = np.zeros((6, nwlen))
 
-    if plot:
-        plt.figure (50)
+    if do_plot:
+        plt.figure(50)
 
     for i in np.arange(6):
-        v2final[i,:] = (iiv2[i,:] + oiv2[idx[i,1],:] + iov2[idx[i,2],:] + oov2[idx[i,3],:])\
-                       / (nrepeatii+nrepeatoi+nrepeatio+nrepeatoo)
-        if plot:
+        v2final[i, :] = (iiv2[i, :] + oiv2[idx[i, 1], :] + iov2[idx[i, 2], :] + oov2[idx[i, 3], :])\
+            / (nrepeatii+nrepeatoi+nrepeatio+nrepeatoo)
+        if do_plot:
             plt.subplot(3, 2, i + 1)
             plt.plot(iitwl * 1e6, iiv2[i, :], label='II')
             plt.plot(iitwl * 1e6, oov2[i, :], label='OO')
@@ -265,6 +287,5 @@ def calib_BCD(iifile, iofile, oifile, oofile,
         doutin.close()
     doutout.close()
 
-    if plot:
-        pass
+    if do_plot:
         plt.show()

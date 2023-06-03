@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of the Matisse pipeline GUI series
 Copyright (C) 2017- Observatoire de la Côte d'Azur
@@ -24,34 +23,62 @@ licence in the LICENCE.md file.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 """
+from warnings import warn
+
 from astropy.io import fits
 from astropy.io.fits import getheader
 
 
 class headerCache:
-    """"""
+    """This class is caching the keys contained in a header.
 
-    def __init__(self):
-        """Constructor"""
+    Attributes
+    ----------
+    cache : dict
+        The dictionary containing the header's values.
+    max_cache_size : int
+        The maximum size of the dictionary.
+        The default is 1000.
+    """
+
+    def __init__(self) -> None:
+        """The class's constructor."""
         self.cache = {}
         self.max_cache_size = 1000
 
-    def __contains__(self, key):
-        """
-        Returns True or False depending on whether or not the key is in the
-        cache
+    @property
+    def size(self):
+        """Returns the size of the cache"""
+        return len(self.cache)
+
+    def __contains__(self, key: str) -> bool:
+        """Checks if the key is contained in the cache.
+
+        Parameters
+        ----------
+        key : str
+            The key to be checked for.
+
+        Returns
+        -------
+        key_contained : bool
+            Returns "True" or "False" depending on whether
+            or not the key is in the cache.
         """
         return key in self.cache
 
-    def update(self, key, value):
-        self.cache[key] = {'value': value}
+    def update(self, key, value) -> None:
+        """Updates the value at a certain key at the cache.
 
-    @property
-    def size(self):
+        Parameters
+        ----------
+        key : str
+        value : Any
         """
-        Return the size of the cache
-        """
-        return len(self.cache)
+        if key not in self.cache and self.max_cache_size < 1000:
+            self.cache[key] = {"value": value}
+        else:
+            warn("Cache is full, new value will not be added!")
 
 
 cacheHdr = headerCache()

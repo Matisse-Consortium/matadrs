@@ -1,4 +1,3 @@
-"""  """
 import shutil
 import subprocess
 from collections import deque, namedtuple
@@ -18,9 +17,12 @@ __all__ = ["create_visibility_sof", "check_file_match", "sort_fits_by_bcd_config
            "calibrate_bcd", "calibrate_visibilities", "calibrate_fluxes",
            "cleanup_calibration", "calibrate_files", "calibrate_folders", "calibrate"]
 
-DATABASE_DIR = Path(pkg_resources.resource_filename("matadrs", "data/calibrator_databases"))
-DATABASES = ["vBoekelDatabase.fits", "calib_spec_db_v10.fits",
-             "calib_spec_db_v10_supplement.fits", "calib_spec_db_supplement3.fits"]
+DATABASE_DIR = Path(
+    pkg_resources.resource_filename("matadrs", "data/calibrator_databases"))
+DATABASES = ["vBoekelDatabase.fits",
+             "calib_spec_db_v10.fits",
+             "calib_spec_db_v10_supplement.fits",
+             "calib_spec_db_supplement3.fits"]
 LBAND_DATABASES = list(map(lambda x: DATABASE_DIR / x, DATABASES))
 NBAND_DATABASES = LBAND_DATABASES[:]+[DATABASE_DIR / "vBoekelDatabase.fitsold"]
 
@@ -37,7 +39,7 @@ def create_visibility_sof(reduced_dir: Path,
                           targets: List[Path],
                           calibrators: List[Path]) -> Path:
     """Creates the (.sof)-file needed for the visibility calibration with
-    'mat_cal_oifits' and returns its path.
+    "mat_cal_oifits" and returns its path.
 
     Parameters
     ----------
@@ -54,7 +56,7 @@ def create_visibility_sof(reduced_dir: Path,
         The Path to the (.sof)-file used for visibility calibration.
     """
     sof_file = reduced_dir / "visbility_reduction.sof"
-    with open(sof_file, "w+") as sof:
+    with open(sof_file, "w+", encoding="utf-8") as sof:
         for target in targets:
             sof.write(f"{target} TARGET_RAW_INT\n")
         sof.write("\n")
@@ -77,10 +79,11 @@ def check_file_match(targets: List[Path], calibrators: List[Path]) -> bool:
     Returns
     -------
     files_match : bool
+        True if the same number of files have been found, False otherwise.
     """
     if not targets:
-        cprint("No 'TARGET_RAW_INT*'-files found (Check for error in first reduction"
-               " step). SKIPPING!", "y")
+        cprint("No 'TARGET_RAW_INT*'-files found (Check for error in"
+               " first reduction step). SKIPPING!", "y")
         cprint(f"{'':-^50}", "lg")
         return False
     if len(targets) != len(calibrators):
@@ -125,13 +128,15 @@ def sort_fits_by_bcd_configuration(fits_files: List[Path]) -> namedtuple:
 
 
 def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
-    """Executes the BCD-calibration for the the unchopped/chopped, visbility calibrated
-    files.
+    """Executes the BCD-calibration for the the unchopped/chopped, visbility
+    calibrated files.
 
     Parameters
     ----------
     directory : pathlib.Path
         The directory to be searched in.
+    band : str
+        The band for which the BCD-calibration is executed.
     output_dir : pathlib.Path
         The directory to which the new files are saved to.
 
@@ -159,16 +164,16 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
     if band == "lband":
         calib_BCD(bcd.in_in, bcd.in_out,
                   bcd.out_in, bcd.out_out,
-                  outfile_unchopped_cphases, plot=False)
+                  outfile_unchopped_cphases)
     else:
-        calib_BCD(bcd.in_in, "", "", bcd.out_out, outfile_unchopped_cphases, plot=False)
+        calib_BCD(bcd.in_in, "", "",
+                  bcd.out_out, outfile_unchopped_cphases)
 
     if chopped_fits is not None:
         outfile_chopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_CHOPPED_INT.fits"
         bcd_chopped = sort_fits_by_bcd_configuration(chopped_fits)
-        calib_BCD(bcd_chopped.in_in, "",
-                  "", bcd_chopped.out_out,
-                  outfile_chopped_cphases, plot=False)
+        calib_BCD(bcd_chopped.in_in, "", "",
+                  bcd_chopped.out_out, outfile_chopped_cphases)
 
 
 def calibrate_visibilities(targets: List[Path],
@@ -229,7 +234,8 @@ def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
                 do_airmass_correction=do_airmass)
         cprint(f"Plotting file '{output_file.name}'...", "y")
         plot_fits = Plotter(output_file, save_path=output_dir)
-        plot_fits.add_cphases().add_vis(corr_flux=True).add_vis2().plot(save=True, error=True)
+        plot_fits.add_cphases().add_vis(corr_flux=True).add_vis2()
+        plot_fits.plot(save=True, error=True)
 
 
 # TODO: Find way to make this moving better than this -> Moves (.fits)-files
@@ -353,9 +359,3 @@ def calibrate(reduced_dir: Path,
         for band in bands:
             calibrate_folders(reduced_dir, mode, band, overwrite)
     cprint(f"Finished calibration of {', '.join(bands)} and {', '.join(modes)}", "lp")
-
-
-if __name__ == "__main__":
-    data_dir = "/data/beegfs/astro-storage/groups/matisse/scheuck/data/"
-    stem_dir, target_dir = "matisse/GTO/hd142666/", "UTs/20220420"
-    calibrate(data_dir, stem_dir, target_dir)

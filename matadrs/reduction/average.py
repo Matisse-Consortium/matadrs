@@ -53,12 +53,12 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
 
     Parameters
     ----------
-    directory: pathlib.Path
+    directory : pathlib.Path
         The directory to be searched in.
-    file_type: str
+    file_type : str
         Either 'flux' or 'vis' for the flux and visibility calibration,
         respectively.
-    output_dir: pathlib.Path
+    output_dir : pathlib.Path
         The directory to which the new files are saved to.
 
     Notes
@@ -68,10 +68,9 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
     'INT_CHOPPED', respectively, and indicated that they are averaged by an
     'AVG' in their name.
 
-
     See also
     --------
-    .avg_oifits.avg_oifits: Averaging for (.fits)-files.
+    .avg_oifits.avg_oifits : Averaging for (.fits)-files.
     """
     if file_type == "flux":
         cprint("Averaging flux calibration...", "g")
@@ -91,7 +90,8 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
 
 
 def average_folders(calibrated_dir: Path, mode: str) -> None:
-    """Iterates over the calibrated directories to.
+    """Iterates over the calibrated directories and averages their
+    "RAW_INT"-files.
 
     Parameters
     ----------
@@ -120,16 +120,19 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
             cprint("Plotting averaged files...", "g")
             for fits_file in get_fits_by_tag(output_dir, "AVG"):
                 plot_fits = Plotter(fits_file, save_path=output_dir)
-                plot_fits.add_cphases().add_vis(corr_flux=True).add_vis2().plot(save=True, error=True)
+                plot_fits.add_cphases().add_vis(corr_flux=True).add_vis2()
+                plot_fits.plot(save=True, error=True)
             cprint(f"{'':-^50}", "lg")
 
 
 # TODO: Implement overwrite
 def average(calibrated_dir: Path,
             mode: Optional[str] = "both",
-            overwrite: Optional[bool] = False):
-    """Does the full averaging for all of the calibrated directories
-    subdirectories.
+            overwrite: Optional[bool] = False) -> None:
+    """Does the full averaging over all calibrated directories.
+
+    Does it for all available band-directories ("lband", "nband") and depending
+    on the given mode for either "coherent", "incoherent" mode or both.
 
     Parameters
     ----------
