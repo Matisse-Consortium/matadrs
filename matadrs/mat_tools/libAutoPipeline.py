@@ -24,13 +24,14 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 """
 from warnings import warn
+from typing import List
 
 from astropy.io import fits
 from astropy.io.fits import getheader
 
 
 class headerCache:
-    """This class is caching the keys contained in a header.
+    """This class is caching the keys contained in headers.
 
     Attributes
     ----------
@@ -84,15 +85,21 @@ class headerCache:
 CACHE_HDR = headerCache()
 
 
-def matisseCalib(header, action, listCalibFile, calibPrevious):
-    """
+def matisseCalib(header: str, action: str,
+                 listCalibFile: List[str],
+                 calibPrevious) -> List[str, int]:
+    """Adds the values of the given header to the
+    "CACHE_HDR".
 
     Parameters
     ----------
     header : str
-    action :
-    listCalibFile :
-    calibPrevious :
+        The header
+    action : str
+        The mode used for the hybrid observation.
+    listCalibFile : list of str
+        The
+    calibPrevious
     """
     global CACHE_HDR
     keyDetReadCurname = header['HIERARCH ESO DET READ CURNAME']
@@ -660,12 +667,28 @@ def matisseCalib(header, action, listCalibFile, calibPrevious):
         else:
             status=0
         return [res,status]
-
-
     return [res,0]
 
-def matisseRecipes(action, det, tel, resol):
 
+def matisseRecipes(action: str, det, tel, resol) -> List[str]:
+    """Gets the settings needed for the reduction from the
+    detector, telescopes, and observation mode used.
+
+    Parameters
+    ----------
+    action : str
+        The mode used for the hybrid observation.
+    det : str
+        The detector that has been used. Either "HAWAII" or
+        "AQUARIUS".
+    tel : str
+        Either "ATs" or "UTs".
+    resol : str
+        The resolution of the observation.
+
+    Returns
+    -------
+    """
     if (action=="ACTION_MAT_CAL_DET_SLOW_SPEED"):
         return ["mat_cal_det","--gain=2.73 --darklimit=100.0 --flatlimit=0.3 --max_nonlinear_range=36000.0 --max_abs_deviation=2000.0 --max_rel_deviation=0.01 --nltype=2"]
     if (action=="ACTION_MAT_CAL_DET_FAST_SPEED"):
@@ -689,7 +712,6 @@ def matisseRecipes(action, det, tel, resol):
             if (tel=="ESO-VLTI-A1234"):
                 options += " --replaceTel=3"
 
-
         elif (det =="HAWAII-2RG"):
             options += "--useOpdMod=FALSE --tartyp=57 --compensate=[pb,nl,if,rb,bp,od] --hampelFilterKernel=10"
 
@@ -703,11 +725,17 @@ def matisseRecipes(action, det, tel, resol):
         return ["mat_im_rem",""]
     return ["",""]
 
-def matisseAction(header,tag):
+def matisseAction(header: str, tag: str) -> str:
     """
 
     Parameters
     ----------
+    header : str
+    tag : str
+
+    Returns
+    -------
+    action : str
     """
     keyDetName        = header['HIERARCH ESO DET NAME']
     keyDetReadCurname = header['HIERARCH ESO DET READ CURNAME']
