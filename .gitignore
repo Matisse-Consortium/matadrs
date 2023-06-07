@@ -8,6 +8,7 @@ __pycache__/
 # Specific folders to ignore
 tests/
 matadrs/jacob_files
+docs/build/
 doc/
 
 # Specific files to ignore
