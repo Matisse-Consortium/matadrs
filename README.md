@@ -10,7 +10,7 @@ and easily in as few steps as possible with the least knowledge required. To mak
 possible for seasoned MATISSE users to quickly and easily reduce data and giving others
 who are interested in MATISSE data the opportunity to do so as well.
 
-* **Documentation**: [https://mbsck.github.io/matadrs/](https://mbsck.github.io/p2obp/)
+* **Documentation**: [https://mbsck.github.io/matadrs/](https://mbsck.github.io/matadrs/)
 * **Installation**: [https://mbsck.github.io/matadrs/installation.html](https://mbsck.github.io/matadrs/installation.html)
 * **Getting Started**: [https://mbsck.github.io/p2obp/getting_started.html](https://mbsck.github.io/matadrs/getting_started.html) and the scripts in the `example/` directory.
 * **Bug Reports**: [https://github.com/MBSck/p2obp/issues](https://github.com/MBSck/matadrs/issues)
