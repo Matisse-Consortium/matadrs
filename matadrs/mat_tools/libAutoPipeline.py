@@ -24,7 +24,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 """
 from warnings import warn
-from typing import List
+from typing import Union, List
 
 from astropy.io import fits
 from astropy.io.fits import getheader
@@ -87,7 +87,7 @@ CACHE_HDR = headerCache()
 
 def matisseCalib(header: str, action: str,
                  listCalibFile: List[str],
-                 calibPrevious) -> List[str, int]:
+                 calibPrevious) -> List[Union[str, int]]:
     """Adds the values of the given header to the
     "CACHE_HDR".
 
