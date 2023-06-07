@@ -1,9 +1,14 @@
 from pathlib import Path
-from astropy.io import fits as pyfits
+
+import numpy as np
+from astropy.io import fits
 
 
-def get_gravity_data(fits_file: Path)
-    hdu = pyfits.open(file)
+# TODO: Make this into a working function -> Ask Karin Perraut?
+# TODO: Maybe remove from package -> Or add to readout.
+def get_gravity_data(fits_file: Path):
+    """Gets the data from a GRAVITY (.fits)-file."""
+    hdu = fits.open(fits_file)
 
     # Read the data
     # index 10 = SC ; 20 = FT ; 11,12 = SC_POL ; 21,22 = FT_POL
@@ -23,7 +28,3 @@ def get_gravity_data(fits_file: Path)
             for i, j in hdu['OI_VIS',10].data.field('STA_INDEX')]
     triplet = [dicname[i]+'-'+dicname[j]+'-'+dicname[k]\
                for i, j, k in hdu['OI_T3',20].data.field('STA_INDEX')]
-
-
-if __name__ == "__main__":
-    file = "C:/Users/perrautk/Documents/GRAVITY/GTO/HD100546/Myfile.fits"
