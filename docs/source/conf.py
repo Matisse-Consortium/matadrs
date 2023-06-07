@@ -9,7 +9,7 @@
 import os
 import sys
 
-project = "p2obp"
+project = "matadrs"
 copyright = "2023, Marten Scheuck"
 author = "Marten Scheuck"
 release = "0.1.0"
