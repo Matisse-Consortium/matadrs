@@ -1,0 +1,722 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>matadrs.reduction.calibrate module &#8212; p2obp 0.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'modules/reduction/calibrate';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="matadrs.reduction.fluxcal module" href="fluxcal.html" />
+    <link rel="prev" title="matadrs.reduction.calib_BCD2 module" href="calib_BCD2.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">p2obp 0.1.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../features.html">
+                        Features
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../api.html">
+                        API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-external" href="https://github.com/MBSck/matadrs/releases">
+                        Changelog
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../credit.html">
+                        Credit
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../features.html">
+                        Features
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../api.html">
+                        API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-external" href="https://github.com/MBSck/matadrs/releases">
+                        Changelog
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../credit.html">
+                        Credit
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../matadrs.html">matadrs.matadrs module</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Subpackages</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../matadrs.grep.html">matadrs.grep package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../grep/get_gravity_data.html">matadrs.grep.get_gravity_data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../grep/getdata_ESO_archive.html">matadrs.grep.getdata_ESO_archive module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../grep/query.html">matadrs.grep.query module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../grep/rework.html">matadrs.grep.rework module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../matadrs.mat_tools.html">matadrs.mat_tools package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../mat_tools/libAutoPipeline.html">matadrs.mat_tools.libAutoPipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mat_tools/mat_autoPipeline.html">matadrs.mat_tools.mat_autoPipeline module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../matadrs.reduction.html">matadrs.reduction package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="average.html">matadrs.reduction.average module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="avg_oifits.html">matadrs.reduction.avg_oifits module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="calib_BCD2.html">matadrs.reduction.calib_BCD2 module</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">matadrs.reduction.calibrate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fluxcal.html">matadrs.reduction.fluxcal module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="merge.html">matadrs.reduction.merge module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reduce.html">matadrs.reduction.reduce module</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../matadrs.utils.html">matadrs.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils/data_prep.html">matadrs.utils.data_prep module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/plot.html">matadrs.utils.plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/readout.html">matadrs.utils.readout module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/robust.html">matadrs.utils.robust module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/tools.html">matadrs.utils.tools module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/options.html">matadrs.utils.options module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../api.html" class="nav-link">API</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../matadrs.reduction.html" class="nav-link">matadrs.reduction package</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">matadrs.reduction.calibrate module</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-matadrs.reduction.calibrate">
+<span id="matadrs-reduction-calibrate-module"></span><h1>matadrs.reduction.calibrate module<a class="headerlink" href="#module-matadrs.reduction.calibrate" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate" title="Permalink to this definition">#</a></dt>
+<dd><p>Does the full calibration for all of the reduced directories
+subdirectories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reduced_dir</strong> (<em>pathlib.Path</em>) – The path to multiple folders that need to be cross correlated.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’.</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites files from previous calibration.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The mode of calibration can either be ‘coherent’ or ‘incoherent’, which
+corresponds to either the calibration of the correlated fluxes or the
+total flux.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_bcd">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_bcd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#calibrate_bcd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_bcd" title="Permalink to this definition">#</a></dt>
+<dd><p>Executes the BCD-calibration for the the unchopped/chopped, visbility
+calibrated files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>pathlib.Path</em>) – The directory to be searched in.</p></li>
+<li><p><strong>band</strong> (<em>str</em>) – The band for which the BCD-calibration is executed.</p></li>
+<li><p><strong>output_dir</strong> (<em>pathlib.Path</em>) – The directory to which the new files are saved to.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This creates either one or two output files depending if there are only
+unchopped or also chopped files. The files’ names end with either ‘INT’ or
+‘INT_CHOPPED’, respectively, and indicated that they are averaged by an
+‘AVG’ in their name.</p>
+<p>From MATISSE-pipeline version 1.7.6, the BCD-calibration is included in the
+pipeline, however, for L-band it only takes into account the chopped files,
+and is unreliable if they are not present, in which case the
+BCD-calibration is executed via this script and the output of it merged
+into the final file.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="calib_BCD2.html#matadrs.reduction.calib_BCD2.calib_BCD" title="matadrs.reduction.calib_BCD2.calib_BCD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calib_BCD2.calib_BCD</span></code></a></dt><dd><p>BCD-calibration for closure phases.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_files">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrator_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#calibrate_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_files" title="Permalink to this definition">#</a></dt>
+<dd><p>The total calibration for a target and a calibrator folder. Includes
+the flux-, visibility- and closure phase (bcd-) calibration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reduced_dir</strong> (<em>pathlib.Path</em>) – The path to multiple folders that need to be cross correlated.</p></li>
+<li><p><strong>target_dir</strong> (<em>pathlib.Path</em>) – The directory of the science target.</p></li>
+<li><p><strong>calibrator_dir</strong> (<em>pathlib.Path</em>) – The directory of the calibrator.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – The mode of calibration. Either ‘corrflux’, ‘flux’ or ‘both’ depending
+if it is ‘coherent’ or ‘incoherent’ reduced data.</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites files from previous calibration.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_fluxes">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_fluxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#calibrate_fluxes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_fluxes" title="Permalink to this definition">#</a></dt>
+<dd><p>Calibrates the fluxes of all the provided files and saves it to the
+output directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The detected “TARGET_RAW”-files.</p></li>
+<li><p><strong>calibrators</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The detected “CALIB_RAW”-files.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’.</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’.</p></li>
+<li><p><strong>product_dir</strong> (<em>pathlib.Path</em>) – The directory to contain the calibrated files.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_folders">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#calibrate_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_folders" title="Permalink to this definition">#</a></dt>
+<dd><p>Calibrates a directory containing the scientific target with a directory
+containing the calibrator observation. Calibrates flux, visibility and
+closure phases (bcd).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reduced_dir</strong> (<em>pathlib.Path</em>) – The path to multiple folders that need to be cross correlated.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’.</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites files from previous calibration.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_visibilities">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_visibilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#calibrate_visibilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_visibilities" title="Permalink to this definition">#</a></dt>
+<dd><p>Calibrates the visibilities of all the provided files and saves them to
+the output directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The detected “TARGET_RAW”-files.</p></li>
+<li><p><strong>calibrators</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The detected “CALIB_RAW”-files.</p></li>
+<li><p><strong>product_dir</strong> (<em>pathlib.Path</em>) – The directory to contain the calibrated files.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.check_file_match">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">check_file_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#check_file_match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.check_file_match" title="Permalink to this definition">#</a></dt>
+<dd><p>Checks if all needed files exist in the directories and if the number
+of both directories is the same.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The detected “TARGET_RAW”-files.</p></li>
+<li><p><strong>calibrators</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The detected “CALIB_RAW”-files.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>files_match</strong> – True if the same number of files have been found, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.cleanup_calibration">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">cleanup_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#cleanup_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.cleanup_calibration" title="Permalink to this definition">#</a></dt>
+<dd><p>Moves any (.fits)-files created by ‘esorex’ and the esorex (.log)-files
+to the calibrated folder.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.create_visibility_sof">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">create_visibility_sof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#create_visibility_sof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.create_visibility_sof" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates the (.sof)-file needed for the visibility calibration with
+“mat_cal_oifits” and returns its path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reduced_dir</strong> (<em>pathlib.Path</em>) – The directory containing the, by the pipeline, reduced data.</p></li>
+<li><p><strong>targets</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The ‘TARGET_RAW_INT’-files.</p></li>
+<li><p><strong>calibrators</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The ‘CALIB_RAW_INT’-files.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sof_file</strong> – The Path to the (.sof)-file used for visibility calibration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pathlib.Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.calibrate.sort_fits_by_bcd_configuration">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">sort_fits_by_bcd_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">namedtuple</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#sort_fits_by_bcd_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.sort_fits_by_bcd_configuration" title="Permalink to this definition">#</a></dt>
+<dd><p>Sorts the input (.fits)-files by their BCD configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fits_files</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The (.fits)-files to be checked for their BCD-configuration.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>bcd_configuration</strong> – A named tuple containing the (.fits)-files sorted by BCD-configuration.
+If none of the specified configuration is found then the field is
+filled with an empty string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>collections.namedtuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="calib_BCD2.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">matadrs.reduction.calib_BCD2 module</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="fluxcal.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">matadrs.reduction.fluxcal module</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate"><code class="docutils literal notranslate"><span class="pre">calibrate()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate_bcd"><code class="docutils literal notranslate"><span class="pre">calibrate_bcd()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate_files"><code class="docutils literal notranslate"><span class="pre">calibrate_files()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate_fluxes"><code class="docutils literal notranslate"><span class="pre">calibrate_fluxes()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate_folders"><code class="docutils literal notranslate"><span class="pre">calibrate_folders()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate_visibilities"><code class="docutils literal notranslate"><span class="pre">calibrate_visibilities()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.check_file_match"><code class="docutils literal notranslate"><span class="pre">check_file_match()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.cleanup_calibration"><code class="docutils literal notranslate"><span class="pre">cleanup_calibration()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.create_visibility_sof"><code class="docutils literal notranslate"><span class="pre">create_visibility_sof()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.sort_fits_by_bcd_configuration"><code class="docutils literal notranslate"><span class="pre">sort_fits_by_bcd_configuration()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/modules/reduction/calibrate.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Marten Scheuck.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
