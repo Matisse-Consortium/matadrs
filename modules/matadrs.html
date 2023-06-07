@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>matadrs.matadrs module &#8212; p2obp 0.1.0 documentation</title>
+    <title>matadrs.matadrs module &#8212; matadrs 0.1.0 documentation</title>
   
   
   
@@ -103,7 +103,7 @@
   
   
   
-    <p class="title logo__title">p2obp 0.1.0 documentation</p>
+    <p class="title logo__title">matadrs 0.1.0 documentation</p>
   
 </a></div>
     
@@ -390,8 +390,39 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="matadrs-matadrs-module">
-<h1>matadrs.matadrs module<a class="headerlink" href="#matadrs-matadrs-module" title="Permalink to this heading">#</a></h1>
+  <section id="module-matadrs.matadrs">
+<span id="matadrs-matadrs-module"></span><h1>matadrs.matadrs module<a class="headerlink" href="#module-matadrs.matadrs" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.matadrs.reduction_pipeline">
+<span class="sig-prename descclassname"><span class="pre">matadrs.matadrs.</span></span><span class="sig-name descname"><span class="pre">reduction_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dirs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_dirs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_reduce</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_calibrate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_average</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_merge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/matadrs/matadrs.html#reduction_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.matadrs.reduction_pipeline" title="Permalink to this definition">#</a></dt>
+<dd><p>Combines all the facettes of data reduction into one executable function that takes
+a single or a list of epochs to be reduced via the MATISSE pipeline, then calibrates,
+merges and averages them, in succession.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_dirs</strong> (<em>list</em><em> of </em><em>Path</em><em> or </em><em>Path</em>) – The directory/ies to either the raw, reduced, calibrated or averaged files depending
+on which step is selected for the pipeline, for the respective observation/s.</p></li>
+<li><p><strong>product_dirs</strong> (<em>list</em><em> of </em><em>Path</em><em> or </em><em>Path</em>) – The directory/ies to contain the reduced, calibrated, averaged, and merged files
+for the respective observation/s.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
+‘incoherent’ or ‘both’.</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
+‘nband’ or ‘both’.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites present files from previous reduction.</p></li>
+<li><p><strong>do_reduce</strong> (<em>bool</em><em>, </em><em>optional</em>) – Execute the reduction step.</p></li>
+<li><p><strong>do_calibrate</strong> (<em>bool</em><em>, </em><em>optional</em>) – Execute the calibration step.</p></li>
+<li><p><strong>do_average</strong> (<em>bool</em><em>, </em><em>optional</em>) – Execute the averaging step.</p></li>
+<li><p><strong>do_merge</strong> (<em>bool</em><em>, </em><em>optional</em>) – Execute the merging step.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>WARNING : All files in a given folder from any previous reduction will be REMOVED.
+Subdirectories for the individual steps (‘reduced’, ‘calib’, ‘averaged’, ‘final’)
+will be AUTOMATICALLY created in the ‘product_dir’.</p>
+</dd></dl>
+
 </section>
 
 
@@ -434,6 +465,16 @@ document.write(`
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.matadrs.reduction_pipeline"><code class="docutils literal notranslate"><span class="pre">reduction_pipeline()</span></code></a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">

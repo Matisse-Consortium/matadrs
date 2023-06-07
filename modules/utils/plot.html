@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>matadrs.utils.plot module &#8212; p2obp 0.1.0 documentation</title>
+    <title>matadrs.utils.plot module &#8212; matadrs 0.1.0 documentation</title>
   
   
   
@@ -103,7 +103,7 @@
   
   
   
-    <p class="title logo__title">p2obp 0.1.0 documentation</p>
+    <p class="title logo__title">matadrs 0.1.0 documentation</p>
   
 </a></div>
     
@@ -393,8 +393,368 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="matadrs-utils-plot-module">
-<h1>matadrs.utils.plot module<a class="headerlink" href="#matadrs-utils-plot-module" title="Permalink to this heading">#</a></h1>
+  <section id="module-matadrs.utils.plot">
+<span id="matadrs-utils-plot-module"></span><h1>matadrs.utils.plot module<a class="headerlink" href="#module-matadrs.utils.plot" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="matadrs.utils.plot.PlotComponent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matadrs.utils.plot.</span></span><span class="sig-name descname"><span class="pre">PlotComponent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#PlotComponent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.PlotComponent" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class containing the elements required for a plot
+from the</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels</strong></dt><dd></dd>
+<dt><strong>x_values</strong></dt><dd></dd>
+<dt><strong>y_errors</strong></dt><dd></dd>
+<dt><strong>y_values</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.plot.PlotComponent.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#matadrs.utils.plot.PlotComponent.labels" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.plot.PlotComponent.x_values">
+<span class="sig-name descname"><span class="pre">x_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#matadrs.utils.plot.PlotComponent.x_values" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.plot.PlotComponent.y_errors">
+<span class="sig-name descname"><span class="pre">y_errors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#matadrs.utils.plot.PlotComponent.y_errors" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.plot.PlotComponent.y_values">
+<span class="sig-name descname"><span class="pre">y_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#matadrs.utils.plot.PlotComponent.y_values" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matadrs.utils.plot.</span></span><span class="sig-name descname"><span class="pre">Plotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that plots models as well as reduced data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fits_files</strong> (<em>pathlib.Path</em><em> or </em><em>list</em><em> of </em><em>pathlib.Path</em>) – </p></li>
+<li><p><strong>flux_files</strong> (<em>pathlib.Path</em><em> or </em><em>list</em><em> of </em><em>pathlib.Path</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>plot_name</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>save_path</strong> (<em>pathlib.Path</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.num_components">
+<span class="sig-name descname"><span class="pre">num_components</span></span><a class="headerlink" href="#matadrs.utils.plot.Plotter.num_components" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.band_mask">
+<span class="sig-name descname"><span class="pre">band_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.utils.plot.Plotter.band_mask" title="Permalink to this definition">#</a></dt>
+<dd><p>The masking for the bands to make the plots visually readable.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.mask_dataframe">
+<span class="sig-name descname"><span class="pre">mask_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_mask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.utils.plot.Plotter.mask_dataframe" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.calculate_uv_points">
+<span class="sig-name descname"><span class="pre">calculate_uv_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">baselines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour_angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.utils.plot.Plotter.calculate_uv_points" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">make_uv_tracks(ax,</span> <span class="pre">uv_coord,</span> <span class="pre">baselines,</span> <span class="pre">sta_label,</span> <span class="pre">flag,</span></span></dt>
+<dd><p>symbol, color, sel_wl, airmass_lim)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.plot_uv">
+<span class="sig-name descname"><span class="pre">plot_uv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sel_wl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airmass_lim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.plot_uv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.plot_uv" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.set_dataframe">
+<span class="sig-name descname"><span class="pre">set_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.utils.plot.Plotter.set_dataframe" title="Permalink to this definition">#</a></dt>
+<dd><p>Prepares each row in a column as a pandas DataFrame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.make_component">
+<span class="sig-name descname"><span class="pre">make_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unwrap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.make_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.make_component" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates a pandas DataFrame that has all the plots’ information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.add_flux">
+<span class="sig-name descname"><span class="pre">add_flux</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.add_flux" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the total flux(es) as a subplot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.add_vis">
+<span class="sig-name descname"><span class="pre">add_vis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">corr_flux</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'long'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_vis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.add_vis" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the visibilities/correlated fluxes as a subplot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.add_vis2">
+<span class="sig-name descname"><span class="pre">add_vis2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">legend_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'long'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_vis2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.add_vis2" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the squared visibilities as a subplot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.add_cphases">
+<span class="sig-name descname"><span class="pre">add_cphases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unwrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">360</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_cphases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.add_cphases" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the closure phases as a subplot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.add_diff_phases">
+<span class="sig-name descname"><span class="pre">add_diff_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unwrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">360</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_diff_phases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.add_diff_phases" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the differential phases as a subplot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.add_uv">
+<span class="sig-name descname"><span class="pre">add_uv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_uv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.add_uv" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the (u, v)-coordinates as a subplot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.add_text">
+<span class="sig-name descname"><span class="pre">add_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.utils.plot.Plotter.add_text" title="Permalink to this definition">#</a></dt>
+<dd><p>To be implemented.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.add_mosaic">
+<span class="sig-name descname"><span class="pre">add_mosaic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unwrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'long'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_mosaic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.add_mosaic" title="Permalink to this definition">#</a></dt>
+<dd><p>Combines multiple subplots to produce a mosaic plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.get_plot_linestyle">
+<span class="sig-name descname"><span class="pre">get_plot_linestyle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">already_chosen_linestyles</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#matadrs.utils.plot.Plotter.get_plot_linestyle" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets a linestyle, which is different from the already chosen one.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.plot" title="Permalink to this definition">#</a></dt>
+<dd><p>Combines the individual components into one plot.</p>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference internal" href="#id8" title="matadrs.utils.plot.Plotter.num_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_components</span></code></a></dt><dd><p>The number of componets contained</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="matadrs.utils.plot.Plotter.add_cphases"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_cphases</span></code></a>(**kwargs)</p></td>
+<td><p>Adds the closure phases as a subplot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id1" title="matadrs.utils.plot.Plotter.add_diff_phases"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_diff_phases</span></code></a>(**kwargs)</p></td>
+<td><p>Adds the differential phases as a subplot</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id2" title="matadrs.utils.plot.Plotter.add_flux"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_flux</span></code></a>(**kwargs)</p></td>
+<td><p>Adds the total flux(es) as a subplot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id3" title="matadrs.utils.plot.Plotter.add_mosaic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_mosaic</span></code></a>(**kwargs)</p></td>
+<td><p>Combines multiple subplots to produce a mosaic plot</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id4" title="matadrs.utils.plot.Plotter.add_uv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_uv</span></code></a>(**kwargs)</p></td>
+<td><p>Adds the (u, v)-coordinates as a subplot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id5" title="matadrs.utils.plot.Plotter.add_vis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_vis</span></code></a>([corr_flux])</p></td>
+<td><p>Adds the visibilities/correlated fluxes as a subplot</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id6" title="matadrs.utils.plot.Plotter.add_vis2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_vis2</span></code></a>([corr_flux])</p></td>
+<td><p>Adds the squared visibilities as a subplot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id7" title="matadrs.utils.plot.Plotter.make_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_component</span></code></a>(data_name[, legend_format, ...])</p></td>
+<td><p>Generates a pandas DataFrame that has all the plots' information</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id9" title="matadrs.utils.plot.Plotter.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([save, subplots, sharex])</p></td>
+<td><p>Combines the individual components into one plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.plot.Plotter.plot_component" title="matadrs.utils.plot.Plotter.plot_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_component</span></code></a>(ax, name, component[, ...])</p></td>
+<td><p>Plots all the data of a single component.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id10" title="matadrs.utils.plot.Plotter.plot_uv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_uv</span></code></a>(ax[, symbol, sel_wl, airmass_lim, ...])</p></td>
+<td><p>Plots the (u, v)-coordinates and their corresponding tracks</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">add_cphases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_cphases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the closure phases as a subplot</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">add_diff_phases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_diff_phases"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the differential phases as a subplot</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">add_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the total flux(es) as a subplot</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">add_mosaic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_mosaic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Permalink to this definition">#</a></dt>
+<dd><p>Combines multiple subplots to produce a mosaic plot</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">add_uv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_uv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the (u, v)-coordinates as a subplot</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">add_vis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">corr_flux</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_vis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the visibilities/correlated fluxes as a subplot</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">add_vis2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">corr_flux</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.add_vis2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds the squared visibilities as a subplot</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">make_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'long'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unwrap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">360</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#matadrs.utils.plot.PlotComponent" title="matadrs.utils.plot.PlotComponent"><span class="pre">PlotComponent</span></a></span></span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.make_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Permalink to this definition">#</a></dt>
+<dd><p>Generates a pandas DataFrame that has all the plots’ information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_name</strong> (<em>str</em>) – The name of the data to be plotted. Determines the legend- and plot
+labels.</p></li>
+<li><p><strong>legend_format</strong> (<em>str</em><em>, </em><em>optional</em>) – Sets the format of the legend: For all information set “long” and
+for only station names set “short”.</p></li>
+<li><p><strong>unwrap</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>period</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>component</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of either Callable or <a class="reference internal" href="#matadrs.utils.plot.PlotComponent" title="matadrs.utils.plot.PlotComponent">PlotComponent</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id8">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_components</span></span><a class="headerlink" href="#id8" title="Permalink to this definition">#</a></dt>
+<dd><p>The number of componets contained</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subplots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition">#</a></dt>
+<dd><p>Combines the individual components into one plot.</p>
+<p>The size and dimension of the plot is automatically determined</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save</strong> (<em>bool</em><em>, </em><em>optional</em>) – If toggled, saves the plot to the self.save_path file with the
+self.plot_name</p></li>
+<li><p><strong>subplots</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>sharex</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.plot_component">
+<span class="sig-name descname"><span class="pre">plot_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#matadrs.utils.plot.PlotComponent" title="matadrs.utils.plot.PlotComponent"><span class="pre">PlotComponent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_xlabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.plot_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.plot_component" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots all the data of a single component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> – </p></li>
+<li><p><strong>name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>component</strong> (<em>callable</em><em> or </em><em>plotcomponent</em>) – </p></li>
+<li><p><strong>no_xlabel</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>error</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>margin</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">plot_uv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sel_wl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airmass_lim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.plot_uv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots the (u, v)-coordinates and their corresponding tracks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – </p></li>
+<li><p><strong>symbol</strong> (<em>str</em><em>, </em><em>optional</em>) – The symbol that markes the coordinates of the (u, v)-point.</p></li>
+<li><p><strong>color</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – Set the color/colors of the uv-coords. In case of multiple
+(.fits)-files the colors can be specified as a list with entries
+for each file.</p></li>
+<li><p><strong>sel_wl</strong> (<em>float</em><em>, </em><em>optional</em>) – The wavelength to convert meter to Mlambda. If None then no
+conversion is done.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.utils.plot.make_uv_tracks">
+<span class="sig-prename descclassname"><span class="pre">matadrs.utils.plot.</span></span><span class="sig-name descname"><span class="pre">make_uv_tracks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uv_coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baselines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sta_label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">declination</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sel_wl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airmass_lim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#make_uv_tracks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.make_uv_tracks" title="Permalink to this definition">#</a></dt>
+<dd><p>This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).</p>
+<p>From coordinate + ha (range), calculate uv tracks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uv_coords</strong> (<em>numpy.ndarray</em><em> of </em><em>float</em>) – </p></li>
+<li><p><strong>baselines</strong> (<em>list</em><em> of </em><em>numpy.ndarray</em>) – The baselines in the following order: Baselines east, -north,
+-longest.</p></li>
+<li><p><strong>sta_labels</strong> (<em>list</em><em> of </em><em>numpy.ndarray</em>) – </p></li>
+<li><p><strong>declination</strong> (<em>float</em>) – </p></li>
+<li><p><strong>flag</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>symbol</strong> (<em>str</em>) – </p></li>
+<li><p><strong>color</strong> (<em>str</em>) – </p></li>
+<li><p><strong>sel_wl</strong> (<em>float</em>) – </p></li>
+<li><p><strong>airmass_lim</strong> (<em>float</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -437,6 +797,55 @@ document.write(`
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.PlotComponent"><code class="docutils literal notranslate"><span class="pre">PlotComponent</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.PlotComponent.labels"><code class="docutils literal notranslate"><span class="pre">PlotComponent.labels</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.PlotComponent.x_values"><code class="docutils literal notranslate"><span class="pre">PlotComponent.x_values</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.PlotComponent.y_errors"><code class="docutils literal notranslate"><span class="pre">PlotComponent.y_errors</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.PlotComponent.y_values"><code class="docutils literal notranslate"><span class="pre">PlotComponent.y_values</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter"><code class="docutils literal notranslate"><span class="pre">Plotter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.num_components"><code class="docutils literal notranslate"><span class="pre">Plotter.num_components</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.band_mask"><code class="docutils literal notranslate"><span class="pre">Plotter.band_mask()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.mask_dataframe"><code class="docutils literal notranslate"><span class="pre">Plotter.mask_dataframe()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.calculate_uv_points"><code class="docutils literal notranslate"><span class="pre">Plotter.calculate_uv_points()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.plot_uv"><code class="docutils literal notranslate"><span class="pre">Plotter.plot_uv()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.set_dataframe"><code class="docutils literal notranslate"><span class="pre">Plotter.set_dataframe()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.make_component"><code class="docutils literal notranslate"><span class="pre">Plotter.make_component()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.add_flux"><code class="docutils literal notranslate"><span class="pre">Plotter.add_flux()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.add_vis"><code class="docutils literal notranslate"><span class="pre">Plotter.add_vis()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.add_vis2"><code class="docutils literal notranslate"><span class="pre">Plotter.add_vis2()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.add_cphases"><code class="docutils literal notranslate"><span class="pre">Plotter.add_cphases()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.add_diff_phases"><code class="docutils literal notranslate"><span class="pre">Plotter.add_diff_phases()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.add_uv"><code class="docutils literal notranslate"><span class="pre">Plotter.add_uv()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.add_text"><code class="docutils literal notranslate"><span class="pre">Plotter.add_text()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.add_mosaic"><code class="docutils literal notranslate"><span class="pre">Plotter.add_mosaic()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.get_plot_linestyle"><code class="docutils literal notranslate"><span class="pre">Plotter.get_plot_linestyle()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.plot"><code class="docutils literal notranslate"><span class="pre">Plotter.plot()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">Plotter.add_cphases()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">Plotter.add_diff_phases()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">Plotter.add_flux()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">Plotter.add_mosaic()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">Plotter.add_uv()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">Plotter.add_vis()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">Plotter.add_vis2()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">Plotter.make_component()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">Plotter.num_components</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">Plotter.plot()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.Plotter.plot_component"><code class="docutils literal notranslate"><span class="pre">Plotter.plot_component()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">Plotter.plot_uv()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.plot.make_uv_tracks"><code class="docutils literal notranslate"><span class="pre">make_uv_tracks()</span></code></a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
