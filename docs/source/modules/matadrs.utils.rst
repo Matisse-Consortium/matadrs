@@ -8,7 +8,6 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
-   utils/data_prep
    utils/plot
    utils/readout
    utils/robust
