@@ -2,15 +2,19 @@
 __pycache__/
 *.egg-info/
 
-# Specific files to ignore
-README.md
-MANIFEST.in
-LICENSE
-pyproject.toml
-.gitattributes
+# Files to ignore
+*.txt
 
-# Specific folder to ignore
-examples/
-matadrs/
-doc/
+# Specific folders to ignore
 tests/
+matadrs/jacob_files
+docs/
+doc/
+matadrs/
+examples/
+
+# Specific files to ignore
+.gitattributes
+LICENSE
+MANIFEST.in
+README.md

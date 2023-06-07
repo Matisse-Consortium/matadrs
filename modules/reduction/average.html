@@ -393,90 +393,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="module-matadrs.reduction.average">
-<span id="matadrs-reduction-average-module"></span><h1>matadrs.reduction.average module<a class="headerlink" href="#module-matadrs.reduction.average" title="Permalink to this heading">#</a></h1>
-<section id="routine">
-<h2>Routine<a class="headerlink" href="#routine" title="Permalink to this heading">#</a></h2>
-<p class="rubric">References</p>
-<p class="rubric">Examples</p>
-</section>
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.average.average">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.average.</span></span><span class="sig-name descname"><span class="pre">average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibrated_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/average.html#average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.average.average" title="Permalink to this definition">#</a></dt>
-<dd><p>Does the full averaging over all calibrated directories.</p>
-<p>Does it for all available band-directories (“lband”, “nband”) and depending
-on the given mode for either “coherent”, “incoherent” mode or both.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>calibrated_dir</strong> (<em>pathlib.Path</em>) – The directory containing the calibration’s products.</p></li>
-<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
-‘incoherent’ or ‘both’.</p></li>
-<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites present files from previous calibration.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.average.average_files">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.average.</span></span><span class="sig-name descname"><span class="pre">average_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/average.html#average_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.average.average_files" title="Permalink to this definition">#</a></dt>
-<dd><p>Averages the unchopped (.fits)-files and the chopped (.fits)-files if
-given.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>directory</strong> (<em>pathlib.Path</em>) – The directory to be searched in.</p></li>
-<li><p><strong>file_type</strong> (<em>str</em>) – Either ‘flux’ or ‘vis’ for the flux and visibility calibration,
-respectively.</p></li>
-<li><p><strong>output_dir</strong> (<em>pathlib.Path</em>) – The directory to which the new files are saved to.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>This creates either one or two output files depending if there are only
-unchopped or also chopped files. The files’ names are with either ‘INT’ or
-‘INT_CHOPPED’, respectively, and indicated that they are averaged by an
-‘AVG’ in their name.</p>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="avg_oifits.html#matadrs.reduction.avg_oifits.avg_oifits" title="matadrs.reduction.avg_oifits.avg_oifits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">avg_oifits.avg_oifits</span></code></a></dt><dd><p>Averaging for (.fits)-files.</p>
-</dd>
-</dl>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.average.average_folders">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.average.</span></span><span class="sig-name descname"><span class="pre">average_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibrated_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/average.html#average_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.average.average_folders" title="Permalink to this definition">#</a></dt>
-<dd><p>Iterates over the calibrated directories and averages their
-“RAW_INT”-files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>calibrated_dir</strong> (<em>pathlib.Path</em>) – The directory containing the calibration’s products.</p></li>
-<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
-‘incoherent’ or ‘both’.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.average.copy_calibrated_files">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.average.</span></span><span class="sig-name descname"><span class="pre">copy_calibrated_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/average.html#copy_calibrated_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.average.copy_calibrated_files" title="Permalink to this definition">#</a></dt>
-<dd><p>Copies the bcd-calibrated files to the averaged directory.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>directory</strong> (<em>pathlib.Path</em>) – The directory to be searched in.</p></li>
-<li><p><strong>output_dir</strong> (<em>pathlib.Path</em>) – The directory to which the new files are saved to.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+  <section id="matadrs-reduction-average-module">
+<h1>matadrs.reduction.average module<a class="headerlink" href="#matadrs-reduction-average-module" title="Permalink to this heading">#</a></h1>
 </section>
 
 
@@ -519,20 +437,6 @@ unchopped or also chopped files. The files’ names are with either ‘INT’ or
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#routine">Routine</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.average.average"><code class="docutils literal notranslate"><span class="pre">average()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.average.average_files"><code class="docutils literal notranslate"><span class="pre">average_files()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.average.average_folders"><code class="docutils literal notranslate"><span class="pre">average_folders()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.average.copy_calibrated_files"><code class="docutils literal notranslate"><span class="pre">copy_calibrated_files()</span></code></a></li>
-</ul>
-  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">

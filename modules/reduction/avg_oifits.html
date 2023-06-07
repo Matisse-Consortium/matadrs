@@ -393,81 +393,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="module-matadrs.reduction.avg_oifits">
-<span id="matadrs-reduction-avg-oifits-module"></span><h1>matadrs.reduction.avg_oifits module<a class="headerlink" href="#module-matadrs.reduction.avg_oifits" title="Permalink to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.avg_oifits.avg_oifits">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.avg_oifits.</span></span><span class="sig-name descname"><span class="pre">avg_oifits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headerval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_cflux</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/avg_oifits.html#avg_oifits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.avg_oifits.avg_oifits" title="Permalink to this definition">#</a></dt>
-<dd><p>This takes multiple (.fits)-files averages their
-HDULISTs and creates a unified, averaged file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>infile_list</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The files to be averaged over.</p></li>
-<li><p><strong>outfile_path</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The averaged output file.</p></li>
-<li><p><strong>headerval</strong> (<em>list</em><em>, </em><em>optional</em>) – </p></li>
-<li><p><strong>avg_clfux</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the function will average over all
-the correlated flux data (this is still experimental).</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.avg_oifits.calc_vis_from_corrflux">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.avg_oifits.</span></span><span class="sig-name descname"><span class="pre">calc_vis_from_corrflux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_corrflux_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_totalflux_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/reduction/avg_oifits.html#calc_vis_from_corrflux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.avg_oifits.calc_vis_from_corrflux" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculates the visibilities from the correlated fluxes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_corrflux_file</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The files containing the correlated fluxes.</p></li>
-<li><p><strong>input_totalflux_file</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The files containing the total fluxes.</p></li>
-<li><p><strong>outfile_path</strong> (<em>pathlib.Path</em>) – The file that will contain the visibilities.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.avg_oifits.oifits_patchwork">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.avg_oifits.</span></span><span class="sig-name descname"><span class="pre">oifits_patchwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oi_types_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headerval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/reduction/avg_oifits.html#oifits_patchwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.avg_oifits.oifits_patchwork" title="Permalink to this definition">#</a></dt>
-<dd><p>This takes multiple (.fits)-files and merges certain
-HDULISTs from them into one merged (.fits)-file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>infile_list</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The files to be merged.</p></li>
-<li><p><strong>outfile_path</strong> (<em>list</em><em> of </em><em>pathlib.Path</em>) – The merged output file.</p></li>
-<li><p><strong>oi_types_list</strong> (<em>list</em><em>, </em><em>optional</em>) – </p></li>
-<li><p><strong>headerval</strong> (<em>list</em><em>, </em><em>optional</em>) – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.avg_oifits.oifits_restrict_wavelengths">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.avg_oifits.</span></span><span class="sig-name descname"><span class="pre">oifits_restrict_wavelengths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sel_wl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wl_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_flag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/reduction/avg_oifits.html#oifits_restrict_wavelengths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.avg_oifits.oifits_restrict_wavelengths" title="Permalink to this definition">#</a></dt>
-<dd><p>Restrictes the wavelength range of an input (.fits)-file
-and writes the restricted (.fits)-file to the output path.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>infile_path</strong> (<em>pathlib.Path</em>) – The file to be restricted in wavelength.</p></li>
-<li><p><strong>outfile_path</strong> (<em>pathlib.Path</em>) – The file to which the restricted wavelenght information is
-to be written to.</p></li>
-<li><p><strong>sel_wl</strong> (<em>float</em><em>, </em><em>optional</em>) – The central wavelength around which the file is restricted.</p></li>
-<li><p><strong>bandwidth</strong> (<em>float</em><em>, </em><em>optional</em>) – The bandwidth around the central wavelength to which the file
-is restricted.</p></li>
-<li><p><strong>wl_range</strong> (<em>list</em><em>, </em><em>optional</em>) – Specifies a wavelength range to restric the file to.
-If this is specified then it will take precendent over
-the “sel_wl” and the “bandwidth”.</p></li>
-<li><p><strong>do_flag</strong> (<em>bool</em><em>, </em><em>optional</em>) – If toggled, all flagged wavelength values will be excluded.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+  <section id="matadrs-reduction-avg-oifits-module">
+<h1>matadrs.reduction.avg_oifits module<a class="headerlink" href="#matadrs-reduction-avg-oifits-module" title="Permalink to this heading">#</a></h1>
 </section>
 
 
@@ -510,19 +437,6 @@ the “sel_wl” and the “bandwidth”.</p></li>
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.avg_oifits.avg_oifits"><code class="docutils literal notranslate"><span class="pre">avg_oifits()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.avg_oifits.calc_vis_from_corrflux"><code class="docutils literal notranslate"><span class="pre">calc_vis_from_corrflux()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.avg_oifits.oifits_patchwork"><code class="docutils literal notranslate"><span class="pre">oifits_patchwork()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.avg_oifits.oifits_restrict_wavelengths"><code class="docutils literal notranslate"><span class="pre">oifits_restrict_wavelengths()</span></code></a></li>
-</ul>
-  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">

@@ -393,107 +393,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="module-matadrs.utils.robust">
-<span id="matadrs-utils-robust-module"></span><h1>matadrs.utils.robust module<a class="headerlink" href="#module-matadrs.utils.robust" title="Permalink to this heading">#</a></h1>
-<p>Small collection of robust statistical estimators based on functions from
-Henry Freudenriech (Hughes STX) statistics library (called ROBLIB) that have
-been incorporated into the AstroIDL User’s Library.  Function included are:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>biweightMean - biweighted mean estimator</p></li>
-<li><p>mean - robust estimator of the mean of a data set</p></li>
-<li><p>mode - robust estimate of the mode of a data set using the half-sample
-method</p></li>
-<li><p>std - robust estimator of the standard deviation of a data set</p></li>
-<li><p>checkfit - return the standard deviation and biweights for a fit in order
-to determine its quality</p></li>
-<li><p>linefit - outlier resistant fit of a line to data</p></li>
-<li><p>polyfit - outlier resistant fit of a polynomial to data</p></li>
-</ul>
-</div></blockquote>
-<p>For the fitting routines, the coefficients are returned in the same order as
-numpy.polyfit, i.e., with the coefficient of the highest power listed first.</p>
-<dl class="simple">
-<dt>For additional information about the original IDL routines, see:</dt><dd><p><a class="reference external" href="http://idlastro.gsfc.nasa.gov/contents.html#C17">http://idlastro.gsfc.nasa.gov/contents.html#C17</a></p>
-</dd>
-</dl>
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.utils.robust.biweightMean">
-<span class="sig-prename descclassname"><span class="pre">matadrs.utils.robust.</span></span><span class="sig-name descname"><span class="pre">biweightMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/robust.html#biweightMean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.robust.biweightMean" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculate the mean of a data set using bisquare weighting.</p>
-<p>Based on the biweight_mean routine from the AstroIDL User’s
-Library.</p>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.0.3: </span>Added the ‘axis’ and ‘dtype’ keywords to make this function more
-compatible with numpy.mean()</p>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.utils.robust.checkfit">
-<span class="sig-prename descclassname"><span class="pre">matadrs.utils.robust.</span></span><span class="sig-name descname"><span class="pre">checkfit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputFit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BisquareLimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/robust.html#checkfit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.robust.checkfit" title="Permalink to this definition">#</a></dt>
-<dd><p>Determine the quality of a fit and biweights.  Returns a tuple
-with elements:</p>
-<blockquote>
-<div><ol class="arabic simple" start="0">
-<li><p>Robust standard deviation analog</p></li>
-<li><p>Fractional median absolute deviation of the residuals</p></li>
-<li><p>Number of input points given non-zero weight in the calculation</p></li>
-<li><p>Bisquare weights of the input points</p></li>
-<li><p>Residual values scaled by sigma</p></li>
-</ol>
-</div></blockquote>
-<p>This function is based on the rob_checkfit routine from the AstroIDL
-User’s Library.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.utils.robust.linefit">
-<span class="sig-prename descclassname"><span class="pre">matadrs.utils.robust.</span></span><span class="sig-name descname"><span class="pre">linefit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Bisector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BisquareLimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CloseFactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.03</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/robust.html#linefit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.robust.linefit" title="Permalink to this definition">#</a></dt>
-<dd><p>Outlier resistance two-variable linear regression function.</p>
-<p>Based on the robust_linefit routine in the AstroIDL User’s Library.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.utils.robust.mean">
-<span class="sig-prename descclassname"><span class="pre">matadrs.utils.robust.</span></span><span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/robust.html#mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.robust.mean" title="Permalink to this definition">#</a></dt>
-<dd><p>Robust estimator of the mean of a data set.  Based on the
-resistant_mean function from the AstroIDL User’s Library.</p>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.0.3: </span>Added the ‘axis’ and ‘dtype’ keywords to make this function more
-compatible with numpy.mean()</p>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.utils.robust.mode">
-<span class="sig-prename descclassname"><span class="pre">matadrs.utils.robust.</span></span><span class="sig-name descname"><span class="pre">mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/robust.html#mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.robust.mode" title="Permalink to this definition">#</a></dt>
-<dd><p>Robust estimator of the mode of a data set using the half-sample mode.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.utils.robust.polyfit">
-<span class="sig-prename descclassname"><span class="pre">matadrs.utils.robust.</span></span><span class="sig-name descname"><span class="pre">polyfit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/robust.html#polyfit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.robust.polyfit" title="Permalink to this definition">#</a></dt>
-<dd><p>Outlier resistance two-variable polynomial function fitter.</p>
-<p>Based on the robust_poly_fit routine in the AstroIDL User’s
-Library.</p>
-<p>Unlike robust_poly_fit, two different polynomial fitters are used
-because numpy.polyfit does not support non-uniform weighting of the
-data.  For the weighted fitting, the SciPy Orthogonal Distance
-Regression module (scipy.odr) is used.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.utils.robust.std">
-<span class="sig-prename descclassname"><span class="pre">matadrs.utils.robust.</span></span><span class="sig-name descname"><span class="pre">std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/robust.html#std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.robust.std" title="Permalink to this definition">#</a></dt>
-<dd><p>Robust estimator of the standard deviation of a data set.</p>
-<p>Based on the robust_sigma function from the AstroIDL User’s Library.</p>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.0.3: </span>Added the ‘axis’ and ‘dtype’ keywords to make this function more
-compatible with numpy.std()</p>
-</div>
-</dd></dl>
-
+  <section id="matadrs-utils-robust-module">
+<h1>matadrs.utils.robust module<a class="headerlink" href="#matadrs-utils-robust-module" title="Permalink to this heading">#</a></h1>
 </section>
 
 
@@ -536,22 +437,6 @@ compatible with numpy.std()</p>
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.robust.biweightMean"><code class="docutils literal notranslate"><span class="pre">biweightMean()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.robust.checkfit"><code class="docutils literal notranslate"><span class="pre">checkfit()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.robust.linefit"><code class="docutils literal notranslate"><span class="pre">linefit()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.robust.mean"><code class="docutils literal notranslate"><span class="pre">mean()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.robust.mode"><code class="docutils literal notranslate"><span class="pre">mode()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.robust.polyfit"><code class="docutils literal notranslate"><span class="pre">polyfit()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.robust.std"><code class="docutils literal notranslate"><span class="pre">std()</span></code></a></li>
-</ul>
-  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
