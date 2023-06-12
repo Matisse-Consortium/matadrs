@@ -4,7 +4,7 @@ import shutil
 from datetime import timedelta
 from functools import wraps
 from pathlib import Path
-from typing import Optional, Callable, Tuple, List
+from typing import Union, Optional, Callable, Tuple, List
 
 import astropy.units as u
 import numpy as np
@@ -14,8 +14,26 @@ __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
            "get_path_descriptor"]
 
 
-def unwrap_phases(phase, error, period=360):
-    return map(lambda x: np.unwrap(x, period=period), [phase, error])
+def unwrap_phases(phase: Union[float, np.ndarray],
+                  error: Optional[Union[float, np.ndarray]] = None,
+                  period: Optional[int] = 360
+                  ) -> Union[Tuple[np.ndarray, np.ndarray], np.ndarray]:
+    """Unwraps both the phases and the errors of the input arrays.
+
+    Parameters
+    ----------
+    phase : float or numpy.ndarray
+    error : float or numpy.ndarray, optional
+    period : int, optional
+
+    Returns
+    -------
+    phase : numpy.ndarray
+    error : numpy.ndarray, optional
+    """
+    if error is not None:
+        return map(lambda x: np.unwrap(x, period=period), [phase, error])
+    return np.unwrap(phase, period=period)
 
 
 def cprint(message: str, color: Optional[str] = None) -> None:
@@ -85,7 +103,7 @@ def print_execution_time(func: Callable):
         result = func(*args, **kwargs)
         execution_time = time.perf_counter()-overall_start_time
         cprint(f"{'':-^50}", "lg")
-        cprint(f"Executed in {timedelta(seconds=execution_time)}"
+        cprint(f"[INFO]: Executed in {timedelta(seconds=execution_time)}"
                " hh:mm:ss", "lg")
         cprint(f"{'':-^50}", "lg")
         return result
