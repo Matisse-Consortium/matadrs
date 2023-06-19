@@ -8,11 +8,12 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
+import matadrs
 
 project = "matadrs"
 copyright = "2023, Marten Scheuck"
 author = "Marten Scheuck"
-release = "0.1.0"
+release = matadrs.__version__
 
 # -- General configuration ---------------------------------------------------
 

@@ -4,7 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "matadrs"
-version = "0.1.1"
 description = "An extended, fully automated MATISSE-data reduction pipeline"
 requires-python = ">=3.9"
 readme = "README.md"
@@ -53,6 +52,9 @@ dev = [
 
 [tool.setuptools]
 include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "matadrs.__version__"}
 
 [project.urls]
 repository = "https://github.com/MBSck/matadrs"
