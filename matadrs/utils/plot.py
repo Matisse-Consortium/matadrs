@@ -265,7 +265,8 @@ class Plotter:
         """
         component = []
         for readout in self.readouts:
-            sub_component = PlotComponent(x_values=readout.oi_wl["EFF_WAVE"].data.squeeze())
+            sub_component = PlotComponent(
+                x_values=readout.oi_wl["EFF_WAVE"].data.squeeze())
             if data_name == "flux":
                 sub_component.y_values = readout.oi_flux["FLUXDATA"]
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
@@ -293,8 +294,8 @@ class Plotter:
                     diff_phases = readout.oi_vis["VISPHI"]
                     diff_phases_err = readout.oi_vis["VISPHIERR"]
                     if unwrap:
-                        diff_phases, diff_phases_err = unwrap_phases(diff_phases,
-                                                                     diff_phases_err, period)
+                        diff_phases, diff_phases_err = unwrap_phases(
+                            diff_phases, diff_phases_err, period)
                     sub_component.y_values = diff_phases
                     sub_component.y_errors = diff_phases_err
                 elif data_name == "vis2":
@@ -303,7 +304,8 @@ class Plotter:
                 else:
                     raise KeyError("No data-type of that data name exists!")
             elif data_name == "cphases":
-                cphases, cphases_err = readout.oi_t3["T3PHI"], readout.oi_t3["T3PHIERR"]
+                cphases = readout.oi_t3["T3PHI"]
+                cphases_err = readout.oi_t3["T3PHIERR"]
                 if unwrap:
                     cphases, cphases_err = unwrap_phases(cphases,
                                                          cphases_err, period)
@@ -360,98 +362,114 @@ class Plotter:
 
     def add_mosaic(self, **kwargs):
         """Combines multiple subplots to produce a mosaic plot"""
-        self.add_uv(**kwargs).add_vis(corr_flux=True, **kwargs).add_vis2(**kwargs)
-        self.add_flux(**kwargs).add_cphases(**kwargs).add_diff_phases(**kwargs)
+        self.add_uv(**kwargs)
+        self.add_vis(corr_flux=True, **kwargs)
+        self.add_vis2(**kwargs)
+        self.add_flux(**kwargs)
+        self.add_diff_phases(**kwargs)
+        self.add_cphases(**kwargs)
         return self
-    # NOTE: Legend sizes. xx-small', 'x-small', 'small', 'medium',
-    # 'large', 'x-large', 'xx-large
-    def plot_component(self, ax, name: str,
-                       component: Union[Callable, PlotComponent],
-                       no_xlabel: Optional[bool] = False,
+
+    def plot_component(self, axarr, name: str,
+                       components: Union[Callable, PlotComponent],
+                       sharex: Optional[bool] = False,
+                       share_legend: Optional[bool] = False,
                        error: Optional[bool] = False,
                        margin: Optional[float] = 0.05,
                        legend: Optional[bool] = True,
                        legend_location: Optional[str] = "upper right",
                        legend_size: Optional[int] = "xx-small") -> None:
+        """Plots a single component
+
+        Parameters
+        ----------
+        ax : matplotlib.axes
+        name : str
+        component : callable or PlotComponent"""
+        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]"
+        for index, (ax, component) in enumerate(zip(axarr, components)):
+            if isinstance(component, PlotComponent):
+                for label, y_value, y_error in zip(component.labels,
+                                                   component.y_values,
+                                                   component.y_errors):
+                    ax.plot(component.x_values, y_value, label=label)
+                    if error:
+                        ax.fill_between(component.x_values,
+                                        y_value+y_error, y_value-y_error,
+                                        alpha=0.2)
+                    if legend:
+                        if not share_legend:
+                            ax.legend(fontsize=legend_size,
+                                      loc=legend_location, framealpha=0.5)
+                        elif index == 0:
+                            ax.legend(fontsize=legend_size,
+                                      loc=legend_location, framealpha=0.5)
+                    limits = self._set_y_limits(component.x_values,
+                                                component.y_values,
+                                                margin=margin)
+                    ax.set_ylim(*limits)
+                    if not sharex:
+                        ax.set_xlabel(xlabel)
+                    elif index == len(axarr)-1:
+                        ax.set_xlabel(xlabel)
+                    ax.set_ylabel(name)
+            else:
+                component(ax)
+
+    def plot(self,
+             subplots: Optional[bool] = False,
+             rax: Optional[bool] = False,
+             savefig: Optional[Union[str, bool]] = None,
+             format: Optional[str] = "pdf",
+             **kwargs) -> Optional[Axes]:
         """Plots all the data of a single component.
 
         Parameters
         ----------
-        ax :
+        ax : matplotlib.axes
         name : str
         component : callable or plotcomponent
-        no_xlabel : bool, optional
+        subplots : bool, optional
+        sharex : bool, optional
+        sharey : bool, optional
         error : bool, optional
         margin : bool, optional
         legend : bool, optional
         legend_location : str, optional
         legend_size : int, optional
         """
-        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
-        for index, sub_component in enumerate(component):
-            if isinstance(sub_component, PlotComponent):
-                for label, y_value, y_error in zip(sub_component.labels,
-                                                   sub_component.y_values,
-                                                   sub_component.y_errors):
-                    ax.plot(sub_component.x_values, y_value, label=label)
-                    if error:
-                        ax.fill_between(sub_component.x_values,
-                                        y_value+y_error, y_value-y_error,
-                                        alpha=0.2)
-                    if legend:
-                        ax.legend(fontsize=legend_size,
-                                  loc=legend_location, framealpha=0.5)
-                    limits = self._set_y_limits(sub_component.x_values,
-                                                sub_component.y_values,
-                                                margin=margin)
-                ax.set_ylim(*limits)
-                ax.set_xlabel(xlabel)
-                ax.set_ylabel(name)
-            else:
-                sub_component(ax)
+        if subplots:
+            columns = self.num_components
+            rows = len(list(self.components.values())[0])
+        else:
+            columns = 1 if self.num_components == 1 else\
+                (3 if self.num_components >= 3 else 2)
+            rows = np.ceil(self.num_components/columns).astype(int)\
+                if self.num_components != 1 else 1
 
-    # TODO: Add support for multiple files so subplots are created and such.
-    # TODO: Sharex, sharey and subplots should be added
-    def plot(self, save: Optional[bool] = False,
-             subplots: Optional[bool] = False,
-             sharex: Optional[bool] = False,
-             format: Optional[str] = "pdf",
-             rax: Optional[bool] = False, **kwargs) -> Optional[Axes]:
-        """Combines the individual components into one plot.
-
-        The size and dimension of the plot is automatically determined
-
-        Parameters
-        ----------
-        save: bool, optional
-            If toggled, saves the plot to the self.save_path file with the
-            self.plot_name
-        subplots : bool, optional
-        sharex : bool, optional
-        rax : bool, optional
-        kwargs: dict, optional
-        """
-        columns = 1 if self.num_components == 1 else\
-            (3 if self.num_components >= 3 else 2)
-        rows = np.ceil(self.num_components/columns).astype(int)\
-            if self.num_components != 1 else 1
         to_px = 1/plt.rcParams["figure.dpi"]
         fig, axarr = plt.subplots(rows, columns,
                                   constrained_layout=True,
                                   figsize=(512*to_px*columns, 512*to_px*rows))
 
-        if self.num_components != 1:
-            for ax, (name, component)\
-                    in zip(axarr.flatten(), self.components.items()):
-                self.plot_component(ax, name, component, **kwargs)
-        else:
-            name, component = map(
-                lambda x: x[0], zip(*self.components.items()))
-            self.plot_component(axarr, name, component, **kwargs)
-        fig.tight_layout()
+        upper, lower = 0, 1
+        for index, (name, component) in enumerate(self.components.items()):
+            if subplots:
+                self.plot_component(axarr[:, index], name, component, **kwargs)
+            else:
+                # TODO: Fix this here.
+                upper += len(component)
+                self.plot_component(
+                    axarr.flatten()[lower:upper], name, component, **kwargs)
+                lower = upper
 
-        if save:
-            plt.savefig(self.save_path / self.plot_name, format=format)
+        fig.tight_layout()
+        if savefig is not None:
+            if isinstance(savefig, (str, Path)):
+                save_path = Path(savefig)
+            else:
+                save_path = self.save_path / self.plot_name
+            plt.savefig(save_path, format=format)
         else:
             plt.show()
 
