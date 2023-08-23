@@ -377,7 +377,7 @@ class Plotter:
                        error: Optional[bool] = False,
                        margin: Optional[float] = 0.05,
                        legend: Optional[bool] = True,
-                       legend_location: Optional[str] = "upper right",
+                       legend_location: Optional[str] = None,
                        legend_size: Optional[int] = "xx-small") -> None:
         """Plots a single component
 
@@ -466,7 +466,7 @@ class Plotter:
         fig.tight_layout()
         if savefig is not None:
             if isinstance(savefig, (str, Path)):
-                save_path = Path(savefig)
+                save_path = Path(f"{Path(savefig).stem}.{format}")
             else:
                 save_path = self.save_path / self.plot_name
             plt.savefig(save_path, format=format)
