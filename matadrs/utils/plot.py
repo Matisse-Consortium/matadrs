@@ -370,6 +370,8 @@ class Plotter:
                        no_xlabel: Optional[bool] = False,
                        error: Optional[bool] = False,
                        margin: Optional[float] = 0.05,
+                       legend: Optional[bool] = True,
+                       legend_location: Optional[str] = "upper right",
                        legend_size: Optional[int] = "xx-small") -> None:
         """Plots all the data of a single component.
 
@@ -381,6 +383,9 @@ class Plotter:
         no_xlabel : bool, optional
         error : bool, optional
         margin : bool, optional
+        legend : bool, optional
+        legend_location : str, optional
+        legend_size : int, optional
         """
         xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
         for index, sub_component in enumerate(component):
@@ -391,8 +396,11 @@ class Plotter:
                     ax.plot(sub_component.x_values, y_value, label=label)
                     if error:
                         ax.fill_between(sub_component.x_values,
-                                        y_value+y_error, y_value-y_error, alpha=0.2)
-                    ax.legend(fontsize=legend_size, loc="upper right", framealpha=0.5)
+                                        y_value+y_error, y_value-y_error,
+                                        alpha=0.2)
+                    if legend:
+                        ax.legend(fontsize=legend_size,
+                                  loc=legend_location, framealpha=0.5)
                     limits = self._set_y_limits(sub_component.x_values,
                                                 sub_component.y_values,
                                                 margin=margin)
