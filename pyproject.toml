@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "matadrs"
+dynamic = ["version"]
 description = "An extended, fully automated MATISSE-data reduction pipeline"
 requires-python = ">=3.9"
 readme = "README.md"

@@ -363,12 +363,14 @@ class Plotter:
         self.add_uv(**kwargs).add_vis(corr_flux=True, **kwargs).add_vis2(**kwargs)
         self.add_flux(**kwargs).add_cphases(**kwargs).add_diff_phases(**kwargs)
         return self
-
+    # NOTE: Legend sizes. xx-small', 'x-small', 'small', 'medium',
+    # 'large', 'x-large', 'xx-large
     def plot_component(self, ax, name: str,
                        component: Union[Callable, PlotComponent],
                        no_xlabel: Optional[bool] = False,
                        error: Optional[bool] = False,
-                       margin: Optional[float] = 0.05) -> None:
+                       margin: Optional[float] = 0.05,
+                       legend_size: Optional[int] = "xx-small") -> None:
         """Plots all the data of a single component.
 
         Parameters
@@ -390,7 +392,7 @@ class Plotter:
                     if error:
                         ax.fill_between(sub_component.x_values,
                                         y_value+y_error, y_value-y_error, alpha=0.2)
-                    ax.legend(fontsize="xx-small", loc="upper right", framealpha=0.5)
+                    ax.legend(fontsize=legend_size, loc="upper right", framealpha=0.5)
                     limits = self._set_y_limits(sub_component.x_values,
                                                 sub_component.y_values,
                                                 margin=margin)
@@ -400,10 +402,13 @@ class Plotter:
             else:
                 sub_component(ax)
 
+    # TODO: Add support for multiple files so subplots are created and such.
     # TODO: Sharex, sharey and subplots should be added
     def plot(self, save: Optional[bool] = False,
              subplots: Optional[bool] = False,
-             sharex: Optional[bool] = False, **kwargs):
+             sharex: Optional[bool] = False,
+             format: Optional[str] = "pdf",
+             rax: Optional[bool] = False, **kwargs) -> Optional[Axes]:
         """Combines the individual components into one plot.
 
         The size and dimension of the plot is automatically determined
@@ -415,6 +420,7 @@ class Plotter:
             self.plot_name
         subplots : bool, optional
         sharex : bool, optional
+        rax : bool, optional
         kwargs: dict, optional
         """
         columns = 1 if self.num_components == 1 else\
@@ -427,16 +433,20 @@ class Plotter:
                                   figsize=(512*to_px*columns, 512*to_px*rows))
 
         if self.num_components != 1:
-            for ax, (name, component) in zip(axarr.flatten(), self.components.items()):
+            for ax, (name, component)\
+                    in zip(axarr.flatten(), self.components.items()):
                 self.plot_component(ax, name, component, **kwargs)
         else:
             name, component = map(
                 lambda x: x[0], zip(*self.components.items()))
-            self.plot_component(ax, name, component, **kwargs)
+            self.plot_component(axarr, name, component, **kwargs)
         fig.tight_layout()
 
         if save:
-            plt.savefig(self.save_path / self.plot_name, format="pdf")
+            plt.savefig(self.save_path / self.plot_name, format=format)
         else:
             plt.show()
+
+        if rax:
+            return fig, axarr
         plt.close()
