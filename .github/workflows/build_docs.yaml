@@ -41,7 +41,7 @@ jobs:
         git config user.name github-actions
         git config user.email github-actions@github.com
 
-    - name: Cleanup Old Files
+    - name: Cleanup Old Folders
       run: |
         rm -rf _static/
         rm -rf _modules/
@@ -54,6 +54,6 @@ jobs:
         git stash pop
         mv -f docs/build/* .
         rm -rf docs/build
-        git -f add .
+        git add .
         git commit -m "Auto update docs"
         git push
