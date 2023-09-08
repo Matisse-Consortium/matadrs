@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>matadrs.utils.plot module &#8212; matadrs 0.1.0 documentation</title>
+    <title>matadrs.utils.plot module &#8212; matadrs 0.1.1 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="matadrs.utils.readout module" href="readout.html" />
-    <link rel="prev" title="matadrs.utils.data_prep module" href="data_prep.html" />
+    <link rel="prev" title="matadrs.utils package" href="../matadrs.utils.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -103,7 +103,7 @@
   
   
   
-    <p class="title logo__title">matadrs 0.1.0 documentation</p>
+    <p class="title logo__title">matadrs 0.1.1 documentation</p>
   
 </a></div>
     
@@ -325,7 +325,6 @@ document.write(`
 </ul>
 </li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../matadrs.utils.html">matadrs.utils package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="data_prep.html">matadrs.utils.data_prep module</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">matadrs.utils.plot module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="readout.html">matadrs.utils.readout module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="robust.html">matadrs.utils.robust module</a></li>
@@ -397,7 +396,7 @@ document.write(`
 <span id="matadrs-utils-plot-module"></span><h1>matadrs.utils.plot module<a class="headerlink" href="#module-matadrs.utils.plot" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="matadrs.utils.plot.PlotComponent">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matadrs.utils.plot.</span></span><span class="sig-name descname"><span class="pre">PlotComponent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#PlotComponent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.PlotComponent" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matadrs.utils.plot.</span></span><span class="sig-name descname"><span class="pre">PlotComponent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#PlotComponent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.PlotComponent" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class containing the elements required for a plot
 from the</p>
@@ -592,11 +591,11 @@ from the</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#id7" title="matadrs.utils.plot.Plotter.make_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_component</span></code></a>(data_name[, legend_format, ...])</p></td>
 <td><p>Generates a pandas DataFrame that has all the plots' information</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id9" title="matadrs.utils.plot.Plotter.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([save, subplots, sharex])</p></td>
-<td><p>Combines the individual components into one plot.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.plot.Plotter.plot_component" title="matadrs.utils.plot.Plotter.plot_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_component</span></code></a>(ax, name, component[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id9" title="matadrs.utils.plot.Plotter.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([subplots, rax, savefig, format])</p></td>
 <td><p>Plots all the data of a single component.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.plot.Plotter.plot_component" title="matadrs.utils.plot.Plotter.plot_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_component</span></code></a>(axarr, name, components[, ...])</p></td>
+<td><p>Plots a single component</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#id10" title="matadrs.utils.plot.Plotter.plot_uv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_uv</span></code></a>(ax[, symbol, sel_wl, airmass_lim, ...])</p></td>
 <td><p>Plots the (u, v)-coordinates and their corresponding tracks</p></td>
@@ -677,17 +676,22 @@ for only station names set “short”.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id9">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subplots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition">#</a></dt>
-<dd><p>Combines the individual components into one plot.</p>
-<p>The size and dimension of the plot is automatically determined</p>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subplots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Axes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots all the data of a single component.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>save</strong> (<em>bool</em><em>, </em><em>optional</em>) – If toggled, saves the plot to the self.save_path file with the
-self.plot_name</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes</em>) – </p></li>
+<li><p><strong>name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>component</strong> (<em>callable</em><em> or </em><em>plotcomponent</em>) – </p></li>
 <li><p><strong>subplots</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
 <li><p><strong>sharex</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
-<li><p><strong>kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>sharey</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>error</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>margin</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>legend</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>legend_location</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>legend_size</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -695,17 +699,14 @@ self.plot_name</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="matadrs.utils.plot.Plotter.plot_component">
-<span class="sig-name descname"><span class="pre">plot_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#matadrs.utils.plot.PlotComponent" title="matadrs.utils.plot.PlotComponent"><span class="pre">PlotComponent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_xlabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.plot_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.plot_component" title="Permalink to this definition">#</a></dt>
-<dd><p>Plots all the data of a single component.</p>
+<span class="sig-name descname"><span class="pre">plot_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axarr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#matadrs.utils.plot.PlotComponent" title="matadrs.utils.plot.PlotComponent"><span class="pre">PlotComponent</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">share_legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xx-small'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/plot.html#Plotter.plot_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.plot.Plotter.plot_component" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots a single component</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ax</strong> – </p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes</em>) – </p></li>
 <li><p><strong>name</strong> (<em>str</em>) – </p></li>
-<li><p><strong>component</strong> (<em>callable</em><em> or </em><em>plotcomponent</em>) – </p></li>
-<li><p><strong>no_xlabel</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
-<li><p><strong>error</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
-<li><p><strong>margin</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>component</strong> (<em>callable</em><em> or </em><a class="reference internal" href="#matadrs.utils.plot.PlotComponent" title="matadrs.utils.plot.PlotComponent"><em>PlotComponent</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -769,12 +770,12 @@ conversion is done.</p></li>
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="data_prep.html"
+       href="../matadrs.utils.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">matadrs.utils.data_prep module</p>
+        <p class="prev-next-title">matadrs.utils package</p>
       </div>
     </a>
     <a class="right-next"
