@@ -170,22 +170,22 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
     .calib_BCD2.calib_BCD : BCD-calibration for closure phases.
     """
     cprint("Executing BCD-calibration...", "g")
-    unchopped_fits, chopped_fits = split_fits(directory, "CAL_INT_0")
-    outfile_unchopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
-    bcd = sort_fits_by_bcd_configuration(unchopped_fits)
-    if band == "lband":
-        calib_BCD(bcd.in_in, bcd.in_out,
-                  bcd.out_in, bcd.out_out,
-                  outfile_unchopped_cphases, plot=False)
+    fits_file_groups = split_fits(directory, "CAL_INT_0")
+    outfile = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
 
-        if chopped_fits is not None:
-            outfile_chopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_INT_CHOPPED.fits"
-            bcd_chopped = sort_fits_by_bcd_configuration(chopped_fits)
-            calib_BCD(bcd_chopped.in_in, "",
-                      "", bcd_chopped.out_out,
-                      outfile_chopped_cphases, plot=False)
+    if band == "lband":
+        for fits_files in fits_file_groups:
+            if fits_files is not None:
+                outfile = output_dir / "TARGET_BCD_CAL_T3PHI_INT_CHOPPED.fits"
+            else:
+                continue
+
+            bcd = sort_fits_by_bcd_configuration(fits_files)
+            calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in,
+                      bcd.out_out, outfile, plot=False)
     else:
-        calib_BCD(bcd.in_in, "", "", bcd.out_out, outfile_unchopped_cphases, plot=False)
+        bcd = sort_fits_by_bcd_configuration(fits_file_groups[0])
+        calib_BCD(bcd.in_in, "", "", bcd.out_out, outfile, plot=False)
 
 
 def calibrate_visibilities(targets: List[Path],
