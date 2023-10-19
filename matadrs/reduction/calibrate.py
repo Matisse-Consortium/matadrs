@@ -256,8 +256,9 @@ def cleanup_calibration(output_dir: Path):
     to the calibrated folder."""
     for fits_file in Path().cwd().glob("*.fits"):
         shutil.move(str(fits_file), str(output_dir / fits_file.name))
-    shutil.move(str(Path().cwd() / "esorex.log"),
-                str(output_dir / "mat_cal_oifits.log"))
+    if (Path().cwd() / "esorex.log").exists():
+        shutil.move(str(Path().cwd() / "esorex.log"),
+                    str(output_dir / "mat_cal_oifits.log"))
     cprint(f"{'':-^50}", "lg")
 
 
