@@ -15,7 +15,8 @@ def matadrs_pipeline(raw_dirs: Union[List[Path], Path],
                      do_reduce: Optional[bool] = True,
                      do_calibrate: Optional[bool] = True,
                      do_average: Optional[bool] = True,
-                     do_merge: Optional[bool] = True) -> None:
+                     do_merge: Optional[bool] = True,
+                     ncores: Optional[int] = 6) -> None:
     """Combines all the facettes of data reduction into one executable function
     that takes a single or a list of epochs to be reduced via the MATISSE
     pipeline, then calibrates, merges and averages them, in succession.
@@ -45,6 +46,8 @@ def matadrs_pipeline(raw_dirs: Union[List[Path], Path],
         Execute the averaging step.
     do_merge : bool, optional
         Execute the merging step.
+    ncores : int, optional
+        The number of cores used for the data reduction.
 
     Notes
     -----
@@ -81,7 +84,7 @@ def matadrs_pipeline(raw_dirs: Union[List[Path], Path],
         cprint(f"Starting data reduction of '{raw_dir}'...", "cy")
         cprint(f"{'':-^50}", "lg")
         if do_reduce:
-            reduction_pipeline(raw_dir, product_dir, mode, band, overwrite)
+            reduction_pipeline(raw_dir, product_dir, mode, band, ncores, overwrite)
         if do_calibrate:
             calibration_pipeline(product_dir, mode, band, overwrite)
         if do_average:
