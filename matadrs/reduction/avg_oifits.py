@@ -365,6 +365,7 @@ def oifits_patchwork(infile_list: List, outfile_path: Path,
 
                 outhdul['OI_VIS'].header['AMPTYP'] = inhdul['OI_VIS'].header['AMPTYP']
                 outhdul['OI_VIS'].data = inhdul['OI_VIS'].data
+                breakpoint()
                 # NOTE: Look up visphi
                 for j in range(n_oi_types_list):
                     if 'visphi' in oi_types_list[j]:

@@ -1,5 +1,8 @@
+from collections import namedtuple
 from typing import Optional, List
 from pathlib import Path
+
+import numpy as np
 
 from .avg_oifits import oifits_patchwork
 from ..utils.plot import Plotter
@@ -88,8 +91,12 @@ def prepare_multiple_merges(directories: Path, output_dir: Path):
                             [coherent_chopped_vis, incoherent_chopped_vis],
                             True, output_dir)
 
+
 # TODO: If pipeline does not have a BCD-output use calibBCD2
-def execute_merge(output_dir: Path, fluxes: List[Path],
+# TODO: Add phase flip for older pipelines
+# FIXME: Visibilities are wrong for L-band
+def execute_merge(output_dir: Path,
+                  fluxes: List[Path],
                   visibilities: List[Path],
                   bcd_visibilities: Optional[List[Path]] = None,
                   bcd_pip_visibilities: Optional[List[Path]] = None,
@@ -99,6 +106,9 @@ def execute_merge(output_dir: Path, fluxes: List[Path],
     coherent_flux, incoherent_flux = fluxes
     coherent_vis, incoherent_vis = visibilities
     out_file = get_output_file_path(coherent_flux, output_dir, chopped)
+    MergeFiles = namedtuple("MergeFiles", np.array(OI_TYPES.copy()).flatten())
+    files_to_merge = MergeFiles(incoherent_flux, coherent_flux,
+                                coherent_vis, incoherent_vis, coherent_vis)
 
     if index is not None:
         out_file = out_file.parent / f"{out_file.stem}_00{index}.fits"
@@ -106,27 +116,27 @@ def execute_merge(output_dir: Path, fluxes: List[Path],
     if "HAWAII" in str(fluxes[0]):
         if bcd_visibilities is not None:
             coherent_bcd_vis, incoherent_bcd_vis = bcd_visibilities
-            files_to_merge = [incoherent_flux, coherent_flux,
-                              coherent_bcd_vis, incoherent_vis,
-                              coherent_bcd_vis]
+            files_to_merge.visphi = coherent_bcd_vis
+            files_to_merge.t3 = incoherent_bcd_vis
         else:
-            files_to_merge = [incoherent_flux, coherent_flux,
-                              coherent_vis, incoherent_vis, coherent_vis]
+            files_to_merge.t3 = incoherent_vis
     else:
         if bcd_visibilities is not None:
-            coherent_vis, incoherent_vis = bcd_visibilities
+            coherent_bcd_vis, incoherent_bcd_vis = bcd_visibilities
+            files_to_merge.vis2 = incoherent_bcd_vis
+            files_to_merge.visphi = files_to_merge.t3 = coherent_bcd_vis
         if bcd_pip_visibilities is not None:
-            coherent_vis, incoherent_vis = bcd_pip_visibilities
-        files_to_merge = [incoherent_flux, coherent_flux,
-                          coherent_vis, incoherent_vis,
-                          coherent_vis]
+            coherent_pip_vis, incoherent_pip_vis = bcd_pip_visibilities
+            files_to_merge.vis2 = incoherent_pip_vis
+            files_to_merge.visphi = files_to_merge.t3 = coherent_pip_vis
 
     oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                      oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
 
 
 # TODO: Find way to remove the try statements
-def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
+def merge_averaged_files(coherent_dir: Path,
+                         incoherent_dir: Path, output_dir: Path) -> None:
     """Merges the averaged files of visibility-, flux- and bcd-calibration.
 
     Parameters
@@ -137,13 +147,14 @@ def merge_averaged_files(directories: List[Path], output_dir: Path) -> None:
     """
     try:
         execute_merge(output_dir,
-                      *get_averaged_files(directories, chopped=False))
+                      *get_averaged_files([coherent_dir, incoherent_dir], chopped=False))
     except Exception:
         pass
 
     try:
         execute_merge(output_dir,
-                      *get_averaged_files(directories, chopped=True),
+                      *get_averaged_files(
+                          [coherent_dir, incoherent_dir], chopped=True),
                       chopped=True)
     except Exception:
         pass
@@ -186,7 +197,7 @@ def merge_folders(coherent_dirs: List[Path],
                "lp")
         cprint(f"{'':-^50}", "lg")
         cprint("Merging averaged files...", "g")
-        merge_averaged_files([coherent_dir, incoherent_dir], output_dir)
+        merge_averaged_files(coherent_dir, incoherent_dir, output_dir)
         cprint("Merging non-averaged files...", "g")
         merge_non_averaged_files(coherent_dir, incoherent_dir, output_dir)
 
