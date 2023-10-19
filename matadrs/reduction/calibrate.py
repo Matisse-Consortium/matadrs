@@ -179,7 +179,7 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
                   outfile_unchopped_cphases, plot=False)
 
         if chopped_fits is not None:
-            outfile_chopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_CHOPPED_INT.fits"
+            outfile_chopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_INT_CHOPPED.fits"
             bcd_chopped = sort_fits_by_bcd_configuration(chopped_fits)
             calib_BCD(bcd_chopped.in_in, "",
                       "", bcd_chopped.out_out,

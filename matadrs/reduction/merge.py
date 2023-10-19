@@ -42,14 +42,16 @@ def get_output_file_path(fits_file: Path, output_dir: Path,
     return output_dir / f"{readout.name}_{tpl_start_cal}:{tpl_start_sci}_{detector}_FINAL_TARGET_INT.fits"
 
 
-def get_averaged_files(directories: List[Path], chopped: bool):
+# TODO: Rewrite this at some point so it only returns really existing files?
+# Other code would then need to be changed as well
+# TODO: Check for the pipeline chopped as well -> See how that is done
+def get_averaged_files(directories: List[Path], chopped: Optional[bool] = False):
     """Gets the averaged files' paths."""
     flux, vis = "TARGET_AVG_FLUX_INT.fits", "TARGET_AVG_VIS_INT.fits"
-    bcd, bcd_pip = "TARGET_AVG_T3PHI_INT.fits", "TARGET_CAL_INT_noBCD.fits"
+    bcd, bcd_pip = "TARGET_BCD_CAL_T3PHI_INT.fits", "TARGET_CAL_INT_noBCD.fits"
 
     if chopped:
-        flux, vis = map(lambda x: x.replace("INT", "INT_CHOPPED"),
-                        [flux, vis])
+        flux, vis = map(lambda x: x.replace("INT", "INT_CHOPPED"), [flux, vis])
         bcd = bcd.replace("INT", "INT_CHOPPED")
 
     fluxes = [directory / flux for directory in directories]
@@ -107,8 +109,9 @@ def execute_merge(output_dir: Path,
     coherent_vis, incoherent_vis = visibilities
     out_file = get_output_file_path(coherent_flux, output_dir, chopped)
     MergeFiles = namedtuple("MergeFiles", np.array(OI_TYPES.copy()).flatten())
-    files_to_merge = MergeFiles(incoherent_flux, coherent_flux,
-                                coherent_vis, incoherent_vis, coherent_vis)
+    MergeFiles.flux, MergeFiles.visamp = incoherent_flux, coherent_flux
+    MergeFiles.vis2 = incoherent_vis
+    MergeFiles.visphi = MergeFiles.t3 = coherent_vis
 
     if index is not None:
         out_file = out_file.parent / f"{out_file.stem}_00{index}.fits"
@@ -116,25 +119,27 @@ def execute_merge(output_dir: Path,
     if "HAWAII" in str(fluxes[0]):
         if bcd_visibilities is not None:
             coherent_bcd_vis, incoherent_bcd_vis = bcd_visibilities
-            files_to_merge.visphi = coherent_bcd_vis
-            files_to_merge.t3 = incoherent_bcd_vis
+            MergeFiles.visphi = coherent_bcd_vis
+            MergeFiles.t3 = incoherent_bcd_vis
         else:
-            files_to_merge.t3 = incoherent_vis
+            MergeFiles.t3 = incoherent_vis
     else:
         if bcd_visibilities is not None:
             coherent_bcd_vis, incoherent_bcd_vis = bcd_visibilities
-            files_to_merge.vis2 = incoherent_bcd_vis
-            files_to_merge.visphi = files_to_merge.t3 = coherent_bcd_vis
+            MergeFiles.vis2 = incoherent_bcd_vis
+            MergeFiles.visphi = MergeFiles.t3 = coherent_bcd_vis
         if bcd_pip_visibilities is not None:
             coherent_pip_vis, incoherent_pip_vis = bcd_pip_visibilities
-            files_to_merge.vis2 = incoherent_pip_vis
-            files_to_merge.visphi = files_to_merge.t3 = coherent_pip_vis
-
+            MergeFiles.vis2 = incoherent_pip_vis
+            MergeFiles.visphi = MergeFiles.t3 = coherent_pip_vis
+    files_to_merge = [MergeFiles.flux, MergeFiles.visamp,
+                      MergeFiles.visphi, MergeFiles.vis2, MergeFiles.t3]
     oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                      oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
 
 
 # TODO: Find way to remove the try statements
+# TODO: Make these errors more precise at some future point and log them
 def merge_averaged_files(coherent_dir: Path,
                          incoherent_dir: Path, output_dir: Path) -> None:
     """Merges the averaged files of visibility-, flux- and bcd-calibration.
@@ -146,17 +151,21 @@ def merge_averaged_files(coherent_dir: Path,
     output_dir : pathlib.Path
     """
     try:
-        execute_merge(output_dir,
-                      *get_averaged_files([coherent_dir, incoherent_dir], chopped=False))
-    except Exception:
+        averaged_non_chopped_files = get_averaged_files([coherent_dir, incoherent_dir])
+        execute_merge(output_dir, *averaged_non_chopped_files)
+    except Exception as e:
+        print("Error merging non-chopped files, skipping file!\n", e)
+        raise e
         pass
 
     try:
-        execute_merge(output_dir,
-                      *get_averaged_files(
-                          [coherent_dir, incoherent_dir], chopped=True),
-                      chopped=True)
-    except Exception:
+        averaged_chopped_files = get_averaged_files(
+            [coherent_dir, incoherent_dir], chopped=True)
+        if averaged_chopped_files[0][0].exists():
+            execute_merge(output_dir, *averaged_chopped_files, chopped=True)
+    except Exception as e:
+        print("Error merging chopped files, skipping file!\n", e)
+        breakpoint()
         pass
 
 
