@@ -1,11 +1,13 @@
 import os
 from pathlib import Path
 from typing import List, Optional
+from shutil import copyfile
+
 import numpy as np
 from astropy.io import fits
-from shutil import copyfile
-import robust
 from scipy.interpolate import interp1d
+
+import robust
 
 
 def avg_oifits(infile_list: List[Path], outfile_path: Path,
