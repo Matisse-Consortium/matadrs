@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 from shutil import copyfile
-from astropy import Path
+from pathlib import Path
 
 import numpy as np
 from astropy.io import fits
