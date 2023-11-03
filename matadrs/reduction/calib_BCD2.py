@@ -2,14 +2,14 @@
 
 @author: fmillour
 """
+import os
 from pathlib import Path
 from typing import Optional
+from shutil import copyfile
 
 import matplotlib.pyplot as plt
-import os
 import numpy as np
 from astropy.io import fits
-from shutil import copyfile
 
 
 def calib_BCD(iifile: Path, iofile: Path,
