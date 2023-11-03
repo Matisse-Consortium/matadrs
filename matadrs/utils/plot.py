@@ -10,7 +10,7 @@ from matplotlib.axes import Axes
 
 from .readout import ReadoutFits
 from .tools import unwrap_phases, calculate_uv_points
-from .options import options
+from .options import OPTIONS
 
 
 # TODO: Add proper docs
@@ -231,7 +231,8 @@ class Plotter:
             for uv_index, uv_coord in enumerate(uv_coords):
                 make_uv_tracks(ax, uv_coord, baselines[uv_index],
                                sta_labels[uv_index], readout.dec*np.pi/180,
-                               flags[uv_index], symbol, options["colors"][index],
+                               flags[uv_index], symbol,
+                               OPTIONS["plot.colors"][index],
                                sel_wl, airmass_lim, show_text)
 
             xlabel, ylabel = "$u$ (m)", "$v$ (m)"

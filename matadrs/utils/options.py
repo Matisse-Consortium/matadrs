@@ -1,3 +1,5 @@
-options = {}
-options["colors"] = ["b", "g", "r", "c", "m", "y"]
-options["linestyles"] = ["-", "--", "-.", ":"]
+OPTIONS = {}
+OPTIONS["plot.COLORS"] = ["b", "g", "r", "c", "m", "y"]
+OPTIONS["plot.linestyles"] = ["-", "--", "-.", ":"]
+
+OPTIONS["average.func"] = "biweightmean"

@@ -9,7 +9,7 @@ from scipy.interpolate import interp1d
 from .robust import mean, biweightMean
 
 
-def avg_oifits(infiles: List[str], outfile: str,
+def avg_oifits(infiles: List[Path], outfile: Path,
                headerval: Optional[List] = [],
                avg_baselines: Optional[bool] = False,
                avg_groups: Optional[List[int]] = [6],
@@ -23,9 +23,9 @@ def avg_oifits(infiles: List[str], outfile: str,
 
     Parameters
     ----------
-    infiles: str
+    infiles: list of pathlib.Path
         List of .fits-files to be averaged
-    outfile: str
+    outfile: pathlib.Path
         Name of the output file
     headerval:  list, optional
         List of header keywords to be averaged
@@ -55,7 +55,7 @@ def avg_oifits(infiles: List[str], outfile: str,
         avgfunc = np.nanmean
     if avg_func == "nanmedian" or avg_func == "median":
         avgfunc = np.nanmedian
-        
+
     if os.path.exists(infiles[0]):
         copyfile(infiles[0], outfile)
     else:

@@ -22,6 +22,7 @@ from typing import Optional
 from .avg_oifits import avg_oifits
 from ..utils.plot import Plotter
 from ..utils.tools import cprint, split_fits, get_fits_by_tag, get_execution_modes
+from ..utils.options import OPTIONS
 
 
 HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
@@ -84,11 +85,13 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
         outfile_name = "TARGET_AVG_VIS"
 
     outfile_unchopped = output_dir / f"{outfile_name}_INT.fits"
-    avg_oifits(unchopped_fits, outfile_unchopped, headerval=HEADER_TO_REMOVE)
+    avg_oifits(unchopped_fits, outfile_unchopped,
+               headerval=HEADER_TO_REMOVE, avg_func=OPTIONS["average.func"])
 
     if chopped_fits is not None:
         outfile_chopped = output_dir / f"{outfile_name}_INT_CHOPPED.fits"
-        avg_oifits(chopped_fits, outfile_chopped, headerval=HEADER_TO_REMOVE)
+        avg_oifits(chopped_fits, outfile_chopped,
+                   headerval=HEADER_TO_REMOVE, avg_func=OPTIONS["average.func"])
 
 
 def average_folders(calibrated_dir: Path, mode: str) -> None:
