@@ -6,7 +6,7 @@ import numpy as np
 from astropy.io import fits
 from scipy.interpolate import interp1d
 
-import robust
+from .robust import mean, biweightMean
 
 
 def avg_oifits(infiles: List[str], outfile: str,
@@ -48,9 +48,9 @@ def avg_oifits(infiles: List[str], outfile: str,
         Function to be used for averaging 'robustmean', 'biweightmean', 'nanmean', 'nanmedian'.
     """
     if avg_func == "robustmean":
-        avgfunc = robust.mean
+        avgfunc = mean
     if avg_func == "biweightmean":
-        avgfunc = robust.biweightMean
+        avgfunc = biweightMean
     if avg_func == "nanmean" or avg_func == "mean":
         avgfunc = np.nanmean
     if avg_func == "nanmedian" or avg_func == "median":
