@@ -972,7 +972,7 @@ def transform_spectrum_to_real_spectral_resolution(
         make_plot: Optional[bool] = False,
         figpath_out: Optional[Path] = 'spectrum_plots.png',
         ylabel: Optional[str] = '',
-        yscale: Optional[str] = 'none') -> np.ndarry:
+        yscale: Optional[str] = 'none') -> np.ndarray:
     """Transforms the spectrum to real spectral resolution.
 
     Parameters

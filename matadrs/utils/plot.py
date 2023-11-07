@@ -419,6 +419,8 @@ class Plotter:
             self.plot_name
         subplots : bool, optional
         sharex : bool, optional
+        error : bool, optional
+        margin : bool, optional
         kwargs: dict, optional
         """
         columns = 1 if self.num_components == 1 else\
