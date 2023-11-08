@@ -23,6 +23,7 @@ from .avg_oifits import avg_oifits
 from ..utils.plot import Plotter
 from ..utils.tools import cprint, split_fits, get_fits_by_tag, get_execution_modes
 from ..utils.options import OPTIONS
+from ..mat_tools.libPostTools import mat_mergeByTplStart
 
 
 HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
@@ -49,7 +50,8 @@ def copy_calibrated_files(directory: Path, output_dir: Path) -> None:
         shutil.copy(str(bcd_file), (output_dir / bcd_file.name))
 
 
-def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
+def average_files(directory: Path, file_type: str,
+                  output_dir: Path, method: str) -> None:
     """Averages the unchopped (.fits)-files and the chopped (.fits)-files if
     given.
 
@@ -62,6 +64,8 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
         respectively.
     output_dir: pathlib.Path
         The directory to which the new files are saved to.
+    method: str
+        The method of averaging the files.
 
     Notes
     -----
@@ -85,16 +89,26 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
         outfile_name = "TARGET_AVG_VIS"
 
     outfile_unchopped = output_dir / f"{outfile_name}_INT.fits"
-    avg_oifits(unchopped_fits, outfile_unchopped,
-               headerval=HEADER_TO_REMOVE, avg_func=OPTIONS["average.func"])
+    if method == "avg_oifits":
+        avg_oifits(unchopped_fits, outfile_unchopped,
+                   headerval=HEADER_TO_REMOVE, avg_func=OPTIONS["average.func"])
+    else:
+        merged_file_unchopped = mat_mergeByTplStart(
+                fits_files=unchopped_fits, output_dir=str(output_dir), save=True)
+        shutil.move(str(merged_file_unchopped), str(outfile_unchopped))
 
     if chopped_fits is not None:
         outfile_chopped = output_dir / f"{outfile_name}_INT_CHOPPED.fits"
-        avg_oifits(chopped_fits, outfile_chopped,
-                   headerval=HEADER_TO_REMOVE, avg_func=OPTIONS["average.func"])
+        if method == "avg_oifits":
+            avg_oifits(chopped_fits, outfile_chopped,
+                       headerval=HEADER_TO_REMOVE, avg_func=OPTIONS["average.func"])
+        else:
+            merged_file_chopped = mat_mergeByTplStart(
+                    fits_files=chopped_fits, output_dir=str(output_dir), save=True)
+            shutil.move(str(merged_file_chopped), str(outfile_chopped))
 
 
-def average_folders(calibrated_dir: Path, mode: str) -> None:
+def average_folders(calibrated_dir: Path, mode: str, method: str) -> None:
     """Iterates over the calibrated directories to.
 
     Parameters
@@ -104,6 +118,8 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
     mode : str, optional
         The mode in which the reduction is to be executed. Either 'coherent',
         'incoherent' or 'both'.
+    method: str
+        The method of averaging the files.
     """
     for directory in (calibrated_dir / "calib" / mode).glob("*.rb"):
         cprint(f"Averaging folder {directory.name}...", "g")
@@ -117,8 +133,8 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
-        average_files(directory, "flux", output_dir)
-        average_files(directory, "vis", output_dir)
+        average_files(directory, "flux", output_dir, method)
+        average_files(directory, "vis", output_dir, method)
         copy_calibrated_files(directory, output_dir)
 
         cprint("Plotting averaged files...", "g")
@@ -131,6 +147,7 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
 # TODO: Implement overwrite
 def averaging_pipeline(calibrated_dir: Path,
                        mode: Optional[str] = "both",
+                       method: Optional[str] = "avg_oifits",
                        overwrite: Optional[bool] = False):
     """Does the full averaging for all of the calibrated directories
     subdirectories.
@@ -149,6 +166,6 @@ def averaging_pipeline(calibrated_dir: Path,
         cprint("Averaging and BCD-calibration of"
                f" {calibrated_dir.name} with mode={mode}", "lp")
         cprint(f"{'':-^50}", "lg")
-        average_folders(calibrated_dir, mode)
+        average_folders(calibrated_dir, mode, method)
     cprint("Averaging done!", "lp")
     cprint(f"{'':-^50}", "lg")
