@@ -174,13 +174,16 @@ class Plotter:
     def _set_y_limits(self, wavelength: np.ndarray,
                       data: List[np.ndarray], margin: Optional[float] = 0.05) -> Tuple[int, int]:
         """Sets the y-limits from the data with some margin"""
-        if np.min(wavelength) >= 6:
-            indices = np.where((wavelength > 8.5) | (wavelength < 12.5))
-        else:
-            indices_low = np.where((wavelength <= 4.8) & (wavelength >= 4.5))
-            indices_high = np.where((wavelength >= 3.) & (wavelength <= 3.8))
-            indices = np.hstack((indices_low, indices_high))
-        ymin, ymax = data[:, indices].min(), data[:, indices].max()
+        try:
+            if np.min(wavelength) >= 6:
+                indices = np.where((wavelength > 8.5) | (wavelength < 12.5))
+            else:
+                indices_low = np.where((wavelength <= 4.8) & (wavelength >= 4.5))
+                indices_high = np.where((wavelength >= 3.) & (wavelength <= 3.8))
+                indices = np.hstack((indices_low, indices_high))
+            ymin, ymax = data[:, indices].min(), data[:, indices].max()
+        except ValueError:
+            ymin, ymax = np.percentile(data, 10), np.percentile(data, 90)
         spacing = np.linalg.norm(ymax-ymin)*margin
         return ymin-spacing, ymax+spacing
 
@@ -205,11 +208,11 @@ class Plotter:
         """
         uv_max = 0
         for index, readout in enumerate(self.readouts):
-            uv_coords = readout.oi_vis["UVCOORD"]
+            uv_coords = readout.oi_vis2["UVCOORD"]
             if uv_max < (tmp_uv_max := uv_coords.max()):
                 uv_max = tmp_uv_max
-            flags = readout.oi_vis["FLAG"]
-            sta_indices = readout.oi_vis["STA_INDEX"]
+            flags = readout.oi_vis2["FLAG"]
+            sta_indices = readout.oi_vis2["STA_INDEX"]
             sta_index = readout.oi_array["STA_INDEX"]
             sta_name = readout.oi_array["STA_NAME"]
             sta_xyz = readout.oi_array["STAXYZ"]
@@ -273,11 +276,11 @@ class Plotter:
                 sub_component.labels = readout.oi_array["TEL_NAME"]\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
-                station_names = readout.oi_vis["DELAY_LINE"]
+                station_names = readout.oi_vis2["DELAY_LINE"]
                 if legend_format == "long":
-                    baselines = np.around(readout.oi_vis["BASELINE"], 2)
-                    u_coords = readout.oi_vis["UVCOORD"][:, 0]
-                    v_coords = readout.oi_vis["UVCOORD"][:, 1]
+                    baselines = np.around(readout.oi_vis2["BASELINE"], 2)
+                    u_coords = readout.oi_vis2["UVCOORD"][:, 0]
+                    v_coords = readout.oi_vis2["UVCOORD"][:, 1]
                     # TODO: Find out what this is exactly? Projected Baselines? Positional Angle?
                     pas = np.around(
                         (np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
@@ -384,7 +387,7 @@ class Plotter:
         kwargs: dict
         """
         xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
-        for index, sub_component in enumerate(component):
+        for sub_component in component:
             if isinstance(sub_component, PlotComponent):
                 for label, y_value, y_error in zip(sub_component.labels,
                                                    sub_component.y_values,
@@ -394,10 +397,10 @@ class Plotter:
                         ax.fill_between(sub_component.x_values,
                                         y_value+y_error, y_value-y_error, alpha=0.2)
                     ax.legend(fontsize="xx-small", loc="upper right", framealpha=0.5)
-                test = self._set_y_limits(sub_component.x_values,
-                                          sub_component.y_values,
-                                          margin=margin)
-                ax.set_ylim(*test)
+                ylims = self._set_y_limits(sub_component.x_values,
+                                           sub_component.y_values,
+                                           margin=margin)
+                ax.set_ylim(*ylims)
                 ax.set_xlabel(xlabel)
                 ax.set_ylabel(name)
             else:
@@ -439,11 +442,11 @@ class Plotter:
             name, component = map(
                 lambda x: x[0], zip(*self.components.items()))
             self.plot_component(axarr, name, component, **kwargs)
-        fig.tight_layout()
 
         if save:
             plt.savefig(self.save_path / (self.plot_name + f".{format}"),
                         format=format)
         else:
             plt.show()
+        fig.tight_layout()
         plt.close()

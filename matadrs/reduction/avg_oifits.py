@@ -5,9 +5,10 @@ from shutil import copyfile
 
 import numpy as np
 from astropy.io import fits
+from astropy.stats.biweight import biweight_location
 from scipy.interpolate import interp1d
 
-from .robust import mean, biweightMean
+from .robust import mean
 
 
 def avg_oifits(infile_list: List[Path], outfile_path: Path,
@@ -19,7 +20,7 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                scale_flux: Optional[bool] = False,
                scale_corrflux: Optional[bool] = False,
                scale_wl_range: Optional[List[float]] = [8.3, 9.2],
-               avg_func: Optional[str] = 'robustmean') -> None:
+               avg_func: Optional[str] = 'biweightmean') -> None:
     """Averages (.fits)-files.
 
     Parameters
@@ -51,18 +52,19 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
     if avg_func == 'robustmean':
         avgfunc = mean
     if avg_func == 'biweightmean':
-        avgfunc = biweightMean
+        avgfunc = biweight_location
+        # biweightMean
     if avg_func == 'nanmean' or avg_func == 'mean':
         avgfunc = np.nanmean
     if avg_func == 'nanmedian' or avg_func == 'median':
         avgfunc = np.nanmedian
-
+        
     if os.path.exists(infile_list[0]):
         copyfile(infile_list[0], outfile_path)
     else:
-        print(f'ERROR (avg_oifits): File not found: {infile_list[0]}')
+        print('ERROR (avg_oifits): File not found: '+infile_list[0])
         return
-    outhdul = fits.open(outfile_path, mode='update')
+    outhdul  = fits.open(outfile_path, mode='update')
 
     inhdul_lst = []
     visamp_lst = []
@@ -89,7 +91,7 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
     wl_lst_flux = []
     wl_lst_vis2 = []
     wl_lst_visamp = []
-
+    
     j = 0
     for infile in infile_list:
         # NOTE: Read OI_VIS
@@ -97,9 +99,8 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
 
             inhdul_lst.append(fits.open(infile, mode='readonly'))
             wl = inhdul_lst[-1]['OI_WAVELENGTH'].data['EFF_WAVE']
-            # print(infile)
-
             # NOTE: Read OI_VIS
+            
             visamp = inhdul_lst[-1]['OI_VIS'].data['VISAMP']
             visamperr = inhdul_lst[-1]['OI_VIS'].data['VISAMPERR']
             visphi = inhdul_lst[-1]['OI_VIS'].data['VISPHI']
@@ -107,7 +108,7 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
             sta_index = inhdul_lst[-1]['OI_VIS'].data['STA_INDEX']
             ucoord = inhdul_lst[-1]['OI_VIS'].data['UCOORD']
             vcoord = inhdul_lst[-1]['OI_VIS'].data['VCOORD']
-            # print('bef', ucoord, sta_index)
+            # print('bef',ucoord,sta_index)
             if avg_baselines:
                 pbl = np.sqrt(ucoord**2+vcoord**2)
                 pbl_sort_idx = np.argsort(pbl)
@@ -120,20 +121,20 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                         sta_index[pbl_sort_idx[jj+k]] = sta_idx
                         ucoord[pbl_sort_idx[jj+k]] = uc
                         vcoord[pbl_sort_idx[jj+k]] = vc
-                    jj += avg_groups[i]
-            # print('aft', ucoord, sta_index)
+                    jj+=avg_groups[i]
+            #print('aft',ucoord,sta_index)
             for i in range(len(visamp)):
                 if np.all(visamp[i] == 0.0):
                     visamp[i] = visamp[i]*np.nan
                     visamperr[i] = visamperr[i]*np.nan
-                if np.all(visphi[i] == 0.0):
+                if np.all(visphi[i] == 0.0):  
                     visphi[i] = visphi[i]*np.nan
                     visphierr[i] = visphierr[i]*np.nan
                 visamp_lst.append(visamp[i])
                 visamperr_lst.append(visamperr[i])
                 visphi_lst.append(visphi[i])
                 visphierr_lst.append(visphierr[i])
-                # if avg_baselines == False:
+                #if avg_baselines == False:
                 visamp_sta_index_lst.append(sta_index[i])
                 visamp_ucoord_lst.append(ucoord[i])
                 visamp_vcoord_lst.append(vcoord[i])
@@ -141,16 +142,17 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                 #     visamp_sta_index_lst.append(sta_index[0])
                 #     visamp_ucoord_lst.append(ucoord[0])
                 #     visamp_vcoord_lst.append(vcoord[0])
-                wl_lst_visamp.append(wl)
+                wl_lst_visamp.append(wl)  
 
-            # NOTE: Read OI_VIS2
+
+            #read OI_VIS2
             vis2 = inhdul_lst[-1]['OI_VIS2'].data['VIS2DATA']
             vis2err = inhdul_lst[-1]['OI_VIS2'].data['VIS2ERR']
             sta_index = inhdul_lst[-1]['OI_VIS2'].data['STA_INDEX']
             ucoord = inhdul_lst[-1]['OI_VIS2'].data['UCOORD']
             vcoord = inhdul_lst[-1]['OI_VIS2'].data['VCOORD']
-            if avg_baselines:
-                pbl = np.hypot(ucoord, vcoord)
+            if avg_baselines == True:
+                pbl = np.sqrt(ucoord**2+vcoord**2)
                 pbl_sort_idx = np.argsort(pbl)
                 jj = 0
                 for i in range(len(avg_groups)):
@@ -161,7 +163,7 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                         sta_index[pbl_sort_idx[jj+k]] = sta_idx
                         ucoord[pbl_sort_idx[jj+k]] = uc
                         vcoord[pbl_sort_idx[jj+k]] = vc
-                    jj += avg_groups[i]
+                    jj+=avg_groups[i]
             for i in range(len(vis2)):
                 if np.all(vis2[i] == 0.0):
                     vis2[i] = vis2[i]*np.nan
@@ -170,10 +172,10 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                 vis2err_lst.append(vis2err[i])
                 vis2_sta_index_lst.append(sta_index[i])
                 vis2_ucoord_lst.append(ucoord[i])
-                vis2_vcoord_lst.append(vcoord[i])
-                wl_lst_vis2.append(wl)
+                vis2_vcoord_lst.append(vcoord[i]) 
+                wl_lst_vis2.append(wl)   
 
-            # NOTE: Read OI_T3
+            #read OI_T3
             t3phi = inhdul_lst[-1]['OI_T3'].data['T3PHI']
             t3phierr = inhdul_lst[-1]['OI_T3'].data['T3PHIERR']
             sta_index = inhdul_lst[-1]['OI_T3'].data['STA_INDEX']
@@ -189,21 +191,21 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                 t3phierr_lst.append(t3phierr[i])
                 t3phi_sta_index_lst.append(sta_index[i])
                 t3phi_u1coord_lst.append(u1coord[i])
-                t3phi_v1coord_lst.append(v1coord[i])
+                t3phi_v1coord_lst.append(v1coord[i])  
                 t3phi_u2coord_lst.append(u2coord[i])
-                t3phi_v2coord_lst.append(v2coord[i])
+                t3phi_v2coord_lst.append(v2coord[i])  
 
             is_flux = True
-            # NOTE: Read OI_FLUX
-            if len(filter_lst_flux) > 0:
+            #read OI_FLUX
+            if(len(filter_lst_flux) > 0):
                 filter_flux = filter_lst_flux[j]
             else:
                 filter_flux = [*range(0, 42, 1)]
             try:
                 fluxdata = inhdul_lst[-1]['OI_FLUX'].data['FLUXDATA']
-                fluxerr = inhdul_lst[-1]['OI_FLUX'].data['FLUXERR']
+                fluxerr  = inhdul_lst[-1]['OI_FLUX'].data['FLUXERR']
                 k = 0
-                for spectrum, errspectrum in zip(fluxdata, fluxerr):
+                for spectrum,errspectrum in zip(fluxdata,fluxerr):
                     if k in filter_flux:
                         if np.all(spectrum == 0.0):
                             flux_lst.append(spectrum*np.nan)
@@ -211,16 +213,17 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                         else:
                             flux_lst.append(spectrum)
                             fluxerr_lst.append(errspectrum)
-                        wl_lst_flux.append(wl)
-                    k += 1
-            except KeyError:
+                        wl_lst_flux.append(wl)  
+                    k+=1
+            except KeyError as e:
+                # print(e)
                 is_flux = False
                 flux_lst.append(np.nan*visamp)
                 fluxerr_lst.append(np.nan*visamp)
-                wl_lst_flux.append(wl)
+                wl_lst_flux.append(wl)  
         else:
-            print(f"WARNING (avg_oifits): File not found: {infile}")
-        j += 1
+            print('WARNING (avg_oifits): File not found: '+infile)
+        j+=1
 
     if not inhdul_lst:
         outhdul.close()
@@ -228,63 +231,59 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
         print('ERROR (avg_oifits): No files to average.')
         return
 
-    # NOTE: Average fluxes:
-    if is_flux:
+    #average fluxes:
+    if is_flux == True:
         flux_arr = np.array(flux_lst)
         fluxerr_arr = np.array(fluxerr_lst)
         # for ii in range(len(flux_arr)):
         #     print(flux_arr[ii])
-        # avg_flux = np.nanmean(flux_arr,axis=0)
-        avg_flux = avgfunc(flux_arr, axis=0)
-        if scale_flux:
-            wl_idx = np.logical_and(wl_lst_flux[0]*1e6 > (scale_wl_range[0]),
-                                    wl_lst_flux[0]*1e6 <= scale_wl_range[1])
-            avg_flux_wl = np.nanmean(avg_flux[wl_idx])
+        #avg_flux = np.nanmean(flux_arr,axis=0)
+        avg_flux = avgfunc(flux_arr,axis=0)
+        if scale_flux == True:
+            wl_idx = np.logical_and(wl_lst_flux[0]*1e6 > (scale_wl_range[0]),wl_lst_flux[0]*1e6 <= scale_wl_range[1])
+            avg_flux_wl = np.nanmean(avg_flux[wl_idx]) 
             for i in range(len(flux_lst)):
                 flux_lst[i] = flux_lst[i]/np.nanmean(flux_lst[i][wl_idx])*avg_flux_wl
                 fluxerr_lst[i] = fluxerr_lst[i]/np.nanmean(flux_lst[i][wl_idx])*avg_flux_wl
             flux_arr = np.array(flux_lst)
             fluxerr_arr = np.array(fluxerr_lst)
-            avg_flux = avgfunc(flux_arr, axis=0)
-
-        # avg_flux = np.nanmedian(flux_arr,axis=0)
+            avg_flux = avgfunc(flux_arr,axis=0)
+                
+        #avg_flux = np.nanmedian(flux_arr,axis=0)
         # print(avg_flux)
         # print(len(flux_arr))
         if len(flux_arr) > 3:
-            # NOTE: Combine two error sources: Standard deviation over the
-            # different BCDs, and average error (calculated by the pipeline)
-            avg_fluxerr = np.sqrt(np.nanstd(flux_arr, axis=0)**2.0\
-                    + np.nanmean(fluxerr_arr, axis=0)**2.0)
+            # combine two error sources: standard deviation over the different BCDs, and average error (calculated by the pipeline) 
+            avg_fluxerr = np.sqrt(np.nanstd(flux_arr,axis=0)**2.0 + np.nanmean(fluxerr_arr,axis=0)**2.0)
         else:
-            # WARNING: It may be not the best method for error calculation
-            avg_fluxerr = np.nanmean(fluxerr_arr, axis=0)
+            avg_fluxerr = np.nanmean(fluxerr_arr,axis=0) #WARNING: it may be not the best method for error calculation
         outhdul['OI_FLUX'].data = outhdul['OI_FLUX'].data[0:1]
         outhdul['OI_FLUX'].data['FLUXDATA'] = avg_flux
-        outhdul['OI_FLUX'].data['FLUXERR'] = avg_fluxerr
+        outhdul['OI_FLUX'].data['FLUXERR'] = avg_fluxerr 
 
-    # NOTE: Collect unique station indices from OI_VIS
+    # collect unique station indices from OI_VIS
     sta_index_unique_lst = []
     ucoord_unique_lst = []
     vcoord_unique_lst = []
     sta_index = inhdul_lst[0]['OI_VIS'].data['STA_INDEX']
-    sta_index= [list(item) for item in sta_index]
+    sta_index= [ list(item) for item in sta_index ]
     ucoord = inhdul_lst[0]['OI_VIS'].data['UCOORD']
     vcoord = inhdul_lst[0]['OI_VIS'].data['VCOORD']
     sta_index_unique_lst.append(sta_index[0])
     ucoord_unique_lst.append(ucoord[0])
     vcoord_unique_lst.append(vcoord[0])
-    for i in range(1, len(sta_index)):
-        if not ((sta_index[i] in sta_index_unique_lst)
-                or (sta_index[i][::-1] in sta_index_unique_lst)):
+    for i in range(1,len(sta_index)):
+        if not ( (sta_index[i] in sta_index_unique_lst) \
+        or (sta_index[i][::-1] in sta_index_unique_lst )):
             sta_index_unique_lst.append(sta_index[i])
             ucoord_unique_lst.append(ucoord[i])
             vcoord_unique_lst.append(vcoord[i])
 
-    # NOTE: Average VISAMP and VISPHI
+    #average VISAMP and VISPHI
     n_sta_index = len(sta_index_unique_lst)
     outhdul['OI_VIS'].data = outhdul['OI_VIS'].data[0:n_sta_index]
     for k in range(len(sta_index_unique_lst)):
-        # NOTE: Collect and average matching visamp data
+        #collect and average matching visamp data
         visamp_lst_sta = []
         visamperr_lst_sta = []
         visphi_lst_sta = []
@@ -296,36 +295,32 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                 visamperr_lst_sta.append(visamperr_lst[i])
                 visphi_lst_sta.append(visphi_lst[i])
                 visphierr_lst_sta.append(visphierr_lst[i])
-
+        
         visamp_arr = np.array(visamp_lst_sta)
         visamperr_arr = np.array(visamperr_lst_sta)
         visphi_arr = np.array(visphi_lst_sta)
         visphierr_arr = np.array(visphierr_lst_sta)
-        # print(k)
-        # print(visamp_arr)
+        #print(k)
+        #print(visamp_arr)
         avg_visamp = avgfunc(visamp_arr,axis=0)
         if scale_corrflux == True:
-            wl_idx = np.logical_and(wl_lst_flux[0]*1e6 > (scale_wl_range[0]),
-                                    wl_lst_flux[0]*1e6 <= scale_wl_range[1])
-            avg_cflux_wl = np.nanmean(avg_visamp[wl_idx])
+            wl_idx = np.logical_and(wl_lst_flux[0]*1e6 > (scale_wl_range[0]),wl_lst_flux[0]*1e6 <= scale_wl_range[1])
+            avg_cflux_wl = np.nanmean(avg_visamp[wl_idx]) 
             for i in range(len(visamp_lst_sta)):
                 visamp_lst_sta[i] = visamp_lst_sta[i]/np.nanmean(visamp_lst_sta[i][wl_idx])*avg_cflux_wl
                 visamperr_lst_sta[i] = visamperr_lst_sta[i]/np.nanmean(visamp_lst_sta[i][wl_idx])*avg_cflux_wl
             visamp_arr = np.array(visamp_lst_sta)
             visamperr_arr = np.array(visamperr_lst_sta)
-            avg_visamp = avgfunc(visamp_arr, axis=0)
-        avg_visphi = np.arctan2(avgfunc(np.sin(visphi_arr*np.pi/180.0), axis=0),
-                                avgfunc(np.cos(visphi_arr*np.pi/180.0), axis=0))*180.0/np.pi
+            avg_visamp = avgfunc(visamp_arr,axis=0)
+        avg_visphi = np.arctan2(avgfunc(np.sin(visphi_arr*np.pi/180.0),axis=0),avgfunc(np.cos(visphi_arr*np.pi/180.0),axis=0))*180.0/np.pi
         # print(len(visamp_arr))
         if len(visamp_arr) > 3:
             avg_visamperr = np.sqrt(np.nanstd(visamp_arr,axis=0)**2.0 + np.nanmean(visamperr_arr,axis=0)**2.0)
             avg_visphierr = np.sqrt(np.nanstd(visphi_arr,axis=0)**2.0 + np.nanmean(visphierr_arr,axis=0)**2.0)
-            # NOTE: Combine two error sources: standard deviation over the different BCDs,
-            # and average error (calculated by the pipeline)
+            # combine two error sources: standard deviation over the different BCDs, and average error (calculated by the pipeline) 
         else:
-            # WARNING: It may be not the best method for error calculation
-            avg_visamperr = np.nanmean(visamperr_arr, axis=0)
-            avg_visphierr = np.nanmean(visphierr_arr, axis=0)
+            avg_visamperr = np.nanmean(visamperr_arr,axis=0) #WARNING: it may be not the best method for error calculation
+            avg_visphierr = np.nanmean(visphierr_arr,axis=0)
         # print(avg_visamp)
         # print(outhdul['OI_VIS'].data['VISAMP'][k])
         outhdul['OI_VIS'].data['VISAMP'][k] = avg_visamp
@@ -336,29 +331,29 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
         outhdul['OI_VIS'].data['UCOORD'][k] = ucoord_unique_lst[k]
         outhdul['OI_VIS'].data['VCOORD'][k] = vcoord_unique_lst[k]
 
-    # NOTE: Collect unique station indices from OI_VIS2
+    # collect unique station indices from OI_VIS2
     sta_index_unique_lst = []
     ucoord_unique_lst = []
     vcoord_unique_lst = []
     sta_index = inhdul_lst[0]['OI_VIS2'].data['STA_INDEX']
-    sta_index = [list(item) for item in sta_index]
+    sta_index= [ list(item) for item in sta_index ]
     ucoord = inhdul_lst[0]['OI_VIS2'].data['UCOORD']
     vcoord = inhdul_lst[0]['OI_VIS2'].data['VCOORD']
     sta_index_unique_lst.append(sta_index[0])
     ucoord_unique_lst.append(ucoord[0])
     vcoord_unique_lst.append(vcoord[0])
-    for i in range(1, len(sta_index)):
-        if not ((sta_index[i] in sta_index_unique_lst)
-                or (sta_index[i][::-1] in sta_index_unique_lst)):
+    for i in range(1,len(sta_index)):
+        if not ( (sta_index[i] in sta_index_unique_lst) \
+        or (sta_index[i][::-1] in sta_index_unique_lst )):
             sta_index_unique_lst.append(sta_index[i])
             ucoord_unique_lst.append(ucoord[i])
             vcoord_unique_lst.append(vcoord[i])
 
-    # NOTE: Average VIS2
+    #average VIS2
     n_sta_index = len(sta_index_unique_lst)
     outhdul['OI_VIS2'].data = outhdul['OI_VIS2'].data[0:n_sta_index]
     for k in range(len(sta_index_unique_lst)):
-        # NOTE: Collect and average matching vis2 data
+        #collect and average matching vis2 data
         vis2_lst_sta = []
         vis2err_lst_sta = []
         for i in range(len(vis2_sta_index_lst)):
@@ -368,22 +363,19 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                 vis2err_lst_sta.append(vis2err_lst[i])
         vis2_arr = np.array(vis2_lst_sta)
         vis2err_arr = np.array(vis2err_lst_sta)
-        avg_vis2 = avgfunc(vis2_arr, axis=0)
+        avg_vis2 = avgfunc(vis2_arr,axis=0)
         if len(vis2_arr) > 3:
-            # NOTE: Combine two error sources: standard deviation over the different BCDs,
-            # and average error (calculated by the pipeline)
-            avg_vis2err = np.sqrt(np.nanstd(vis2_arr, axis=0)**2.0\
-                    + np.nanmean(vis2err_arr, axis=0)**2.0)
+            # combine two error sources: standard deviation over the different BCDs, and average error (calculated by the pipeline)
+            avg_vis2err = np.sqrt(np.nanstd(vis2_arr,axis=0)**2.0 + np.nanmean(vis2err_arr,axis=0)**2.0)
         else:
-            # WARNING: It may be not the best method for error calculation
-            avg_vis2err = np.nanmean(vis2err_arr, axis=0)
+            avg_vis2err = np.nanmean(vis2err_arr,axis=0) #WARNING: it may be not the best method for error calculation
         outhdul['OI_VIS2'].data['VIS2DATA'][k] = avg_vis2
         outhdul['OI_VIS2'].data['VIS2ERR'][k] = avg_vis2err
         outhdul['OI_VIS2'].data['STA_INDEX'][k] = sta_index_unique_lst[k]
         outhdul['OI_VIS2'].data['UCOORD'][k] = ucoord_unique_lst[k]
         outhdul['OI_VIS2'].data['VCOORD'][k] = vcoord_unique_lst[k]
 
-    # NOTE: Collect unique station indices from OI_T3
+    # collect unique station indices from OI_T3
     sta_index_unique_lst = []
     sta_index_unique_lst_sorted = []
     u1coord_unique_lst = []
@@ -391,7 +383,7 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
     u2coord_unique_lst = []
     v2coord_unique_lst = []
     sta_index = inhdul_lst[0]['OI_T3'].data['STA_INDEX']
-    sta_index = [list(item) for item in sta_index]
+    sta_index= [ list(item) for item in sta_index ]
     u1coord = inhdul_lst[0]['OI_T3'].data['U1COORD']
     v1coord = inhdul_lst[0]['OI_T3'].data['V1COORD']
     u2coord = inhdul_lst[0]['OI_T3'].data['U2COORD']
@@ -403,8 +395,8 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
     v1coord_unique_lst.append(v1coord[0])
     u2coord_unique_lst.append(u2coord[0])
     v2coord_unique_lst.append(v2coord[0])
-    for i in range(1, len(sta_index)):
-        if not ((sorted(sta_index[i]) in sta_index_unique_lst_sorted)):
+    for i in range(1,len(sta_index)):
+        if not ( (sorted(sta_index[i]) in sta_index_unique_lst_sorted) ):
             sta_index_unique_lst.append(sta_index[i])
             sta_index_unique_lst_sorted.append(sorted(sta_index[i]))
             u1coord_unique_lst.append(u1coord[i])
@@ -412,11 +404,11 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
             u2coord_unique_lst.append(u2coord[i])
             v2coord_unique_lst.append(v2coord[i])
 
-    # NOTE: Average T3PHI
+    #average T3PHI
     n_sta_index = len(sta_index_unique_lst)
     outhdul['OI_T3'].data = outhdul['OI_T3'].data[0:n_sta_index]
     for k in range(len(sta_index_unique_lst)):
-        # NOTE: Collect and average matching vis2 data
+        #collect and average matching vis2 data
         t3phi_lst_sta = []
         t3phierr_lst_sta = []
         # print('k',k,sta_index_unique_lst_sorted[k])
@@ -427,15 +419,13 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
                 t3phierr_lst_sta.append(t3phierr_lst[i])
         t3phi_arr = np.array(t3phi_lst_sta)
         t3phierr_arr = np.array(t3phierr_lst_sta)
-        # avg_t3phi = np.nanmean(t3phi_arr,axis=0)
+        #avg_t3phi = np.nanmean(t3phi_arr,axis=0)
         avg_t3phi = np.arctan2(avgfunc(np.sin(t3phi_arr*np.pi/180.0),axis=0),avgfunc(np.cos(t3phi_arr*np.pi/180.0),axis=0))*180.0/np.pi
         if len(t3phi_arr) > 3:
-            # NOTE: Combine two error sources: standard deviation over the different BCDs,
-            # and average error (calculated by the pipeline)
+            # combine two error sources: standard deviation over the different BCDs, and average error (calculated by the pipeline)
             avg_t3phierr = np.sqrt(np.nanstd(t3phi_arr,axis=0)**2.0 + np.nanmean(t3phierr_arr,axis=0)**2.0)
         else:
-            # WARNING: It may be not the best method for error calculation
-            avg_t3phierr = np.nanmean(t3phierr_arr, axis=0)
+            avg_t3phierr = np.nanmean(t3phierr_arr,axis=0) #WARNING: it may be not the best method for error calculation
         outhdul['OI_T3'].data['T3PHI'][k] = avg_t3phi
         outhdul['OI_T3'].data['T3PHIERR'][k] = avg_t3phierr
         outhdul['OI_T3'].data['STA_INDEX'][k] = sta_index_unique_lst[k]
@@ -447,8 +437,7 @@ def avg_oifits(infile_list: List[Path], outfile_path: Path,
     for dic in headerval:
         outhdul[0].header[dic['key']] = dic['value']
 
-    # NOTE: Changes are written back to original fits
-    outhdul.flush()
+    outhdul.flush()  # changes are written back to original.fits
     outhdul.close()
     for inhdul in inhdul_lst:
         inhdul.close()
@@ -472,20 +461,19 @@ def oifits_patchwork(
     headerval : list of str
         List of header keys.
     """
-    # print(infile_list)
     if os.path.exists(infile_list[0]):
         copyfile(infile_list[0], outfile_path)
     else:
-        print(f'ERROR (oifits_patchwork): File not found: {infile_list[0]}')
+        print('ERROR (oifits_patchwork): File not found: '+infile_list[0])
         return
-    outhdul = fits.open(outfile_path, mode='update')
+    outhdul  = fits.open(outfile_path, mode='update')
 
     n_oi_types_list = len(oi_types_list)
     for i in range(n_oi_types_list):
-        # print(i)
+        #print(i)
         oi_types = oi_types_list[i]
         infile = infile_list[i]
-        # print(infile)
+        #print(infile)
         inhdul = fits.open(infile, mode='readonly')
 
         for oi_type in oi_types:
@@ -498,34 +486,33 @@ def oifits_patchwork(
                 outhdul['OI_T3'].data = inhdul['OI_T3'].data
             if oi_type == 'visamp':
                 try:
-                    outhdul[0].header['HIERARCH ESO PRO CAL NAME'] = inhdul[0].header['HIERARCH ESO PRO CAL NAME']
-                    outhdul[0].header['HIERARCH ESO PRO CAL RA'] = inhdul[0].header['HIERARCH ESO PRO CAL RA']  
-                    outhdul[0].header['HIERARCH ESO PRO CAL DEC'] = inhdul[0].header['HIERARCH ESO PRO CAL DEC'] 
-                    outhdul[0].header['HIERARCH ESO PRO CAL AIRM'] = inhdul[0].header['HIERARCH ESO PRO CAL AIRM']
-                    outhdul[0].header['HIERARCH ESO PRO CAL FWHM'] = inhdul[0].header['HIERARCH ESO PRO CAL FWHM']
-                    outhdul[0].header['HIERARCH ESO PRO CAL TAU0'] = inhdul[0].header['HIERARCH ESO PRO CAL TAU0']
-                    outhdul[0].header['HIERARCH ESO PRO CAL TPL START'] = inhdul[0].header['HIERARCH ESO PRO CAL TPL START']     
-                    outhdul[0].header['HIERARCH ESO PRO CAL DB NAME'] = inhdul[0].header['HIERARCH ESO PRO CAL DB NAME']    
-                    outhdul[0].header['HIERARCH ESO PRO CAL DB DBNAME'] = inhdul[0].header['HIERARCH ESO PRO CAL DB DBNAME']  
-                    outhdul[0].header['HIERARCH ESO PRO CAL DB RA'] = inhdul[0].header['HIERARCH ESO PRO CAL DB RA']      
-                    outhdul[0].header['HIERARCH ESO PRO CAL DB DEC'] = inhdul[0].header['HIERARCH ESO PRO CAL DB DEC']     
-                    outhdul[0].header['HIERARCH ESO PRO CAL DB DIAM'] = inhdul[0].header['HIERARCH ESO PRO CAL DB DIAM']    
-                    outhdul[0].header['HIERARCH ESO PRO CAL DB ERRDIAM'] = inhdul[0].header['HIERARCH ESO PRO CAL DB ERRDIAM'] 
+                    outhdul[0].header['HIERARCH ESO PRO CAL NAME'] =          inhdul[0].header['HIERARCH ESO PRO CAL NAME']
+                    outhdul[0].header['HIERARCH ESO PRO CAL RA'] =            inhdul[0].header['HIERARCH ESO PRO CAL RA']  
+                    outhdul[0].header['HIERARCH ESO PRO CAL DEC'] =           inhdul[0].header['HIERARCH ESO PRO CAL DEC'] 
+                    outhdul[0].header['HIERARCH ESO PRO CAL AIRM'] =          inhdul[0].header['HIERARCH ESO PRO CAL AIRM']
+                    outhdul[0].header['HIERARCH ESO PRO CAL FWHM'] =          inhdul[0].header['HIERARCH ESO PRO CAL FWHM']
+                    outhdul[0].header['HIERARCH ESO PRO CAL TAU0'] =          inhdul[0].header['HIERARCH ESO PRO CAL TAU0']
+                    outhdul[0].header['HIERARCH ESO PRO CAL TPL START'] =     inhdul[0].header['HIERARCH ESO PRO CAL TPL START']     
+                    outhdul[0].header['HIERARCH ESO PRO CAL DB NAME'] =       inhdul[0].header['HIERARCH ESO PRO CAL DB NAME']    
+                    outhdul[0].header['HIERARCH ESO PRO CAL DB DBNAME'] =     inhdul[0].header['HIERARCH ESO PRO CAL DB DBNAME']  
+                    outhdul[0].header['HIERARCH ESO PRO CAL DB RA'] =         inhdul[0].header['HIERARCH ESO PRO CAL DB RA']      
+                    outhdul[0].header['HIERARCH ESO PRO CAL DB DEC'] =        inhdul[0].header['HIERARCH ESO PRO CAL DB DEC']     
+                    outhdul[0].header['HIERARCH ESO PRO CAL DB DIAM'] =       inhdul[0].header['HIERARCH ESO PRO CAL DB DIAM']    
+                    outhdul[0].header['HIERARCH ESO PRO CAL DB ERRDIAM'] =    inhdul[0].header['HIERARCH ESO PRO CAL DB ERRDIAM'] 
                     outhdul[0].header['HIERARCH ESO PRO CAL DB SEPARATION'] = inhdul[0].header['HIERARCH ESO PRO CAL DB SEPARATION'] 
                 except KeyError as e:
                     print(e)
 
                 outhdul['OI_VIS'].header['AMPTYP'] = inhdul['OI_VIS'].header['AMPTYP']
                 outhdul['OI_VIS'].data = inhdul['OI_VIS'].data
-                # NOTE: Look up visphi
+                #look up visphi
                 for j in range(n_oi_types_list):
                     if 'visphi' in oi_types_list[j]:
                         infile2 = infile_list[j]
                         inhdul2 = fits.open(infile2, mode='readonly')
                         visphi = inhdul2['OI_VIS'].data['VISPHI']
                         visphierr = inhdul2['OI_VIS'].data['VISPHIERR']
-
-                        # NOTE: Match station indices
+                        #match station indices
                         sta_index_visamp = outhdul['OI_VIS'].data['STA_INDEX']
                         sta_index_visamp = [ list(item) for item in sta_index_visamp ]
                         sta_index_visphi = inhdul2['OI_VIS'].data['STA_INDEX']
@@ -546,37 +533,36 @@ def oifits_patchwork(
         del outhdul[0].header[dic['key']]
         outhdul[0].header[dic['key']] = dic['value']
 
-    # NOTE: Changes are written back to original.fits
-    outhdul.flush()
+
+    outhdul.flush()  # changes are written back to original.fits
     outhdul.close()
     inhdul.close()
     inhdul2.close()
 
 
-def calc_vis_from_corrflux(input_corrflux_file,input_totalflux_file,outfile_path):
+def calc_vis_from_corrflux(input_corrflux_file, input_totalflux_file,
+                           outfile_path, propagate_fluxerr: Optional[bool] = True):
     copyfile(input_corrflux_file, outfile_path)
     outhdul  = fits.open(outfile_path, mode='update')
 
     inhdul_corr = fits.open(input_corrflux_file, mode='readonly')
     inhdul_tot = fits.open(input_totalflux_file, mode='readonly')
-
-    # NOTE: Read total spectra
+    # read total spectra
     wl_flux = inhdul_tot['OI_WAVELENGTH'].data['EFF_WAVE']
     flux = inhdul_tot['OI_FLUX'].data['FLUXDATA'][0]
     fluxerr = inhdul_tot['OI_FLUX'].data['FLUXERR'][0]
     # print(flux,fluxerr)
-
-    # NOTE: Read correlated spectra
+    # read correlated spectra
     corrflux = inhdul_corr['OI_VIS'].data['VISAMP']
     corrfluxerr = inhdul_corr['OI_VIS'].data['VISAMPERR']
     wl_corrflux = inhdul_corr['OI_WAVELENGTH'].data['EFF_WAVE']
     # print(corrflux,corrfluxerr)
 
     if not len(outhdul['OI_VIS'].data['VISAMP'][0]) == len(flux):
-        # NOTE: Interpolate the flux data to the wavelengths of the correlated flux
-        f = interp1d(wl_flux, flux, kind='cubic')
+        # interpolate the flux data to the wavelengths of the correlated flux
+        f = interp1d(wl_flux, flux,kind='cubic')
         flux_resamp = f(wl_corrflux)
-        f = interp1d(wl_flux, fluxerr, kind='cubic')
+        f = interp1d(wl_flux, fluxerr,kind='cubic')
         fluxerr_resamp = f(wl_corrflux)
         flux = flux_resamp
         fluxerr = fluxerr_resamp
@@ -584,22 +570,21 @@ def calc_vis_from_corrflux(input_corrflux_file,input_totalflux_file,outfile_path
         outhdul['OI_FLUX'].data['FLUXERR'] = fluxerr
         
     for k in range(len(outhdul['OI_VIS'].data['VISAMP'])):
-        # NOTE: Collect and average matching vis2 data
+        # collect and average matching vis2 data
         vis = (corrflux[k]/flux)
-        viserr = vis*np.sqrt((corrfluxerr[k]/corrflux[k])**2 + (fluxerr/flux)**2)
+        if propagate_fluxerr:
+            viserr = vis*np.sqrt((corrfluxerr[k]/corrflux[k])**2 + (fluxerr/flux)**2)
+        else:
+            viserr = corrfluxerr[k]/flux[k] #WARNING: this is not how errors should be calculated
         vis2 = vis**2.0
         vis2err = 2.0*vis*viserr
         # print(viserr,vis2err)
-
-        # WARNING: this is not how errors should be calculated
         outhdul['OI_VIS2'].data['VIS2DATA'][k] = vis2
-        outhdul['OI_VIS2'].data['VIS2ERR'][k] = vis2err
+        outhdul['OI_VIS2'].data['VIS2ERR'][k] = vis2err 
         outhdul['OI_VIS2'].data['STA_INDEX'][k] = inhdul_corr['OI_VIS'].data['STA_INDEX'][k]
         outhdul['OI_VIS2'].data['UCOORD'][k] = inhdul_corr['OI_VIS'].data['UCOORD'][k]
         outhdul['OI_VIS2'].data['VCOORD'][k] = inhdul_corr['OI_VIS'].data['VCOORD'][k]
-
-    # NOTE: Changes are written back to original.fits
-    outhdul.flush()
+    outhdul.flush()  # changes are written back to original.fits
     outhdul.close()
     inhdul_corr.close()
     inhdul_tot.close()
@@ -629,7 +614,7 @@ def oifits_restrict_wavelengths(
         If True, flag the wavelengths we do not want to use.
     """
     copyfile(infile_path, outfile_path)
-    outhdul = fits.open(outfile_path, mode='update')
+    outhdul  = fits.open(outfile_path, mode='update')
 
     hdu = fits.open(infile_path, mode='readonly')
     try:
@@ -641,7 +626,7 @@ def oifits_restrict_wavelengths(
         return
 
     if wl_range:
-        idx = np.logical_and(wl*1e6 > (wl_range[0]), wl*1e6 <= wl_range[1])
+        idx = np.logical_and(wl*1e6 > (wl_range[0]),wl*1e6 <= wl_range[1])
     else:
         idx = np.logical_or(wl*1e6 < (sel_wl-bandwidth/2.0),wl*1e6 >= (sel_wl+bandwidth/2.0))
     # wl_new = wl[idx]
@@ -700,207 +685,200 @@ def oifits_restrict_wavelengths(
             pass
             # print("WARNING: No OI_FLUX table!")
             # print(e)
+    
     else:
         new_wave = hdu['OI_WAVELENGTH'].data['EFF_WAVE'][idx]
         outhdul['OI_WAVELENGTH'].data = np.resize(outhdul['OI_WAVELENGTH'].data,(len(new_wave),))
         outhdul['OI_WAVELENGTH'].data['EFF_WAVE'] = new_wave
         outhdul['OI_WAVELENGTH'].data['EFF_BAND'] = hdu['OI_WAVELENGTH'].data['EFF_BAND'][idx]
-
+        
         Nwl = len(new_wave)
+        
         if 'OI_VIS2' in hdu:
             n_rows = len(outhdul['OI_VIS2'].data['VIS2DATA'])
             # OI_VIS2
             NV2 = len(outhdul['OI_VIS2'].data['VIS2DATA'])
             del outhdul['OI_VIS2']
-            c1 = fits.Column(name='TARGET_ID', format='I')
-            c2 = fits.Column(name='TIME', format='D', unit='s')
-            c3 = fits.Column(name='MJD', format='D', unit='day')
-            c4 = fits.Column(name='INT_TIME', format='D', unit='s')
-            c5 = fits.Column(name='VIS2DATA', format='%dD' % Nwl)
-            c6 = fits.Column(name='VIS2ERR', format='%dD' % Nwl)
-            c7 = fits.Column(name='UCOORD', format='D', unit='m')
-            c8 = fits.Column(name='VCOORD', format='D', unit='m')
-            c9 = fits.Column(name='STA_INDEX', format='2I')
-            c10 = fits.Column(name='FLAG', format='%dL' % Nwl)
-            oi_vis2_hdu = fits.BinTableHDU.from_columns(
-                    [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10],
-                    name='OI_VIS2', nrows=NV2, fill=True)
+            c1 = fits. Column(name='TARGET_ID', format='I')
+            c2 = fits. Column(name='TIME', format='D',unit='s')
+            c3 = fits. Column(name='MJD', format='D',unit='day')
+            c4 = fits. Column(name='INT_TIME', format='D',unit='s')
+            c5 = fits. Column(name='VIS2DATA', format='%dD'%Nwl)
+            c6 = fits. Column(name='VIS2ERR', format='%dD'%Nwl)
+            c7 = fits. Column(name='UCOORD', format='D',unit='m')
+            c8 = fits. Column(name='VCOORD', format='D',unit='m')
+            c9 = fits. Column(name='STA_INDEX', format='2I')
+            c10= fits. Column(name='FLAG', format='%dL'%Nwl)
+            oi_vis2_hdu = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10],name='OI_VIS2',nrows=NV2,fill=True)
             outhdul.append(oi_vis2_hdu)
 
             outhdul['OI_VIS2'].header['DATE-OBS'] = hdu['OI_VIS2'].header['DATE-OBS']
-            outhdul['OI_VIS2'].header['EXTNAME'] = hdu['OI_VIS2'].header['EXTNAME']
-            outhdul['OI_VIS2'].header['EXTVER'] = hdu['OI_VIS2'].header['EXTVER']
+            outhdul['OI_VIS2'].header['EXTNAME'] =  hdu['OI_VIS2'].header['EXTNAME']
+            outhdul['OI_VIS2'].header['EXTVER']  = hdu['OI_VIS2'].header['EXTVER']  
             outhdul['OI_VIS2'].header['OI_REVN'] = hdu['OI_VIS2'].header['OI_REVN']
             outhdul['OI_VIS2'].header['ARRNAME'] = hdu['OI_VIS2'].header['ARRNAME']
             outhdul['OI_VIS2'].header['INSNAME'] = hdu['OI_VIS2'].header['INSNAME']
             outhdul['OI_VIS2'].data['TARGET_ID'] = hdu['OI_VIS2'].data['TARGET_ID']
-            outhdul['OI_VIS2'].data['TIME'] = hdu['OI_VIS2'].data['TIME']
-            outhdul['OI_VIS2'].data['MJD'] = hdu['OI_VIS2'].data['MJD']
-            outhdul['OI_VIS2'].data['INT_TIME'] = hdu['OI_VIS2'].data['INT_TIME']
-            outhdul['OI_VIS2'].data['UCOORD'] = hdu['OI_VIS2'].data['UCOORD']
-            outhdul['OI_VIS2'].data['VCOORD'] = hdu['OI_VIS2'].data['VCOORD']
-            outhdul['OI_VIS2'].data['STA_INDEX'] = hdu['OI_VIS2'].data['STA_INDEX']
+            outhdul['OI_VIS2'].data['TIME']      = hdu['OI_VIS2'].data['TIME']      
+            outhdul['OI_VIS2'].data['MJD']       = hdu['OI_VIS2'].data['MJD']       
+            outhdul['OI_VIS2'].data['INT_TIME']  = hdu['OI_VIS2'].data['INT_TIME']  
+            outhdul['OI_VIS2'].data['UCOORD']    = hdu['OI_VIS2'].data['UCOORD']    
+            outhdul['OI_VIS2'].data['VCOORD']    = hdu['OI_VIS2'].data['VCOORD']
+            outhdul['OI_VIS2'].data['STA_INDEX'] = hdu['OI_VIS2'].data['STA_INDEX'] 
             for j in range(NV2):
                 outhdul['OI_VIS2'].data['VIS2DATA'][j] = hdu['OI_VIS2'].data['VIS2DATA'][j][idx]
                 outhdul['OI_VIS2'].data['FLAG'][j] = hdu['OI_VIS2'].data['FLAG'][j][idx]
                 outhdul['OI_VIS2'].data['VIS2ERR'][j] = hdu['OI_VIS2'].data['VIS2ERR'][j][idx]
-
+        
         if 'OI_T3' in hdu:
             # OI_T3
             NT3 = len(hdu['OI_T3'].data['T3PHI'])
             del outhdul['OI_T3']
-            c1 = fits.Column(name='TARGET_ID', format='1I')
-            c2 = fits.Column(name='TIME', format='1D', unit='s')
-            c3 = fits.Column(name='MJD', format='1D', unit='day')
-            c4 = fits.Column(name='INT_TIME', format='1D', unit='s')
-            c5 = fits.Column(name='T3AMP', format='%dD' % Nwl)
-            c6 = fits.Column(name='T3AMPERR', format='%dD' % Nwl)
-            c7 = fits.Column(name='T3PHI', format='%dD' % Nwl, unit='deg')
-            c8 = fits.Column(name='T3PHIERR', format='%dD' % Nwl, unit='deg')
-            c9 = fits.Column(name='U1COORD', format='1D', unit='m')
-            c10 = fits.Column(name='V1COORD', format='1D', unit='m')
-            c11 = fits.Column(name='U2COORD', format='1D', unit='m')
-            c12 = fits.Column(name='V2COORD', format='1D', unit='m')
-            c13 = fits.Column(name='STA_INDEX', format='3I')
-            c14 = fits.Column(name='FLAG', format='%dL' % Nwl)
-            oi_t3_hdu = fits.BinTableHDU.from_columns(
-                    [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14],
-                    name='OI_T3', nrows=NT3, fill=True)
+            c1 = fits. Column(name='TARGET_ID', format='1I')
+            c2 = fits. Column(name='TIME', format='1D', unit='s')
+            c3 = fits. Column(name='MJD', format='1D', unit='day' )
+            c4 = fits. Column(name='INT_TIME', format='1D',unit='s')
+            c5 = fits. Column(name='T3AMP', format='%dD'%Nwl)
+            c6 = fits. Column(name='T3AMPERR', format='%dD'%Nwl)
+            c7 = fits. Column(name='T3PHI', format='%dD'%Nwl,unit='deg')
+            c8 = fits. Column(name='T3PHIERR', format='%dD'%Nwl,unit='deg')
+            c9 = fits. Column(name='U1COORD', format='1D', unit='m')
+            c10= fits. Column(name='V1COORD', format='1D', unit='m')
+            c11= fits. Column(name='U2COORD', format='1D', unit='m')
+            c12= fits. Column(name='V2COORD', format='1D', unit='m')
+            c13= fits. Column(name='STA_INDEX', format='3I')
+            c14= fits. Column(name='FLAG', format='%dL'%Nwl)
+            oi_t3_hdu = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14],name='OI_T3',nrows=NT3,fill=True)
             outhdul.append(oi_t3_hdu)
 
             outhdul['OI_T3'].header['DATE-OBS']= hdu['OI_T3'].header['DATE-OBS']
-            outhdul['OI_T3'].header['EXTNAME'] = hdu['OI_T3'].header['EXTNAME']
-            outhdul['OI_T3'].header['EXTVER'] = hdu['OI_T3'].header['EXTVER']
-            outhdul['OI_T3'].header['OI_REVN'] = hdu['OI_T3'].header['OI_REVN']
-            outhdul['OI_T3'].header['ARRNAME'] = hdu['OI_T3'].header['ARRNAME']
-            outhdul['OI_T3'].header['INSNAME'] = hdu['OI_T3'].header['INSNAME']
-            outhdul['OI_T3'].data['TARGET_ID'] = hdu['OI_T3'].data['TARGET_ID']
-            outhdul['OI_T3'].data['TIME'] = hdu['OI_T3'].data['TIME']
-            outhdul['OI_T3'].data['MJD'] = hdu['OI_T3'].data['MJD']
-            outhdul['OI_T3'].data['INT_TIME'] = hdu['OI_T3'].data['INT_TIME']
-            outhdul['OI_T3'].data['U1COORD'] = hdu['OI_T3'].data['U1COORD']
-            outhdul['OI_T3'].data['V1COORD'] = hdu['OI_T3'].data['V1COORD']
-            outhdul['OI_T3'].data['U2COORD'] = hdu['OI_T3'].data['U2COORD']
-            outhdul['OI_T3'].data['V2COORD'] = hdu['OI_T3'].data['V2COORD']
-            outhdul['OI_T3'].data['STA_INDEX'] = hdu['OI_T3'].data['STA_INDEX']
+            outhdul['OI_T3'].header['EXTNAME'] = hdu['OI_T3'].header['EXTNAME'] 
+            outhdul['OI_T3'].header['EXTVER']  = hdu['OI_T3'].header['EXTVER']  
+            outhdul['OI_T3'].header['OI_REVN'] = hdu['OI_T3'].header['OI_REVN'] 
+            outhdul['OI_T3'].header['ARRNAME'] = hdu['OI_T3'].header['ARRNAME'] 
+            outhdul['OI_T3'].header['INSNAME'] = hdu['OI_T3'].header['INSNAME'] 
+            outhdul['OI_T3'].data['TARGET_ID'] = hdu['OI_T3'].data['TARGET_ID'] 
+            outhdul['OI_T3'].data['TIME']      = hdu['OI_T3'].data['TIME']      
+            outhdul['OI_T3'].data['MJD']       = hdu['OI_T3'].data['MJD']       
+            outhdul['OI_T3'].data['INT_TIME']  = hdu['OI_T3'].data['INT_TIME']  
+            outhdul['OI_T3'].data['U1COORD']   = hdu['OI_T3'].data['U1COORD']   
+            outhdul['OI_T3'].data['V1COORD']   = hdu['OI_T3'].data['V1COORD']   
+            outhdul['OI_T3'].data['U2COORD']   = hdu['OI_T3'].data['U2COORD']   
+            outhdul['OI_T3'].data['V2COORD']   = hdu['OI_T3'].data['V2COORD']   
+            outhdul['OI_T3'].data['STA_INDEX'] = hdu['OI_T3'].data['STA_INDEX'] 
             for j in range(NT3):
-                outhdul['OI_T3'].data['T3AMP'][j] = hdu['OI_T3'].data['T3AMP'][j][idx]
+                outhdul['OI_T3'].data['T3AMP'][j]    = hdu['OI_T3'].data['T3AMP'][j][idx]   
                 outhdul['OI_T3'].data['T3AMPERR'][j] = hdu['OI_T3'].data['T3AMPERR'][j][idx]
-                outhdul['OI_T3'].data['T3PHI'][j] = hdu['OI_T3'].data['T3PHI'][j][idx]
+                outhdul['OI_T3'].data['T3PHI'][j]    = hdu['OI_T3'].data['T3PHI'][j][idx]   
                 outhdul['OI_T3'].data['T3PHIERR'][j] = hdu['OI_T3'].data['T3PHIERR'][j][idx]
-                outhdul['OI_T3'].data['FLAG'][j] = hdu['OI_T3'].data['FLAG'][j][idx]
-
+                outhdul['OI_T3'].data['FLAG'][j]     = hdu['OI_T3'].data['FLAG'][j][idx]    
+    
         if 'OI_VIS' in hdu:
             # OI_VIS
             NV = len(outhdul['OI_VIS'].data['VISAMP'])
             del outhdul['OI_VIS']
             c1 = fits. Column(name='TARGET_ID', format='1I')
-            c2 = fits. Column(name='TIME', format='1D', unit='s')
-            c3 = fits. Column(name='MJD', format='1D', unit='day')
+            c2 = fits. Column(name='TIME', format='1D',unit='s')
+            c3 = fits. Column(name='MJD', format='1D',unit='day')
             c4 = fits. Column(name='INT_TIME', format='1D',unit='s')
-            c5 = fits. Column(name='VISAMP', format='%dD' % Nwl)
-            c6 = fits. Column(name='VISAMPERR', format='%dD' % Nwl)
-            c7 = fits. Column(name='VISPHI', format='%dD' % Nwl, unit='deg')
-            c8 = fits. Column(name='VISPHIERR', format='%dD' % Nwl, unit='deg')
-            c9 = fits. Column(name='UCOORD', format='1D', unit='m')
-            c10= fits. Column(name='VCOORD', format='1D', unit='m')
+            c5 = fits. Column(name='VISAMP', format='%dD'%Nwl)
+            c6 = fits. Column(name='VISAMPERR', format='%dD'%Nwl)
+            c7 = fits. Column(name='VISPHI', format='%dD'%Nwl,unit='deg')
+            c8 = fits. Column(name='VISPHIERR', format='%dD'%Nwl,unit='deg')
+            c9 = fits. Column(name='UCOORD', format='1D',unit='m')
+            c10= fits. Column(name='VCOORD', format='1D',unit='m')
             c11= fits. Column(name='STA_INDEX', format='2I')
-            c12= fits. Column(name='FLAG', format='%dL' % Nwl)
-            oi_vis_hdu = fits.BinTableHDU.from_columns(
-                    [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12],
-                    name='OI_VIS', nrows=NV, fill=True)
+            c12= fits. Column(name='FLAG', format='%dL'%Nwl)
+            oi_vis_hdu = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12],name='OI_VIS',nrows=NV,fill=True)
             outhdul.append(oi_vis_hdu)
 
-            outhdul['OI_VIS'].header['EXTNAME'] = hdu['OI_VIS'].header['EXTNAME']
-            outhdul['OI_VIS'].header['EXTVER'] = hdu['OI_VIS'].header['EXTVER']
-            outhdul['OI_VIS'].header['OI_REVN'] = hdu['OI_VIS'].header['OI_REVN']
-            outhdul['OI_VIS'].header['ARRNAME'] = hdu['OI_VIS'].header['ARRNAME']
-            outhdul['OI_VIS'].header['INSNAME'] = hdu['OI_VIS'].header['INSNAME']
+            outhdul['OI_VIS'].header['EXTNAME'] = hdu['OI_VIS'].header['EXTNAME'] 
+            outhdul['OI_VIS'].header['EXTVER']  = hdu['OI_VIS'].header['EXTVER']  
+            outhdul['OI_VIS'].header['OI_REVN'] = hdu['OI_VIS'].header['OI_REVN'] 
+            outhdul['OI_VIS'].header['ARRNAME'] = hdu['OI_VIS'].header['ARRNAME'] 
+            outhdul['OI_VIS'].header['INSNAME'] = hdu['OI_VIS'].header['INSNAME'] 
             outhdul['OI_VIS'].header['DATE-OBS']= hdu['OI_VIS'].header['DATE-OBS']
-            outhdul['OI_VIS'].header['AMPTYP'] = hdu['OI_VIS'].header['AMPTYP']
-            outhdul['OI_VIS'].header['PHITYP'] = hdu['OI_VIS'].header['PHITYP']
-            outhdul['OI_VIS'].data['TARGET_ID'] = hdu['OI_VIS'].data['TARGET_ID']
-            outhdul['OI_VIS'].data['TIME'] = hdu['OI_VIS'].data['TIME']
-            outhdul['OI_VIS'].data['MJD'] = hdu['OI_VIS'].data['MJD']
-            outhdul['OI_VIS'].data['INT_TIME'] = hdu['OI_VIS'].data['INT_TIME']
-            outhdul['OI_VIS'].data['UCOORD'] = hdu['OI_VIS'].data['UCOORD']
-            outhdul['OI_VIS'].data['VCOORD'] = hdu['OI_VIS'].data['VCOORD']
-            outhdul['OI_VIS'].data['STA_INDEX'] = hdu['OI_VIS'].data['STA_INDEX']
+            outhdul['OI_VIS'].header['AMPTYP']  = hdu['OI_VIS'].header['AMPTYP']  
+            outhdul['OI_VIS'].header['PHITYP']  = hdu['OI_VIS'].header['PHITYP']  
+            outhdul['OI_VIS'].data['TARGET_ID'] = hdu['OI_VIS'].data['TARGET_ID'] 
+            outhdul['OI_VIS'].data['TIME']      = hdu['OI_VIS'].data['TIME']      
+            outhdul['OI_VIS'].data['MJD']       = hdu['OI_VIS'].data['MJD']       
+            outhdul['OI_VIS'].data['INT_TIME']  = hdu['OI_VIS'].data['INT_TIME']  
+            outhdul['OI_VIS'].data['UCOORD']    = hdu['OI_VIS'].data['UCOORD']    
+            outhdul['OI_VIS'].data['VCOORD']    = hdu['OI_VIS'].data['VCOORD']    
+            outhdul['OI_VIS'].data['STA_INDEX'] = hdu['OI_VIS'].data['STA_INDEX'] 
             for j in range(NV):
-                outhdul['OI_VIS'].data['VISAMP'][j] = hdu['OI_VIS'].data['VISAMP'][j][idx]
+                outhdul['OI_VIS'].data['VISAMP'][j]    = hdu['OI_VIS'].data['VISAMP'][j][idx]   
                 outhdul['OI_VIS'].data['VISAMPERR'][j] = hdu['OI_VIS'].data['VISAMPERR'][j][idx]
-                outhdul['OI_VIS'].data['VISPHI'][j] = hdu['OI_VIS'].data['VISPHI'][j][idx]
+                outhdul['OI_VIS'].data['VISPHI'][j]    = hdu['OI_VIS'].data['VISPHI'][j][idx]   
                 outhdul['OI_VIS'].data['VISPHIERR'][j] = hdu['OI_VIS'].data['VISPHIERR'][j][idx]
-                outhdul['OI_VIS'].data['FLAG'][j] = hdu['OI_VIS'].data['FLAG'][j][idx]
-
+                outhdul['OI_VIS'].data['FLAG'][j]      = hdu['OI_VIS'].data['FLAG'][j][idx]  
+        
         if 'TF2' in hdu:
             NV2 = len(hdu['TF2'].data['TF2'])
             del outhdul['TF2']
-            c1 = fits. Column(name='TIME', format='1D', unit='s')
-            c2 = fits. Column(name='MJD', format='1D', unit='day')
-            c3 = fits. Column(name='INT_TIME', format='1D', unit='s')
-            c4 = fits. Column(name='TF2', format='%dD' % Nwl)
-            c5 = fits. Column(name='TF2ERR', format='%dD' % Nwl)
-            c6 = fits. Column(name='TF', format='%dD' % Nwl)
-            c7 = fits. Column(name='TFERR', format='%dD' % Nwl)
+            c1 = fits. Column(name='TIME', format='1D',unit='s')
+            c2 = fits. Column(name='MJD', format='1D',unit='day')
+            c3 = fits. Column(name='INT_TIME', format='1D',unit='s')
+            c4 = fits. Column(name='TF2', format='%dD'%Nwl)
+            c5 = fits. Column(name='TF2ERR', format='%dD'%Nwl)
+            c6 = fits. Column(name='TF', format='%dD'%Nwl)
+            c7 = fits. Column(name='TFERR', format='%dD'%Nwl)
             c8 = fits. Column(name='STA_INDEX', format='2I')
-            oi_tf2_hdu = fits.BinTableHDU.from_columns(
-                    [c1, c2, c3, c4, c5, c6, c7, c8], name='TF2', nrows=NV2, fill=True)
+            oi_tf2_hdu = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8],name='TF2',nrows=NV2,fill=True)
             outhdul.append(oi_tf2_hdu)
 
             outhdul['TF2'].header['DATE-OBS']= hdu['TF2'].header['DATE-OBS']
-            outhdul['TF2'].header['EXTNAME'] = hdu['TF2'].header['EXTNAME']
-            outhdul['TF2'].header['EXTVER']  = hdu['TF2'].header['EXTVER']
-            outhdul['TF2'].header['OI_REVN'] = hdu['TF2'].header['OI_REVN']
-            outhdul['TF2'].header['ARRNAME'] = hdu['TF2'].header['ARRNAME']
-            outhdul['TF2'].header['INSNAME'] = hdu['TF2'].header['INSNAME']
-            outhdul['TF2'].data['TIME'] = hdu['TF2'].data['TIME']
-            outhdul['TF2'].data['MJD'] = hdu['TF2'].data['MJD']
-            outhdul['TF2'].data['INT_TIME'] = hdu['TF2'].data['INT_TIME']
-            outhdul['TF2'].data['STA_INDEX'] = hdu['TF2'].data['STA_INDEX']
+            outhdul['TF2'].header['EXTNAME'] = hdu['TF2'].header['EXTNAME'] 
+            outhdul['TF2'].header['EXTVER']  = hdu['TF2'].header['EXTVER']  
+            outhdul['TF2'].header['OI_REVN'] = hdu['TF2'].header['OI_REVN'] 
+            outhdul['TF2'].header['ARRNAME'] = hdu['TF2'].header['ARRNAME'] 
+            outhdul['TF2'].header['INSNAME'] = hdu['TF2'].header['INSNAME'] 
+            outhdul['TF2'].data['TIME']      = hdu['TF2'].data['TIME']      
+            outhdul['TF2'].data['MJD']       = hdu['TF2'].data['MJD']       
+            outhdul['TF2'].data['INT_TIME']  = hdu['TF2'].data['INT_TIME']  
+            outhdul['TF2'].data['STA_INDEX'] = hdu['TF2'].data['STA_INDEX'] 
             for j in range(NV2):
-                outhdul['TF2'].data['TF2'][j] = hdu['TF2'].data['TF2'][j][idx]
-                outhdul['TF2'].data['TF'][j] = hdu['TF2'].data['TF'][j][idx]
+                outhdul['TF2'].data['TF2'][j]   = hdu['TF2'].data['TF2'][j][idx]
+                outhdul['TF2'].data['TF'][j]    = hdu['TF2'].data['TF'][j][idx]    
                 outhdul['TF2'].data['TF2ERR'][j]= hdu['TF2'].data['TF2ERR'][j][idx]
-                outhdul['TF2'].data['TFERR'][j] = hdu['TF2'].data['TFERR'][j][idx]
-
+                outhdul['TF2'].data['TFERR'][j] = hdu['TF2'].data['TFERR'][j][idx] 
+        
         if 'OI_FLUX' in hdu:
             # OI_FLUX
             NF = len(hdu['OI_FLUX'].data['FLUXDATA'])
             del outhdul['OI_FLUX']
             c1 = fits. Column(name='TARGET_ID', format='1I')
-            c2 = fits. Column(name='TIME', format='1D', unit='s')
-            c3 = fits. Column(name='MJD', format='1D', unit='day')
-            c4 = fits. Column(name='INT_TIME', format='1D', unit='s')
-            c5 = fits. Column(name='FLUXDATA', format='%dD' % Nwl)
-            c6 = fits. Column(name='FLUXERR', format='%dD' % Nwl)
+            c2 = fits. Column(name='TIME', format='1D',unit='s')
+            c3 = fits. Column(name='MJD', format='1D',unit='day')
+            c4 = fits. Column(name='INT_TIME', format='1D',unit='s')
+            c5 = fits. Column(name='FLUXDATA', format='%dD'%Nwl)
+            c6 = fits. Column(name='FLUXERR', format='%dD'%Nwl)
             c7 = fits. Column(name='STA_INDEX', format='1I')
-            c8 = fits. Column(name='FLAG', format='%dL' % Nwl)
-            oi_flux_hdu = fits.BinTableHDU.from_columns(
-                    [c1, c2, c3, c4, c5, c6, c7, c8], name='OI_FLUX', nrows=NF, fill=True)
+            c8 = fits. Column(name='FLAG', format='%dL'%Nwl)
+            oi_flux_hdu = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8],name='OI_FLUX',nrows=NF,fill=True)
             outhdul.append(oi_flux_hdu)
 
-            outhdul['OI_FLUX'].header['EXTNAME'] = hdu['OI_FLUX'].header['EXTNAME']
-            outhdul['OI_FLUX'].header['EXTVER'] = hdu['OI_FLUX'].header['EXTVER']
-            outhdul['OI_FLUX'].header['OI_REVN'] = hdu['OI_FLUX'].header['OI_REVN']
+            outhdul['OI_FLUX'].header['EXTNAME'] = hdu['OI_FLUX'].header['EXTNAME'] 
+            outhdul['OI_FLUX'].header['EXTVER']  = hdu['OI_FLUX'].header['EXTVER']  
+            outhdul['OI_FLUX'].header['OI_REVN'] = hdu['OI_FLUX'].header['OI_REVN'] 
             outhdul['OI_FLUX'].header['DATE-OBS']= hdu['OI_FLUX'].header['DATE-OBS']
-            outhdul['OI_FLUX'].header['ARRNAME'] = hdu['OI_FLUX'].header['ARRNAME']
-            outhdul['OI_FLUX'].header['INSNAME'] = hdu['OI_FLUX'].header['INSNAME']
-            outhdul['OI_FLUX'].header['FOV'] = hdu['OI_FLUX'].header['FOV']
-            outhdul['OI_FLUX'].header['FOVTYPE'] = hdu['OI_FLUX'].header['FOVTYPE']
-            outhdul['OI_FLUX'].header['CALSTAT'] = hdu['OI_FLUX'].header['CALSTAT']
-            outhdul['OI_FLUX'].data['TARGET_ID'] = hdu['OI_FLUX'].data['TARGET_ID']
-            outhdul['OI_FLUX'].data['TIME'] = hdu['OI_FLUX'].data['TIME']
-            outhdul['OI_FLUX'].data['MJD'] = hdu['OI_FLUX'].data['MJD']
-            outhdul['OI_FLUX'].data['INT_TIME'] = hdu['OI_FLUX'].data['INT_TIME']
-            outhdul['OI_FLUX'].data['STA_INDEX'] = hdu['OI_FLUX'].data['STA_INDEX']
+            outhdul['OI_FLUX'].header['ARRNAME'] = hdu['OI_FLUX'].header['ARRNAME'] 
+            outhdul['OI_FLUX'].header['INSNAME'] = hdu['OI_FLUX'].header['INSNAME'] 
+            outhdul['OI_FLUX'].header['FOV']     = hdu['OI_FLUX'].header['FOV']     
+            outhdul['OI_FLUX'].header['FOVTYPE'] = hdu['OI_FLUX'].header['FOVTYPE'] 
+            outhdul['OI_FLUX'].header['CALSTAT'] = hdu['OI_FLUX'].header['CALSTAT'] 
+            outhdul['OI_FLUX'].data['TARGET_ID'] = hdu['OI_FLUX'].data['TARGET_ID'] 
+            outhdul['OI_FLUX'].data['TIME']      = hdu['OI_FLUX'].data['TIME']      
+            outhdul['OI_FLUX'].data['MJD']       = hdu['OI_FLUX'].data['MJD']       
+            outhdul['OI_FLUX'].data['INT_TIME']  = hdu['OI_FLUX'].data['INT_TIME']  
+            outhdul['OI_FLUX'].data['STA_INDEX'] = hdu['OI_FLUX'].data['STA_INDEX'] 
             for j in range(NF):
                 outhdul['OI_FLUX'].data['FLUXDATA'][j] = hdu['OI_FLUX'].data['FLUXDATA'][j][idx]
-                outhdul['OI_FLUX'].data['FLUXERR'][j] = hdu['OI_FLUX'].data['FLUXERR'][j][idx]
-                outhdul['OI_FLUX'].data['FLAG'][j] = hdu['OI_FLUX'].data['FLAG'][j][idx]
-
-    # NOTE: Changes are written back to original.fits
-    outhdul.flush()
+                outhdul['OI_FLUX'].data['FLUXERR'][j]  = hdu['OI_FLUX'].data['FLUXERR'][j][idx]
+                outhdul['OI_FLUX'].data['FLAG'][j]     = hdu['OI_FLUX'].data['FLAG'][j][idx]
+                            
+    outhdul.flush()  # changes are written back to original.fits
     outhdul.close()
     hdu.close()
 
