@@ -16,7 +16,7 @@ from astropy.io import fits
 
 def calib_BCD(iifile: Path, iofile: Path,
               oifile: Path, oofile: Path,
-              outputfile: Optional[Path] = Path.cwd() / "toto.fits",
+              outputfile: Optional[Path] = None,
               lim: Optional[int] = 180,
               plot: Optional[bool] = True) -> None:
     """Calibrates the different exposures of the Beam Commuting
@@ -39,6 +39,9 @@ def calib_BCD(iifile: Path, iofile: Path,
     plot : bool, optional
         Whether to plot the results, by default True
     """
+    if outputfile is None:
+        outputfile = Path.cwd() / "toto.fits"
+
     iifile, iofile, oifile, oofile = map(lambda x: Path(x).resolve(),
                                          [iifile, iofile, oifile, oofile])
     copyfile(iifile, outputfile)

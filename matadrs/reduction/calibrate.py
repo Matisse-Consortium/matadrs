@@ -167,7 +167,7 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
 
     See also
     --------
-    .calib_BCD2.calib_BCD : BCD-calibration for closure phases.
+    ..mat_tools.calib_BCD2.calib_BCD : BCD-calibration for closure phases.
     """
     cprint("Executing BCD-calibration...", "g")
     fits_file_groups = split_fits(directory, "CAL_INT_0")
