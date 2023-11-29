@@ -1,11 +1,13 @@
-"""Created on Apr 11 2019
+# -*- coding: utf-8 -*-
+"""
+Created on Apr 11 2019
 
 @author: fmillour
 """
 import os
+from shutil import copyfile
 from pathlib import Path
 from typing import Optional
-from shutil import copyfile
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,28 +16,33 @@ from astropy.io import fits
 
 def calib_BCD(iifile: Path, iofile: Path,
               oifile: Path, oofile: Path,
-              outputfile: Optional[Path] = os.getenv("HOME") + "/toto.fits",
+              outputfile: Optional[Path] = Path.cwd() / "toto.fits",
               lim: Optional[int] = 180,
               plot: Optional[bool] = True) -> None:
-    """Executes the BCD-calibration.
+    """Calibrates the different exposures of the Beam Commuting
+    Device (BCD).
 
     Parameters
     ----------
     iifile : pathlib.Path
-        BCD In-In file.
+        The in-in file.
     iofile : pathlib.Path
-        BCD In-Out file.
+        The in-out file.
     oifile : pathlib.Path
-        BCD Out-In file.
+        The out-in file.
     oofile : pathlib.Path
-        BCD Out-Out file.
+        The out-out file.
     outputfile : pathlib.Path, optional
-        Path to the output file.
+        The name of the output file, by default Path.cwd() / "toto.fits"
     lim : int, optional
-    plot : int, optional
+        The number of degrees to limit the angle, by default 180
+    plot : bool, optional
+        Whether to plot the results, by default True
     """
+    iifile, iofile, oifile, oofile = map(lambda x: Path(x).resolve(),
+                                         [iifile, iofile, oifile, oofile])
     copyfile(iifile, outputfile)
-    outhdul = fits.open(outputfile, mode="update")
+    outhdu = fits.open(outputfile, mode="update")
 
     dinin = fits.open(iifile)
     doutout = fits.open(oofile)
@@ -109,8 +116,7 @@ def calib_BCD(iifile: Path, iofile: Path,
     #     oofl = np.nan*iiv2
 
     nwlen = np.shape(iit3p)[1]
-
-    # NOTE: Add the different exposures up
+    # addup the different exposures
     nrepeatii = int(np.shape(iit3p)[0] / 4)
     # print(nrepeatii)
     nrepeatii = int(np.shape(iiv2)[0] / 6)
@@ -129,8 +135,9 @@ def calib_BCD(iifile: Path, iofile: Path,
     # print(nrepeatio)
     # print(nrepeatoi)
     # print(nrepeatoo)
-
-    # NOTE: Store multiple exposures data into the first 6 rows
+    # nrepeatii = 0
+    # print(nrepeatii)
+    # Store multiple exposures data into the first 6 rows
     if nrepeatii > 1:
         for i in np.arange(nrepeatii - 1):
             for j in np.arange(6):
@@ -184,11 +191,11 @@ def calib_BCD(iifile: Path, iofile: Path,
                 cos_oot3p[j, :] += cos_oot3p[(i + 1) * 4 + j, :]
                 # oofl[j, :] += oofl[(i + 1) * 4 + j, :]
 
-    # NOTE: Treat closure phases
+    # Treat closure phases
     idx = np.array([[0, 0, 3, 3], [1, 2, 1, 2], [2, 1, 2, 1], [3, 3, 0, 0]])
     sign = np.array([[1, -1, 1, -1], [1, 1, -1, -1], [1, 1, -1, -1], [1, -1, 1, -1]])
 
-    # NOTE: Initialize closure phase with same shape as input
+    # Initialize closure phase with same shape as input
     sin_avg = np.zeros((4, nwlen))
     cos_avg = np.zeros((4, nwlen))
     closfinal = np.zeros((4, nwlen))
@@ -207,12 +214,23 @@ def calib_BCD(iifile: Path, iofile: Path,
             + sign[i, 2] * sin_iot3p[idx[i, 2], :]
             + sign[i, 3] * sin_oot3p[idx[i, 3], :]
         ) / (nrepeatii + nrepeatoi + nrepeatio + nrepeatoo)
+        # print('i',i)
+        # print('ii',cos_iit3p[idx[i,0],:])
+        # print('oi',cos_oit3p[idx[i,1],:])
+        # print('io',cos_iot3p[idx[i,2],:])
+        # print('oo',cos_oot3p[idx[i,3],:])
+        # print('sin')
+        # print('ii',sin_iit3p[idx[i,0],:])
+        # print('oi',sin_oit3p[idx[i,1],:])
+        # print('io',sin_iot3p[idx[i,2],:])
+        # print('oo',sin_oot3p[idx[i,3],:])
         cos_avg[i, :] = (
             1.0 * cos_iit3p[idx[i, 0], :]
             + 1.0 * cos_oit3p[idx[i, 1], :]
             + 1.0 * cos_iot3p[idx[i, 2], :]
             + 1.0 * cos_oot3p[idx[i, 3], :]
         ) / (nrepeatii + nrepeatoi + nrepeatio + nrepeatoo)
+        # print('avg',cos_avg[i,:])
         closfinal[i, :] = np.arctan2(sin_avg[i, :], cos_avg[i, :]) * 180.0 / np.pi
         if plot:
             plt.subplot(2, 2, i + 1)
@@ -225,19 +243,27 @@ def calib_BCD(iifile: Path, iofile: Path,
             plt.legend()
             plt.ylim(-lim, lim)
 
-    # NOTE: Treat differential phases
-    idx = np.array([[0, 0, 0, 0],
-                    [1, 1, 1, 1],
-                    [2, 3, 4, 5],
-                    [3, 2, 5, 4],
-                    [4, 5, 2, 3],
-                    [5, 4, 3, 2]])
-    sign = np.array([[1, -1, 1, -1],
-                     [1, 1, -1, -1],
-                     [1, 1, 1, 1],
-                     [1, 1, 1, 1],
-                     [1, 1, 1, 1],
-                     [1, 1, 1, 1],])
+    # Treat differential phases
+    idx = np.array(
+        [
+            [0, 0, 0, 0],
+            [1, 1, 1, 1],
+            [2, 3, 4, 5],
+            [3, 2, 5, 4],
+            [4, 5, 2, 3],
+            [5, 4, 3, 2],
+        ]
+    )
+    sign = np.array(
+        [
+            [1, -1, 1, -1],
+            [1, 1, -1, -1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+        ]
+    )
 
     sin_avg = np.zeros((6, nwlen))
     cos_avg = np.zeros((6, nwlen))
@@ -273,7 +299,7 @@ def calib_BCD(iifile: Path, iofile: Path,
             plt.ylabel("Differential phase")
             plt.legend()
 
-    # NOTE: Treat visamp (or correlated fluxes)
+    # Treat visamp (or correlated fluxes)
     vafinal = np.zeros((6, nwlen))
 
     if plot:
@@ -292,7 +318,7 @@ def calib_BCD(iifile: Path, iofile: Path,
             plt.ylabel("VISAMP")
             plt.legend()
 
-    # NOTE: Treat visibilities
+    # Treat visibilities
     v2final = np.zeros((6, nwlen))
 
     if plot:
@@ -314,32 +340,31 @@ def calib_BCD(iifile: Path, iofile: Path,
             plt.ylabel("Squared visibility")
             plt.legend()
 
-    outhdul["OI_T3"].data = outhdul["OI_T3"].data[0:4]
-    outhdul["OI_T3"].data["T3PHI"] = closfinal[0:4]
-    outhdul["OI_VIS"].data = outhdul["OI_VIS"].data[0:6]
-    outhdul["OI_VIS"].data["VISPHI"] = dpfinal[0:6]
-    outhdul["OI_VIS"].data["VISAMP"] = vafinal
-    outhdul["OI_VIS2"].data = outhdul["OI_VIS2"].data[0:6]
-    outhdul["OI_VIS2"].data["VIS2DATA"] = v2final
+    outhdu["OI_T3"].data = outhdu["OI_T3"].data[0:4]
+    outhdu["OI_T3"].data["T3PHI"] = closfinal[0:4]
+    outhdu["OI_VIS"].data = outhdu["OI_VIS"].data[0:6]
+    outhdu["OI_VIS"].data["VISPHI"] = dpfinal[0:6]
+    outhdu["OI_VIS"].data["VISAMP"] = vafinal
+    outhdu["OI_VIS2"].data = outhdu["OI_VIS2"].data[0:6]
+    outhdu["OI_VIS2"].data["VIS2DATA"] = v2final
     # if is_flux:
     #     outhdu['OI_FLUX'].data = outhdu['OI_FLUX'].data[0:4]
     #     outhdu['OI_FLUX'].data['FLUXDATA'] = flfinal
 
     if "correlated" in dinin["OI_VIS"].header["AMPTYP"]:
-        outhdul["OI_VIS"].header["AMPTYP"] = "correlated flux"
+        outhdu["OI_VIS"].header["AMPTYP"] = "correlated flux"
 
-    del outhdul[0].header["HIERARCH ESO INS BCD1 ID"]
-    del outhdul[0].header["HIERARCH ESO INS BCD2 ID"]
-    del outhdul[0].header["HIERARCH ESO INS BCD1 NAME"]
-    del outhdul[0].header["HIERARCH ESO INS BCD2 NAME"]
-    outhdul[0].header["HIERARCH ESO INS BCD1 ID"] = " "
-    outhdul[0].header["HIERARCH ESO INS BCD2 ID"] = " "
-    outhdul[0].header["HIERARCH ESO INS BCD1 NAME"] = " "
-    outhdul[0].header["HIERARCH ESO INS BCD2 NAME"] = " "
+    del outhdu[0].header["HIERARCH ESO INS BCD1 ID"]
+    del outhdu[0].header["HIERARCH ESO INS BCD2 ID"]
+    del outhdu[0].header["HIERARCH ESO INS BCD1 NAME"]
+    del outhdu[0].header["HIERARCH ESO INS BCD2 NAME"]
+    outhdu[0].header["HIERARCH ESO INS BCD1 ID"] = " "
+    outhdu[0].header["HIERARCH ESO INS BCD2 ID"] = " "
+    outhdu[0].header["HIERARCH ESO INS BCD1 NAME"] = " "
+    outhdu[0].header["HIERARCH ESO INS BCD2 NAME"] = " "
 
-    # NOTE: Changes are written back to original.fits
-    outhdul.flush()
-    outhdul.close()
+    outhdu.flush()  # changes are written back to original.fits
+    outhdu.close()
     dinin.close()
     if os.path.exists(iofile):
         dinout.close()
