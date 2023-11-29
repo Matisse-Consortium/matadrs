@@ -42,7 +42,7 @@ def calib_BCD(iifile: Path, iofile: Path,
     if outputfile is None:
         outputfile = Path.cwd() / "toto.fits"
 
-    iifile, iofile, oifile, oofile = map(lambda x: Path(x),
+    iifile, iofile, oifile, oofile = map(lambda x: Path(x) if x is not "" else "",
                                          [iifile, iofile, oifile, oofile])
     copyfile(iifile, outputfile)
     outhdu = fits.open(outputfile, mode="update")
