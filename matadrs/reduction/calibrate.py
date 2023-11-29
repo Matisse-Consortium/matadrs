@@ -9,7 +9,7 @@ from warnings import warn
 import pkg_resources
 
 from .fluxcal import fluxcal
-from ..mat_tools import calib_BCD
+from ..mat_tools.calib_BCD2 import calib_BCD
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time, get_path_descriptor,\
