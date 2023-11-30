@@ -34,6 +34,8 @@ MODE_NAMES = {"coherent": "corrflux", "incoherent": "flux"}
 # mat_target_list of newest edition for that (grep it via python api of google sheets)
 # Make a function for this
 # MAT_TARGET_LIST = DATA_DIR / "mat_target_list.xlsx"
+
+# TODO: Make a function that takes care of a missing file or use mat_toolsMergeAll
 def create_visibility_sof(reduced_dir: Path,
                           targets: List[Path],
                           calibrators: List[Path]) -> Path:
@@ -185,7 +187,7 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
                       bcd.out_out, outfile, plot=False)
     else:
         bcd = sort_fits_by_bcd_configuration(fits_file_groups[0])
-        calib_BCD(bcd.in_in, "", "", bcd.out_out, outfile, plot=False)
+        calib_BCD(bcd.in_in, None, None, bcd.out_out, outfile, plot=False)
 
 
 def calibrate_visibilities(targets: List[Path],
