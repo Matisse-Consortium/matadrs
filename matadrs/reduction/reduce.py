@@ -346,9 +346,10 @@ def cleanup_reduction(product_dir: Path,
 
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                          product_dir: Path, mode: bool,
-                         band: str, tpl_start: str, overwrite: bool) -> None:
-    """Reduces either the L- and/or the N-band data for either the "coherent"
-    and/or "incoherent" setting for a single iteration/epoch.
+                         band: str, tpl_start: str,
+                         ncores: int, overwrite: bool) -> None:
+    """Reduces either the L- and/or the N-band data for either the 'coherent' and/or
+    'incoherent' setting for a single iteration/epoch.
 
     Notes
     -----
@@ -373,6 +374,8 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
         "nband" or "both".
     tpl_star : str
         The starting time of observations.
+    ncores : int, optional
+        The number of cores used.
     overwrite : bool, optional
         If toggled, overwrites any files from previous reductions.
     """
@@ -382,18 +385,20 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
     mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
                      dirCalib=str(calib_dir), tplstartsel=tpl_start,
-                     nbCore=6, resol='', paramL=param_L, paramN=param_N,
+                     nbCore=ncores, resol='', paramL=param_L, paramN=param_N,
                      overwrite=int(overwrite), maxIter=1, skipL=int(skip_L),
                      skipN=int(skip_N), spectralBinning=spectral_binning)
     cleanup_reduction(product_dir, mode, band, overwrite)
 
 
 @print_execution_time
-def reduce(raw_dir: Path, product_dir: Path,
-           mode: Optional[str] = "both",
-           band: Optional[str] = "both",
-           overwrite: Optional[bool] = False) -> None:
-    """Does the full reduction for all of the raw directories.
+def reduction_pipeline(raw_dir: Path,
+                       product_dir: Path,
+                       mode: Optional[str] = "both",
+                       band: Optional[str] = "both",
+                       ncores: Optional[int] = 6,
+                       overwrite: Optional[bool] = False) -> None:
+    """Runs the pipeline for the data reduction.
 
     Parameters
     ----------
@@ -405,8 +410,10 @@ def reduce(raw_dir: Path, product_dir: Path,
         The mode in which the reduction is to be executed. Either "coherent",
         "incoherent" or "both".
     band : str, optional
-        The band in which the reduction is to be executed. Either "lband",
-        "nband" or "both".
+        The band in which the reduction is to be executed. Either 'lband',
+        'nband' or 'both'.
+    ncores : int, optional
+        The number of cores used.
     overwrite : bool, optional
         If toggled, overwrites any files from previous reductions.
 
@@ -429,7 +436,5 @@ def reduce(raw_dir: Path, product_dir: Path,
             for band in bands:
                 cprint(f"Processing the {band.title()}...", "lp")
                 reduce_mode_and_band(raw_dir, calib_dir, product_dir,
-                                     mode, band, tpl_start, overwrite)
-    cprint(
-        f"Finished reducing {', '.join(bands)} for {', '.join(modes)}-mode(s)",
-        "lp")
+                                     mode, band, tpl_start, ncores, overwrite)
+    cprint(f"Finished reducing {', '.join(bands)} for {', '.join(modes)}-mode(s)", "lp")

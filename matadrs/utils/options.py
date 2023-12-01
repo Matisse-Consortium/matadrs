@@ -1,8 +1,5 @@
-"""
-Contains the options dictionary that can be accessed from within
-Matadrs for global settings.
+OPTIONS = {}
+OPTIONS["plot.colors"] = ["b", "g", "r", "c", "m", "y"]
+OPTIONS["plot.linestyles"] = ["-", "--", "-.", ":"]
 
-"""
-options = {}
-options["colors"] = ["b", "g", "r", "c", "m", "y"]
-options["linestyles"] = ["-", "--", "-.", ":"]
+OPTIONS["average.func"] = "robustmean"

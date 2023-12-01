@@ -10,33 +10,38 @@ from matplotlib.axes import Axes
 
 from .readout import ReadoutFits
 from .tools import unwrap_phases, calculate_uv_points
-from .options import options
+from .options import OPTIONS
 
 
 # TODO: Add proper docs
 def make_uv_tracks(ax, uv_coord: np.ndarray[float],
                    baselines: List[np.ndarray],
                    sta_label: List[np.ndarray],
-                   declination: float, flag: bool,
-                   symbol: str, color: str, sel_wl: float,
+                   declination: float,
+                   symbol: str, color: str,
                    airmass_lim: float, show_text: bool) -> None:
     """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
 
-    From coordinate + ha (range), calculate uv tracks
+    From coordinate + ha (range), calculate uv tracks.
 
     Parameters
     ----------
     uv_coords : numpy.ndarray of float
+        The (u, v)-coordinates.
     baselines : list of numpy.ndarray
         The baselines in the following order: Baselines east, -north,
         -longest.
     sta_labels : list of numpy.ndarray
     declination : float
-    flag : bool
+        The declination of the site.
     symbol : str
+        The symbol that markes the coordinates of the (u, v)-point.
     color : str
-    sel_wl : float
+        Set the color/colors of the uv-coords. In case of multiple
+        (.fits)-files the colors can be specified as a list with entries
+        for each file.
     airmass_lim : float
+        The airmass limit for the uv-coords.
     """
     u_coords, v_coords = uv_coord
     latitude_paranal = EarthLocation.of_site(
@@ -67,7 +72,17 @@ def make_uv_tracks(ax, uv_coord: np.ndarray[float],
 @dataclass
 class PlotComponent:
     """Class containing the elements required for a plot
-    from the """
+    from the reduced data.
+
+    Parameters
+    ----------
+    name: str
+    labels: list
+    x_values: list
+    y_values: list
+    y_errors: list
+    """
+    name: str
     labels: List = None
     x_values: List = None
     y_values: List = None
@@ -91,6 +106,7 @@ class Plotter:
     Attributes
     ----------
     num_components : int
+        The number of components in the plot.
 
     Methods
     -------
@@ -152,9 +168,9 @@ class Plotter:
         if plot_name is not None:
             self.plot_name = plot_name
         elif isinstance(fits_files, List) and len(fits_files) > 1:
-            self.plot_name = "combined_fits.pdf"
+            self.plot_name = "combined_fits"
         else:
-            self.plot_name = f"{Path(fits_files).stem}.pdf"
+            self.plot_name = f"{Path(fits_files).stem}"
 
         self.readouts = [ReadoutFits(fits_file, flux_file)
                          for fits_file, flux_file
@@ -174,20 +190,23 @@ class Plotter:
     def _set_y_limits(self, wavelength: np.ndarray,
                       data: List[np.ndarray], margin: Optional[float] = 0.05) -> Tuple[int, int]:
         """Sets the y-limits from the data with some margin"""
-        if np.min(wavelength) >= 6:
-            indices = np.where((wavelength > 8.5) | (wavelength < 12.5))
-        else:
-            indices_low = np.where((wavelength < 4.8) & (wavelength > 4.5))
-            indices_high = np.where((wavelength > 3.) & (wavelength < 3.8))
-            indices = np.hstack((indices_low, indices_high))
-        ymin, ymax = data[:, indices].min(), data[:, indices].max()
+        try:
+            if np.min(wavelength) >= 6:
+                indices = np.where((wavelength > 8.5) | (wavelength < 12.5))
+            else:
+                indices_low = np.where((wavelength <= 4.8) & (wavelength >= 4.5))
+                indices_high = np.where((wavelength >= 3.) & (wavelength <= 3.8))
+                indices = np.hstack((indices_low, indices_high))
+            ymin, ymax = data[:, indices].min(), data[:, indices].max()
+        except ValueError:
+            ymin, ymax = np.percentile(data, 10), np.percentile(data, 90)
         spacing = np.linalg.norm(ymax-ymin)*margin
         return ymin-spacing, ymax+spacing
 
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
                 sel_wl: Optional[float] = None,
                 airmass_lim: Optional[float] = 2.,
-                show_text: Optional[List] = None) -> None:
+                show_text: Optional[List] = False) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
 
         Parameters
@@ -205,11 +224,11 @@ class Plotter:
         """
         uv_max = 0
         for index, readout in enumerate(self.readouts):
-            uv_coords = readout.oi_vis["UVCOORD"]
+            uv_coords = readout.oi_vis2["UVCOORD"]
             if uv_max < (tmp_uv_max := uv_coords.max()):
                 uv_max = tmp_uv_max
-            flags = readout.oi_vis["FLAG"]
-            sta_indices = readout.oi_vis["STA_INDEX"]
+            flags = readout.oi_vis2["FLAG"]
+            sta_indices = readout.oi_vis2["STA_INDEX"]
             sta_index = readout.oi_array["STA_INDEX"]
             sta_name = readout.oi_array["STA_NAME"]
             sta_xyz = readout.oi_array["STAXYZ"]
@@ -231,7 +250,8 @@ class Plotter:
             for uv_index, uv_coord in enumerate(uv_coords):
                 make_uv_tracks(ax, uv_coord, baselines[uv_index],
                                sta_labels[uv_index], readout.dec*np.pi/180,
-                               flags[uv_index], symbol, options["colors"][index],
+                               flags[uv_index], symbol,
+                               OPTIONS["plot.colors"][index],
                                sel_wl, airmass_lim, show_text)
 
             xlabel, ylabel = "$u$ (m)", "$v$ (m)"
@@ -243,9 +263,10 @@ class Plotter:
             ax.set_ylabel(ylabel)
 
     def make_component(self, data_name: str,
+                       corr_flux: Optional[bool] = False,
                        legend_format: Optional[str] = "long",
                        unwrap: Optional[bool] = False,
-                       period: Optional[int] = 360) -> Union[Callable, PlotComponent]:
+                       period: Optional[int] = 360):
         """Generates a pandas DataFrame that has all the plots' information
 
         Parameters
@@ -253,17 +274,15 @@ class Plotter:
         data_name : str
             The name of the data to be plotted. Determines the legend- and plot
             labels.
+        corr_flux : bool, optional
+            If true then instead of visibilities the correlated flux is plotted
         legend_format : str, optional
             Sets the format of the legend: For all information set "long" and
             for only station names set "short".
         unwrap : bool, optional
         period : int, optional
-
-        Returns
-        -------
-        component : list of either Callable or PlotComponent
         """
-        component = []
+        component, component_label = [], None
         for readout in self.readouts:
             sub_component = PlotComponent(
                 x_values=readout.oi_wl["EFF_WAVE"].data.squeeze())
@@ -272,12 +291,13 @@ class Plotter:
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
                 sub_component.labels = readout.oi_array["TEL_NAME"]\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
+                component_label = f"Flux ({readout.get_unit('oi_flux', 'fluxdata')})"
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
-                station_names = readout.oi_vis["DELAY_LINE"]
+                station_names = readout.oi_vis2["DELAY_LINE"]
                 if legend_format == "long":
-                    baselines = np.around(readout.oi_vis["BASELINE"], 2)
-                    u_coords = readout.oi_vis["UVCOORD"][:, 0]
-                    v_coords = readout.oi_vis["UVCOORD"][:, 1]
+                    baselines = np.around(readout.oi_vis2["BASELINE"], 2)
+                    u_coords = readout.oi_vis2["UVCOORD"][:, 0]
+                    v_coords = readout.oi_vis2["UVCOORD"][:, 1]
                     # TODO: Find out what this is exactly? Projected Baselines? Positional Angle?
                     pas = np.around(
                         (np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
@@ -290,6 +310,7 @@ class Plotter:
                 if data_name == "vis":
                     sub_component.y_values = readout.oi_vis["VISAMP"]
                     sub_component.y_errors = readout.oi_vis["VISAMPERR"]
+                    component_label = f"Visibilities ({readout.get_unit('oi_vis', 'visamp')})"
                 elif data_name == "diff":
                     diff_phases = readout.oi_vis["VISPHI"]
                     diff_phases_err = readout.oi_vis["VISPHIERR"]
@@ -298,9 +319,11 @@ class Plotter:
                             diff_phases, diff_phases_err, period)
                     sub_component.y_values = diff_phases
                     sub_component.y_errors = diff_phases_err
+                    component_label = r"Differential Phases ($^{\circ}$)"
                 elif data_name == "vis2":
                     sub_component.y_values = readout.oi_vis2["VIS2DATA"]
                     sub_component.y_errors = readout.oi_vis2["VIS2ERR"]
+                    component_label = "Squared visibilities (a.u.)"
                 else:
                     raise KeyError("No data-type of that data name exists!")
             elif data_name == "cphases":
@@ -312,12 +335,16 @@ class Plotter:
                 sub_component.labels = readout.oi_t3["TRIANGLE"]
                 sub_component.y_values = cphases
                 sub_component.y_errors = cphases_err
+                component_label = r"Closure Phases ($^{\circ}$)"
             elif data_name == "uv":
                 sub_component = self.plot_uv
+                component_label = "$(u, v)$-coordinates"
             else:
                 raise KeyError("Input data name cannot be queried!")
             component.append(sub_component)
-        return component
+        breakpoint()
+        self.components[component_label] = component
+        return self
 
     def add_flux(self, **kwargs):
         """Adds the total flux(es) as a subplot
@@ -329,36 +356,30 @@ class Plotter:
             self.make_component("flux", **kwargs)
         return self
 
-    def add_vis(self, corr_flux: Optional[bool] = False, **kwargs):
+    def add_vis(self, **kwargs):
         """Adds the visibilities/correlated fluxes as a subplot"""
         label = "Correlated Flux [Jy]" if corr_flux else "Visibility"
         self.components[label] =\
             self.make_component("vis", **kwargs)
         return self
 
-    def add_vis2(self, corr_flux: Optional[bool] = False, **kwargs):
+    def add_vis2(self, **kwargs):
         """Adds the squared visibilities as a subplot"""
-        self.components["Squared visibilities"] =\
+        self.components[""] =\
             self.make_component("vis2", **kwargs)
         return self
 
     def add_cphases(self, **kwargs):
         """Adds the closure phases as a subplot"""
-        self.components[r"Closure phases [$^{\circ}$]"] =\
-            self.make_component("cphases", **kwargs)
-        return self
+        return self.make_component("cphases", **kwargs)
 
     def add_diff_phases(self, **kwargs):
         """Adds the differential phases as a subplot"""
-        self.components[r"Differential phases [$^{\circ}$]"] =\
-            self.make_component("diff", **kwargs)
-        return self
+        return self.make_component("diff", **kwargs)
 
     def add_uv(self, **kwargs):
         """Adds the (u, v)-coordinates as a subplot"""
-        self.components["$(u, v)$-coordinates"] =\
-            self.make_component("uv", **kwargs)
-        return self
+        return self.make_component("uv", **kwargs)
 
     def add_mosaic(self, **kwargs):
         """Combines multiple subplots to produce a mosaic plot"""
@@ -376,52 +397,7 @@ class Plotter:
                        share_legend: Optional[bool] = False,
                        error: Optional[bool] = False,
                        margin: Optional[float] = 0.05,
-                       legend: Optional[bool] = True,
-                       legend_location: Optional[str] = None,
-                       legend_size: Optional[int] = "xx-small") -> None:
-        """Plots a single component
-
-        Parameters
-        ----------
-        ax : matplotlib.axes
-        name : str
-        component : callable or PlotComponent"""
-        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]"
-        for index, (ax, component) in enumerate(zip(axarr, components)):
-            if isinstance(component, PlotComponent):
-                for label, y_value, y_error in zip(component.labels,
-                                                   component.y_values,
-                                                   component.y_errors):
-                    ax.plot(component.x_values, y_value, label=label)
-                    if error:
-                        ax.fill_between(component.x_values,
-                                        y_value+y_error, y_value-y_error,
-                                        alpha=0.2)
-                    if legend:
-                        if not share_legend:
-                            ax.legend(fontsize=legend_size,
-                                      loc=legend_location, framealpha=0.5)
-                        elif index == 0:
-                            ax.legend(fontsize=legend_size,
-                                      loc=legend_location, framealpha=0.5)
-                    limits = self._set_y_limits(component.x_values,
-                                                component.y_values,
-                                                margin=margin)
-                    ax.set_ylim(*limits)
-                    if not sharex:
-                        ax.set_xlabel(xlabel)
-                    elif index == len(axarr)-1:
-                        ax.set_xlabel(xlabel)
-                    ax.set_ylabel(name)
-            else:
-                component(ax)
-
-    def plot(self,
-             subplots: Optional[bool] = False,
-             rax: Optional[bool] = False,
-             savefig: Optional[Union[str, bool]] = None,
-             format: Optional[str] = "pdf",
-             **kwargs) -> Optional[Axes]:
+                       **kwargs) -> None:
         """Plots all the data of a single component.
 
         Parameters
@@ -429,14 +405,50 @@ class Plotter:
         ax : matplotlib.axes
         name : str
         component : callable or plotcomponent
-        subplots : bool, optional
-        sharex : bool, optional
-        sharey : bool, optional
+        no_xlabel : bool, optional
         error : bool, optional
         margin : bool, optional
-        legend : bool, optional
-        legend_location : str, optional
-        legend_size : int, optional
+        kwargs: dict
+        """
+        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
+        for sub_component in component:
+            if isinstance(sub_component, PlotComponent):
+                for label, y_value, y_error in zip(sub_component.labels,
+                                                   sub_component.y_values,
+                                                   sub_component.y_errors):
+                    ax.plot(sub_component.x_values, y_value, label=label)
+                    if error:
+                        ax.fill_between(sub_component.x_values,
+                                        y_value+y_error, y_value-y_error, alpha=0.2)
+                    ax.legend(fontsize="xx-small", loc="upper right", framealpha=0.5)
+                ylims = self._set_y_limits(sub_component.x_values,
+                                           sub_component.y_values,
+                                           margin=margin)
+                ax.set_ylim(*ylims)
+                ax.set_xlabel(xlabel)
+                ax.set_ylabel(name)
+            else:
+                sub_component(ax, **kwargs)
+
+    # TODO: Sharex, sharey and subplots should be added
+    def plot(self, save: Optional[bool] = False,
+             subplots: Optional[bool] = False,
+             sharex: Optional[bool] = False,
+             format: Optional[str] = "pdf", **kwargs):
+        """Combines the individual components into one plot.
+
+        The size and dimension of the plot is automatically determined
+
+        Parameters
+        ----------
+        save: bool, optional
+            If toggled, saves the plot to the self.save_path file with the
+            self.plot_name
+        subplots : bool, optional
+        sharex : bool, optional
+        error : bool, optional
+        margin : bool, optional
+        kwargs: dict, optional
         """
         if subplots:
             columns = self.num_components
@@ -452,27 +464,18 @@ class Plotter:
                                   constrained_layout=True,
                                   figsize=(512*to_px*columns, 512*to_px*rows))
 
-        upper, lower = 0, 1
-        for index, (name, component) in enumerate(self.components.items()):
-            if subplots:
-                self.plot_component(axarr[:, index], name, component, **kwargs)
-            else:
-                # TODO: Fix this here.
-                upper += len(component)
-                self.plot_component(
-                    axarr.flatten()[lower:upper], name, component, **kwargs)
-                lower = upper
+        if self.num_components != 1:
+            for ax, (name, component) in zip(axarr.flatten(), self.components.items()):
+                self.plot_component(ax, name, component, **kwargs)
+        else:
+            name, component = map(
+                lambda x: x[0], zip(*self.components.items()))
+            self.plot_component(axarr, name, component, **kwargs)
 
-        fig.tight_layout()
-        if savefig is not None:
-            if isinstance(savefig, (str, Path)):
-                save_path = Path(f"{Path(savefig).stem}.{format}")
-            else:
-                save_path = self.save_path / self.plot_name
-            plt.savefig(save_path, format=format)
+        if save:
+            plt.savefig(self.save_path / (self.plot_name + f".{format}"),
+                        format=format)
         else:
             plt.show()
-
-        if rax:
-            return fig, axarr
+        fig.tight_layout()
         plt.close()

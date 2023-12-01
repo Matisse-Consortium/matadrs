@@ -1,13 +1,15 @@
+import re
 import shutil
 import subprocess
 from collections import deque, namedtuple
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional, Dict, List
+from warnings import warn
 
 import pkg_resources
 
 from .fluxcal import fluxcal
-from .calib_BCD2 import calib_BCD
+from ..mat_tools.calib_BCD2 import calib_BCD
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time, get_path_descriptor,\
@@ -35,6 +37,8 @@ MODE_NAMES = {"coherent": "corrflux", "incoherent": "flux"}
 # mat_target_list of newest edition for that (grep it via python api of google sheets)
 # Make a function for this
 # MAT_TARGET_LIST = DATA_DIR / "mat_target_list.xlsx"
+
+# TODO: Make a function that takes care of a missing file or use mat_toolsMergeAll
 def create_visibility_sof(reduced_dir: Path,
                           targets: List[Path],
                           calibrators: List[Path]) -> Path:
@@ -82,15 +86,15 @@ def check_file_match(targets: List[Path], calibrators: List[Path]) -> bool:
         True if the same number of files have been found, False otherwise.
     """
     if not targets:
-        cprint("No 'TARGET_RAW_INT*'-files found (Check for error in"
-               " first reduction step). SKIPPING!", "y")
+        cprint("No 'TARGET_RAW_INT*'-files found (Maybe calibrator? If not check for"
+               " error in first reduction step). SKIPPING!", "y")
         cprint(f"{'':-^50}", "lg")
+        return False
+    if len(targets) < 4:
+        warn("# 'TARGET_RAW_INT'-files is lower than 4! Indicates problems with reduction. SKIPPING!")
         return False
     if len(targets) != len(calibrators):
-        cprint("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-files. SKIPPING!",
-               "y")
-        cprint(f"{'':-^50}", "lg")
-        return False
+        warn("#'TARGET_RAW_INT'-files != #'CALIB_RAW_INT'-files!")
     return True
 
 
@@ -127,6 +131,22 @@ def sort_fits_by_bcd_configuration(fits_files: List[Path]) -> namedtuple:
     return BCDFits(in_in, in_out, out_in, out_out)
 
 
+def match_targets_to_calibrators(targets: List[Path],
+                                 calibrators: List[Path]) -> Dict[str, str]:
+    """Matches the 'TARGET_RAW_INT'- to the 'CALIB_RAW_INT'-files."""
+    first_dict = {}
+    for target in targets:
+        numerical_part = re.search(r'\d+', target.name).group()
+        first_dict[numerical_part] = target
+
+    matched_entries = {}
+    for calibrator in calibrators:
+        numerical_part = re.search(r'\d+', calibrator.name).group()
+        if numerical_part in first_dict:
+            matched_entries[first_dict[numerical_part]] = calibrator
+    return matched_entries
+
+
 def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
     """Executes the BCD-calibration for the the unchopped/chopped, visbility
     calibrated files.
@@ -155,25 +175,25 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
 
     See also
     --------
-    .calib_BCD2.calib_BCD : BCD-calibration for closure phases.
+    ..mat_tools.calib_BCD2.calib_BCD : BCD-calibration for closure phases.
     """
     cprint("Executing BCD-calibration...", "g")
-    unchopped_fits, chopped_fits = split_fits(directory, "CAL_INT_000")
-    outfile_unchopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
-    bcd = sort_fits_by_bcd_configuration(unchopped_fits)
-    if band == "lband":
-        calib_BCD(bcd.in_in, bcd.in_out,
-                  bcd.out_in, bcd.out_out,
-                  outfile_unchopped_cphases)
-    else:
-        calib_BCD(bcd.in_in, "", "",
-                  bcd.out_out, outfile_unchopped_cphases)
+    fits_file_groups = split_fits(directory, "CAL_INT_0")
+    outfile = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
 
-    if chopped_fits is not None:
-        outfile_chopped_cphases = output_dir / "TARGET_BCD_CAL_T3PHI_CHOPPED_INT.fits"
-        bcd_chopped = sort_fits_by_bcd_configuration(chopped_fits)
-        calib_BCD(bcd_chopped.in_in, "", "",
-                  bcd_chopped.out_out, outfile_chopped_cphases)
+    if band == "lband":
+        for fits_files in fits_file_groups:
+            if fits_files is not None:
+                outfile = output_dir / "TARGET_BCD_CAL_T3PHI_INT_CHOPPED.fits"
+            else:
+                continue
+
+            bcd = sort_fits_by_bcd_configuration(fits_files)
+            calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in,
+                      bcd.out_out, outfile, plot=False)
+    else:
+        bcd = sort_fits_by_bcd_configuration(fits_file_groups[0])
+        calib_BCD(bcd.in_in, None, None, bcd.out_out, outfile, plot=False)
 
 
 def calibrate_visibilities(targets: List[Path],
@@ -245,13 +265,12 @@ def cleanup_calibration(output_dir: Path):
     to the calibrated folder."""
     for fits_file in Path().cwd().glob("*.fits"):
         shutil.move(str(fits_file), str(output_dir / fits_file.name))
-    shutil.move(str(Path().cwd() / "esorex.log"),
-                str(output_dir / "mat_cal_oifits.log"))
+    if (Path().cwd() / "esorex.log").exists():
+        shutil.move(str(Path().cwd() / "esorex.log"),
+                    str(output_dir / "mat_cal_oifits.log"))
     cprint(f"{'':-^50}", "lg")
 
 
-# TODO: Make this better so it calibrates even if the calibrator or the science
-# target is chopped but the other is not
 def calibrate_files(reduced_dir: Path, target_dir: Path,
                     calibrator_dir: Path, mode: str,
                     band: str, overwrite: bool) -> None:
@@ -280,6 +299,8 @@ def calibrate_files(reduced_dir: Path, target_dir: Path,
     calibrators = get_fits_by_tag(calibrator_dir, "CALIB_RAW_INT")
 
     if check_file_match(targets, calibrators):
+        matches = match_targets_to_calibrators(targets, calibrators)
+        targets, calibrators = map(list, [matches.keys(), matches.values()])
         output_dir = get_path_descriptor(reduced_dir, "TAR-CAL",
                                          targets[0], calibrators[0])
         if not output_dir.exists():
@@ -318,6 +339,8 @@ def calibrate_folders(reduced_dir: Path, mode: str,
         cprint(f"{'':-^50}", "lg")
         if check_if_target(directory):
             for rotated_directory in rotated_sub_directories:
+                if directory == rotated_directory:
+                    continue
                 calibrate_files(reduced_dir, directory,
                                 rotated_directory, mode, band, overwrite)
     cprint(f"Finished calibration of {band} and {mode}", "lp")
@@ -328,10 +351,10 @@ def calibrate_folders(reduced_dir: Path, mode: str,
 # cals as checker generally
 # TODO: Implement checking for overwriting. Right now overwriting is by default
 @print_execution_time
-def calibrate(reduced_dir: Path,
-              mode: Optional[str] = "both",
-              band: Optional[str] = "both",
-              overwrite: Optional[bool] = False) -> None:
+def calibration_pipeline(reduced_dir: Path,
+                         mode: Optional[str] = "both",
+                         band: Optional[str] = "both",
+                         overwrite: Optional[bool] = False) -> None:
     """Does the full calibration for all of the reduced directories
     subdirectories.
 

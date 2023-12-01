@@ -162,10 +162,15 @@ def split_fits(directory: Path, tag: str) -> Tuple[List[Path], Optional[List[Pat
     chopped_fits : list of pathlib.Path, optional
         A list of Paths that are the unchopped (.fits)-files.
     """
-    unchopped_fits = [fits_file for fits_file in get_fits_by_tag(directory, tag)]
-    if len(unchopped_fits) == 6:
-        return unchopped_fits[:4], unchopped_fits[4:]
-    return unchopped_fits, None
+    fits_files = [fits_file for fits_file in get_fits_by_tag(directory, tag)]
+    unchopped_fits, chopped_fits = [], []
+    for fits_file in fits_files:
+        index = int(fits_file.name[-6])
+        if 0 <= index <= 4:
+            unchopped_fits.append(fits_file)
+        elif 5 <= index <= 6:
+            chopped_fits.append(fits_file)
+    return unchopped_fits, chopped_fits if chopped_fits else None
 
 
 # TODO: Write function in such a way that it gets the name of the files from the headers

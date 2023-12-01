@@ -1,3 +1,4 @@
+from logging import warn
 import pkg_resources
 import warnings
 from pathlib import Path
@@ -11,15 +12,12 @@ from astropy.table import Table
 from astropy.coordinates import SkyCoord
 from scipy.interpolate import CubicSpline
 
-__all__ = ["ReadoutFits"]
-
 # NOTE: Remove units warning. In (.fits)-file 'day' unit contain, which doesn't exist
 warnings.simplefilter("ignore", category=u.UnitsWarning)
 
-# TODO: Make this into a configuration file
-DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
+__all__ = ["ReadoutFits"]
 
-# NOTE: All VLTI-baseline configurations by station indices to names
+DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 
 
 # TODO: Add to fluxcalibration that it changes the unit to Jy not ADU -> Maybe in Jozsef's
@@ -60,11 +58,17 @@ class ReadoutFits:
     tau0
     longest_entry
     oi_wl
+    oi_wl_hdr
     oi_array
+    oi_array_hdr
     oi_flux
+    oi_flux_hdr
     oi_t3
+    oi_t3_hdr
     oi_vis
+    oi_vis_hdr
     oi_vis2
+    oi_vis2_hdr
 
     Methods
     -------
@@ -98,9 +102,11 @@ class ReadoutFits:
         self._name, self._coords = None, None
         self._simbad_query = None
 
-        self._oi_array, self._oi_wl = None, None
-        self._oi_flux, self._oi_t3 = None, None
-        self._oi_vis, self._oi_vis2 = None, None
+        headers = ["oi_array", "oi_wl", "oi_flux",
+                   "oi_t3", "oi_vis", "oi_vis2"]
+        for header in headers:
+            setattr(self, f"_{header}", None)
+            setattr(self, f"{header}_hdr", self.get_header(header))
 
         with fits.open(self.fits_file) as hdul:
             self.primary_header = hdul[0].header
@@ -281,8 +287,8 @@ class ReadoutFits:
                                       self.merge_uv_coords(self._oi_vis),
                                       self.get_baselines(self._oi_vis)],
                                      names=["DELAY_LINE", "UVCOORD", "BASELINE"])
-            self._oi_vis.keep_columns(["VISAMP", "VISAMPERR", "VISPHI", "VISPHIERR",
-                                       "UVCOORD", "DELAY_LINE", "BASELINE",
+            self._oi_vis.keep_columns(["VISAMP", "VISAMPERR", "UVCOORD",
+                                       "DELAY_LINE", "BASELINE",
                                        "MJD", "FLAG", "STA_INDEX"])
         return self._oi_vis
 
@@ -353,6 +359,28 @@ class ReadoutFits:
         cubic_spline = CubicSpline(flux_data["wl"], flux_data["flux"])
         interpolated_flux = (cubic_spline(self.oi_wl["EFF_WAVE"].data)).ravel()
         return interpolated_flux, interpolated_flux*0.1
+
+    def get_header(self, header: str) -> Optional[fits.Header]:
+        """Fetches a Card's header by its header name.
+
+        Parameters
+        ----------
+        header : str
+            The header which data is to be stored in a table.
+
+        Returns
+        -------
+        header : fits.Header, optional
+        """
+        with fits.open(self.fits_file, "readonly") as hdul:
+            if header not in hdul:
+                warn(f"Header {header} not found in {self.fits_file}!")
+                return
+            return hdul[header].header
+
+    def get_unit(self, header: str, sub_header: str) -> str:
+        """Fetches the unit of a header by the sub header's name."""
+        return self.get_header(header)[sub_header].unit
 
     def get_table_for_fits(self, header: str) -> Table:
         """Fetches a Card by its header and then reads its information into a Table.
