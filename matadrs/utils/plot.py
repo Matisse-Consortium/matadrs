@@ -14,7 +14,7 @@ from .options import OPTIONS
 
 
 # TODO: Add proper docs
-def make_uv_tracks(ax, uv_coord: np.ndarray[float],
+def make_uv_tracks(ax, uv_coord: np.ndarray,
                    baselines: List[np.ndarray],
                    sta_label: List[np.ndarray],
                    declination: float,
@@ -297,7 +297,6 @@ class Plotter:
                     baselines = np.around(readout.oi_vis2["BASELINE"], 2)
                     u_coords = readout.oi_vis2["UVCOORD"][:, 0]
                     v_coords = readout.oi_vis2["UVCOORD"][:, 1]
-                    # TODO: Find out what this is exactly? Projected Baselines? Positional Angle?
                     pas = np.around(
                         (np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
                     # TODO: Make the variables into mathrm
@@ -386,8 +385,8 @@ class Plotter:
         self.add_cphases(**kwargs)
         return self
 
-    def plot_component(self, axarr, name: str,
-                       components: Union[Callable, PlotComponent],
+    def plot_component(self, ax, name: str,
+                       component: Union[Callable, PlotComponent],
                        sharex: Optional[bool] = False,
                        share_legend: Optional[bool] = False,
                        error: Optional[bool] = False,
@@ -405,7 +404,7 @@ class Plotter:
         margin : bool, optional
         kwargs: dict
         """
-        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]" if not no_xlabel else ""
+        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]"
         for sub_component in component:
             if isinstance(sub_component, PlotComponent):
                 for label, y_value, y_error in zip(sub_component.labels,
