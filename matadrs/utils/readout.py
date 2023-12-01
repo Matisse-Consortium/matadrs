@@ -225,7 +225,7 @@ class ReadoutFits:
     @property
     def longest_entry(self) -> int:
         """The longest entry of all the rows fetched from the 'oi_wl' Table."""
-        return np.max(self.oi_wl["EFF_WAVE"].shape)
+        return np.max(self.oi_wavelength["EFF_WAVE"].shape)
 
     @property
     def sta_to_tel(self) -> Dict[int, str]:
@@ -236,17 +236,17 @@ class ReadoutFits:
         return self._sta_to_tel
 
     @property
-    def oi_wl(self) -> Table:
+    def oi_wavelength(self) -> Table:
         """Gets the wavelength table and reforms it into one entry."""
-        if self._oi_wl is None:
-            self._oi_wl = Table()
+        if self._oi_wavelength is None:
+            self._oi_wavelength = Table()
             wl = self.get_table_for_fits("oi_wavelength")["EFF_WAVE"]
-            self._oi_wl.add_column(self._oi_wl.Column([wl.data.astype(np.float64)],
-                                                      unit=wl.unit), name="EFF_WAVE")
-            if self.oi_wl["EFF_WAVE"].unit is not u.m:
-                self.oi_wl["EFF_WAVE"] = self.oi_wl["EFF_WAVE"].value*u.m
-            self._oi_wl["EFF_WAVE"] = self._oi_wl["EFF_WAVE"].to(u.um)
-        return self._oi_wl
+            self._oi_wavelength.add_column(self._oi_wavelength.Column(
+                [wl.data.astype(np.float64)], unit=wl.unit), name="EFF_WAVE")
+            if self.oi_wavelength["EFF_WAVE"].unit is not u.m:
+                self.oi_wavelength["EFF_WAVE"] = self.oi_wavelength["EFF_WAVE"].value*u.m
+            self._oi_wavelength["EFF_WAVE"] = self._oi_wavelength["EFF_WAVE"].to(u.um)
+        return self._oi_wavelength
 
     @property
     def oi_array(self) -> Table:
@@ -355,7 +355,7 @@ class ReadoutFits:
         """
         flux_data = Table.read(self.flux_file, names=["wl", "flux"], format="ascii")
         cubic_spline = CubicSpline(flux_data["wl"], flux_data["flux"])
-        interpolated_flux = (cubic_spline(self.oi_wl["EFF_WAVE"].data)).ravel()
+        interpolated_flux = (cubic_spline(self.oi_wavelength["EFF_WAVE"].data)).ravel()
         return interpolated_flux, interpolated_flux*0.1
 
     def get_header(self, header: str) -> Optional[fits.Header]:

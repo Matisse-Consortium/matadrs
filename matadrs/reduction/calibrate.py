@@ -181,6 +181,7 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
     fits_file_groups = split_fits(directory, "CAL_INT_0")
     outfile = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
 
+    # TODO: Exchange BCD-calibration with matallmergeoifits
     if band == "lband":
         for fits_files in fits_file_groups:
             if fits_files is not None:

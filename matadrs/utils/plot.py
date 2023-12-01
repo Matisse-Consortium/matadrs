@@ -283,7 +283,7 @@ class Plotter:
         component, component_label = [], None
         for readout in self.readouts:
             sub_component = PlotComponent(
-                x_values=readout.oi_wl["EFF_WAVE"].data.squeeze())
+                x_values=readout.oi_wavelength["EFF_WAVE"].data.squeeze())
             if data_name == "flux":
                 sub_component.y_values = readout.oi_flux["FLUXDATA"]
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
