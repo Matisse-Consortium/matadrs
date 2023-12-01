@@ -32,7 +32,14 @@ def read_fits(fits_file: Path,
     fits.HDUList
         The HDUList of the FITS file.
     """
-    if fits_file is not None:
+    if fits_file in [None, "", " "]:
+        with fits.open(fits_file_replace, "readonly") as hdul:
+            t3phi = np.zeros(hdul["OI_T3"].data["T3PHI"])
+            visphi = np.zeros(hdul["OI_VIS"].data["VISPHI"])
+            visamp = np.zeros(hdul["OI_VIS"].data["VISAMP"])
+            vis2data = np.zeros(hdul["OI_VIS2"].data["VIS2DATA"])
+            vis_type = np.zeros(hdul["OI_VIS"].header["AMPTYP"])
+    else:
         with fits.open(fits_file, "readonly") as hdul:
             t3phi = hdul["OI_T3"].data["T3PHI"]*u.deg.to(u.rad)
             visphi = hdul["OI_VIS"].data["VISPHI"]*u.deg.to(u.rad)
@@ -40,13 +47,6 @@ def read_fits(fits_file: Path,
             vis2data = hdul["OI_VIS2"].data["VIS2DATA"]
             wavelength = hdul["OI_WAVELENGTH"].data["EFF_WAVE"]
             vis_type = hdul["OI_VIS"].header["AMPTYP"]
-    else:
-        with fits.open(fits_file_replace, "readonly") as hdul:
-            t3phi = np.zeros(hdul["OI_T3"].data["T3PHI"])
-            visphi = np.zeros(hdul["OI_VIS"].data["VISPHI"])
-            visamp = np.zeros(hdul["OI_VIS"].data["VISAMP"])
-            vis2data = np.zeros(hdul["OI_VIS2"].data["VIS2DATA"])
-            vis_type = np.zeros(hdul["OI_VIS"].header["AMPTYP"])
     if rvis_type:
         return t3phi, visphi, visamp, vis2data, wavelength, vis_type
     return t3phi, visphi, visamp, vis2data
