@@ -76,13 +76,11 @@ class PlotComponent:
 
     Parameters
     ----------
-    name: str
     labels: list
     x_values: list
     y_values: list
     y_errors: list
     """
-    name: str
     labels: List = None
     x_values: List = None
     y_values: List = None
