@@ -290,6 +290,7 @@ class Plotter:
                 sub_component.labels = readout.oi_array["TEL_NAME"]\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
                 component_label = f"Flux ({readout.get_unit('oi_flux', 'fluxdata')})"
+                breakpoint()
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
                 station_names = readout.oi_vis2["DELAY_LINE"]
                 if legend_format == "long":
@@ -306,9 +307,13 @@ class Plotter:
                     labels = station_names
                 sub_component.labels = labels
                 if data_name == "vis":
+                    unit = readout.get_unit('oi_vis', 'visamp')
                     sub_component.y_values = readout.oi_vis["VISAMP"]
                     sub_component.y_errors = readout.oi_vis["VISAMPERR"]
-                    component_label = f"Visibilities ({readout.get_unit('oi_vis', 'visamp')})"
+                    if unit == "Jy":
+                        component_label = "Correlated Fluxes (Jy))"
+                    else:
+                        component_label = "Visibilities (a.u.)"
                 elif data_name == "diff":
                     diff_phases = readout.oi_vis["VISPHI"]
                     diff_phases_err = readout.oi_vis["VISPHIERR"]
@@ -340,7 +345,6 @@ class Plotter:
             else:
                 raise KeyError("Input data name cannot be queried!")
             component.append(sub_component)
-        breakpoint()
         self.components[component_label] = component
         return self
 
@@ -350,22 +354,15 @@ class Plotter:
         See Also
         --------
         """
-        self.components["Total Flux [Jy]"] =\
-            self.make_component("flux", **kwargs)
-        return self
+        return self.make_component("flux", **kwargs)
 
     def add_vis(self, **kwargs):
         """Adds the visibilities/correlated fluxes as a subplot"""
-        label = "Correlated Flux [Jy]" if corr_flux else "Visibility"
-        self.components[label] =\
-            self.make_component("vis", **kwargs)
-        return self
+        return self.make_component("vis", **kwargs)
 
     def add_vis2(self, **kwargs):
         """Adds the squared visibilities as a subplot"""
-        self.components[""] =\
-            self.make_component("vis2", **kwargs)
-        return self
+        return self.make_component("vis2", **kwargs)
 
     def add_cphases(self, **kwargs):
         """Adds the closure phases as a subplot"""
