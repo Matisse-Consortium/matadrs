@@ -40,7 +40,7 @@ dependencies = [
   "skycalc-cli>=1.4",
 ]
 
-[options.extras_require]
+[project.optional-dependencies]
 dev = [
   "ipython",
   "pytest >= 7.2.1",
