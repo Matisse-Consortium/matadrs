@@ -17,26 +17,31 @@ from .options import OPTIONS
 def make_uv_tracks(ax, uv_coord: np.ndarray[float],
                    baselines: List[np.ndarray],
                    sta_label: List[np.ndarray],
-                   declination: float, flag: bool,
-                   symbol: str, color: str, sel_wl: float,
+                   declination: float,
+                   symbol: str, color: str,
                    airmass_lim: float, show_text: bool) -> None:
     """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
 
-    From coordinate + ha (range), calculate uv tracks
+    From coordinate + ha (range), calculate uv tracks.
 
     Parameters
     ----------
     uv_coords : numpy.ndarray of float
+        The (u, v)-coordinates.
     baselines : list of numpy.ndarray
         The baselines in the following order: Baselines east, -north,
         -longest.
     sta_labels : list of numpy.ndarray
     declination : float
-    flag : bool
+        The declination of the site.
     symbol : str
+        The symbol that markes the coordinates of the (u, v)-point.
     color : str
-    sel_wl : float
+        Set the color/colors of the uv-coords. In case of multiple
+        (.fits)-files the colors can be specified as a list with entries
+        for each file.
     airmass_lim : float
+        The airmass limit for the uv-coords.
     """
     u_coords, v_coords = uv_coord
     latitude_paranal = EarthLocation.of_site(
@@ -67,7 +72,17 @@ def make_uv_tracks(ax, uv_coord: np.ndarray[float],
 @dataclass
 class PlotComponent:
     """Class containing the elements required for a plot
-    from the """
+    from the reduced data.
+
+    Parameters
+    ----------
+    name: str
+    labels: list
+    x_values: list
+    y_values: list
+    y_errors: list
+    """
+    name: str
     labels: List = None
     x_values: List = None
     y_values: List = None
@@ -91,6 +106,7 @@ class Plotter:
     Attributes
     ----------
     num_components : int
+        The number of components in the plot.
 
     Methods
     -------
@@ -247,9 +263,10 @@ class Plotter:
             ax.set_ylabel(ylabel)
 
     def make_component(self, data_name: str,
+                       corr_flux: Optional[bool] = False,
                        legend_format: Optional[str] = "long",
                        unwrap: Optional[bool] = False,
-                       period: Optional[int] = 360) -> Union[Callable, PlotComponent]:
+                       period: Optional[int] = 360):
         """Generates a pandas DataFrame that has all the plots' information
 
         Parameters
@@ -257,17 +274,15 @@ class Plotter:
         data_name : str
             The name of the data to be plotted. Determines the legend- and plot
             labels.
+        corr_flux : bool, optional
+            If true then instead of visibilities the correlated flux is plotted
         legend_format : str, optional
             Sets the format of the legend: For all information set "long" and
             for only station names set "short".
         unwrap : bool, optional
         period : int, optional
-
-        Returns
-        -------
-        component : list of either Callable or PlotComponent
         """
-        component = []
+        component, component_label = [], None
         for readout in self.readouts:
             sub_component = PlotComponent(x_values=readout.oi_wl["EFF_WAVE"].data.squeeze())
             if data_name == "flux":
@@ -275,6 +290,7 @@ class Plotter:
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
                 sub_component.labels = readout.oi_array["TEL_NAME"]\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
+                component_label = f"Flux ({readout.get_unit('oi_flux', 'fluxdata')})"
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
                 station_names = readout.oi_vis2["DELAY_LINE"]
                 if legend_format == "long":
@@ -293,6 +309,7 @@ class Plotter:
                 if data_name == "vis":
                     sub_component.y_values = readout.oi_vis["VISAMP"]
                     sub_component.y_errors = readout.oi_vis["VISAMPERR"]
+                    component_label = f"Visibilities ({readout.get_unit('oi_vis', 'visamp')})"
                 elif data_name == "diff":
                     diff_phases = readout.oi_vis["VISPHI"]
                     diff_phases_err = readout.oi_vis["VISPHIERR"]
@@ -301,9 +318,11 @@ class Plotter:
                                                                      diff_phases_err, period)
                     sub_component.y_values = diff_phases
                     sub_component.y_errors = diff_phases_err
+                    component_label = r"Differential Phases ($^{\circ}$)"
                 elif data_name == "vis2":
                     sub_component.y_values = readout.oi_vis2["VIS2DATA"]
                     sub_component.y_errors = readout.oi_vis2["VIS2ERR"]
+                    component_label = "Squared visibilities (a.u.)"
                 else:
                     raise KeyError("No data-type of that data name exists!")
             elif data_name == "cphases":
@@ -314,12 +333,16 @@ class Plotter:
                 sub_component.labels = readout.oi_t3["TRIANGLE"]
                 sub_component.y_values = cphases
                 sub_component.y_errors = cphases_err
+                component_label = r"Closure Phases ($^{\circ}$)"
             elif data_name == "uv":
                 sub_component = self.plot_uv
+                component_label = "$(u, v)$-coordinates"
             else:
                 raise KeyError("Input data name cannot be queried!")
             component.append(sub_component)
-        return component
+        breakpoint()
+        self.components[component_label] = component
+        return self
 
     def add_flux(self, **kwargs):
         """Adds the total flux(es) as a subplot
@@ -331,36 +354,30 @@ class Plotter:
             self.make_component("flux", **kwargs)
         return self
 
-    def add_vis(self, corr_flux: Optional[bool] = False, **kwargs):
+    def add_vis(self, **kwargs):
         """Adds the visibilities/correlated fluxes as a subplot"""
         label = "Correlated Flux [Jy]" if corr_flux else "Visibility"
         self.components[label] =\
             self.make_component("vis", **kwargs)
         return self
 
-    def add_vis2(self, corr_flux: Optional[bool] = False, **kwargs):
+    def add_vis2(self, **kwargs):
         """Adds the squared visibilities as a subplot"""
-        self.components["Squared visibilities"] =\
+        self.components[""] =\
             self.make_component("vis2", **kwargs)
         return self
 
     def add_cphases(self, **kwargs):
         """Adds the closure phases as a subplot"""
-        self.components[r"Closure phases [$^{\circ}$]"] =\
-            self.make_component("cphases", **kwargs)
-        return self
+        return self.make_component("cphases", **kwargs)
 
     def add_diff_phases(self, **kwargs):
         """Adds the differential phases as a subplot"""
-        self.components[r"Differential phases [$^{\circ}$]"] =\
-            self.make_component("diff", **kwargs)
-        return self
+        return self.make_component("diff", **kwargs)
 
     def add_uv(self, **kwargs):
         """Adds the (u, v)-coordinates as a subplot"""
-        self.components["$(u, v)$-coordinates"] =\
-            self.make_component("uv", **kwargs)
-        return self
+        return self.make_component("uv", **kwargs)
 
     def add_mosaic(self, **kwargs):
         """Combines multiple subplots to produce a mosaic plot"""

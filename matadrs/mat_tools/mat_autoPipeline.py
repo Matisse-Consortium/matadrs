@@ -37,7 +37,7 @@ from tqdm import tqdm
 from .libAutoPipeline import matisseRecipes, matisseCalib, matisseAction, matisseType
 
 
-# Run esorex recipes
+# NOTE: Run esorex recipes
 def runEsorex(cmd: List) -> None:
     """Runs the given esorex command
 

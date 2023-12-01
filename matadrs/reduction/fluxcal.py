@@ -404,7 +404,7 @@ def fluxcal(inputfile_sci: Path, inputfile_cal: Path,
                                    ra=ra_cal, dec=dec_cal, match_radius=match_radius, band=band)
         i = i+1
 
-    if match == True:
+    if match:
         cal_name_db, diam_cal, diam_err_cal, wav_cal_model,\
                 spectrum_cal, caldb_file, min_sep_arcsec, ra_cal_db, dec_cal_db = out_lst
         if math.isnan(diam_cal):
