@@ -53,5 +53,8 @@ include-package-data = true
 [tool.setuptools.dynamic]
 version = {attr = "matadrs.__version__"}
 
+[tool.setuptools.packages.find]
+include = ["matadrs*"]
+
 [project.urls]
 repository = "https://github.com/MBSck/matadrs"
