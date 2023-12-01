@@ -380,7 +380,10 @@ class ReadoutFits:
 
     def get_unit(self, header: str, sub_header: str) -> str:
         """Fetches the unit of a header by the sub header's name."""
-        return self.get_header(header)[sub_header].unit
+        header = self.get_header(header)
+        list_index = list(header.values()).index(sub_header.upper())
+        type_index = list(header.keys())[list_index][-1]
+        return header[f"TUNIT{type_index}"]
 
     def get_table_for_fits(self, header: str) -> Table:
         """Fetches a Card by its header and then reads its information into a Table.
