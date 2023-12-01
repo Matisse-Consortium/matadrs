@@ -8,7 +8,7 @@ from astropy.io import fits
 from astropy.stats.biweight import biweight_location
 from scipy.interpolate import interp1d
 
-from .robust import mean
+from ..utils.robust import mean
 
 
 def avg_oifits(infile_list: List[Path], outfile_path: Path,

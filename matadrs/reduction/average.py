@@ -13,7 +13,7 @@ Examples
 --------
 """
 
-__all__ = ["copy_calibrated_files", "average_files", "average_folders", "average"]
+__all__ = ["copy_calibrated_files", "average_files", "average_folders"]
 
 import shutil
 from pathlib import Path
@@ -21,7 +21,8 @@ from typing import Optional
 
 from .avg_oifits import avg_oifits
 from ..utils.plot import Plotter
-from ..utils.tools import cprint, split_fits, get_fits_by_tag, get_execution_modes
+from ..utils.tools import cprint, split_fits, get_fits_by_tag, \
+        get_execution_modes
 from ..utils.options import OPTIONS
 from ..mat_tools.libPostTools import mat_mergeByTplStart
 
@@ -81,19 +82,23 @@ def average_files(directory: Path, file_type: str,
     if file_type == "flux":
         cprint("Averaging flux calibration...", "g")
         outfile_name = "TARGET_AVG_FLUX"
-        unchopped_fits, chopped_fits = split_fits(directory, "TARGET_FLUX_CAL")
+        unchopped_fits, chopped_fits = split_fits(
+                directory, "TARGET_FLUX_CAL")
     else:
         cprint("Averaging visibility calibration...", "g")
-        unchopped_fits, chopped_fits = split_fits(directory, "TARGET_CAL_INT_0")
+        unchopped_fits, chopped_fits = split_fits(
+                directory, "TARGET_CAL_INT_0")
         outfile_name = "TARGET_AVG_VIS"
 
     outfile_unchopped = output_dir / f"{outfile_name}_INT.fits"
     if method == "avg_oifits":
         avg_oifits(unchopped_fits, outfile_unchopped,
-                   headerval=HEADER_TO_REMOVE, avg_func=OPTIONS["average.func"])
+                   headerval=HEADER_TO_REMOVE,
+                   avg_func=OPTIONS["average.func"])
     else:
         merged_file_unchopped = mat_mergeByTplStart(
-                fits_files=unchopped_fits, output_dir=str(output_dir), save=True)
+                fits_files=unchopped_fits,
+                output_dir=str(output_dir), save=True)
         shutil.move(str(merged_file_unchopped), str(outfile_unchopped))
 
     if chopped_fits is not None:

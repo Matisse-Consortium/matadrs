@@ -144,6 +144,7 @@ def calib_BCD(iifile: Path, iofile: Path,
     sin_avg = np.zeros((4, nwlen))
     cos_avg = np.zeros((4, nwlen))
     closfinal = np.zeros((4, nwlen))
+    breakpoint()
 
     if plot:
         plt.figure(51)
