@@ -34,11 +34,11 @@ def read_fits(fits_file: Path,
     """
     if fits_file in [None, "", " "]:
         with fits.open(fits_file_replace, "readonly") as hdul:
-            t3phi = np.zeros(hdul["OI_T3"].data["T3PHI"])
-            visphi = np.zeros(hdul["OI_VIS"].data["VISPHI"])
-            visamp = np.zeros(hdul["OI_VIS"].data["VISAMP"])
-            vis2data = np.zeros(hdul["OI_VIS2"].data["VIS2DATA"])
-            vis_type = np.zeros(hdul["OI_VIS"].header["AMPTYP"])
+            t3phi = np.zeros_like(hdul["OI_T3"].data["T3PHI"])
+            visphi = np.zeros_like(hdul["OI_VIS"].data["VISPHI"])
+            visamp = np.zeros_like(hdul["OI_VIS"].data["VISAMP"])
+            vis2data = np.zeros_like(hdul["OI_VIS2"].data["VIS2DATA"])
+            vis_type = np.zeros_like(hdul["OI_VIS"].header["AMPTYP"])
     else:
         with fits.open(fits_file, "readonly") as hdul:
             t3phi = hdul["OI_T3"].data["T3PHI"]*u.deg.to(u.rad)
