@@ -102,7 +102,7 @@ class ReadoutFits:
         self._name, self._coords = None, None
         self._simbad_query = None
 
-        headers = ["oi_array", "oi_wl", "oi_flux",
+        headers = ["oi_array", "oi_wavelength", "oi_flux",
                    "oi_t3", "oi_vis", "oi_vis2"]
         for header in headers:
             setattr(self, f"_{header}", None)
@@ -336,9 +336,7 @@ class ReadoutFits:
         -------
         observed_as_calibrator : bool
         """
-        if self.observation_type == "calib":
-            return True
-        return False
+        return self.observation_type == "calib"
 
     # TODO: Get a better error representation for the flux
     def get_flux_data_from_flux_file(self) -> Tuple[u.Quantity[u.Jy],
