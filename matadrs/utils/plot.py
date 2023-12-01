@@ -310,7 +310,7 @@ class Plotter:
                     sub_component.y_values = readout.oi_vis["VISAMP"]
                     sub_component.y_errors = readout.oi_vis["VISAMPERR"]
                     if unit == "Jy":
-                        component_label = "Correlated Fluxes (Jy))"
+                        component_label = "Correlated Fluxes (Jy)"
                     else:
                         component_label = "Visibilities (a.u.)"
                 elif data_name == "diff":

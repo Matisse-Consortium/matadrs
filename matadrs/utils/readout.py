@@ -374,13 +374,14 @@ class ReadoutFits:
         """
         with fits.open(self.fits_file, "readonly") as hdul:
             if header not in hdul:
-                warn(f"Header {header} not found in {self.fits_file}!")
+                warn(f"Header {header} not found!")
                 return
             return hdul[header].header
 
     def get_unit(self, header: str, sub_header: str) -> str:
         """Fetches the unit of a header by the sub header's name."""
         header = self.get_header(header)
+        print(header)
         list_index = list(header.values()).index(sub_header.upper())
         type_index = list(header.keys())[list_index][-1]
         return header[f"TUNIT{type_index}"]
