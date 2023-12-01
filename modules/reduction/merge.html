@@ -395,15 +395,34 @@ document.write(`
   <section id="module-matadrs.reduction.merge">
 <span id="matadrs-reduction-merge-module"></span><h1>matadrs.reduction.merge module<a class="headerlink" href="#module-matadrs.reduction.merge" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.execute_merge">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">execute_merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluxes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visibilities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bcd_visibilities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bcd_pip_visibilities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chopped</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#execute_merge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.execute_merge" title="Permalink to this definition">#</a></dt>
+<dd><p>Prepares the lists for the ‘oifits_patchwork’ and executes a merge.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.execute_multiple_merges">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">execute_multiple_merges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fluxes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visibilities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chopped</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#execute_multiple_merges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.execute_multiple_merges" title="Permalink to this definition">#</a></dt>
+<dd><p>Executes a merge for multiple, non-averaged files.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.get_averaged_files">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">get_averaged_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chopped</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#get_averaged_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.get_averaged_files" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets the averaged files’ paths.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="matadrs.reduction.merge.get_output_file_path">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">get_output_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#get_output_file_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.get_output_file_path" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes the output file’s Path from the information from the input
-(.fits)-file and the directory it is contained in.</p>
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">get_output_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chopped</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#get_output_file_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.get_output_file_path" title="Permalink to this definition">#</a></dt>
+<dd><p>Makes the output file’s Path from the information from the input (.fits)-file
+and the directory it is contained in.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fits_file</strong> (<em>pathlib.Path</em>) – The input file.</p></li>
-<li><p><strong>output_dir</strong> (<em>pathlib.Path</em>) – The output directory.</p></li>
+<li><p><strong>output_dir</strong> (<em>pathlib.Path</em>) – </p></li>
+<li><p><strong>chopped</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -416,24 +435,8 @@ document.write(`
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.merge.merge">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">averaged_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#merge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.merge" title="Permalink to this definition">#</a></dt>
-<dd><p>This merges two (.fits)-files together into one, i.e., the
-“coherent” and the “incoherent” files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>averaged_dir</strong> (<em>pathlib.Path</em>) – The directory containing the averaged products.</p></li>
-<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed.
-Either “coherent”, “incoherent” or “both”.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="matadrs.reduction.merge.merge_averaged_files">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">merge_averaged_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#merge_averaged_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.merge_averaged_files" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">merge_averaged_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coherent_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incoherent_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#merge_averaged_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.merge_averaged_files" title="Permalink to this definition">#</a></dt>
 <dd><p>Merges the averaged files of visibility-, flux- and bcd-calibration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -474,6 +477,28 @@ calibration.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.merging_pipeline">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">merging_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">averaged_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#merging_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.merging_pipeline" title="Permalink to this definition">#</a></dt>
+<dd><p>This merges two (.fits)-files together into one, i.e. the  “incoherent”
+and the “coherent” files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>averaged_dir</strong> (<em>pathlib.Path</em>) – The directory containing the averaged products.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed.
+Either “coherent”, “incoherent” or “both”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.reduction.merge.prepare_multiple_merges">
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.merge.</span></span><span class="sig-name descname"><span class="pre">prepare_multiple_merges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/reduction/merge.html#prepare_multiple_merges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.merge.prepare_multiple_merges" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets the non-averaged (.fits)-files and executes multiple merges with it.</p>
 </dd></dl>
 
 </section>
@@ -525,11 +550,15 @@ calibration.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.execute_merge"><code class="docutils literal notranslate"><span class="pre">execute_merge()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.execute_multiple_merges"><code class="docutils literal notranslate"><span class="pre">execute_multiple_merges()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.get_averaged_files"><code class="docutils literal notranslate"><span class="pre">get_averaged_files()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.get_output_file_path"><code class="docutils literal notranslate"><span class="pre">get_output_file_path()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.merge"><code class="docutils literal notranslate"><span class="pre">merge()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.merge_averaged_files"><code class="docutils literal notranslate"><span class="pre">merge_averaged_files()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.merge_folders"><code class="docutils literal notranslate"><span class="pre">merge_folders()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.merge_non_averaged_files"><code class="docutils literal notranslate"><span class="pre">merge_non_averaged_files()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.merging_pipeline"><code class="docutils literal notranslate"><span class="pre">merging_pipeline()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.merge.prepare_multiple_merges"><code class="docutils literal notranslate"><span class="pre">prepare_multiple_merges()</span></code></a></li>
 </ul>
   </nav></div>
 

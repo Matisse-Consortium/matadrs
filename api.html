@@ -394,7 +394,7 @@ are shown and then the various subpackages.</p>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules/matadrs.html">matadrs.matadrs module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules/matadrs.html#matadrs.matadrs.reduction_pipeline"><code class="docutils literal notranslate"><span class="pre">reduction_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/matadrs.html#matadrs.matadrs.matadrs_pipeline"><code class="docutils literal notranslate"><span class="pre">matadrs_pipeline()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -445,7 +445,6 @@ are shown and then the various subpackages.</p>
 <li class="toctree-l2"><a class="reference internal" href="modules/matadrs.reduction.html#submodules">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="modules/reduction/average.html">matadrs.reduction.average module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/average.html#routine">Routine</a></li>
-<li class="toctree-l4"><a class="reference internal" href="modules/reduction/average.html#matadrs.reduction.average.average"><code class="docutils literal notranslate"><span class="pre">average()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/average.html#matadrs.reduction.average.average_files"><code class="docutils literal notranslate"><span class="pre">average_files()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/average.html#matadrs.reduction.average.average_folders"><code class="docutils literal notranslate"><span class="pre">average_folders()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/average.html#matadrs.reduction.average.copy_calibrated_files"><code class="docutils literal notranslate"><span class="pre">copy_calibrated_files()</span></code></a></li>
@@ -458,12 +457,8 @@ are shown and then the various subpackages.</p>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/avg_oifits.html#matadrs.reduction.avg_oifits.oifits_restrict_wavelengths"><code class="docutils literal notranslate"><span class="pre">oifits_restrict_wavelengths()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="modules/reduction/calib_BCD2.html">matadrs.reduction.calib_BCD2 module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="modules/reduction/calib_BCD2.html#matadrs.reduction.calib_BCD2.calib_BCD"><code class="docutils literal notranslate"><span class="pre">calib_BCD()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="modules/reduction/calib_BCD2.html">matadrs.reduction.calib_BCD2 module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="modules/reduction/calibrate.html">matadrs.reduction.calibrate module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="modules/reduction/calibrate.html#matadrs.reduction.calibrate.calibrate"><code class="docutils literal notranslate"><span class="pre">calibrate()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/calibrate.html#matadrs.reduction.calibrate.calibrate_bcd"><code class="docutils literal notranslate"><span class="pre">calibrate_bcd()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/calibrate.html#matadrs.reduction.calibrate.calibrate_files"><code class="docutils literal notranslate"><span class="pre">calibrate_files()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/calibrate.html#matadrs.reduction.calibrate.calibrate_fluxes"><code class="docutils literal notranslate"><span class="pre">calibrate_fluxes()</span></code></a></li>
@@ -494,11 +489,15 @@ are shown and then the various subpackages.</p>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="modules/reduction/merge.html">matadrs.reduction.merge module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.execute_merge"><code class="docutils literal notranslate"><span class="pre">execute_merge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.execute_multiple_merges"><code class="docutils literal notranslate"><span class="pre">execute_multiple_merges()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.get_averaged_files"><code class="docutils literal notranslate"><span class="pre">get_averaged_files()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.get_output_file_path"><code class="docutils literal notranslate"><span class="pre">get_output_file_path()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.merge"><code class="docutils literal notranslate"><span class="pre">merge()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.merge_averaged_files"><code class="docutils literal notranslate"><span class="pre">merge_averaged_files()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.merge_folders"><code class="docutils literal notranslate"><span class="pre">merge_folders()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.merge_non_averaged_files"><code class="docutils literal notranslate"><span class="pre">merge_non_averaged_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.merging_pipeline"><code class="docutils literal notranslate"><span class="pre">merging_pipeline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="modules/reduction/merge.html#matadrs.reduction.merge.prepare_multiple_merges"><code class="docutils literal notranslate"><span class="pre">prepare_multiple_merges()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="modules/reduction/reduce.html">matadrs.reduction.reduce module</a><ul>
@@ -509,7 +508,6 @@ are shown and then the various subpackages.</p>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/reduce.html#matadrs.reduction.reduce.in_catalog"><code class="docutils literal notranslate"><span class="pre">in_catalog()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/reduce.html#matadrs.reduction.reduce.prepare_catalogs"><code class="docutils literal notranslate"><span class="pre">prepare_catalogs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/reduce.html#matadrs.reduction.reduce.prepare_reduction"><code class="docutils literal notranslate"><span class="pre">prepare_reduction()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="modules/reduction/reduce.html#matadrs.reduction.reduce.reduce"><code class="docutils literal notranslate"><span class="pre">reduce()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/reduce.html#matadrs.reduction.reduce.reduce_mode_and_band"><code class="docutils literal notranslate"><span class="pre">reduce_mode_and_band()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="modules/reduction/reduce.html#matadrs.reduction.reduce.set_script_arguments"><code class="docutils literal notranslate"><span class="pre">set_script_arguments()</span></code></a></li>
 </ul>
@@ -582,11 +580,17 @@ are shown and then the various subpackages.</p>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.tau0"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.tau0</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.longest_entry"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.longest_entry</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_wl"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_wl</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_wl_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_wl_hdr</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_array"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_array</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_array_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_array_hdr</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_flux"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_flux</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_flux_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_flux_hdr</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_t3"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_t3</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_t3_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_t3_hdr</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_vis"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_vis</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_vis_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_vis_hdr</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_vis2"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_vis2</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.oi_vis2_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_vis2_hdr</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.is_calibrator"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.is_calibrator()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.get_table_for_fits"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_table_for_fits()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.merge_uv_coords"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.merge_uv_coords()</span></code></a></li>
@@ -600,7 +604,9 @@ are shown and then the various subpackages.</p>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#id5"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_baselines()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#id6"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_delay_lines()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_flux_data_from_flux_file()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.get_header"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_header()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#id7"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_table_for_fits()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#matadrs.utils.readout.ReadoutFits.get_unit"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_unit()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#id8"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.is_calibrator()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#id9"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.longest_entry</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="modules/utils/readout.html#id10"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.merge_uv_coords()</span></code></a></li>

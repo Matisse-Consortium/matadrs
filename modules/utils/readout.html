@@ -515,8 +515,18 @@ values from the flux file.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.oi_wl_hdr">
+<span class="sig-name descname"><span class="pre">oi_wl_hdr</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.oi_wl_hdr" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.oi_array">
 <span class="sig-name descname"><span class="pre">oi_array</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.oi_array" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.oi_array_hdr">
+<span class="sig-name descname"><span class="pre">oi_array_hdr</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.oi_array_hdr" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -525,8 +535,18 @@ values from the flux file.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.oi_flux_hdr">
+<span class="sig-name descname"><span class="pre">oi_flux_hdr</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.oi_flux_hdr" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.oi_t3">
 <span class="sig-name descname"><span class="pre">oi_t3</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.oi_t3" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.oi_t3_hdr">
+<span class="sig-name descname"><span class="pre">oi_t3_hdr</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.oi_t3_hdr" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -535,8 +555,18 @@ values from the flux file.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.oi_vis_hdr">
+<span class="sig-name descname"><span class="pre">oi_vis_hdr</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.oi_vis_hdr" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.oi_vis2">
 <span class="sig-name descname"><span class="pre">oi_vis2</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.oi_vis2" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.oi_vis2_hdr">
+<span class="sig-name descname"><span class="pre">oi_vis2_hdr</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.oi_vis2_hdr" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -643,8 +673,14 @@ delay line configuration.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file" title="matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_flux_data_from_flux_file</span></code></a>()</p></td>
 <td><p>Reads the flux data from the flux file and then interpolates it to the wavelength solution used by MATISSE.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id7" title="matadrs.utils.readout.ReadoutFits.get_table_for_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_table_for_fits</span></code></a>(header)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_header" title="matadrs.utils.readout.ReadoutFits.get_header"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_header</span></code></a>(header)</p></td>
+<td><p>Fetches a Card's header by its header name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id7" title="matadrs.utils.readout.ReadoutFits.get_table_for_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_table_for_fits</span></code></a>(header)</p></td>
 <td><p>Fetches a Card by its header and then reads its information into a Table.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_unit" title="matadrs.utils.readout.ReadoutFits.get_unit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_unit</span></code></a>(header, sub_header)</p></td>
+<td><p>Fetches the unit of a header by the sub header's name.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#id8" title="matadrs.utils.readout.ReadoutFits.is_calibrator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_calibrator</span></code></a>()</p></td>
 <td><p>Fetches the object's observation mode and returns true if it has been observed in 'CALIB' mode.</p></td>
@@ -739,6 +775,23 @@ the flux file.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.get_header">
+<span class="sig-name descname"><span class="pre">get_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Header</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.get_header" title="Permalink to this definition">#</a></dt>
+<dd><p>Fetches a Card’s header by its header name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>header</strong> (<em>str</em>) – The header which data is to be stored in a table.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>header</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>fits.Header, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="id7">
 <span class="sig-name descname"><span class="pre">get_table_for_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Table</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_table_for_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Permalink to this definition">#</a></dt>
 <dd><p>Fetches a Card by its header and then reads its information into a Table.</p>
@@ -750,6 +803,12 @@ the flux file.</p></li>
 <dd class="field-even"><p>Table</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.get_unit">
+<span class="sig-name descname"><span class="pre">get_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.get_unit" title="Permalink to this definition">#</a></dt>
+<dd><p>Fetches the unit of a header by the sub header’s name.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -960,11 +1019,17 @@ calibrator.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.tau0"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.tau0</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.longest_entry"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.longest_entry</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_wl"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_wl</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_wl_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_wl_hdr</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_array"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_array</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_array_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_array_hdr</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_flux"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_flux</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_flux_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_flux_hdr</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_t3"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_t3</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_t3_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_t3_hdr</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_vis"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_vis</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_vis_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_vis_hdr</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_vis2"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_vis2</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.oi_vis2_hdr"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_vis2_hdr</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.is_calibrator"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.is_calibrator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_table_for_fits"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_table_for_fits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.merge_uv_coords"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.merge_uv_coords()</span></code></a></li>
@@ -978,7 +1043,9 @@ calibrator.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_baselines()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_delay_lines()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_flux_data_from_flux_file()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_header"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_header()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_table_for_fits()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_unit"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_unit()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.is_calibrator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.longest_entry</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.merge_uv_coords()</span></code></a></li>

@@ -395,29 +395,6 @@ document.write(`
   <section id="module-matadrs.reduction.calibrate">
 <span id="matadrs-reduction-calibrate-module"></span><h1>matadrs.reduction.calibrate module<a class="headerlink" href="#module-matadrs.reduction.calibrate" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate" title="Permalink to this definition">#</a></dt>
-<dd><p>Does the full calibration for all of the reduced directories
-subdirectories.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>reduced_dir</strong> (<em>pathlib.Path</em>) – The path to multiple folders that need to be cross correlated.</p></li>
-<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
-‘incoherent’ or ‘both’.</p></li>
-<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – The band in which the reduction is to be executed. Either ‘lband’,
-‘nband’ or ‘both’.</p></li>
-<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If ‘True’ overwrites files from previous calibration.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The mode of calibration can either be ‘coherent’ or ‘incoherent’, which
-corresponds to either the calibration of the correlated fluxes or the
-total flux.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="matadrs.reduction.calibrate.calibrate_bcd">
 <span class="sig-prename descclassname"><span class="pre">matadrs.reduction.calibrate.</span></span><span class="sig-name descname"><span class="pre">calibrate_bcd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/calibrate.html#calibrate_bcd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.calibrate.calibrate_bcd" title="Permalink to this definition">#</a></dt>
 <dd><p>Executes the BCD-calibration for the the unchopped/chopped, visbility
@@ -444,7 +421,7 @@ into the final file.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="calib_BCD2.html#matadrs.reduction.calib_BCD2.calib_BCD" title="matadrs.reduction.calib_BCD2.calib_BCD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calib_BCD2.calib_BCD</span></code></a></dt><dd><p>BCD-calibration for closure phases.</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">mat_tools.calib_BCD2.calib_BCD</span></code></dt><dd><p>BCD-calibration for closure phases.</p>
 </dd>
 </dl>
 </div>
@@ -645,7 +622,6 @@ filled with an empty string.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate"><code class="docutils literal notranslate"><span class="pre">calibrate()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate_bcd"><code class="docutils literal notranslate"><span class="pre">calibrate_bcd()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate_files"><code class="docutils literal notranslate"><span class="pre">calibrate_files()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.calibrate.calibrate_fluxes"><code class="docutils literal notranslate"><span class="pre">calibrate_fluxes()</span></code></a></li>
