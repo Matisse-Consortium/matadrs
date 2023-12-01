@@ -380,10 +380,10 @@ class ReadoutFits:
 
     def get_unit(self, header: str, sub_header: str) -> str:
         """Fetches the unit of a header by the sub header's name."""
+        header = self.get_header(header)
         if header == "oi_vis"\
                 and header["AMPTYP"] == "correlated flux":
             return "Jy"
-        header = self.get_header(header)
         list_index = list(header.values()).index(sub_header.upper())
         key = f"TUNIT{list(header.keys())[list_index][-1]}"
         if key in header:
