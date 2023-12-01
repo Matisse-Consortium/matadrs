@@ -381,7 +381,6 @@ class ReadoutFits:
     def get_unit(self, header: str, sub_header: str) -> str:
         """Fetches the unit of a header by the sub header's name."""
         header = self.get_header(header)
-        breakpoint()
         list_index = list(header.values()).index(sub_header.upper())
         type_index = list(header.keys())[list_index][-1]
         return header[f"TUNIT{type_index}"]

@@ -307,7 +307,6 @@ class Plotter:
                     labels = station_names
                 sub_component.labels = labels
                 if data_name == "vis":
-                    breakpoint()
                     unit = readout.get_unit('oi_vis', 'visamp')
                     sub_component.y_values = readout.oi_vis["VISAMP"]
                     sub_component.y_errors = readout.oi_vis["VISAMPERR"]
