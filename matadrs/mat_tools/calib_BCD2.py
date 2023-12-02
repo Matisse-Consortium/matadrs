@@ -119,9 +119,9 @@ def calib_BCD(iifile: Path, iofile: Path,
     # NOTE: Addup the different exposures
     nwlen = np.shape(iit3p)[1]
     nrepeatii = int(np.shape(iiv2)[0] / 6)
+    nrepeatio = int(np.shape(iov2)[0] / 6) if iofile in [None, " ", ""] else 0
+    nrepeatoi = int(np.shape(oiv2)[0] / 6) if oifile in [None, " ", ""] else 0
     nrepeatoo = int(np.shape(oov2)[0] / 6)
-    nrepeatio = int(np.shape(iov2)[0] / 6) if iofile is not None else 0
-    nrepeatoi = int(np.shape(oiv2)[0] / 6) if oifile is not None else 0
 
     # NOTE: Store multiple exposures data into the first 6 rows
     iiva, iiv2, sin_iidp, cos_iidp, sin_iit3p, cos_iit3p = compact_exposures(
@@ -137,8 +137,10 @@ def calib_BCD(iifile: Path, iofile: Path,
             nrepeatoi, oiva, oiv2, sin_oidp, cos_oidp, sin_oit3p, cos_oit3p)
 
     # NOTE: Treat closure phases
-    idx = np.array([[0, 0, 3, 3], [1, 2, 1, 2], [2, 1, 2, 1], [3, 3, 0, 0]])
-    sign = np.array([[1, -1, 1, -1], [1, 1, -1, -1], [1, 1, -1, -1], [1, -1, 1, -1]])
+    idx = np.array([[0, 0, 3, 3], [1, 2, 1, 2],
+                    [2, 1, 2, 1], [3, 3, 0, 0]])
+    sign = np.array([[1, -1, 1, -1], [1, 1, -1, -1],
+                     [1, 1, -1, -1], [1, -1, 1, -1]])
 
     # NOTE: Initialize closure phase with same shape as input
     sin_avg = np.zeros((4, nwlen))
@@ -165,7 +167,8 @@ def calib_BCD(iifile: Path, iofile: Path,
             + 1.0 * cos_oot3p[idx[i, 3], :]
         ) / (nrepeatii + nrepeatoi + nrepeatio + nrepeatoo)
 
-        closfinal[i, :] = np.arctan2(sin_avg[i, :], cos_avg[i, :]) * 180.0 / np.pi
+        closfinal[i, :] = np.arctan2(
+                sin_avg[i, :], cos_avg[i, :])*u.rad.to(u.deg)
 
         if plot:
             plt.subplot(2, 2, i + 1)
