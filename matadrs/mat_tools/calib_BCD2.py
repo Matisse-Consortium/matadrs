@@ -119,8 +119,10 @@ def calib_BCD(iifile: Path, iofile: Path,
     # NOTE: Addup the different exposures
     nwlen = np.shape(iit3p)[1]
     nrepeatii = int(np.shape(iiv2)[0] / 6)
-    nrepeatio = int(np.shape(iov2)[0] / 6) if iofile in [None, " ", ""] else 0
-    nrepeatoi = int(np.shape(oiv2)[0] / 6) if oifile in [None, " ", ""] else 0
+    nrepeatio = int(np.shape(iov2)[0] / 6)\
+        if iofile not in [None, " ", ""] else 0
+    nrepeatoi = int(np.shape(oiv2)[0] / 6)\
+        if oifile not in [None, " ", ""] else 0
     nrepeatoo = int(np.shape(oov2)[0] / 6)
 
     # NOTE: Store multiple exposures data into the first 6 rows
