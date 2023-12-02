@@ -167,7 +167,6 @@ def merge_averaged_files(coherent_dir: Path,
             execute_merge(output_dir, *averaged_chopped_files, chopped=True)
     except Exception as e:
         print("Error merging chopped files, skipping file!\n", e)
-        breakpoint()
         pass
 
 

@@ -290,7 +290,6 @@ class Plotter:
                 sub_component.labels = readout.oi_array["TEL_NAME"]\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
                 component_label = f"Flux ({readout.get_unit('oi_flux', 'fluxdata')})"
-                breakpoint()
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
                 station_names = readout.oi_vis2["DELAY_LINE"]
                 if legend_format == "long":
