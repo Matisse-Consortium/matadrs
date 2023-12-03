@@ -274,6 +274,7 @@ def calib_BCD(iifile: Path, iofile: Path,
             plt.ylim(0, 1)
             plt.ylabel("Squared visibility")
             plt.legend()
+    breakpoint()
 
     with fits.open(outputfile, mode="update") as hdul:
         hdul["OI_T3"].data = hdul["OI_T3"].data[0:4]
