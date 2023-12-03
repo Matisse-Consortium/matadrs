@@ -4,9 +4,9 @@ Created on Apr 11 2019
 
 @author: fmillour
 """
-from shutil import copyfile
 from pathlib import Path
 from typing import List, Optional, Union
+from shutil import copyfile
 
 import astropy.units as u
 import matplotlib.pyplot as plt
@@ -110,6 +110,7 @@ def calibrate_closure_phases(
         file_factor: int, lim: Optional[int] = 180,
         do_plot: Optional[bool] = True) -> np.ndarray:
     """Calibrates the closure phases."""
+    t3p = [compact_exposures(elem, compact_factor=4) for elem in t3p]
     sin_t3p, cos_t3p = zip(*[(np.sin(elem), np.cos(elem)) for elem in t3p])
 
     sin_avg = np.zeros((4, t3p[0].shape[1]))
@@ -146,6 +147,7 @@ def calibrate_differential_phase(
         file_factor: int, lim: Optional[int] = 180,
         do_plot: Optional[bool] = True) -> np.ndarray:
     """Calibrates the differential phase."""
+    dp = [compact_exposures(elem, compact_factor=4) for elem in dp]
     sin_dp, cos_dp = zip(*[(np.sin(elem), np.cos(elem)) for elem in dp])
 
     sin_avg = np.zeros((6, dp[0].shape[1]))
@@ -180,7 +182,8 @@ def calibrate_differential_phase(
 def calibrate_visibilities(
         va: List[np.ndarray], wavelength: np.ndarray,
         file_factor: int, do_plot: Optional[bool] = True) -> np.ndarray:
-    # NOTE: Treat visamp (or correlated fluxes)
+    """Calibrates the visibilities or correlated fluxes."""
+    va = [compact_exposures(elem, compact_factor=6) for elem in va]
     vafinal = np.zeros((6, va[0].shape[1]))
 
     if do_plot:
@@ -205,6 +208,7 @@ def calibrate_squared_visibilities(
         v2: List[np.ndarray], wavelength: np.ndarray,
         file_factor: int, do_plot: Optional[bool] = True) -> np.ndarray:
     """Calibrates the squared visibilities."""
+    v2 = [compact_exposures(elem, compact_factor=6) for elem in v2]
     v2final = np.zeros((6, v2[0].shape[1]))
 
     if do_plot:
