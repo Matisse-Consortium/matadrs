@@ -8,10 +8,12 @@ from typing import Union, Optional, Callable, Tuple, List
 
 import astropy.units as u
 import numpy as np
+from astropy.io import fits
+
 
 __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
-           "get_execution_modes", "split_fits", "get_fits_by_tag", "check_if_target",
-           "get_path_descriptor"]
+           "get_execution_modes", "split_fits", "get_fits_by_tag",
+           "check_if_target", "get_path_descriptor"]
 
 
 def unwrap_phases(phase: Union[float, np.ndarray],
@@ -34,6 +36,22 @@ def unwrap_phases(phase: Union[float, np.ndarray],
     if error is not None:
         return map(lambda x: np.unwrap(x, period=period), [phase, error])
     return np.unwrap(phase, period=period)
+
+
+def flip_phases(fits_file: Path) -> None:
+    """Flips the phase of the t3phi and writes it in the header.
+
+    Required for old versions (<=2.0.0) of the MATISSE data reduction pipeline
+    which had flipped the N-band phase only by 180 degrees.
+    """
+    with fits.open(fits_file, "update") as hdul:
+        header = hdul["oi_t3"].header
+        if "PFLIP" in header:
+            return
+        t3phi = hdul["oi_t3"].data["t3phi"]
+        hdul["oi_t3"].data["t3phi"] = -t3phi
+        header["PFLIP"] = True
+        hdul.flush()
 
 
 def cprint(message: str, color: Optional[str] = None) -> None:

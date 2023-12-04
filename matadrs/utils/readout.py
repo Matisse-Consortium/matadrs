@@ -1,6 +1,7 @@
-from logging import warn
 import pkg_resources
+import re
 import warnings
+from logging import warn
 from pathlib import Path
 from typing import Dict, Tuple, List, Optional
 
@@ -21,8 +22,6 @@ DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 GRAVITY_TO_INDEX = {"sc": 10, "ft": 20}
 
 
-# TODO: Add to fluxcalibration that it changes the unit to Jy not ADU -> Maybe in Jozsef's
-# script?
 class ReadoutFits:
     """Reads out the Cards as Tables as well as the primary header of a
     (.fits)-file and makes certain keys from the primary header available
@@ -112,6 +111,8 @@ class ReadoutFits:
 
         with fits.open(self.fits_file) as hdul:
             self.primary_header = hdul[0].header
+
+        self.pipeline_version = self.primary_header["HIERARCH ESO PRO REC1 PIPE ID"]
 
     @property
     def name(self) -> str:
@@ -351,20 +352,46 @@ class ReadoutFits:
         """
         return self.observation_type == "calib"
 
+    def is_pip_version_greater_equal(self, version: str) -> bool:
+        """Checks if the pipeline's version is greater than the
+        reference version.
+
+        Parameters
+        ----------
+        version : str
+            The version to compare with the reference version.
+            To be passed in the format 'x.y.z'
+
+        Returns
+        -------
+        greater : bool
+        """
+        numbers_to_check = [int(num) for num
+                            in re.findall(r'\d+', version)]
+        numbers_reference = [int(num) for num
+                             in re.findall(r'\d+', self.pipeline_version)]
+
+        if len(numbers_to_check) >= 3 and len(numbers_reference) >= 3:
+            return all(numbers_reference[index] >= numbers_to_check[index]
+                       for index in range(3))
+        else:
+            raise ValueError("Invalid version format."
+                             " Please use x.y.z format.")
+
     # TODO: Get a better error representation for the flux
     def get_flux_data_from_flux_file(self) -> Tuple[u.Quantity[u.Jy],
                                                     u.Quantity[u.Jy]]:
-        """Reads the flux data from the flux file and then interpolates it to the
-        wavelength solution used by MATISSE.
+        """Reads the flux data from the flux file and then interpolates it
+        to the wavelength solution used by MATISSE.
 
         Returns
         -------
         flux : astropy.units.Jy
-            The, to MATISSE's wavelength solution interpolated, flux fetched from the
-            flux file.
+            The, to MATISSE's wavelength solution interpolated, flux fetched
+            from the flux file.
         flux_error : astropy.units.Jy
-            The, to MATISSE's wavelength solution interpolated, flux error fetched from
-            the flux file.
+            The, to MATISSE's wavelength solution interpolated, flux error
+            fetched from the flux file.
         """
         flux_data = Table.read(self.flux_file, names=["wl", "flux"], format="ascii")
         cubic_spline = CubicSpline(flux_data["wl"], flux_data["flux"])

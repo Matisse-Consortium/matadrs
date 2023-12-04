@@ -17,5 +17,5 @@ product_dirs = list(map(lambda x: Path(str(x).replace("raw", "product")), raw_di
 # Call the reduction_pipeline
 matadrs_pipeline(raw_dirs, product_dirs, overwrite=True,
                  do_reduce=False, do_calibrate=False,
-                 do_average=True, do_merge=False,
+                 do_average=True, do_merge=True,
                  averaging_method="mat_tools", ncores=6)

@@ -98,7 +98,6 @@ def prepare_multiple_merges(directories: Path, output_dir: Path):
 
 # TODO: If pipeline does not have a BCD-output use calibBCD2
 # TODO: Add phase flip for older pipelines
-# FIXME: Visibilities are wrong for L-band
 def execute_merge(output_dir: Path,
                   fluxes: List[Path],
                   visibilities: List[Path],
