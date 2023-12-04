@@ -7,6 +7,7 @@ import numpy as np
 from .avg_oifits import oifits_patchwork
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
+from ..utils.options import OPTIONS
 from ..utils.tools import cprint, split_fits
 
 HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
@@ -116,25 +117,25 @@ def execute_merge(output_dir: Path,
 
     if index is not None:
         out_file = out_file.parent / f"{out_file.stem}_00{index}.fits"
-
-    if "HAWAII" in str(fluxes[0]):
-        if bcd_visibilities is not None:
-            coherent_bcd_vis, incoherent_bcd_vis = bcd_visibilities
-            MergeFiles.visphi = coherent_bcd_vis
-            MergeFiles.t3 = incoherent_bcd_vis
+    if OPTIONS["average.method"] != "mat_tools":
+        if "HAWAII" in str(fluxes[0]):
+            if bcd_visibilities is not None:
+                coherent_bcd_vis, incoherent_bcd_vis = bcd_visibilities
+                MergeFiles.visphi = coherent_bcd_vis
+                MergeFiles.t3 = incoherent_bcd_vis
+            else:
+                MergeFiles.t3 = incoherent_vis
         else:
-            MergeFiles.t3 = incoherent_vis
-    else:
-        if bcd_visibilities is not None:
-            coherent_bcd_vis, incoherent_bcd_vis = bcd_visibilities
-            MergeFiles.vis2 = incoherent_bcd_vis
-            MergeFiles.visphi = MergeFiles.t3 = coherent_bcd_vis
-        if bcd_pip_visibilities is not None:
-            coherent_pip_vis, incoherent_pip_vis = bcd_pip_visibilities
-            MergeFiles.vis2 = incoherent_pip_vis
-            MergeFiles.visphi = MergeFiles.t3 = coherent_pip_vis
-    files_to_merge = [MergeFiles.flux, MergeFiles.visamp,
-                      MergeFiles.visphi, MergeFiles.vis2, MergeFiles.t3]
+            if bcd_visibilities is not None:
+                coherent_bcd_vis, incoherent_bcd_vis = bcd_visibilities
+                MergeFiles.vis2 = incoherent_bcd_vis
+                MergeFiles.visphi = MergeFiles.t3 = coherent_bcd_vis
+            if bcd_pip_visibilities is not None:
+                coherent_pip_vis, incoherent_pip_vis = bcd_pip_visibilities
+                MergeFiles.vis2 = incoherent_pip_vis
+                MergeFiles.visphi = MergeFiles.t3 = coherent_pip_vis
+        files_to_merge = [MergeFiles.flux, MergeFiles.visamp,
+                          MergeFiles.visphi, MergeFiles.vis2, MergeFiles.t3]
     oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                      oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
 
