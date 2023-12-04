@@ -191,10 +191,10 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
 
             bcd = sort_fits_by_bcd_configuration(fits_files)
             calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in,
-                      bcd.out_out, outfile, plot=False)
+                      bcd.out_out, outfile, do_plot=False)
     else:
         bcd = sort_fits_by_bcd_configuration(fits_file_groups[0])
-        calib_BCD(bcd.in_in, None, None, bcd.out_out, outfile, plot=False)
+        calib_BCD(bcd.in_in, None, None, bcd.out_out, outfile, do_plot=False)
 
 
 def calibrate_visibilities(targets: List[Path],
