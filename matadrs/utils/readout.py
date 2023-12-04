@@ -302,6 +302,7 @@ class ReadoutFits:
                                       self.get_baselines(self._oi_vis)],
                                      names=["DELAY_LINE", "UVCOORD", "BASELINE"])
             self._oi_vis.keep_columns(["VISAMP", "VISAMPERR", "UVCOORD",
+                                       "VISPHI", "VISPHIERR",
                                        "DELAY_LINE", "BASELINE",
                                        "MJD", "FLAG", "STA_INDEX"])
         return self._oi_vis
@@ -317,7 +318,6 @@ class ReadoutFits:
                                       names=["DELAY_LINE", "UVCOORD", "BASELINE"])
             self._oi_vis2.keep_columns(["VIS2DATA", "VIS2ERR",
                                         "UVCOORD", "DELAY_LINE",
-                                        "VISPHI", "VISPHIERR",
                                         "BASELINE", "MJD", "FLAG", "STA_INDEX"])
         return self._oi_vis2
 
