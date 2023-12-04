@@ -82,7 +82,7 @@ def compact_exposures(array: np.ndarray, compact_factor: int):
     compacted_array : numpy.ndarray
     """
     compact_array = array.copy()
-    for i in range(array[0].shape[1]//compact_factor):
+    for i in range(array[0].shape[0]//compact_factor):
         for j in np.arange(compact_factor):
             compact_array[j] += array[(i + 1) * compact_factor + j]
     return compact_array
@@ -124,13 +124,13 @@ def calibrate_closure_phases(
         if len(t3p) == 4:
             sin_avg[index] = sum([T3P_SIGN[index, i]*elem[T3P_INDEX[index, i]]
                                   for i, elem in enumerate(sin_t3p)])
-            cos_avg[index] = sum([T3P_SIGN[index, i]*elem[T3P_INDEX[index, i]]
+            cos_avg[index] = sum([elem[T3P_INDEX[index, i]]
                                   for i, elem in enumerate(cos_t3p)])
         else:
             indices = [0, 3]
             sin_avg[index] = sum([T3P_SIGN[index, i]*elem[T3P_INDEX[index, i]]
                                   for i, elem in zip(indices, sin_t3p)])
-            cos_avg[index] = sum([T3P_SIGN[index, i]*elem[T3P_INDEX[index, i]]
+            cos_avg[index] = sum([elem[T3P_INDEX[index, i]]
                                   for i, elem in zip(indices, cos_t3p)])
 
         closfinal[index] = np.arctan2(
