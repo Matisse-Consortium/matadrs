@@ -285,7 +285,10 @@ class Plotter:
             sub_component = PlotComponent(
                 x_values=readout.oi_wavelength["EFF_WAVE"].data.squeeze())
             if data_name == "flux":
-                sub_component.y_values = readout.oi_flux["FLUXDATA"]
+                if "fluxdata" in readout.oi_flux:
+                    sub_component.y_values = readout.oi_flux["FLUXDATA"]
+                else:
+                    sub_component.y_values = readout.oi_flux["FLUX"]
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
                 sub_component.labels = readout.oi_array["TEL_NAME"]\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
