@@ -20,5 +20,5 @@ OPTIONS["average.method"] = "mat_tools"
 
 # Call the reduction_pipeline
 matadrs_pipeline(raw_dirs, product_dirs, overwrite=True,
-                 do_reduce=False, do_calibrate=False,
+                 do_reduce=False, do_calibrate=True,
                  do_average=True, do_merge=True, ncores=6)

@@ -134,8 +134,8 @@ def execute_merge(output_dir: Path,
                 coherent_pip_vis, incoherent_pip_vis = bcd_pip_visibilities
                 MergeFiles.vis2 = incoherent_pip_vis
                 MergeFiles.visphi = MergeFiles.t3 = coherent_pip_vis
-        files_to_merge = [MergeFiles.flux, MergeFiles.visamp,
-                          MergeFiles.visphi, MergeFiles.vis2, MergeFiles.t3]
+    files_to_merge = [MergeFiles.flux, MergeFiles.visamp,
+                      MergeFiles.visphi, MergeFiles.vis2, MergeFiles.t3]
     oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                      oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
 
