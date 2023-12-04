@@ -18,6 +18,7 @@ warnings.simplefilter("ignore", category=u.UnitsWarning)
 __all__ = ["ReadoutFits"]
 
 DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
+GRAVITY_TO_INDEX = {"sc": 10, "ft": 20}
 
 
 # TODO: Add to fluxcalibration that it changes the unit to Jy not ADU -> Maybe in Jozsef's
@@ -101,6 +102,7 @@ class ReadoutFits:
         self._sta_to_tel = None
         self._name, self._coords = None, None
         self._simbad_query = None
+        self.gravity_method = "ft"
 
         headers = ["oi_array", "oi_wavelength", "oi_flux",
                    "oi_t3", "oi_vis", "oi_vis2"]
@@ -132,6 +134,14 @@ class ReadoutFits:
             else:
                 self._name = header_name.lower()
         return self._name
+
+    @property
+    def gravity_index(self) -> int:
+        """Returns the indices for either the fringe tracker or science
+        observations."""
+        if self.primary_header["instrume"].lower() == "gravity":
+            return GRAVITY_TO_INDEX[self.gravity_method]
+        return None
 
     @property
     def simbad_query(self):
@@ -400,7 +410,10 @@ class ReadoutFits:
         -------
         Table
         """
-        return Table().read(self.fits_file, hdu=header)
+        if header == "oi_array":
+            return Table().read(self.fits_file, hdu=header)
+        with fits.open(self.fits_file, "readonly") as hdul:
+            return Table().read(hdul[header, self.gravity_index])
 
     def merge_uv_coords(self, table: Table) -> np.ndarray:
         """Fetches the u- and v-coordinates from a Table and the merges them into a set
