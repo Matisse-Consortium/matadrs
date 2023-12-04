@@ -13,13 +13,13 @@ from .tools import unwrap_phases, calculate_uv_points
 from .options import OPTIONS
 
 
-# TODO: Add proper docs
 def make_uv_tracks(ax, uv_coord: np.ndarray,
                    baselines: List[np.ndarray],
                    sta_label: List[np.ndarray],
                    declination: float,
                    symbol: str, color: str,
-                   airmass_lim: float, show_text: bool) -> None:
+                   airmass_lim: float,
+                   show_text: bool, **kwargs) -> None:
     """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
 
     From coordinate + ha (range), calculate uv tracks.
@@ -204,7 +204,7 @@ class Plotter:
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
                 sel_wl: Optional[float] = None,
                 airmass_lim: Optional[float] = 2.,
-                show_text: Optional[List] = False) -> None:
+                show_text: Optional[List] = False, **kwargs) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
 
         Parameters
