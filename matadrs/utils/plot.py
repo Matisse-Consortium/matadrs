@@ -285,14 +285,15 @@ class Plotter:
             sub_component = PlotComponent(
                 x_values=readout.oi_wavelength["EFF_WAVE"].data.squeeze())
             if data_name == "flux":
-                if "fluxdata" in readout.oi_flux:
+                if "FLUXDATA" in readout.oi_flux.columns:
                     sub_component.y_values = readout.oi_flux["FLUXDATA"]
+                    component_label = f"Flux ({readout.get_unit('oi_flux', 'fluxdata')})"
                 else:
                     sub_component.y_values = readout.oi_flux["FLUX"]
+                    component_label = f"Flux ({readout.get_unit('oi_flux', 'flux')})"
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
                 sub_component.labels = readout.oi_array["TEL_NAME"]\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
-                component_label = f"Flux ({readout.get_unit('oi_flux', 'fluxdata')})"
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
                 station_names = readout.oi_vis2["DELAY_LINE"]
                 if legend_format == "long":

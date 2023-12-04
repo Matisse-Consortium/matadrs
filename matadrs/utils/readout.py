@@ -285,7 +285,10 @@ class ReadoutFits:
                     self._oi_flux.add_columns([self._oi_flux.Column([flux], unit=u.Jy),
                                               self._oi_flux.Column([flux_err], unit=u.Jy)],
                                               names=["FLUXDATA", "FLUXERR"])
-            self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR"])
+            if "FLUXDATA" in self._oi_flux.columns:
+                self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR"])
+            else:
+                self._oi_flux.keep_columns(["FLUX", "FLUXERR"])
         return self._oi_flux
 
     @property
