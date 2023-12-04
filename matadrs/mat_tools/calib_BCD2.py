@@ -82,7 +82,7 @@ def compact_exposures(array: np.ndarray, compact_factor: int):
     compacted_array : numpy.ndarray
     """
     compact_array = array.copy()
-    for i in range(array[0].shape[0]//compact_factor):
+    for i in range(array[0].shape[1]//compact_factor):
         for j in np.arange(compact_factor):
             compact_array[j] += array[(i + 1) * compact_factor + j]
     return compact_array
@@ -110,7 +110,7 @@ def calibrate_closure_phases(
         file_factor: int, lim: Optional[int] = 180,
         do_plot: Optional[bool] = True) -> np.ndarray:
     """Calibrates the closure phases."""
-    t3p = [compact_exposures(elem, compact_factor=4) for elem in t3p]
+    # t3p = [compact_exposures(elem, compact_factor=4) for elem in t3p]
     sin_t3p, cos_t3p = zip(*[(np.sin(elem), np.cos(elem)) for elem in t3p])
 
     sin_avg = np.zeros((4, t3p[0].shape[1]))
@@ -147,7 +147,7 @@ def calibrate_differential_phase(
         file_factor: int, lim: Optional[int] = 180,
         do_plot: Optional[bool] = True) -> np.ndarray:
     """Calibrates the differential phase."""
-    dp = [compact_exposures(elem, compact_factor=4) for elem in dp]
+    # dp = [compact_exposures(elem, compact_factor=4) for elem in dp]
     sin_dp, cos_dp = zip(*[(np.sin(elem), np.cos(elem)) for elem in dp])
 
     sin_avg = np.zeros((6, dp[0].shape[1]))
@@ -183,7 +183,7 @@ def calibrate_visibilities(
         va: List[np.ndarray], wavelength: np.ndarray,
         file_factor: int, do_plot: Optional[bool] = True) -> np.ndarray:
     """Calibrates the visibilities or correlated fluxes."""
-    va = [compact_exposures(elem, compact_factor=6) for elem in va]
+    # va = [compact_exposures(elem, compact_factor=6) for elem in va]
     vafinal = np.zeros((6, va[0].shape[1]))
 
     if do_plot:
@@ -208,7 +208,7 @@ def calibrate_squared_visibilities(
         v2: List[np.ndarray], wavelength: np.ndarray,
         file_factor: int, do_plot: Optional[bool] = True) -> np.ndarray:
     """Calibrates the squared visibilities."""
-    v2 = [compact_exposures(elem, compact_factor=6) for elem in v2]
+    # v2 = [compact_exposures(elem, compact_factor=6) for elem in v2]
     v2final = np.zeros((6, v2[0].shape[1]))
 
     if do_plot:
