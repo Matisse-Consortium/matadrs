@@ -687,7 +687,10 @@ delay line configuration.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#id8" title="matadrs.utils.readout.ReadoutFits.is_calibrator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_calibrator</span></code></a>()</p></td>
 <td><p>Fetches the object's observation mode and returns true if it has been observed in 'CALIB' mode.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id10" title="matadrs.utils.readout.ReadoutFits.merge_uv_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_uv_coords</span></code></a>(table)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal" title="matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_pip_version_greater_equal</span></code></a>(version)</p></td>
+<td><p>Checks if the pipeline's version is greater than the reference version.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id10" title="matadrs.utils.readout.ReadoutFits.merge_uv_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_uv_coords</span></code></a>(table)</p></td>
 <td><p>Fetches the u- and v-coordinates from a Table and the merges them into a set of (u, v)-coordinates.</p></td>
 </tr>
 </tbody>
@@ -761,15 +764,15 @@ line configuration.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file">
 <span class="sig-name descname"><span class="pre">get_flux_data_from_flux_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Quantity</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_flux_data_from_flux_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file" title="Permalink to this definition">#</a></dt>
-<dd><p>Reads the flux data from the flux file and then interpolates it to the
-wavelength solution used by MATISSE.</p>
+<dd><p>Reads the flux data from the flux file and then interpolates it
+to the wavelength solution used by MATISSE.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">
-<li><p><strong>flux</strong> (<em>astropy.units.Jy</em>) – The, to MATISSE’s wavelength solution interpolated, flux fetched from the
-flux file.</p></li>
-<li><p><strong>flux_error</strong> (<em>astropy.units.Jy</em>) – The, to MATISSE’s wavelength solution interpolated, flux error fetched from
-the flux file.</p></li>
+<li><p><strong>flux</strong> (<em>astropy.units.Jy</em>) – The, to MATISSE’s wavelength solution interpolated, flux fetched
+from the flux file.</p></li>
+<li><p><strong>flux_error</strong> (<em>astropy.units.Jy</em>) – The, to MATISSE’s wavelength solution interpolated, flux error
+fetched from the flux file.</p></li>
 </ul>
 </p>
 </dd>
@@ -831,6 +834,25 @@ in ‘CALIB’ mode.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal">
+<span class="sig-name descname"><span class="pre">is_pip_version_greater_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.is_pip_version_greater_equal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal" title="Permalink to this definition">#</a></dt>
+<dd><p>Checks if the pipeline’s version is greater than the
+reference version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>version</strong> (<em>str</em>) – The version to compare with the reference version.
+To be passed in the format ‘x.y.z’</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>greater</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1057,6 +1079,7 @@ calibrator.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_unit"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_unit()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.gravity_index"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.gravity_index</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.is_calibrator()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.is_pip_version_greater_equal()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.longest_entry</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.merge_uv_coords()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.mjd"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.mjd</span></code></a></li>
