@@ -13,8 +13,7 @@ from ..mat_tools.calib_BCD2 import calib_BCD
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time, get_path_descriptor, \
-        check_if_target, get_fits_by_tag, get_execution_modes, split_fits, \
-        flip_phases
+        check_if_target, get_fits_by_tag, get_execution_modes, split_fits
 
 __all__ = ["create_visibility_sof", "check_file_match", "sort_fits_by_bcd_configuration",
            "calibrate_bcd", "calibrate_visibilities", "calibrate_fluxes",
@@ -197,9 +196,6 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
     else:
         bcd = sort_fits_by_bcd_configuration(fits_file_groups[0])
         calib_BCD(bcd.in_in, None, None, bcd.out_out, outfile, do_plot=False)
-        fits_file = fits_file_groups[0][0]
-        if not ReadoutFits(fits_file).is_pip_version_greater_equal("2.0.0"):
-            flip_phases(outfile)
 
 
 def calibrate_visibilities(targets: List[Path],
@@ -223,18 +219,8 @@ def calibrate_visibilities(targets: List[Path],
                     stdout=subprocess.DEVNULL)
     cprint("Plotting visibility calibrated files...", "y")
     for fits_file in get_fits_by_tag(output_dir, "TARGET_CAL_INT"):
-        readout = ReadoutFits(fits_file)
-        if not readout.is_pip_version_greater_equal("2.0.0")\
-                and "AQUARIUS" in fits_file.name:
-            flip_phases(fits_file)
         plot_fits = Plotter(fits_file, save_path=output_dir)
         plot_fits.add_cphases().add_vis().plot(save=True, error=True)
-
-    fits_file = get_fits_by_tag(output_dir, "noBCD")[0]
-    readout = ReadoutFits(fits_file)
-    if not readout.is_pip_version_greater_equal("2.0.0")\
-            and "AQUARIUS" in fits_file.name:
-        flip_phases(fits_file)
 
 
 def calibrate_fluxes(targets: List[Path], calibrators: List[Path],

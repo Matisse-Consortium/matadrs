@@ -8,7 +8,7 @@ from .avg_oifits import oifits_patchwork
 from ..utils.plot import Plotter
 from ..utils.readout import ReadoutFits
 from ..utils.options import OPTIONS
-from ..utils.tools import cprint, split_fits
+from ..utils.tools import cprint, split_fits, flip_phases
 
 HEADER_TO_REMOVE = [{'key': 'HIERARCH ESO INS BCD1 ID', 'value': ' '},
                     {'key': 'HIERARCH ESO INS BCD2 ID', 'value': ' '},
@@ -138,6 +138,9 @@ def execute_merge(output_dir: Path,
                       MergeFiles.visphi, MergeFiles.vis2, MergeFiles.t3]
     oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                      oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
+    if not ReadoutFits(out_file).is_pip_version_greater_equal("2.0.0"):
+        breakpoint()
+        flip_phases(out_file)
 
 
 # TODO: Find way to remove the try statements
