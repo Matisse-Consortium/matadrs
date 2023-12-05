@@ -681,16 +681,19 @@ delay line configuration.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#id7" title="matadrs.utils.readout.ReadoutFits.get_table_for_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_table_for_fits</span></code></a>(header)</p></td>
 <td><p>Fetches a Card by its header and then reads its information into a Table.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_unit" title="matadrs.utils.readout.ReadoutFits.get_unit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_unit</span></code></a>(header, sub_header)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_telescopes" title="matadrs.utils.readout.ReadoutFits.get_telescopes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_telescopes</span></code></a>()</p></td>
+<td><p>Fetches the station indices from the 'oi_flux' table and returns the telescope's names.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_unit" title="matadrs.utils.readout.ReadoutFits.get_unit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_unit</span></code></a>(header, sub_header)</p></td>
 <td><p>Fetches the unit of a header by the sub header's name.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id8" title="matadrs.utils.readout.ReadoutFits.is_calibrator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_calibrator</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id8" title="matadrs.utils.readout.ReadoutFits.is_calibrator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_calibrator</span></code></a>()</p></td>
 <td><p>Fetches the object's observation mode and returns true if it has been observed in 'CALIB' mode.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal" title="matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_pip_version_greater_equal</span></code></a>(version)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal" title="matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_pip_version_greater_equal</span></code></a>(version)</p></td>
 <td><p>Checks if the pipeline's version is greater than the reference version.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id10" title="matadrs.utils.readout.ReadoutFits.merge_uv_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_uv_coords</span></code></a>(table)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id10" title="matadrs.utils.readout.ReadoutFits.merge_uv_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_uv_coords</span></code></a>(table)</p></td>
 <td><p>Fetches the u- and v-coordinates from a Table and the merges them into a set of (u, v)-coordinates.</p></td>
 </tr>
 </tbody>
@@ -806,6 +809,21 @@ fetched from the flux file.</p></li>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Table</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.get_telescopes">
+<span class="sig-name descname"><span class="pre">get_telescopes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_telescopes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.get_telescopes" title="Permalink to this definition">#</a></dt>
+<dd><p>Fetches the station indices from the ‘oi_flux’ table
+and returns the telescope’s names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>telescopes</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of  str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1076,6 +1094,7 @@ calibrator.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_flux_data_from_flux_file()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_header"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_header()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_table_for_fits()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_telescopes"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_telescopes()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_unit"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_unit()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.gravity_index"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.gravity_index</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.is_calibrator()</span></code></a></li>
