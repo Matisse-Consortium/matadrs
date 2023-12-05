@@ -120,7 +120,7 @@ class Plotter:
         Generates a pandas DataFrame that has all the plots' information.
     add_flux()
         Adds the total flux(es) as a subplot.
-    add_vis(corr_flux=False, legend_format="long")
+    add_vis(legend_format="long")
         Adds the visibilities/correlated fluxes as a subplot.
     add_vis2(legend_format="long")
         Adds the squared visibilities as a subplot.
@@ -257,7 +257,6 @@ class Plotter:
             ax.set_ylabel(ylabel)
 
     def make_component(self, data_name: str,
-                       corr_flux: Optional[bool] = False,
                        legend_format: Optional[str] = "long",
                        unwrap: Optional[bool] = False,
                        period: Optional[int] = 360):
@@ -268,8 +267,6 @@ class Plotter:
         data_name : str
             The name of the data to be plotted. Determines the legend- and plot
             labels.
-        corr_flux : bool, optional
-            If true then instead of visibilities the correlated flux is plotted
         legend_format : str, optional
             Sets the format of the legend: For all information set "long" and
             for only station names set "short".
@@ -377,7 +374,7 @@ class Plotter:
     def add_mosaic(self, **kwargs):
         """Combines multiple subplots to produce a mosaic plot"""
         self.add_uv(**kwargs)
-        self.add_vis(corr_flux=True, **kwargs)
+        self.add_vis(**kwargs)
         self.add_vis2(**kwargs)
         self.add_flux(**kwargs)
         self.add_diff_phases(**kwargs)

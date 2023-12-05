@@ -423,15 +423,8 @@ class ReadoutFits:
 
     def get_unit(self, header: str, sub_header: str) -> str:
         """Fetches the unit of a header by the sub header's name."""
-        header = self.get_header(header)
-        if header == "oi_vis"\
-                and header["AMPTYP"] == "correlated flux":
-            return "Jy"
-        list_index = list(header.values()).index(sub_header.upper())
-        key = f"TUNIT{list(header.keys())[list_index][-1]}"
-        if key in header:
-            return header[key]
-        return "a.u."
+        unit = getattr(self, header)[sub_header.upper()].unit
+        return str(unit) if unit is not None else "a.u."
 
     def get_table_for_fits(self, header: str) -> Table:
         """Fetches a Card by its header and then reads its information into a Table.
