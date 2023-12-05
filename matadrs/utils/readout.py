@@ -283,16 +283,18 @@ class ReadoutFits:
                              self._oi_flux.Column([flux_err])],
                             names=["FLUXDATA", "FLUXERR"])
                 else:
-                    # TODO: Make this work so the unit is Jy -> Right now it has no effect
                     nan_array = self._oi_flux.Column(
                             np.full(self.longest_entry, np.nan))
                     nan_array.unit = u.Jy
-                    self._oi_flux.add_columns([[nan_array], [nan_array]],
-                                              names=["FLUXDATA", "FLUXERR"])
+                    self._oi_flux.add_columns(
+                            [[nan_array], [nan_array], [np.nan]],
+                            names=["FLUXDATA", "FLUXERR", "STA_INDEX"])
             if "FLUXDATA" in self._oi_flux.columns:
-                self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "STA_INDEX"])
+                self._oi_flux.keep_columns(
+                        ["FLUXDATA", "FLUXERR", "STA_INDEX"])
             else:
-                self._oi_flux.keep_columns(["FLUX", "FLUXERR", "STA_INDEX"])
+                self._oi_flux.keep_columns(
+                        ["FLUX", "FLUXERR", "STA_INDEX"])
         return self._oi_flux
 
     @property

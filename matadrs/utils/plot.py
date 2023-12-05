@@ -185,8 +185,11 @@ class Plotter:
         return len(self.components)
 
     def _set_y_limits(self, wavelength: np.ndarray,
-                      data: List[np.ndarray], margin: Optional[float] = 0.05) -> Tuple[int, int]:
+                      data: List[np.ndarray],
+                      margin: Optional[float] = 0.05) -> Tuple[int, int]:
         """Sets the y-limits from the data with some margin"""
+        if np.all(data == np.nan):
+            return None, None
         try:
             if np.min(wavelength) >= 6:
                 indices = np.where((wavelength > 8.5) | (wavelength < 12.5))
