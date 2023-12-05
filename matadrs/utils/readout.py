@@ -92,11 +92,12 @@ class ReadoutFits:
         delay line configuration.
     """
 
-    def __init__(self, fits_file: Path, flux_file: Optional[Path] = "") -> None:
+    def __init__(self, fits_file: Path,
+                 flux_file: Optional[Path] = None) -> None:
         """The class's constructor"""
-        # TODO: Maybe rename fits file to file? or Path?
         self.fits_file = Path(fits_file)
-        self.flux_file = Path(flux_file) if flux_file else None
+        if flux_file is not None:
+            self.flux_file = Path(flux_file)
 
         self._sta_to_tel = None
         self._name, self._coords = None, None
@@ -270,29 +271,29 @@ class ReadoutFits:
     def oi_flux(self) -> Table:
         """Fetches the flux table if given, and if not makes an empty one."""
         if self._oi_flux is None:
+            # NOTE: Not all MATISSE datasets contain 'oi_flux'-data.
+            # Thus try-except
             try:
-                # NOTE: Not all MATISSE datasets contain 'oi_flux'-data, thus try-except
-                try:
-                    self._oi_flux = self.get_table_for_fits("oi_flux")
-                except KeyError:
-                    self._oi_flux = Table()
-                    if self.flux_file not in ["", None]:
-                        # TODO: Make this work so the unit is Jy -> Right now it has no effect
-                        nan_array = self._oi_flux.Column(np.full(self.longest_entry, np.nan),
-                                                         unit=u.Jy)
-                        self._oi_flux.add_columns([[nan_array], [nan_array]],
-                                                  names=["FLUXDATA", "FLUXERR"])
-                    else:
-                        flux, flux_err = self.get_flux_data_from_flux_file()
-                        self._oi_flux.add_columns([self._oi_flux.Column([flux], unit=u.Jy),
-                                                  self._oi_flux.Column([flux_err], unit=u.Jy)],
-                                                  names=["FLUXDATA", "FLUXERR"])
-                if "FLUXDATA" in self._oi_flux.columns:
-                    self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "STA_INDEX"])
+                self._oi_flux = self.get_table_for_fits("oi_flux")
+            except KeyError:
+                self._oi_flux = Table()
+                if self.flux_file:
+                    flux, flux_err = self.get_flux_data_from_flux_file()
+                    self._oi_flux.add_columns(
+                            [self._oi_flux.Column([flux]),
+                             self._oi_flux.Column([flux_err])],
+                            names=["FLUXDATA", "FLUXERR"])
                 else:
-                    self._oi_flux.keep_columns(["FLUX", "FLUXERR", "STA_INDEX"])
-            except Exception:
-                breakpoint()
+                    # TODO: Make this work so the unit is Jy -> Right now it has no effect
+                    nan_array = self._oi_flux.Column(
+                            np.full(self.longest_entry, np.nan))
+                    nan_array.unit = u.Jy
+                    self._oi_flux.add_columns([[nan_array], [nan_array]],
+                                              names=["FLUXDATA", "FLUXERR"])
+            if "FLUXDATA" in self._oi_flux.columns:
+                self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "STA_INDEX"])
+            else:
+                self._oi_flux.keep_columns(["FLUX", "FLUXERR", "STA_INDEX"])
         return self._oi_flux
 
     @property
