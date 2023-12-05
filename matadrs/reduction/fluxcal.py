@@ -37,6 +37,7 @@ Arguments:
 #                uncertainty in calibrator diameter is not taken into account
 # TODO: Treat if the cal database cannot be opened
 # NOTE: Treat if there is no matching source in the database: DONE
+# TODO: Change unit in fluxcal to right one.
 # FIXME: Some dec values are NULL in vBoekeldatabase
 
 ########################################################################

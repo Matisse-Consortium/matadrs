@@ -223,7 +223,6 @@ class Plotter:
             uv_coords = readout.oi_vis2["UVCOORD"]
             if uv_max < (tmp_uv_max := uv_coords.max()):
                 uv_max = tmp_uv_max
-            flags = readout.oi_vis2["FLAG"]
             sta_indices = readout.oi_vis2["STA_INDEX"]
             sta_index = readout.oi_array["STA_INDEX"]
             sta_name = readout.oi_array["STA_NAME"]
@@ -289,7 +288,7 @@ class Plotter:
                     sub_component.y_values = readout.oi_flux["FLUX"]
                     component_label = f"Flux ({readout.get_unit('oi_flux', 'flux')})"
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
-                sub_component.labels = readout.oi_array["TEL_NAME"]\
+                sub_component.labels = readout.get_telescopes()\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
                 station_names = readout.oi_vis2["DELAY_LINE"]

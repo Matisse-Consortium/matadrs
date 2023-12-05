@@ -270,26 +270,29 @@ class ReadoutFits:
     def oi_flux(self) -> Table:
         """Fetches the flux table if given, and if not makes an empty one."""
         if self._oi_flux is None:
-            # NOTE: Not all MATISSE datasets contain 'oi_flux'-data, thus try-except
             try:
-                self._oi_flux = self.get_table_for_fits("oi_flux")
-            except KeyError:
-                self._oi_flux = Table()
-                if self.flux_file not in ["", None]:
-                    # TODO: Make this work so the unit is Jy -> Right now it has no effect
-                    nan_array = self._oi_flux.Column(np.full(self.longest_entry, np.nan),
-                                                     unit=u.Jy)
-                    self._oi_flux.add_columns([[nan_array], [nan_array]],
-                                              names=["FLUXDATA", "FLUXERR"])
+                # NOTE: Not all MATISSE datasets contain 'oi_flux'-data, thus try-except
+                try:
+                    self._oi_flux = self.get_table_for_fits("oi_flux")
+                except KeyError:
+                    self._oi_flux = Table()
+                    if self.flux_file not in ["", None]:
+                        # TODO: Make this work so the unit is Jy -> Right now it has no effect
+                        nan_array = self._oi_flux.Column(np.full(self.longest_entry, np.nan),
+                                                         unit=u.Jy)
+                        self._oi_flux.add_columns([[nan_array], [nan_array]],
+                                                  names=["FLUXDATA", "FLUXERR"])
+                    else:
+                        flux, flux_err = self.get_flux_data_from_flux_file()
+                        self._oi_flux.add_columns([self._oi_flux.Column([flux], unit=u.Jy),
+                                                  self._oi_flux.Column([flux_err], unit=u.Jy)],
+                                                  names=["FLUXDATA", "FLUXERR"])
+                if "FLUXDATA" in self._oi_flux.columns:
+                    self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "STA_INDEX"])
                 else:
-                    flux, flux_err = self.get_flux_data_from_flux_file()
-                    self._oi_flux.add_columns([self._oi_flux.Column([flux], unit=u.Jy),
-                                              self._oi_flux.Column([flux_err], unit=u.Jy)],
-                                              names=["FLUXDATA", "FLUXERR"])
-            if "FLUXDATA" in self._oi_flux.columns:
-                self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR"])
-            else:
-                self._oi_flux.keep_columns(["FLUX", "FLUXERR"])
+                    self._oi_flux.keep_columns(["FLUX", "FLUXERR", "STA_INDEX"])
+            except Exception:
+                breakpoint()
         return self._oi_flux
 
     @property
@@ -474,6 +477,16 @@ class ReadoutFits:
         baselines  : numpy.ndarray
         """
         return np.sqrt(table["UCOORD"]**2+table["VCOORD"]**2)
+
+    def get_telescopes(self) -> List[str]:
+        """Fetches the station indices from the 'oi_flux' table
+        and returns the telescope's names.
+
+        Returns
+        -------
+        telescopes : list of  str
+        """
+        return [self.sta_to_tel[tel] for tel in self.oi_flux["STA_INDEX"]]
 
     def get_delay_lines(self, table: Table) -> List[str]:
         """Fetches the station indices from a Table and returns the telescope's delay
