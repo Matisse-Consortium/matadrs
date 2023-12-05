@@ -96,8 +96,7 @@ class ReadoutFits:
                  flux_file: Optional[Path] = None) -> None:
         """The class's constructor"""
         self.fits_file = Path(fits_file)
-        if flux_file is not None:
-            self.flux_file = Path(flux_file)
+        self.flux_file = Path(flux_file) if flux_file is not None else None
 
         self._sta_to_tel = None
         self._name, self._coords = None, None
