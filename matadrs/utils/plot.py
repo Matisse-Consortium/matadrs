@@ -154,7 +154,7 @@ class Plotter:
         else:
             self.plot_name = f"{Path(fits_files).stem}"
 
-        self.readouts = map(ReadoutFits, self.fits_files)
+        self.readouts = list(map(ReadoutFits, self.fits_files))
         self.components = {}
 
     def __str__(self):
