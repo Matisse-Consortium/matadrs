@@ -48,9 +48,8 @@ def flip_phases(fits_file: Path) -> None:
         header = hdul["oi_t3"].header
         if "PFLIP" in header:
             return
-        t3phi = hdul["oi_t3"].data["t3phi"]
-        hdul["oi_t3"].data["t3phi"] = -t3phi
-        header["PFLIP"] = True
+        hdul["oi_t3"].data["t3phi"] = -hdul["oi_t3"].data["t3phi"]
+        header["PFLIP"] = True, "Phase flipped by 180 degrees"
         hdul.flush()
 
 

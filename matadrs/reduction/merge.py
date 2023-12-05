@@ -139,7 +139,6 @@ def execute_merge(output_dir: Path,
     oifits_patchwork(list(map(str, files_to_merge)), str(out_file),
                      oi_types_list=OI_TYPES, headerval=HEADER_TO_REMOVE)
     if not ReadoutFits(out_file).is_pip_version_greater_equal("2.0.0"):
-        breakpoint()
         flip_phases(out_file)
 
 
