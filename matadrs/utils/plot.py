@@ -18,8 +18,7 @@ def make_uv_tracks(ax, uv_coord: np.ndarray,
                    sta_label: List[np.ndarray],
                    declination: float,
                    symbol: str, color: str,
-                   airmass_lim: float,
-                   show_text: bool, **kwargs) -> None:
+                   airmass_lim: float, show_text: bool) -> None:
     """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
 
     From coordinate + ha (range), calculate uv tracks.
@@ -202,7 +201,6 @@ class Plotter:
         return ymin-spacing, ymax+spacing
 
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
-                sel_wl: Optional[float] = None,
                 airmass_lim: Optional[float] = 2.,
                 show_text: Optional[List] = False, **kwargs) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
@@ -248,9 +246,8 @@ class Plotter:
             for uv_index, uv_coord in enumerate(uv_coords):
                 make_uv_tracks(ax, uv_coord, baselines[uv_index],
                                sta_labels[uv_index], readout.dec*np.pi/180,
-                               flags[uv_index], symbol,
-                               OPTIONS["plot.colors"][index],
-                               sel_wl, airmass_lim, show_text)
+                               symbol, OPTIONS["plot.colors"][index],
+                               airmass_lim, show_text)
 
             xlabel, ylabel = "$u$ (m)", "$v$ (m)"
             uv_extent = int(uv_max + uv_max*0.25)
