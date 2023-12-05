@@ -396,18 +396,14 @@ document.write(`
 <span id="matadrs-utils-readout-module"></span><h1>matadrs.utils.readout module<a class="headerlink" href="#module-matadrs.utils.readout" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matadrs.utils.readout.</span></span><span class="sig-name descname"><span class="pre">ReadoutFits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matadrs.utils.readout.</span></span><span class="sig-name descname"><span class="pre">ReadoutFits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Reads out the Cards as Tables as well as the primary header of a
 (.fits)-file and makes certain keys from the primary header available
 as properties of the class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fits_file</strong> (<em>pathlib.Path</em>) – The (.fits)-file from which data is sourced.</p></li>
-<li><p><strong>flux_file</strong> (<em>pathlib.Path</em><em>, </em><em>optional</em>) – Additional flux file, that replaces the total flux data for the
-(.fits)-file.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>fits_file</strong> (<em>pathlib.Path</em>) – The (.fits)-file from which data is sourced.</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -417,18 +413,6 @@ as properties of the class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pathlib.Path</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.flux_file">
-<span class="sig-name descname"><span class="pre">flux_file</span></span><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.flux_file" title="Permalink to this definition">#</a></dt>
-<dd><p>If provided, substitutes the columns of the ‘oi_flux’ Table with the
-values from the flux file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pathlib.Path, optional</p>
 </dd>
 </dl>
 </dd></dl>
@@ -577,13 +561,6 @@ observed in ‘CALIB’ mode.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">get_flux_data_from_flux_file():</span></span></dt>
-<dd><p>Reads the flux data from the flux file and then interpolates it to the
-wavelength solution used by MATISSE.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.get_table_for_fits">
 <span class="sig-name descname"><span class="pre">get_table_for_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_table_for_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.get_table_for_fits" title="Permalink to this definition">#</a></dt>
 <dd><p>Fetches a Card by its header and then reads its information into a
@@ -672,28 +649,25 @@ delay line configuration.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#id6" title="matadrs.utils.readout.ReadoutFits.get_delay_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_delay_lines</span></code></a>(table)</p></td>
 <td><p>Fetches the station indices from a Table and returns the telescope's delay line configuration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file" title="matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_flux_data_from_flux_file</span></code></a>()</p></td>
-<td><p>Reads the flux data from the flux file and then interpolates it to the wavelength solution used by MATISSE.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_header" title="matadrs.utils.readout.ReadoutFits.get_header"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_header</span></code></a>(header)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_header" title="matadrs.utils.readout.ReadoutFits.get_header"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_header</span></code></a>(header)</p></td>
 <td><p>Fetches a Card's header by its header name.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id7" title="matadrs.utils.readout.ReadoutFits.get_table_for_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_table_for_fits</span></code></a>(header)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id7" title="matadrs.utils.readout.ReadoutFits.get_table_for_fits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_table_for_fits</span></code></a>(header)</p></td>
 <td><p>Fetches a Card by its header and then reads its information into a Table.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_telescopes" title="matadrs.utils.readout.ReadoutFits.get_telescopes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_telescopes</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_telescopes" title="matadrs.utils.readout.ReadoutFits.get_telescopes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_telescopes</span></code></a>()</p></td>
 <td><p>Fetches the station indices from the 'oi_flux' table and returns the telescope's names.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_unit" title="matadrs.utils.readout.ReadoutFits.get_unit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_unit</span></code></a>(header, sub_header)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.get_unit" title="matadrs.utils.readout.ReadoutFits.get_unit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_unit</span></code></a>(header, sub_header)</p></td>
 <td><p>Fetches the unit of a header by the sub header's name.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id8" title="matadrs.utils.readout.ReadoutFits.is_calibrator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_calibrator</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id8" title="matadrs.utils.readout.ReadoutFits.is_calibrator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_calibrator</span></code></a>()</p></td>
 <td><p>Fetches the object's observation mode and returns true if it has been observed in 'CALIB' mode.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal" title="matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_pip_version_greater_equal</span></code></a>(version)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal" title="matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_pip_version_greater_equal</span></code></a>(version)</p></td>
 <td><p>Checks if the pipeline's version is greater than the reference version.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#id10" title="matadrs.utils.readout.ReadoutFits.merge_uv_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_uv_coords</span></code></a>(table)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id10" title="matadrs.utils.readout.ReadoutFits.merge_uv_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_uv_coords</span></code></a>(table)</p></td>
 <td><p>Fetches the u- and v-coordinates from a Table and the merges them into a set of (u, v)-coordinates.</p></td>
 </tr>
 </tbody>
@@ -760,24 +734,6 @@ line configuration.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of  str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file">
-<span class="sig-name descname"><span class="pre">get_flux_data_from_flux_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Quantity</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_flux_data_from_flux_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file" title="Permalink to this definition">#</a></dt>
-<dd><p>Reads the flux data from the flux file and then interpolates it
-to the wavelength solution used by MATISSE.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p><strong>flux</strong> (<em>astropy.units.Jy</em>) – The, to MATISSE’s wavelength solution interpolated, flux fetched
-from the flux file.</p></li>
-<li><p><strong>flux_error</strong> (<em>astropy.units.Jy</em>) – The, to MATISSE’s wavelength solution interpolated, flux error
-fetched from the flux file.</p></li>
-</ul>
-</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1052,7 +1008,6 @@ calibrator.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits"><code class="docutils literal notranslate"><span class="pre">ReadoutFits</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.fits_file"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.fits_file</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.flux_file"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.flux_file</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.primary_header"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.primary_header</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.name"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.name</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.ra"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.ra</span></code></a></li>
@@ -1091,7 +1046,6 @@ calibrator.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.detector</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_baselines()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_delay_lines()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_flux_data_from_flux_file"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_flux_data_from_flux_file()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_header"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_header()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_table_for_fits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_telescopes"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_telescopes()</span></code></a></li>
