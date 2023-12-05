@@ -181,7 +181,6 @@ class Plotter:
                 indices_high = np.where((wavelength >= 3.) & (wavelength <= 3.8))
                 indices = np.hstack((indices_low, indices_high))
             ymin, ymax = data[:, indices].min(), data[:, indices].max()
-            breakpoint()
         except ValueError:
             ymin, ymax = np.percentile(data, 10), np.percentile(data, 90)
         spacing = np.linalg.norm(ymax-ymin)*margin

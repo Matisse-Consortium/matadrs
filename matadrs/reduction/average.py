@@ -140,7 +140,7 @@ def average_folders(calibrated_dir: Path, mode: str) -> None:
         for fits_file in get_fits_by_tag(output_dir, "AVG"):
             unwrap = True if "AQUARIUS" in fits_file.name else False
             plot_fits = Plotter(fits_file, save_path=output_dir)
-            plot_fits.add_cphases(unwrap=unwrap).add_vis(corr_flux=True).add_vis2()
+            plot_fits.add_cphases(unwrap=unwrap).add_vis().add_vis2()
             plot_fits.plot(save=True, error=True)
         cprint(f"{'':-^50}", "lg")
 

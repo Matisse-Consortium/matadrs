@@ -245,7 +245,7 @@ def merging_pipeline(averaged_dir: Path) -> None:
         plot_fits.add_mosaic(unwrap=unwrap).plot(save=True, error=True)
     for fits_file in (output_dir / "non_averaged").glob("*.fits"):
         plot_fits = Plotter(fits_file, save_path=output_dir / "non_averaged")
-        plot_fits.add_uv().add_vis(corr_flux=True)
+        plot_fits.add_uv().add_vis()
         plot_fits.add_vis2().add_cphases(unwrap=True)
         plot_fits.plot(save=True, error=True)
     cprint(f"{'':-^50}", "lg")
