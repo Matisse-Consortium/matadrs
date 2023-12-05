@@ -67,7 +67,6 @@ def make_uv_tracks(ax, uv_coord: np.ndarray,
                 fontsize="small", color='0', alpha=0.8)
 
 
-# TODO: Rewrite all of this to encompass errors and suplots as well
 @dataclass
 class PlotComponent:
     """Class containing the elements required for a plot
@@ -86,9 +85,6 @@ class PlotComponent:
     y_errors: List = None
 
 
-# TODO: Make this go away from class and just individual plotting functions? -> Maybe
-# easier for paper relevant plots, but first make unified class that makes nice data
-# reduction plots
 # TODO: Implement text plotter with the information on the observation
 class Plotter:
     """Class that plots models as well as reduced data
@@ -96,7 +92,6 @@ class Plotter:
     Parameters
     ----------
     fits_files : pathlib.Path or list of pathlib.Path
-    flux_files : pathlib.Path or list of pathlib.Path, optional
     plot_name : str, optional
     save_path : pathlib.Path, optional
 
@@ -141,21 +136,11 @@ class Plotter:
     """
 
     def __init__(self, fits_files: Union[Path, List[Path]],
-                 flux_files: Optional[Union[Path, List[Path]]] = None,
                  plot_name: Optional[str] = None,
                  save_path: Optional[Path] = None) -> None:
         """The class's constructor"""
         self.fits_files = [fits_files]\
             if not isinstance(fits_files, List) else fits_files
-
-        if flux_files is None:
-            self.flux_files = [None]*len(self.fits_files)
-        elif isinstance(flux_files, List)\
-                and len(flux_files) != len(self.fits_files):
-            raise IOError("Flux files must either be None or be "
-                          "the same number the (.fits)-files provided")
-        else:
-            self.flux_files = flux_files
 
         if save_path is None:
             self.save_path = Path("").cwd()
@@ -169,9 +154,7 @@ class Plotter:
         else:
             self.plot_name = f"{Path(fits_files).stem}"
 
-        self.readouts = [ReadoutFits(fits_file, flux_file)
-                         for fits_file, flux_file
-                         in zip(self.fits_files, self.flux_files)]
+        self.readouts = map(ReadoutFits, self.fits_files)
         self.components = {}
 
     def __str__(self):
@@ -198,6 +181,7 @@ class Plotter:
                 indices_high = np.where((wavelength >= 3.) & (wavelength <= 3.8))
                 indices = np.hstack((indices_low, indices_high))
             ymin, ymax = data[:, indices].min(), data[:, indices].max()
+            breakpoint()
         except ValueError:
             ymin, ymax = np.percentile(data, 10), np.percentile(data, 90)
         spacing = np.linalg.norm(ymax-ymin)*margin

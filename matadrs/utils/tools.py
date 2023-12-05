@@ -9,11 +9,46 @@ from typing import Union, Optional, Callable, Tuple, List
 import astropy.units as u
 import numpy as np
 from astropy.io import fits
+from astropy.table import Table
+from scipy.interpolate import CubicSpline
 
 
 __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
            "get_execution_modes", "split_fits", "get_fits_by_tag",
            "check_if_target", "get_path_descriptor"]
+
+
+# TODO: Get a better error representation for the flux.
+# TODO: Implement smoothing for the flux to the instrument
+def get_flux_data_from_flux_file(
+        flux_file: Path, wavelength_axis: np.ndarray,
+        error_percentage: float
+        ) -> Tuple[u.Quantity[u.Jy], u.Quantity[u.Jy]]:
+    """Reads the flux data from the flux file and then interpolates it
+    to the wavelength solution used by MATISSE.
+
+    Parameters
+    ----------
+    flux_file : pathlib.Path
+        The flux file to be read.
+    wavelength_axis : numpy.ndarray
+        The wavelength axis to interpolate the flux file to.
+    error_percentage : float
+        The percentage of the flux error to be used in the interpolation
+
+    Returns
+    -------
+    flux : astropy.units.Jy
+        The, to MATISSE's wavelength solution interpolated, flux fetched
+        from the flux file.
+    flux_error : astropy.units.Jy
+        The, to MATISSE's wavelength solution interpolated, flux error
+        fetched from the flux file.
+    """
+    flux_data = Table.read(flux_file, names=["wl", "flux"], format="ascii")
+    cubic_spline = CubicSpline(flux_data["wl"], flux_data["flux"])
+    interpolated_flux = (cubic_spline(wavelength_axis)).ravel()
+    return interpolated_flux, interpolated_flux*error_percentage
 
 
 def unwrap_phases(phase: Union[float, np.ndarray],

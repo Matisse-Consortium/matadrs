@@ -11,7 +11,6 @@ from astropy.io import fits
 from astroquery.simbad import Simbad
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
-from scipy.interpolate import CubicSpline
 
 # NOTE: Remove units warning. In (.fits)-file 'day' unit contain, which doesn't exist
 warnings.simplefilter("ignore", category=u.UnitsWarning)
@@ -31,17 +30,11 @@ class ReadoutFits:
     ----------
     fits_file : pathlib.Path
         The (.fits)-file from which data is sourced.
-    flux_file : pathlib.Path, optional
-        Additional flux file, that replaces the total flux data for the
-        (.fits)-file.
 
     Attributes
     ----------
     fits_file : pathlib.Path
         The (.fits)-file that has been read in.
-    flux_file : pathlib.Path, optional
-        If provided, substitutes the columns of the 'oi_flux' Table with the
-        values from the flux file.
     primary_header : astropy.io.fits.PrimaryHDU
         The primary header of the (.fits)-file.
     name
@@ -75,9 +68,6 @@ class ReadoutFits:
     is_calibrator()
         Fetches the object's observation mode and returns true if it has been
         observed in 'CALIB' mode.
-    get_flux_data_from_flux_file():
-        Reads the flux data from the flux file and then interpolates it to the
-        wavelength solution used by MATISSE.
     get_table_for_fits(header: str)
         Fetches a Card by its header and then reads its information into a
         Table.
@@ -92,11 +82,9 @@ class ReadoutFits:
         delay line configuration.
     """
 
-    def __init__(self, fits_file: Path,
-                 flux_file: Optional[Path] = None) -> None:
+    def __init__(self, fits_file: Path) -> None:
         """The class's constructor"""
         self.fits_file = Path(fits_file)
-        self.flux_file = Path(flux_file) if flux_file is not None else None
 
         self._sta_to_tel = None
         self._name, self._coords = None, None
@@ -276,19 +264,12 @@ class ReadoutFits:
                 self._oi_flux = self.get_table_for_fits("oi_flux")
             except KeyError:
                 self._oi_flux = Table()
-                if self.flux_file:
-                    flux, flux_err = self.get_flux_data_from_flux_file()
-                    self._oi_flux.add_columns(
-                            [self._oi_flux.Column([flux]),
-                             self._oi_flux.Column([flux_err])],
-                            names=["FLUXDATA", "FLUXERR"])
-                else:
-                    nan_array = self._oi_flux.Column(
-                            np.full(self.longest_entry, np.nan))
-                    nan_array.unit = u.Jy
-                    self._oi_flux.add_columns(
-                            [[nan_array], [nan_array], [np.nan]],
-                            names=["FLUXDATA", "FLUXERR", "STA_INDEX"])
+                nan_array = self._oi_flux.Column(
+                        np.full(self.longest_entry, np.nan))
+                nan_array.unit = u.Jy
+                self._oi_flux.add_columns(
+                        [[nan_array], [nan_array], [np.nan]],
+                        names=["FLUXDATA", "FLUXERR", "STA_INDEX"])
             if "FLUXDATA" in self._oi_flux.columns:
                 self._oi_flux.keep_columns(
                         ["FLUXDATA", "FLUXERR", "STA_INDEX"])
@@ -383,26 +364,6 @@ class ReadoutFits:
         else:
             raise ValueError("Invalid version format."
                              " Please use x.y.z format.")
-
-    # TODO: Get a better error representation for the flux
-    def get_flux_data_from_flux_file(self) -> Tuple[u.Quantity[u.Jy],
-                                                    u.Quantity[u.Jy]]:
-        """Reads the flux data from the flux file and then interpolates it
-        to the wavelength solution used by MATISSE.
-
-        Returns
-        -------
-        flux : astropy.units.Jy
-            The, to MATISSE's wavelength solution interpolated, flux fetched
-            from the flux file.
-        flux_error : astropy.units.Jy
-            The, to MATISSE's wavelength solution interpolated, flux error
-            fetched from the flux file.
-        """
-        flux_data = Table.read(self.flux_file, names=["wl", "flux"], format="ascii")
-        cubic_spline = CubicSpline(flux_data["wl"], flux_data["flux"])
-        interpolated_flux = (cubic_spline(self.oi_wavelength["EFF_WAVE"].data)).ravel()
-        return interpolated_flux, interpolated_flux*0.1
 
     def get_header(self, header: str) -> Optional[fits.Header]:
         """Fetches a Card's header by its header name.
@@ -499,13 +460,3 @@ class ReadoutFits:
         return ["-".join(list(map(self.sta_to_tel.get, station_index)))
                 if all([index in self.sta_to_tel for index in station_index]) else ""
                 for station_index in table["STA_INDEX"]]
-
-
-if __name__ == "__main__":
-    fits_files = ["HD_163296_2019-03-23T08_41_19_N_TARGET_FINALCAL_INT.fits",
-                  "HD_163296_2019-03-23T08_41_19_L_TARGET_FINALCAL_INT.fits",
-                  "HD_163296_2019-05-06T08_19_51_L_TARGET_FINALCAL_INT.fits"]
-    fits_files = [DATA_DIR / "tests" / fits_file for fits_file in fits_files]
-    flux_files = ["HD_163296_sws.txt", "HD_163296_timmi2.txt"]
-    flux_files = [DATA_DIR / "tests" / flux_file for flux_file in flux_files]
-    readout = ReadoutFits(fits_files[0], flux_files[0])
