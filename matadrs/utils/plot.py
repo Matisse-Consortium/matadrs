@@ -22,8 +22,10 @@ def plot_data_quality(
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
 
-    fits_file = get_fits_by_tag(reduced_directory, "RAW_INT")[0]
-    readout = ReadoutFits(fits_file)
+    fits_file = get_fits_by_tag(reduced_directory, "RAW_INT")
+    if not fits_file:
+        return
+    readout = ReadoutFits(fits_file[0])
 
     plot_kwargs = {"output_path": output_dir,
                    "wlenRange": [3.2, 3.9], "saveplots": True,

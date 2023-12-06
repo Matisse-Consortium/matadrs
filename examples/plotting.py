@@ -2,10 +2,10 @@ from pathlib import Path
 
 from matadrs.utils.plot import Plotter, plot_data_quality
 
-file = Path("/Users/scheuck/Data/calibrated_data/lband/test/TARGET_FLUX_CALT_0004.fits")
+# file = Path("/Users/scheuck/Data/calibrated_data/lband/test/TARGET_FLUX_CALT_0004.fits")
 
-plotter = Plotter(file)
-plotter.add_uv().add_vis().plot(error=True)
+# plotter = Plotter(file)
+# plotter.add_uv().add_vis().plot(error=True)
 
 
 path = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/"
