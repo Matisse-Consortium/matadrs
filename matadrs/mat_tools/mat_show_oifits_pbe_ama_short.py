@@ -1668,14 +1668,19 @@ def show_vis_tf_vs_time(
             y_axis.get_label().set_visible(False)
 
         if saveplots:
-            label = '_VIS_TF'
+            label = ""
+            if "date" in kwargs:
+                label += kwargs["date"]
+            if "target" in kwargs:
+                label += f"_{kwargs['target']}"
+            label += '_VIS_TF'
             fig1.savefig(output_path / f'{label}.png', dpi=150)
             fig1.savefig(output_path / f'{label}.eps', format='eps', dpi=300)
             plt.close(fig1)
         else:
             plt.show()
-        print ("Plots READY.")
-        
+        print("Plots READY.")
+
 
 def show_cf2_vs_time(
         list_of_dicts: List[Dict],

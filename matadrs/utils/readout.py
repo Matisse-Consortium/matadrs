@@ -113,7 +113,11 @@ class ReadoutFits:
         """
         if self._name is None:
             try:
-                header_name = self.primary_header["OBJECT"]
+                if "OBJECT" in self.primary_header:
+                    header_name = self.primary_header["OBJECT"]
+                else:
+                    header_name = self.primary_header["HIERARCH ESO OBS TARG NAME"]
+
             except KeyError:
                 header_name = None
             if (header_name in ["SKY", "STD", "STD,RMNREC"]) or (header_name is None):

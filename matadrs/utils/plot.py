@@ -27,13 +27,12 @@ def plot_data_quality(
         return
     readout = ReadoutFits(fits_file[0])
 
-    plot_kwargs = {"output_path": output_dir,
-                   "wlenRange": [3.2, 3.9], "saveplots": True,
-                   "show": False, "plot_errorbars": False}
-
-    dics = open_oi_dir(reduced_directory, choice_band_LM="L")
     date = readout.tpl_start.split("T")[0]
+    dics = open_oi_dir(reduced_directory, choice_band_LM="L")
     res = readout.resolution.upper()
+    plot_kwargs = {"output_path": output_dir, "date": date,
+                   "target": readout.name, "wlenRange": [3.2, 3.9],
+                   "saveplots": True, "show": False, "plot_errorbars": False}
 
     dics = filter_oi_list(
             dics, spectral_resolutions=[res],
@@ -41,7 +40,6 @@ def plot_data_quality(
 
     show_seeing(dics, **plot_kwargs)
     show_vis_tf_vs_time(dics, **plot_kwargs)
-
 
 
 def make_uv_tracks(ax, uv_coord: np.ndarray,

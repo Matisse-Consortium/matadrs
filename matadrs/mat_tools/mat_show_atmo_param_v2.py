@@ -115,7 +115,13 @@ def show_seeing(
         plt.subplots_adjust(hspace=0)
 
         if saveplots:
-            label = "_SEEING"
+            label = ""
+            if "date" in kwargs:
+                label += kwargs["date"]
+            if "target" in kwargs:
+                label += f"_{kwargs['target']}"
+            label += "_SEEING"
+
             fig.savefig(output_path / f"{label}.png", dpi=150)
             fig.savefig(output_path / f"{label}.eps", format="eps", dpi=300)
             plt.close(fig)
