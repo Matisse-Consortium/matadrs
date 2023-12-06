@@ -3,7 +3,7 @@ import re
 import warnings
 from logging import warn
 from pathlib import Path
-from typing import Dict, Tuple, List, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 import astropy.units as u
@@ -99,8 +99,6 @@ class ReadoutFits:
 
         with fits.open(self.fits_file) as hdul:
             self.primary_header = hdul[0].header
-
-        self.pipeline_version = self.primary_header["HIERARCH ESO PRO REC1 PIPE ID"]
 
     @property
     def name(self) -> str:
@@ -206,6 +204,11 @@ class ReadoutFits:
         return self.primary_header["HIERARCH ESO TPL START"]
 
     @property
+    def pipeline_version(self) -> str:
+        """Fetches the pipeline version from the primary header."""
+        return self.primary_header["HIERARCH ESO PRO REC1 PIPE ID"]
+
+    @property
     def detector(self) -> str:
         """Fetches the detector used for the observation from the primary header."""
         return self.primary_header["HIERARCH ESO DET NAME"]
@@ -286,15 +289,34 @@ class ReadoutFits:
     def oi_vis(self) -> Table:
         """Fetches the visibility table."""
         if self._oi_vis is None:
-            self._oi_vis = self.get_table_for_fits("oi_vis")
-            self._oi_vis.add_columns([self.get_delay_lines(self._oi_vis),
-                                      self.merge_uv_coords(self._oi_vis),
-                                      self.get_baselines(self._oi_vis)],
-                                     names=["DELAY_LINE", "UVCOORD", "BASELINE"])
-            self._oi_vis.keep_columns(["VISAMP", "VISAMPERR", "UVCOORD",
-                                       "VISPHI", "VISPHIERR",
-                                       "DELAY_LINE", "BASELINE",
-                                       "MJD", "FLAG", "STA_INDEX"])
+            try:
+                self._oi_vis = self.get_table_for_fits("oi_vis")
+                self._oi_vis.add_columns(
+                        [self.get_delay_lines(self._oi_vis),
+                         self.merge_uv_coords(self._oi_vis),
+                         self.get_baselines(self._oi_vis)],
+                        names=["DELAY_LINE", "UVCOORD", "BASELINE"])
+            except KeyError:
+                self._oi_vis = Table()
+                nan_column = self._oi_vis.Column(
+                        np.full(self.longest_entry, np.nan))
+                nan_array = [nan_column for _ in range(6)]
+                nan_six = [(np.nan, np.nan) for _ in range(6)]
+                nan_str = ["" for _ in range(6)]
+                nan_base = [np.nan for _ in range(6)]
+                self._oi_vis.add_columns(
+                        [nan_array, nan_array, nan_six,
+                         nan_array, nan_array, nan_str,
+                         nan_base, nan_base, nan_array, nan_six],
+                        names=["VISAMP", "VISAMPERR", "UVCOORD",
+                               "VISPHI", "VISPHIERR",
+                               "DELAY_LINE", "BASELINE",
+                               "MJD", "FLAG", "STA_INDEX"])
+            self._oi_vis.keep_columns(
+                    ["VISAMP", "VISAMPERR", "UVCOORD",
+                     "VISPHI", "VISPHIERR",
+                     "DELAY_LINE", "BASELINE",
+                     "MJD", "FLAG", "STA_INDEX"])
         return self._oi_vis
 
     @property

@@ -200,8 +200,6 @@ class Plotter:
                       data: List[np.ndarray],
                       margin: Optional[float] = 0.05) -> Tuple[int, int]:
         """Sets the y-limits from the data with some margin"""
-        if np.all(data == np.nan):
-            return None, None
         try:
             if np.min(wavelength) >= 6:
                 indices = np.where((wavelength > 8.5) | (wavelength < 12.5))
@@ -213,6 +211,8 @@ class Plotter:
         except ValueError:
             ymin, ymax = np.percentile(data, 10), np.percentile(data, 90)
         spacing = np.linalg.norm(ymax-ymin)*margin
+        if np.isnan(ymin) and np.isnan(ymax):
+            return None, None
         return ymin-spacing, ymax+spacing
 
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
