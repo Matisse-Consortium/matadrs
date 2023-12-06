@@ -20,8 +20,7 @@ from ..utils.tools import cprint, print_execution_time, \
 
 __all__ = ["get_readout_for_tpl_match", "get_tpl_starts", "in_catalog",
            "get_catalog_match", "prepare_catalogs", "set_script_arguments",
-           "cleanup_reduction", "reduce_mode_and_band", "prepare_reduction",
-           "reduce"]
+           "cleanup_reduction", "reduce_mode_and_band", "prepare_reduction"]
 
 
 CATALOG_DIR = Path(
@@ -94,7 +93,6 @@ def find_catalogs(calib_dir: Path) -> List[Path]:
             matisseType(ReadoutFits(catalog).primary_header) == "JSDC_CAT"]
 
 
-# TODO: Test if the times are correct -> None file check.
 def remove_old_catalogs(catalog: Path, calib_dir: Path):
     """Checks if the latest catalog is already existing
     in the calibration directory and removes outdated iterations.

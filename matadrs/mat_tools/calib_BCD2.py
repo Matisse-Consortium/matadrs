@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Apr 11 2019
+"""Created on Apr 11 2019
 
 @author: fmillour
 """

@@ -1,5 +1,4 @@
-"""
-This file is part of the Matisse pipeline GUI series
+"""This file is part of the Matisse pipeline GUI series
 Copyright (C) 2017- Observatoire de la Côte d'Azur
 
 Created in 2016
