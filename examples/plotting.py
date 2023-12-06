@@ -12,4 +12,5 @@ path = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/"
             "data/matisse/GTO/hd142666/product/UTs/")
 for directory in list(path.glob("20*")):
     reduced_dir = directory / "reduced" / "incoherent" / "lband"
-    plot_data_quality(reduced_dir, reduced_dir / "data_quality")
+    for sub_dir in list(reduced_dir.glob("*")):
+        plot_data_quality(sub_dir, sub_dir / "data_quality")

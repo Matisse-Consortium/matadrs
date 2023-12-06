@@ -1127,7 +1127,7 @@ def show_vis2_tf2_vs_time(
                             if text_tag_flag == 1 or (prev_target_name != target_names_cal[idxst][j]):
                                 axs1[i].text(V2_MJD_arr_cal[idxst][j], text_y, \
                                                  target_names_cal[idxst][j].replace('_', ' ')+ \
-                                                 " ("+np.str(np.round(target_fluxes_cal[idxst][j],1))+"Jy)", rotation=90, \
+                                                 " ("+str(np.round(target_fluxes_cal[idxst][j],1))+"Jy)", rotation=90, \
                                                  va='bottom',fontsize=7)
                                 text_tag_flag = 0
                                 prev_text_MJD = V2_MJD_arr_cal[idxst][j]
@@ -1294,7 +1294,7 @@ def show_vis2_tf2_vs_time(
                                 ymin, ymax = axs[i + 0].get_ylim()
                                 axs[i + 0].text(CP_MJD_arr_cal[idxst][j], ymax * 1.05, \
                                                     target_names_CP_cal[idxst][j].replace('_', ' ')+ \
-                                                    " ("+np.str(np.round(target_fluxes_CP_cal[idxst][j],1))+"Jy)", rotation=90,
+                                                    " ("+str(np.round(target_fluxes_CP_cal[idxst][j],1))+"Jy)", rotation=90,
                                                     va='bottom',fontsize=7)  
                                 text_tag_flag = 0
                                 prev_text_MJD = CP_MJD_arr_cal[idxst][j]
@@ -1581,7 +1581,7 @@ def show_vis_tf_vs_time(
                             if text_tag_flag == 1 or (prev_target_name != target_names_cal[idxst][j]):
                                 axs1[i].text(V_MJD_arr_cal[idxst][j], text_y, \
                                                  target_names_cal[idxst][j].replace('_', ' ')+ \
-                                                 " ("+np.str(np.round(target_fluxes_cal[idxst][j],1))+"Jy)", rotation=90, \
+                                                 " ("+str(np.round(target_fluxes_cal[idxst][j],1))+"Jy)", rotation=90, \
                                                  va='bottom',fontsize=7)
                                 text_tag_flag = 0
                                 prev_text_MJD = V_MJD_arr_cal[idxst][j]
@@ -1993,7 +1993,7 @@ def show_cf2_vs_time(
                                 if (tar_name in starFlux) :
                                     axs1[i].text(CF2_MJD_arr_cal[idxst][j], text_y, \
                                                  target_names_cal[idxst][j].replace('_', ' ')+ \
-                                                 " ("+np.str(np.round(starFlux[tar_name],1))+"Jy)", rotation=90, \
+                                                 " ("+str(np.round(starFlux[tar_name],1))+"Jy)", rotation=90, \
                                                  va='bottom',fontsize=7)
                                 else :
                                     axs1[i].text(CF2_MJD_arr_cal[idxst][j], text_y, \
@@ -2143,7 +2143,7 @@ def show_cf2_vs_time(
                                 if (tar_name in starFlux):
                                     axs[i + 0].text(CP_MJD_arr_cal[idxst][j], ymax * 1.05, \
                                                     target_names_CP_cal[idxst][j].replace('_', ' ')+ \
-                                                    " ("+np.str(np.round(starFlux[tar_name],1))+"Jy)", rotation=90,
+                                                    " ("+str(np.round(starFlux[tar_name],1))+"Jy)", rotation=90,
                                                     va='bottom',fontsize=7)
                                 else:
                                      axs[i + 0].text(CP_MJD_arr_cal[idxst][j], ymax * 1.05, \
