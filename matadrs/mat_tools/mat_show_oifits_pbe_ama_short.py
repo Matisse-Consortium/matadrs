@@ -58,13 +58,15 @@ from matplotlib import pyplot as plt
 from ..utils import robust
 
 
-def smooth_tab(tab,n_smooth):
-    kernel=np.ones(n_smooth)//n_smooth
-    tab_smoothed=np.convolve(tab,kernel,mode='same')
+def smooth_tab(tab, n_smooth):
+    kernel = np.ones(n_smooth)//n_smooth
+    tab_smoothed = np.convolve(tab, kernel, mode='same')
     return tab_smoothed
 
+
 def open_oi(oi_file: Path, band_LM: str) -> Dict:
-    """Opens an oifits file and returns a dictionary with the relevant information."""
+    """Opens an oifits file and returns a dictionary with the
+    relevant information."""
     try:
         hdu = fits.open(oi_file)
     except IOError:
@@ -72,7 +74,6 @@ def open_oi(oi_file: Path, band_LM: str) -> Dict:
         return {}
 
     hdr = hdu[0].header
-
     try:
         wl = hdu['OI_WAVELENGTH'].data['EFF_WAVE']
     except KeyError:
@@ -145,7 +146,7 @@ def open_oi(oi_file: Path, band_LM: str) -> Dict:
         band = ''
     dic['BAND'] = band
     dic['TARGET_FLUX'] = flux_target
-    
+
     try:
         if (det_name == 'AQUARIUS'):
             dispersion_name = hdr['HIERARCH ESO INS DIN NAME']
@@ -748,13 +749,14 @@ def show_oi_vs_time(list_of_dicts: Dict, wlenRange: List[float],
         plt.tight_layout()
         plt.show()
 
+
 def show_vis2_tf2_vs_time(
         list_of_dicts: List[Dict], wlenRange: List[float],
         showvis: Optional[bool] = False,
         saveplots: Optional[bool] = False,
         output_path: Optional[Path] = None,
         plot_errorbars: Optional[bool] = True,
-        magic_numbers: Optional[bool] = False) -> None:
+        magic_numbers: Optional[bool] = False, **kwargs) -> None:
     """Plot the vis2 and tf2 vs time.
 
     Parameters
@@ -1367,7 +1369,7 @@ def show_vis_tf_vs_time(
         wlenRange: List[float],
         saveplots: Optional[bool] = False,
         output_path: Optional[Path] = None,
-        plot_errorbars: Optional[bool] = True) -> None:
+        plot_errorbars: Optional[bool] = True, **kwargs) -> None:
     """Plots the TF vs. time for the oifits-files.
 
     Parameters
@@ -2207,18 +2209,17 @@ def show_cf2_vs_time(
             plt.close(fig2)
         else:
             plt.show()
+        print("Plots READY.")
 
-        print ("Plots READY.")
 
-        
 def open_oi_dir(input_dir: Path, choice_band_LM: str):
     """Opens all the oifits-files in the directory."""
-    oifits_file_list = Path(input_dir).glob('*RAW_INT*fits')
+    oifits_file_list = list(map(str, Path(input_dir).glob('*RAW_INT*fits')))
 
     list_of_dicts = []
     for file in oifits_file_list:
         if "LAMP" not in file:
-            dic = open_oi(file,choice_band_LM)
+            dic = open_oi(file, choice_band_LM)
             if dic:
                 print (dic['TARGET'], dic['DATEOBS'], dic['BAND'], dic['DISP'], dic['DIT'], dic['CATEGORY'])
                 list_of_dicts.append(dic)
@@ -2287,6 +2288,7 @@ def filter_oi_list(
                     continue
             if bands:
                 if dic['BAND'] not in bands_new:
+                    breakpoint()
                     continue
             if spectral_resolutions:
                 if dic['DISP'] not in spectral_resolutions:
@@ -2303,7 +2305,7 @@ def filter_oi_list(
             if flux_range:
                 if not (dic['TARGET_FLUX'] >= flux_range[0] and dic['TARGET_FLUX'] <= flux_range[1]):
                     continue
-            
+
             target = dic['TARGET']
             if targets:
                 targets = [x.lower().replace("_", " ") for x in targets]

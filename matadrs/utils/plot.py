@@ -9,8 +9,37 @@ from astropy.coordinates import EarthLocation
 from matplotlib.axes import Axes
 
 from .readout import ReadoutFits
-from .tools import unwrap_phases, calculate_uv_points
+from .tools import unwrap_phases, calculate_uv_points, get_fits_by_tag
 from .options import OPTIONS
+from ..mat_tools.mat_show_atmo_param_v2 import show_seeing
+from ..mat_tools.mat_show_oifits_pbe_ama_short import open_oi_dir, \
+        filter_oi_list, show_vis_tf_vs_time
+
+
+def plot_data_quality(
+        reduced_directory: Path, output_dir: Path) -> None:
+    """Plots the data quality of the reduced fits-files."""
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
+
+    fits_file = get_fits_by_tag(reduced_directory, "RAW_INT")[0]
+    readout = ReadoutFits(fits_file)
+
+    plot_kwargs = {"output_path": output_dir,
+                   "wlenRange": [3.2, 3.9], "saveplots": True,
+                   "show": False, "plot_errorbars": False}
+
+    dics = open_oi_dir(reduced_directory, choice_band_LM="L")
+    date = readout.tpl_start.split("T")[0]
+    res = readout.resolution.upper()
+
+    dics = filter_oi_list(
+            dics, spectral_resolutions=[res],
+            DIT_range=[0.111, 11.], dates=[date], bands=["L"])
+
+    show_seeing(dics, **plot_kwargs)
+    show_vis_tf_vs_time(dics, **plot_kwargs)
+
 
 
 def make_uv_tracks(ax, uv_coord: np.ndarray,

@@ -13,7 +13,7 @@ from astropy.coordinates import SkyCoord
 
 from ..mat_tools.libAutoPipeline import matisseType
 from ..mat_tools.mat_autoPipeline import mat_autoPipeline
-from ..utils.plot import Plotter
+from ..utils.plot import Plotter, plot_data_quality
 from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time, \
     get_execution_modes, get_fits_by_tag, move
@@ -306,6 +306,7 @@ def prepare_reduction(raw_dir: Path,
 
 def cleanup_reduction(product_dir: Path,
                       mode: str, band: str,
+                      do_data_quality_plot: bool,
                       overwrite: Optional[bool]) -> None:
     """Moves the folders to their corresponding folders of structure
     "/mode/band" after the reduction has been finished and plots the
@@ -319,6 +320,9 @@ def cleanup_reduction(product_dir: Path,
     band : str, optional
         The band in which the reduction is to be executed. Either "lband",
         "nband" or "both".
+    do_data_quality_plot : bool, optional
+        If toggled, plots the data quality of the incoherent L-band
+        reduction.
     overwrite : bool, optional
         If toggled, overwrites any files from previous reductions.
     """
@@ -330,14 +334,17 @@ def cleanup_reduction(product_dir: Path,
         cprint(f"Moving folder '{reduced_folder.name}'...", "g")
         move(reduced_folder, mode_and_band_dir, overwrite)
 
-    # TODO: Remove this for loop? Maybe after properly implementing plotting?
     for reduced_folder in mode_and_band_dir.glob("*.rb"):
         cprint(f"Plotting files of folder {reduced_folder.name}...", "g")
         for fits_file in get_fits_by_tag(reduced_folder, "RAW_INT"):
-            plot_fits = Plotter(fits_file,
-                                save_path=mode_and_band_dir / reduced_folder.name)
+            plot_fits = Plotter(
+                    fits_file,
+                    save_path=mode_and_band_dir / reduced_folder.name)
             plot_fits.add_cphases().add_vis().add_vis2()
             plot_fits.plot(save=True, error=True)
+        if do_data_quality_plot and mode == "incoherent" and band == "lband":
+            plot_data_quality(
+                    reduced_folder, reduced_folder / "data_quality")
     cprint(f"Finished reducing {band} in {mode}-mode", "lp")
     cprint(f"{'':-^50}", "lp")
 
@@ -345,7 +352,9 @@ def cleanup_reduction(product_dir: Path,
 def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                          product_dir: Path, mode: bool,
                          band: str, tpl_start: str,
-                         ncores: int, overwrite: bool) -> None:
+                         ncores: int,
+                         do_data_quality_plot: bool,
+                         overwrite: bool) -> None:
     """Reduces either the L- and/or the N-band data for either the 'coherent' and/or
     'incoherent' setting for a single iteration/epoch.
 
@@ -374,7 +383,10 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
         The starting time of observations.
     ncores : int, optional
         The number of cores used.
-    overwrite : bool, optional
+    do_data_quality_plot : bool
+        If toggled, plots the data quality of the incoherent L-band
+        reduction.
+    overwrite : bool
         If toggled, overwrites any files from previous reductions.
     """
     skip_L, skip_N = band == "nband", band == "lband"
@@ -386,7 +398,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                      nbCore=ncores, resol='', paramL=param_L, paramN=param_N,
                      overwrite=int(overwrite), maxIter=1, skipL=int(skip_L),
                      skipN=int(skip_N), spectralBinning=spectral_binning)
-    cleanup_reduction(product_dir, mode, band, overwrite)
+    cleanup_reduction(product_dir, mode, band, do_data_quality_plot, overwrite)
 
 
 @print_execution_time
@@ -395,6 +407,7 @@ def reduction_pipeline(raw_dir: Path,
                        mode: Optional[str] = "both",
                        band: Optional[str] = "both",
                        ncores: Optional[int] = 6,
+                       do_data_quality_plot: Optional[bool] = True,
                        overwrite: Optional[bool] = False) -> None:
     """Runs the pipeline for the data reduction.
 
@@ -412,12 +425,11 @@ def reduction_pipeline(raw_dir: Path,
         'nband' or 'both'.
     ncores : int, optional
         The number of cores used.
+    do_data_quality_plot : bool, optional
+        If toggled, plots the data quality of the incoherent L-band
+        reduction.
     overwrite : bool, optional
         If toggled, overwrites any files from previous reductions.
-
-    Notes
-    -----
-    The reduction is executed on 6 cores in multiprocessing.
     """
     raw_dir = Path(raw_dir).resolve()
     product_dir = Path(product_dir / "reduced").resolve()
@@ -434,5 +446,6 @@ def reduction_pipeline(raw_dir: Path,
             for band in bands:
                 cprint(f"Processing the {band.title()}...", "lp")
                 reduce_mode_and_band(raw_dir, calib_dir, product_dir,
-                                     mode, band, tpl_start, ncores, overwrite)
+                                     mode, band, tpl_start, ncores,
+                                     do_data_quality_plot, overwrite)
     cprint(f"Finished reducing {', '.join(bands)} for {', '.join(modes)}-mode(s)", "lp")

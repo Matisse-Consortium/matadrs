@@ -217,7 +217,7 @@ class ReadoutFits:
         return self.primary_header["HIERARCH ESO ISS AMBI TAU0 START"]
 
     @property
-    def resolution(self) -> Tuple[str, str]:
+    def resolution(self) -> str:
         """Fetches the object's N-band resolutions from the primary header."""
         return self.primary_header["HIERARCH ESO INS DIN NAME"].lower()
 

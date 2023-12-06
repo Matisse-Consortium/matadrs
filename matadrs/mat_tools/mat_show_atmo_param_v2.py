@@ -56,7 +56,7 @@ def show_seeing(
         list_of_dicts: List[Dict],
         saveplots: Optional[bool] = False,
         output_path: Optional[Path] = None,
-        show: Optional[bool] = True) -> None:
+        show: Optional[bool] = True, **kwargs) -> None:
     """Plots the seeing for the oifits-files.
 
     Parameters
@@ -116,8 +116,8 @@ def show_seeing(
 
         if saveplots:
             label = "_SEEING"
-            fig.savefig(output_path + label + ".png", dpi=150)
-            fig.savefig(output_path + label + ".eps", format="eps", dpi=300)
+            fig.savefig(output_path / f"{label}.png", dpi=150)
+            fig.savefig(output_path / f"{label}.eps", format="eps", dpi=300)
             plt.close(fig)
         if show:
             plt.show()
