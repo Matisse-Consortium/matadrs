@@ -603,6 +603,8 @@ delay line configuration.</p>
 </dd>
 <dt><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.gravity_index" title="matadrs.utils.readout.ReadoutFits.gravity_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gravity_index</span></code></a></dt><dd><p>Returns the indices for either the fringe tracker or science observations.</p>
 </dd>
+<dt><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.instrument" title="matadrs.utils.readout.ReadoutFits.instrument"><code class="xref py py-obj docutils literal notranslate"><span class="pre">instrument</span></code></a></dt><dd><p>Fetches the object’s instrument from the primary header.</p>
+</dd>
 <dt><a class="reference internal" href="#id9" title="matadrs.utils.readout.ReadoutFits.longest_entry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">longest_entry</span></code></a></dt><dd><p>The longest entry of all the rows fetched from the ‘oi_wl’ Table.</p>
 </dd>
 <dt><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.mjd" title="matadrs.utils.readout.ReadoutFits.mjd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mjd</span></code></a></dt><dd><p>Fetches the observation’s modified julian date from the primary header.</p>
@@ -797,6 +799,12 @@ and returns the telescope’s names.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gravity_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.gravity_index" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the indices for either the fringe tracker or science
 observations.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.instrument">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instrument</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.instrument" title="Permalink to this definition">#</a></dt>
+<dd><p>Fetches the object’s instrument from the primary header.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1059,6 +1067,7 @@ calibrator.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_telescopes"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_telescopes()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_unit"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_unit()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.gravity_index"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.gravity_index</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.instrument"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.instrument</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.is_calibrator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.is_pip_version_greater_equal"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.is_pip_version_greater_equal()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.longest_entry</span></code></a></li>
