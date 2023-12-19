@@ -2,15 +2,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Tuple, List, Union, Optional
 
-import astropy.units as u
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
-from astropy.coordinates import EarthLocation
 from matplotlib.axes import Axes
 
 from .readout import ReadoutFits
-from .tools import unwrap_phases, calculate_uv_points, get_fits_by_tag
+from .tools import unwrap_phases, calculate_uv_tracks, get_fits_by_tag
 from .options import OPTIONS
 from ..mat_tools.mat_show_atmo_param_v2 import show_seeing
 from ..mat_tools.mat_show_oifits_pbe_ama_short import open_oi_dir, \
@@ -41,42 +39,6 @@ def plot_data_quality(
 
     show_seeing(dics, **plot_kwargs)
     show_vis_tf_vs_time(dics, **plot_kwargs)
-
-
-def make_uv_tracks(ax, u_coords: np.ndarray, v_coords: np.ndarray,
-                   baselines: List[np.ndarray],
-                   declination: float, airmass_lim: float) -> None:
-    """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
-
-    From coordinate + ha (range), calculate uv tracks.
-
-    Parameters
-    ----------
-    uv_coords : numpy.ndarray of float
-        The (u, v)-coordinates.
-    baselines : list of numpy.ndarray
-        The baselines in the following order: Baselines east, -north,
-        -longest.
-    declination : float
-        The declination of the site.
-    color : str
-        Set the color/colors of the uv-coords. In case of multiple
-        (.fits)-files the colors can be specified as a list with entries
-        for each file.
-    airmass_lim : float
-        The airmass limit for the uv-coords.
-    """
-    latitude_paranal = EarthLocation.of_site(
-        "paranal").geodetic.lat.to(u.rad)
-    hamax = np.arccos(abs((1./airmass_lim-np.sin(latitude_paranal)
-                           * np.sin(declination))/(np.cos(latitude_paranal)
-                                                   * np.cos(declination))))
-    hour_angles = np.linspace(-hamax, hamax, 1000)
-    u_coord_tracks, v_coord_tracks = calculate_uv_points(
-            baselines, hour_angles, latitude_paranal, declination)
-
-    ax.plot(u_coord_tracks, v_coord_tracks, '-', color='grey', alpha=0.5)
-    ax.plot(-u_coord_tracks, -v_coord_tracks, '-', color='grey', alpha=0.5)
 
 
 @dataclass
@@ -264,12 +226,15 @@ class Plotter:
                             fontsize="small", color='0', alpha=0.8)
 
                 if make_tracks:
-                    make_uv_tracks(
-                            ax, u_coords, v_coords, baselines[uv_index],
-                            readout.dec*np.pi/180, color, airmass_lim)
+                    u_coord_tracks, v_coord_tracks = calculate_uv_tracks(
+                        baselines[uv_index], readout.dec*np.pi/180, airmass_lim)
+                    ax.plot(u_coord_tracks, v_coord_tracks, '-', color='grey', alpha=0.5)
+                    ax.plot(-u_coord_tracks, -v_coord_tracks, '-', color='grey', alpha=0.5)
 
         ax.plot([0.], [0.], '+k', markersize=5, markeredgewidth=2, alpha=0.5)
-        xlabel, ylabel = "$u$ (m)", "$v$ (m)"
+
+        # TODO: Implement check or calculation for the orientations
+        xlabel, ylabel = "$u$ (m) - South", "$v$ (m) - East"
         uv_extent = int(uv_max + uv_max*0.25)
 
         if color_grouping == "instrument":

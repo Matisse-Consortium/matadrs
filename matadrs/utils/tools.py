@@ -8,6 +8,7 @@ from typing import Union, Optional, Callable, Tuple, List
 
 import astropy.units as u
 import numpy as np
+from astropy.coordinates import EarthLocation
 from astropy.io import fits
 from astropy.table import Table
 from scipy.interpolate import CubicSpline
@@ -290,11 +291,10 @@ def get_path_descriptor(root_dir: Path, descriptor: Path,
     return root_dir / "calib" / mode_and_band[0] / new_dir_name
 
 
-# TODO: Rename function at a future point
-def calculate_uv_points(baselines: List[float],
-                        hour_angle: np.ndarray[float],
-                        latitude: u.rad,
-                        declination: u.rad) -> Tuple[np.ndarray]:
+# TODO: Reimplement both of the following functions in a better way
+def transform_uv_points(
+        baselines: List[float], hour_angle: np.ndarray,
+        latitude: u.rad, declination: u.rad) -> Tuple[np.ndarray, np.ndarray]:
     """Calculates the earth rotation (synthesis) for the uv-point
     corresponding to the baselines for the input hour angle(s)
 
@@ -322,3 +322,26 @@ def calculate_uv_points(baselines: List[float],
         (np.cos(latitude) * np.sin(declination) * np.cos(hour_angle)
          - np.sin(latitude) * np.cos(declination))
     return u_coords, v_coords
+
+
+def calculate_uv_tracks(baselines: List[np.ndarray],
+                        declination: float, airmass_lim: float):
+    """Calculates the tracks that uv-coordinates create from the earth rotation
+    synthesis at the latitude of paranal.
+
+    Parameters
+    ----------
+    baselines : list of numpy.ndarray
+        The baselines in the following order: Baselines east, -north, -longest.
+    declination : float
+        The declination of the target.
+    airmass_lim : float
+        The airmass limit of the target.
+    """
+    latitude_paranal = EarthLocation.of_site(
+        "paranal").geodetic.lat.to(u.rad)
+    hamax = np.arccos(abs((1./airmass_lim-np.sin(latitude_paranal)
+                           * np.sin(declination))/(np.cos(latitude_paranal)
+                                                   * np.cos(declination))))
+    return transform_uv_points(baselines, np.linspace(-hamax, hamax, 1000),
+                               latitude_paranal, declination)
