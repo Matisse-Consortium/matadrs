@@ -43,12 +43,9 @@ def plot_data_quality(
     show_vis_tf_vs_time(dics, **plot_kwargs)
 
 
-def make_uv_tracks(ax, uv_coord: np.ndarray,
+def make_uv_tracks(ax, u_coords: np.ndarray, v_coords: np.ndarray,
                    baselines: List[np.ndarray],
-                   sta_label: List[np.ndarray],
-                   declination: float,
-                   symbol: str, color: str,
-                   airmass_lim: float, show_text: bool) -> None:
+                   declination: float, airmass_lim: float) -> None:
     """This function was written by Jozsef Varga (from menEWS: menEWS_plot.py).
 
     From coordinate + ha (range), calculate uv tracks.
@@ -60,21 +57,15 @@ def make_uv_tracks(ax, uv_coord: np.ndarray,
     baselines : list of numpy.ndarray
         The baselines in the following order: Baselines east, -north,
         -longest.
-    sta_labels : list of numpy.ndarray
     declination : float
         The declination of the site.
-    symbol : str
-        The symbol that markes the coordinates of the (u, v)-point.
     color : str
         Set the color/colors of the uv-coords. In case of multiple
         (.fits)-files the colors can be specified as a list with entries
         for each file.
     airmass_lim : float
         The airmass limit for the uv-coords.
-    show_text : bool
-        If the baselines should be shown next to the coordinates as text.
     """
-    u_coords, v_coords = uv_coord
     latitude_paranal = EarthLocation.of_site(
         "paranal").geodetic.lat.to(u.rad)
     hamax = np.arccos(abs((1./airmass_lim-np.sin(latitude_paranal)
@@ -86,15 +77,6 @@ def make_uv_tracks(ax, uv_coord: np.ndarray,
 
     ax.plot(u_coord_tracks, v_coord_tracks, '-', color='grey', alpha=0.5)
     ax.plot(-u_coord_tracks, -v_coord_tracks, '-', color='grey', alpha=0.5)
-    ax.plot([0.], [0.], '+k', markersize=5, markeredgewidth=2, alpha=0.5)
-
-    ax.plot(u_coords, v_coords, symbol, color=color,
-            markersize=10, markeredgewidth=3)
-    ax.plot(-u_coords, -v_coords, symbol,
-            color=color, markersize=10, markeredgewidth=3)
-    if show_text:
-        ax.text(-u_coords-3.5, -v_coords-1.5, sta_label,
-                fontsize="small", color='0', alpha=0.8)
 
 
 @dataclass
@@ -221,6 +203,7 @@ class Plotter:
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
                 airmass_lim: Optional[float] = 2.,
                 show_text: Optional[List] = False,
+                make_tracks: Optional[bool] = True,
                 color_grouping: Optional[str] = "file",
                 **kwargs) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
@@ -234,6 +217,8 @@ class Plotter:
             The airmass limit for the uv-coords.
         show_text: list of bool, optional
             If the baselines should be shown next to the coordinates as text.
+        make_tracks: bool, optional
+            If the tracks should be plotted.
         color_grouping : str, optional
             The color grouping used for the uv-coords. If 'file' the
             colors are based on the different (.fits)-files. If 'instrument'
@@ -269,11 +254,21 @@ class Plotter:
                     instruments.append(readout.instrument)
                 color = OPTIONS["plot.colors"][instruments.index(readout.instrument)]
 
-            for uv_index, uv_coord in enumerate(uv_coords):
-                make_uv_tracks(ax, uv_coord, baselines[uv_index],
-                               sta_labels[uv_index], readout.dec*np.pi/180,
-                               symbol, color, airmass_lim, show_text)
+            for uv_index, (u_coords, v_coords) in enumerate(uv_coords):
+                ax.plot(u_coords, v_coords, symbol, color=color,
+                        markersize=10, markeredgewidth=3)
+                ax.plot(-u_coords, -v_coords, symbol,
+                        color=color, markersize=10, markeredgewidth=3)
+                if show_text:
+                    ax.text(-u_coords-3.5, -v_coords-1.5, sta_labels[uv_index],
+                            fontsize="small", color='0', alpha=0.8)
 
+                if make_tracks:
+                    make_uv_tracks(
+                            ax, u_coords, v_coords, baselines[uv_index],
+                            readout.dec*np.pi/180, color, airmass_lim)
+
+        ax.plot([0.], [0.], '+k', markersize=5, markeredgewidth=2, alpha=0.5)
         xlabel, ylabel = "$u$ (m)", "$v$ (m)"
         uv_extent = int(uv_max + uv_max*0.25)
 
