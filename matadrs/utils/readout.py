@@ -127,10 +127,15 @@ class ReadoutFits:
         return self._name
 
     @property
+    def instrument(self) -> str:
+        """Fetches the object's instrument from the primary header."""
+        return self.primary_header["instrume"].lower()
+
+    @property
     def gravity_index(self) -> int:
         """Returns the indices for either the fringe tracker or science
         observations."""
-        if self.primary_header["instrume"].lower() == "gravity":
+        if self.instrument == "gravity":
             return GRAVITY_TO_INDEX[self.gravity_method]
         return None
 

@@ -5,6 +5,7 @@ from typing import Callable, Tuple, List, Union, Optional
 import astropy.units as u
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 from astropy.coordinates import EarthLocation
 from matplotlib.axes import Axes
 
@@ -70,6 +71,8 @@ def make_uv_tracks(ax, uv_coord: np.ndarray,
         for each file.
     airmass_lim : float
         The airmass limit for the uv-coords.
+    show_text : bool
+        If the baselines should be shown next to the coordinates as text.
     """
     u_coords, v_coords = uv_coord
     latitude_paranal = EarthLocation.of_site(
@@ -78,10 +81,8 @@ def make_uv_tracks(ax, uv_coord: np.ndarray,
                            * np.sin(declination))/(np.cos(latitude_paranal)
                                                    * np.cos(declination))))
     hour_angles = np.linspace(-hamax, hamax, 1000)
-    u_coord_tracks, v_coord_tracks = calculate_uv_points(baselines,
-                                                         hour_angles,
-                                                         latitude_paranal,
-                                                         declination)
+    u_coord_tracks, v_coord_tracks = calculate_uv_points(
+            baselines, hour_angles, latitude_paranal, declination)
 
     ax.plot(u_coord_tracks, v_coord_tracks, '-', color='grey', alpha=0.5)
     ax.plot(-u_coord_tracks, -v_coord_tracks, '-', color='grey', alpha=0.5)
@@ -183,6 +184,8 @@ class Plotter:
         else:
             self.plot_name = f"{Path(fits_files).stem}"
 
+        self.color_grouping = "file"
+
         self.readouts = list(map(ReadoutFits, self.fits_files))
         self.components = {}
 
@@ -217,7 +220,9 @@ class Plotter:
 
     def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
                 airmass_lim: Optional[float] = 2.,
-                show_text: Optional[List] = False, **kwargs) -> None:
+                show_text: Optional[List] = False,
+                color_grouping: Optional[str] = "file",
+                **kwargs) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
 
         Parameters
@@ -225,15 +230,17 @@ class Plotter:
         ax : matplotlib.axes.Axes
         symbol : str, optional
             The symbol that markes the coordinates of the (u, v)-point.
-        color : str or list of str, optional
-            Set the color/colors of the uv-coords. In case of multiple
-            (.fits)-files the colors can be specified as a list with entries
-            for each file.
-        sel_wl : float, optional
-            The wavelength to convert meter to Mlambda. If None then no
-            conversion is done.
+        airmass_lim: float, optional
+            The airmass limit for the uv-coords.
+        show_text: list of bool, optional
+            If the baselines should be shown next to the coordinates as text.
+        color_grouping : str, optional
+            The color grouping used for the uv-coords. If 'file' the
+            colors are based on the different (.fits)-files. If 'instrument'
+            the colors are based on the different instruments (see
+            ReadoutFits.instrument).
         """
-        uv_max = 0
+        instruments, uv_max = [], 0
         for index, readout in enumerate(self.readouts):
             uv_coords = readout.oi_vis2["UVCOORD"]
             if uv_max < (tmp_uv_max := uv_coords.max()):
@@ -255,26 +262,39 @@ class Plotter:
                 baselines.append(baseline)
                 sta_labels.append(sta_label)
 
-            # TODO: Determine the maximum for the (u, v)-plot and then use that to set the
-            # plot dimensions
+            if color_grouping == "file":
+                color = OPTIONS["plot.colors"][index]
+            elif color_grouping == "instrument":
+                if readout.instrument not in instruments:
+                    instruments.append(readout.instrument)
+                color = OPTIONS["plot.colors"][instruments.index(readout.instrument)]
+
             for uv_index, uv_coord in enumerate(uv_coords):
                 make_uv_tracks(ax, uv_coord, baselines[uv_index],
                                sta_labels[uv_index], readout.dec*np.pi/180,
-                               symbol, OPTIONS["plot.colors"][index],
-                               airmass_lim, show_text)
+                               symbol, color, airmass_lim, show_text)
 
-            xlabel, ylabel = "$u$ (m)", "$v$ (m)"
-            uv_extent = int(uv_max + uv_max*0.25)
+        xlabel, ylabel = "$u$ (m)", "$v$ (m)"
+        uv_extent = int(uv_max + uv_max*0.25)
 
-            ax.set_xlim([uv_extent, -uv_extent])
-            ax.set_ylim([-uv_extent, uv_extent])
-            ax.set_xlabel(xlabel)
-            ax.set_ylabel(ylabel)
+        if color_grouping == "instrument":
+            handles = []
+            for index, instrument in enumerate(instruments):
+                color = OPTIONS["plot.colors"][index]
+                handles.append(mlines.Line2D(
+                    [], [], color=color, marker="X",
+                    linestyle="None", label=instrument.upper()))
+            ax.legend(handles=handles, loc="upper left")
+
+        ax.set_xlim([uv_extent, -uv_extent])
+        ax.set_ylim([-uv_extent, uv_extent])
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
 
     def make_component(self, data_name: str,
                        legend_format: Optional[str] = "long",
                        unwrap: Optional[bool] = False,
-                       period: Optional[int] = 360):
+                       period: Optional[int] = 360, **kwargs):
         """Generates a pandas DataFrame that has all the plots' information
 
         Parameters
@@ -286,9 +306,11 @@ class Plotter:
             Sets the format of the legend: For all information set "long" and
             for only station names set "short".
         unwrap : bool, optional
+            If the phase should be unwrapped.
         period : int, optional
+            The unwrapping period.
         """
-        component, component_label = [], None
+        component, component_label, component_kwargs = [], None, {**kwargs}
         for readout in self.readouts:
             sub_component = PlotComponent(
                 x_values=readout.oi_wavelength["EFF_WAVE"].data.squeeze())
@@ -355,39 +377,36 @@ class Plotter:
             else:
                 raise KeyError("Input data name cannot be queried!")
             component.append(sub_component)
-        self.components[component_label] = component
+        self.components[component_label] = {"values": component,
+                                            "kwargs": component_kwargs}
         return self
 
     def add_flux(self, **kwargs):
-        """Adds the total flux(es) as a subplot
-
-        See Also
-        --------
-        """
+        """Adds the total flux(es) as a subplot."""
         return self.make_component("flux", **kwargs)
 
     def add_vis(self, **kwargs):
-        """Adds the visibilities/correlated fluxes as a subplot"""
+        """Adds the visibilities/correlated fluxes as a subplot."""
         return self.make_component("vis", **kwargs)
 
     def add_vis2(self, **kwargs):
-        """Adds the squared visibilities as a subplot"""
+        """Adds the squared visibilities as a subplot."""
         return self.make_component("vis2", **kwargs)
 
     def add_cphases(self, **kwargs):
-        """Adds the closure phases as a subplot"""
+        """Adds the closure phases as a subplot."""
         return self.make_component("cphases", **kwargs)
 
     def add_diff_phases(self, **kwargs):
-        """Adds the differential phases as a subplot"""
+        """Adds the differential phases as a subplot."""
         return self.make_component("diff", **kwargs)
 
     def add_uv(self, **kwargs):
-        """Adds the (u, v)-coordinates as a subplot"""
+        """Adds the (u, v)-coordinates as a subplot."""
         return self.make_component("uv", **kwargs)
 
     def add_mosaic(self, **kwargs):
-        """Combines multiple subplots to produce a mosaic plot"""
+        """Combines multiple subplots to produce a mosaic plot."""
         self.add_uv(**kwargs)
         self.add_vis(**kwargs)
         self.add_vis2(**kwargs)
@@ -438,8 +457,7 @@ class Plotter:
     # TODO: Sharex, sharey and subplots should be added
     def plot(self, save: Optional[bool] = False,
              subplots: Optional[bool] = False,
-             sharex: Optional[bool] = False,
-             format: Optional[str] = "pdf", **kwargs):
+             sharex: Optional[bool] = False, **kwargs):
         """Combines the individual components into one plot.
 
         The size and dimension of the plot is automatically determined
@@ -465,21 +483,24 @@ class Plotter:
                 if self.num_components != 1 else 1
 
         to_px = 1/plt.rcParams["figure.dpi"]
-        fig, axarr = plt.subplots(rows, columns,
-                                  constrained_layout=True,
-                                  figsize=(512*to_px*columns, 512*to_px*rows))
+        fig, axarr = plt.subplots(
+                rows, columns, constrained_layout=True,
+                figsize=(512*to_px*columns, 512*to_px*rows))
 
         if self.num_components != 1:
-            for ax, (name, component) in zip(axarr.flatten(), self.components.items()):
-                self.plot_component(ax, name, component, **kwargs)
+            for ax, (name, component)\
+                    in zip(axarr.flatten(), self.components.items()):
+                self.plot_component(ax, name, component["values"],
+                                    **component["kwargs"], **kwargs)
         else:
             name, component = map(
                 lambda x: x[0], zip(*self.components.items()))
-            self.plot_component(axarr, name, component, **kwargs)
+            self.plot_component(axarr, name, component["values"],
+                                **component["kwargs"], **kwargs)
 
         if save:
-            plt.savefig(self.save_path / (self.plot_name + f".{format}"),
-                        format=format)
+            plt.savefig(self.save_path / self.plot_name,
+                        format=Path(self.plot_name).suffix[1:])
         else:
             plt.show()
         fig.tight_layout()
