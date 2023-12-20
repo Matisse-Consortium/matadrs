@@ -24,6 +24,7 @@ import sys
 import glob
 import shutil
 import filecmp
+from pathlib import Path
 
 import numpy as np
 from astropy.io import fits
@@ -71,39 +72,29 @@ def removeDoubleParameter(p):
 
 
 def mat_autoPipeline(
-    dirRaw="",
-    dirResult="",
-    dirCalib="",
-    nbCore=0,
-    resol=0,
-    paramL="",
-    paramN="",
-    overwrite=0,
-    maxIter=0,
-    skipL=0,
-    skipN=0,
-    tplstartsel="",
-    tplidsel="",
-    spectralBinning="",
-    try_K2N_cophasing=True,
-):
+        dirRaw: Path = None, dirResult: Path = None,
+        dirCalib: Path = None, nbCore: int = 0,
+        resol=0, paramL="", paramN="", overwrite=0,
+        maxIter=0, skipL=0, skipN=0, tplstartsel="",
+        tplidsel="", spectralBinning="", try_K2N_cophasing=True) -> None:
     v = Vizier(columns=["med-Lflux", "med-Mflux", "med-Nflux"], catalog="II/361")
+
     # Print meaningful error messages if something is wrong in the command line
     print("------------------------------------------------------------------------")
-    if dirRaw == "":
-        print("ERROR: You have to specifiy a Raw Data Directory or a list of raw file")
+    if dirRaw is None:
+        print("ERROR: You have to specifiy a Raw Data Directory")
         sys.exit(0)
     else:
         print("%-40s" % ("Raw Data Directory or file list:",), dirRaw)
-    if dirCalib == "":
+    if dirCalib is None:
         dirCalib = dirRaw
         print(
             "Info: Calibration Directory not specified. We use the default directory "
             + dirCalib
         )
     print("%-40s" % ("Calibration Directory:",), dirCalib)
-    if dirResult == "":
-        dirResult = os.getcwd()
+    if dirResult is None:
+        dirResult = str(Path.cwd())
         print("Info : Results Directory not specified. We use the current directory")
     print("%-40s" % ("Results Directory:",), dirResult)
     if nbCore == 0:
@@ -119,17 +110,14 @@ def mat_autoPipeline(
     print("%-40s" % ("Maximum Number of Iteration:",), maxIter)
 
     print("------------------------------------------------------------------------")
-    if not ("[" in dirRaw):
-        listRaw = glob.glob(dirRaw + "/MATIS*.fits")
-        print("Raw directory given")
-    else:
-        print("List of raw files given")
-        listRaw = eval(dirRaw)
-    if dirCalib != "":
-        listArchive = glob.glob(dirCalib + "/*.fits")
+    listRaw = list(map(str, dirRaw.glob("*.fits")))
+    print("Raw directory given")
+
+    if dirCalib is not None:
+        listArchive = list(map(str, dirCalib.glob("*.fits")))
     else:
         listArchive = []
-    # print(listRaw)
+
     # Sort listRaw using template ID and template start
     print("Sorting files according to constraints...")
     allhdr = []
@@ -138,7 +126,7 @@ def mat_autoPipeline(
     ):
         try:
             allhdr.append(getheader(filename, 0))
-        except:
+        except Exception:
             print("\nWARNING: corrupt file!")
 
     listRawSorted = []
