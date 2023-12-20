@@ -28,6 +28,8 @@ from typing import Union, List
 from astropy.io import fits
 from astropy.io.fits import getheader
 
+from ..utils.options import OPTIONS
+
 
 class headerCache:
     """This class is caching the keys contained in headers.
@@ -44,7 +46,7 @@ class headerCache:
     def __init__(self) -> None:
         """The class's constructor."""
         self.cache = {}
-        self.max_cache_size = 1000
+        self.max_cache_size = OPTIONS["reduce.cache.size"]
 
     @property
     def size(self):
