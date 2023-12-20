@@ -16,10 +16,9 @@ from ..mat_tools.libAutoPipeline import matisseType
 from ..mat_tools.mat_autoPipeline import mat_autoPipeline
 from ..utils.plot import Plotter, plot_data_quality
 from ..utils.readout import ReadoutFits
-from ..utils.tools import cprint, print_execution_time, \
-    get_execution_modes, get_fits_by_tag, move
+from ..utils.tools import HeaderNotFoundWarning, cprint, \
+        print_execution_time, get_execution_modes, get_fits_by_tag, move
 
-from ..utils.tools import HeaderNotFoundWarning
 
 warnings.simplefilter("ignore", category=HeaderNotFoundWarning)
 

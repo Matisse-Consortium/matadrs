@@ -12,6 +12,8 @@ from astroquery.simbad import Simbad
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
 
+from ..utils.tools import HeaderNotFoundWarning
+
 # NOTE: Remove units warning. In (.fits)-file 'day' unit contain,
 # which doesn't exist
 warnings.simplefilter("ignore", category=u.UnitsWarning)
