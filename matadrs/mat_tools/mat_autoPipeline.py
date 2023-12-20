@@ -55,7 +55,7 @@ def runEsorex(cmd):
 
 # ------------------------------------------------------------------------------
 
-
+# TODO: This function could be overworked
 def removeDoubleParameter(p):
     listP = p.split(" ")
     paramName = []
@@ -477,8 +477,13 @@ def mat_autoPipeline(
 
                 listNewParams = removeDoubleParameter(elt["param"].replace("/", " --"))
 
-                cmd="esorex --output-dir="+outputDir+" "+elt['recipes']+" "\
-                        +elt['param'].replace("/"," --")+" "+sofname+"%"+resol
+                # NOTE: This is done to avoid empty parameters
+                listNewParams = ' '.join(
+                    [f"--{param.strip()}" for param in listNewParams.split("--")
+                     if param.strip() not in ["", " "]])
+
+                cmd = f"esorex --output-dir={outputDir} {elt['recipes']} "\
+                        f"{listNewParams} {sofname}%{resol}"
 
                 if iterNumber > 1:
                     sofnamePrev = (
@@ -576,5 +581,4 @@ def mat_autoPipeline(
                     "%-30s" % (elt["action"],),
                     msg,
                 )
-
             break

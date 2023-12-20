@@ -407,6 +407,8 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     param_L, param_N = set_script_arguments(mode)
     spectral_binning = get_spectral_binning(raw_dir, tpl_start)
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
+
+    # NOTE: here resol="" is required for the code not to skip the reduction
     mat_autoPipeline(dirRaw=raw_dir, dirResult=product_dir,
                      dirCalib=calib_dir, tplstartsel=tpl_start,
                      nbCore=ncores, paramL=param_L, paramN=param_N,
