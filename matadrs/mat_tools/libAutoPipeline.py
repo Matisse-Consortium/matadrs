@@ -71,14 +71,13 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
     keyInsFinId       = header['HIERARCH ESO INS FIN ID']
     keyDetMtrh2       = header['HIERARCH ESO DET WIN MTRH2']
     keyDetMtrs2       = header['HIERARCH ESO DET WIN MTRS2']
-        
+
     res = calibPrevious
-    
-    if (action == "ACTION_MAT_CAL_DET_SLOW_SPEED" or 
+    if (action == "ACTION_MAT_CAL_DET_SLOW_SPEED" or
         action == "ACTION_MAT_CAL_DET_FAST_SPEED" or
         action == "ACTION_MAT_CAL_DET_LOW_GAIN"   or
         action == "ACTION_MAT_CAL_DET_HIGH_GAIN"):
-        return [res,1]
+        return [res, 1]
 
     allhdr        = []
     for elt in listCalibFile:
@@ -95,15 +94,14 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
         for elt in res:
             if (elt[1]   == "BADPIX"):
                 nbCalib+=1
-            
+
         for hdr,elt in zip(allhdr,listCalibFile):
-            
             tagCalib=matisseType(hdr)
             if (tagCalib == "BADPIX"):
                 keyDetReadCurnameCalib = hdr['HIERARCH ESO DET READ CURNAME']
                 keyTplStartCalib       = hdr['HIERARCH ESO TPL START']
                 keyDetChipNameCalib    = hdr['HIERARCH ESO DET CHIP NAME']
-                
+
             if (tagCalib                == "BADPIX" and
                 (keyDetReadCurnameCalib == keyDetReadCurname and
                  keyDetChipNameCalib    == keyDetChipName)):
@@ -248,16 +246,16 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
     if (action=="ACTION_MAT_RAW_ESTIMATES"):
         nbCalib=0
         for elt in res:
-            if (elt[1]=="BADPIX" or 
-                elt[1]=="OBS_FLATFIELD" or 
-                elt[1]=="NONLINEARITY" or 
+            if (elt[1]=="BADPIX" or
+                elt[1]=="OBS_FLATFIELD" or
+                elt[1]=="NONLINEARITY" or
                 elt[1]=="SHIFT_MAP" or
                 elt[1]=="KAPPA_MATRIX"):
                 nbCalib+=1
 
-        for hdr,elt in zip(allhdr,listCalibFile):
+        for hdr, elt in zip(allhdr,listCalibFile):
             tagCalib=matisseType(hdr)
-            if (tagCalib=="BADPIX" or 
+            if (tagCalib=="BADPIX" or
                 tagCalib=="OBS_FLATFIELD" or
                 tagCalib=="NONLINEARITY" or
                 tagCalib=="SHIFT_MAP" or

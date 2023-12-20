@@ -477,20 +477,8 @@ def mat_autoPipeline(
 
                 listNewParams = removeDoubleParameter(elt["param"].replace("/", " --"))
 
-                # cmd="esorex --output-dir="+outputDir+" "+elt['recipes']+" "+elt['param'].replace("/"," --")+" "+sofname+"%"+resol;
-                cmd = (
-                    esorex_dir
-                    + "/esorex --output-dir="
-                    + outputDir
-                    + " "
-                    + elt["recipes"]
-                    + " "
-                    + listNewParams
-                    + " "
-                    + sofname
-                    + "%"
-                    + resol
-                )
+                cmd="esorex --output-dir="+outputDir+" "+elt['recipes']+" "\
+                        +elt['param'].replace("/"," --")+" "+sofname+"%"+resol
 
                 if iterNumber > 1:
                     sofnamePrev = (
