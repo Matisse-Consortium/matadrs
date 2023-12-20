@@ -20,7 +20,8 @@ from ..utils.tools import HeaderNotFoundWarning, cprint, \
         print_execution_time, get_execution_modes, get_fits_by_tag, move
 
 
-warnings.simplefilter("ignore", category=HeaderNotFoundWarning)
+# NOTE: Remove the headers warnings as raw files are non-oifits
+warnings.filterwarnings("ignore", category=HeaderNotFoundWarning)
 
 __all__ = ["get_readout_for_tpl_match", "get_tpl_starts", "in_catalog",
            "get_catalog_match", "prepare_catalogs", "set_script_arguments",
