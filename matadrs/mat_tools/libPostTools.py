@@ -759,14 +759,3 @@ def mat_hduCutRows(hdul: fits.HDUList, nrows: int) -> fits.HDUList:
     newhdu.header = hdul.header
     newhdu.update()
     return newhdu
-
-
-if __name__ == "__main__":
-    directory = Path("/Users/scheuck/Data/calibrated_data/lband")
-    output_dir = Path("/Users/scheuck/Data/merged_data/lband/merged")
-    if not output_dir.exists():
-        output_dir.mkdir(parents=True)
-    fits_files = sorted(map(str, directory.glob("*TARGET_CAL*fits")))[4:]
-    fileout = mat_mergeByTplStart(fits_files=fits_files,
-                                  output_dir=str(output_dir), save=True)
-    breakpoint()

@@ -2293,7 +2293,6 @@ def filter_oi_list(
                     continue
             if bands:
                 if dic['BAND'] not in bands_new:
-                    breakpoint()
                     continue
             if spectral_resolutions:
                 if dic['DISP'] not in spectral_resolutions:
