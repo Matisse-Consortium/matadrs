@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-This file is part of the Matisse pipeline GUI series
+"""This file is part of the Matisse pipeline GUI series
 Copyright (C) 2017- Observatoire de la Côte d'Azur
 
 Created in 2016
@@ -59,7 +57,6 @@ CACHE_HEADER = headerCache()
 
 def matisseCalib(header,action,listCalibFile,calibPrevious):
     global CACHE_HEADER
-
     keyDetReadCurname = header['HIERARCH ESO DET READ CURNAME']
     keyDetChipName    = header['HIERARCH ESO DET CHIP NAME']
     keyDetSeq1Dit     = header['HIERARCH ESO DET SEQ1 DIT']
@@ -74,16 +71,18 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
     keyInsFinId       = header['HIERARCH ESO INS FIN ID']
     keyDetMtrh2       = header['HIERARCH ESO DET WIN MTRH2']
     keyDetMtrs2       = header['HIERARCH ESO DET WIN MTRS2']
-
+        
     res = calibPrevious
+    
     if (action == "ACTION_MAT_CAL_DET_SLOW_SPEED" or 
         action == "ACTION_MAT_CAL_DET_FAST_SPEED" or
         action == "ACTION_MAT_CAL_DET_LOW_GAIN"   or
         action == "ACTION_MAT_CAL_DET_HIGH_GAIN"):
-        return [res, 1]
+        return [res,1]
 
-    allhdr = []
+    allhdr        = []
     for elt in listCalibFile:
+        #allhdr.append(getheader(elt,0))
         if elt not in CACHE_HEADER:
             value = getheader(elt,0);
             CACHE_HEADER.update(elt,value)
@@ -92,18 +91,19 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
     if (action == "ACTION_MAT_IM_BASIC"    or
         action == "ACTION_MAT_IM_EXTENDED" or
         action == "ACTION_MAT_IM_REM"):
-        nbCalib = 0
+        nbCalib=0
         for elt in res:
-            if (elt[1] == "BADPIX"):
-                nbCalib += 1
-
-        for hdr, elt in zip(allhdr, listCalibFile):
+            if (elt[1]   == "BADPIX"):
+                nbCalib+=1
+            
+        for hdr,elt in zip(allhdr,listCalibFile):
+            
             tagCalib=matisseType(hdr)
             if (tagCalib == "BADPIX"):
                 keyDetReadCurnameCalib = hdr['HIERARCH ESO DET READ CURNAME']
                 keyTplStartCalib       = hdr['HIERARCH ESO TPL START']
                 keyDetChipNameCalib    = hdr['HIERARCH ESO DET CHIP NAME']
-
+                
             if (tagCalib                == "BADPIX" and
                 (keyDetReadCurnameCalib == keyDetReadCurname and
                  keyDetChipNameCalib    == keyDetChipName)):
@@ -786,3 +786,6 @@ def matisseType(header):
     else:
         res=catg
     return res
+
+
+

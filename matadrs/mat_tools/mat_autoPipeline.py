@@ -23,16 +23,17 @@ import os
 import sys
 import glob
 import shutil
+import filecmp
 
 import numpy as np
 from astropy.io import fits
 from astropy.io.fits import getheader
-from tqdm import tqdm
-import filecmp
-from multiprocessing.pool import Pool
 from astroquery.vizier import Vizier
+from tqdm import tqdm
+from multiprocessing.pool import Pool
 
-from .libAutoPipeline import matisseRecipes, matisseCalib, matisseAction, matisseType
+from .libAutoPipeline import matisseRecipes, matisseCalib, \
+        matisseAction, matisseType
 
 
 def runEsorex(cmd):
@@ -46,8 +47,12 @@ def runEsorex(cmd):
     out = item[-1] + ".log"
     err = item[-1] + ".err"
     val = item[-1].split(".")
+    # print("Running (Recipes : ",item[2],", TplStart : ",val[1],", Detector : ",val[2],")")
     val = item[1].split("=")
     os.system("cd " + val[1] + ";" + cmd + " > " + out + " 2> " + err)
+
+
+# ------------------------------------------------------------------------------
 
 
 def removeDoubleParameter(p):
@@ -62,15 +67,28 @@ def removeDoubleParameter(p):
     return paramsNew
 
 
+# ------------------------------------------------------------------------------
+
+
 def mat_autoPipeline(
-        dirRaw="", dirResult="",
-        dirCalib="", nbCore=0,
-        resol=0, paramL="",
-        paramN="", overwrite=0,
-        maxIter=0, skipL=0,
-        skipN=0, tplstartsel="",
-        tplidsel="", spectralBinning=""):
+    dirRaw="",
+    dirResult="",
+    dirCalib="",
+    nbCore=0,
+    resol=0,
+    paramL="",
+    paramN="",
+    overwrite=0,
+    maxIter=0,
+    skipL=0,
+    skipN=0,
+    tplstartsel="",
+    tplidsel="",
+    spectralBinning="",
+    try_K2N_cophasing=True,
+):
     v = Vizier(columns=["med-Lflux", "med-Mflux", "med-Nflux"], catalog="II/361")
+    # Print meaningful error messages if something is wrong in the command line
     print("------------------------------------------------------------------------")
     if dirRaw == "":
         print("ERROR: You have to specifiy a Raw Data Directory or a list of raw file")
@@ -120,7 +138,7 @@ def mat_autoPipeline(
     ):
         try:
             allhdr.append(getheader(filename, 0))
-        except Exception:
+        except:
             print("\nWARNING: corrupt file!")
 
     listRawSorted = []
@@ -132,8 +150,9 @@ def mat_autoPipeline(
         chip = ""
         if "RMNREC" in hdr["HIERARCH ESO DPR TYPE"]:
             if "GRAVITY" in hdr["HIERARCH ESO DEL FT SENSOR"]:
-                listGRA4MAT.append(filename)
-                listhdrGRA4MAT.append(hdr)
+                if try_K2N_cophasing:  # JV 2023
+                    listGRA4MAT.append(filename)
+                    listhdrGRA4MAT.append(hdr)
 
         if "HIERARCH ESO TPL START" in hdr and "HIERARCH ESO DET CHIP NAME" in hdr:
             tplid = hdr["HIERARCH ESO TPL ID"]
@@ -325,7 +344,7 @@ def mat_autoPipeline(
             if action == "ACTION_MAT_RAW_ESTIMATES":
                 if hdr["HIERARCH ESO DET CHIP NAME"] == "AQUARIUS":
                     if spectralBinning != "":
-                        paramN += f" --spectralBinning={spectralBinning[1]}"
+                        paramN += " --spectralBinning=" + spectralBinning
                     else:
                         paramN += " --spectralBinning=7"
 
@@ -335,7 +354,7 @@ def mat_autoPipeline(
                         elt["param"] = paramN + " " + param
                 else:
                     if spectralBinning != "":
-                        paramL += f" --spectralBinning={spectralBinning[0]}"
+                        paramL += " --spectralBinning=" + spectralBinning
                     else:
                         paramL += " --spectralBinning=5"
 
@@ -470,7 +489,8 @@ def mat_autoPipeline(
 
                 # cmd="esorex --output-dir="+outputDir+" "+elt['recipes']+" "+elt['param'].replace("/"," --")+" "+sofname+"%"+resol;
                 cmd = (
-                    "esorex --output-dir="
+                    esorex_dir
+                    + "/esorex --output-dir="
                     + outputDir
                     + " "
                     + elt["recipes"]
@@ -578,4 +598,5 @@ def mat_autoPipeline(
                     "%-30s" % (elt["action"],),
                     msg,
                 )
+
             break
