@@ -74,7 +74,7 @@ def removeDoubleParameter(p):
 def mat_autoPipeline(
         dirRaw: Path = None, dirResult: Path = None,
         dirCalib: Path = None, nbCore: int = 0,
-        resol=0, paramL="", paramN="", overwrite=0,
+        resol="", paramL="", paramN="", overwrite=0,
         maxIter=0, skipL=0, skipN=0, tplstartsel="",
         tplidsel="", spectralBinning="", try_K2N_cophasing=True) -> None:
     v = Vizier(columns=["med-Lflux", "med-Mflux", "med-Nflux"], catalog="II/361")
