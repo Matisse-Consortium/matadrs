@@ -46,6 +46,7 @@ class headerCache:
     def __init__(self) -> None:
         """The class's constructor."""
         self.cache = {}
+        self.max_cache_size = OPTIONS["reduce.cache.size"]
 
     @property
     def size(self):
@@ -76,8 +77,10 @@ class headerCache:
         key : str
         value : Any
         """
-        if key not in self.cache:
+        if key not in self.cache and self.max_cache_size < 1000:
             self.cache[key] = {"value": value}
+        else:
+            warn("Cache is full, new value will not be added!")
 
 
 CACHE_HDR = headerCache()
