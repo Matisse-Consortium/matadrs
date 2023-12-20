@@ -344,7 +344,7 @@ def mat_autoPipeline(
             if action == "ACTION_MAT_RAW_ESTIMATES":
                 if hdr["HIERARCH ESO DET CHIP NAME"] == "AQUARIUS":
                     if spectralBinning != "":
-                        paramN += " --spectralBinning=" + spectralBinning
+                        paramN += f" --spectralBinning={spectralBinning[1]}"
                     else:
                         paramN += " --spectralBinning=7"
 
@@ -354,7 +354,7 @@ def mat_autoPipeline(
                         elt["param"] = paramN + " " + param
                 else:
                     if spectralBinning != "":
-                        paramL += " --spectralBinning=" + spectralBinning
+                        paramL += f" --spectralBinning={spectralBinning[0]}"
                     else:
                         paramL += " --spectralBinning=5"
 
