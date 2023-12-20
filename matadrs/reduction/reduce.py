@@ -409,7 +409,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
     mat_autoPipeline(dirRaw=str(raw_dir), dirResult=str(product_dir),
                      dirCalib=str(calib_dir), tplstartsel=tpl_start,
-                     nbCore=ncores, resol='', paramL=param_L, paramN=param_N,
+                     nbCore=ncores, paramL=param_L, paramN=param_N,
                      overwrite=int(overwrite), maxIter=1, skipL=int(skip_L),
                      skipN=int(skip_N), spectralBinning=spectral_binning)
     cleanup_reduction(product_dir, mode, band, do_data_quality_plot, overwrite)
