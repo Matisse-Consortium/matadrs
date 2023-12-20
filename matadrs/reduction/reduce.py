@@ -307,11 +307,16 @@ def prepare_reduction(raw_dir: Path,
     if not calib_dir.exists():
         calib_dir.mkdir(parents=True)
 
-    cprint("Moving calibration files into 'calib_files' folders...", "g")
+    cprint("Checking files to move calibration files"
+           "into 'calib_files' folders...", "g")
     for fits_file in raw_dir.glob("M.*"):
         shutil.move(fits_file, calib_dir / fits_file.name)
 
     for fits_file in tqdm(list(raw_dir.glob("*.fits"))):
+        readout = ReadoutFits(fits_file)
+        if any(check_obj in readout.object_id
+               for check_obj in ["STD", "SKY"]):
+            continue
         if any(cal_id in ReadoutFits(fits_file).object_id
                for cal_id in CALIBRATION_IDS):
             shutil.move(fits_file, calib_dir / fits_file.name)
