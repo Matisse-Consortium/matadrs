@@ -216,6 +216,15 @@ class ReadoutFits:
         return self.primary_header["HIERARCH ESO TPL START"]
 
     @property
+    def date(self) -> str:
+        """Fetches the observation's date from the primary header."""
+        if "DATE-OBS" in self.primary_header:
+            return self.primary_header["DATE-OBS"].split("T")[0]
+        if "DATE" in self.primary_header:
+            return self.primary_header["DATE"].split("T")[0]
+        return self.tpl_start.split("T")[0]
+
+    @property
     def pipeline_version(self) -> str:
         """Fetches the pipeline version from the primary header."""
         return self.primary_header["HIERARCH ESO PRO REC1 PIPE ID"]

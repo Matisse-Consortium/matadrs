@@ -166,6 +166,7 @@ class Plotter:
                 airmass_lim: Optional[float] = 2.,
                 show_text: Optional[List] = False,
                 make_tracks: Optional[bool] = True,
+                show_legend: Optional[bool] = True,
                 color_grouping: Optional[str] = "file",
                 **kwargs) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
@@ -181,13 +182,15 @@ class Plotter:
             If the baselines should be shown next to the coordinates as text.
         make_tracks: bool, optional
             If the tracks should be plotted.
+        show_legend: bool, optional
+            If the legend should be shown.
         color_grouping : str, optional
             The color grouping used for the uv-coords. If 'file' the
             colors are based on the different (.fits)-files. If 'instrument'
             the colors are based on the different instruments (see
             ReadoutFits.instrument).
         """
-        instruments, uv_max = [], 0
+        instruments, handles, uv_max = [], [], 0
         for index, readout in enumerate(self.readouts):
             uv_coords = readout.oi_vis2["UVCOORD"]
             if uv_max < (tmp_uv_max := uv_coords.max()):
@@ -211,6 +214,9 @@ class Plotter:
 
             if color_grouping == "file":
                 color = OPTIONS["plot.colors"][index]
+                handles.append(mlines.Line2D(
+                    [], [], color=color, marker="X",
+                    linestyle="None", label=readout.date))
             elif color_grouping == "instrument":
                 if readout.instrument not in instruments:
                     instruments.append(readout.instrument)
@@ -221,6 +227,7 @@ class Plotter:
                         markersize=10, markeredgewidth=3)
                 ax.plot(-u_coords, -v_coords, symbol,
                         color=color, markersize=10, markeredgewidth=3)
+
                 if show_text:
                     ax.text(-u_coords-3.5, -v_coords-1.5, sta_labels[uv_index],
                             fontsize="small", color='0', alpha=0.8)
@@ -244,7 +251,9 @@ class Plotter:
                 handles.append(mlines.Line2D(
                     [], [], color=color, marker="X",
                     linestyle="None", label=instrument.upper()))
-            ax.legend(handles=handles, loc="upper left")
+
+        if show_legend:
+            ax.legend(handles=handles)
 
         ax.set_xlim([uv_extent, -uv_extent])
         ax.set_ylim([-uv_extent, uv_extent])
