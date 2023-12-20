@@ -19,6 +19,11 @@ __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
            "check_if_target", "get_path_descriptor"]
 
 
+class HeaderNotFoundWarning(Warning):
+    """This indicates that a header of a (.fits)-file was not found."""
+    pass
+
+
 # TODO: Get a better error representation for the flux.
 # TODO: Implement smoothing for the flux to the instrument
 def get_flux_data_from_flux_file(

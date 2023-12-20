@@ -1,5 +1,6 @@
 import os
 import shutil
+import warnings
 from pathlib import Path
 from typing import Optional, Tuple, List, Set
 
@@ -17,6 +18,10 @@ from ..utils.plot import Plotter, plot_data_quality
 from ..utils.readout import ReadoutFits
 from ..utils.tools import cprint, print_execution_time, \
     get_execution_modes, get_fits_by_tag, move
+
+from ..utils.tools import HeaderNotFoundWarning
+
+warnings.simplefilter("ignore", category=HeaderNotFoundWarning)
 
 __all__ = ["get_readout_for_tpl_match", "get_tpl_starts", "in_catalog",
            "get_catalog_match", "prepare_catalogs", "set_script_arguments",

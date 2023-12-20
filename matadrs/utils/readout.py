@@ -12,7 +12,8 @@ from astroquery.simbad import Simbad
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
 
-# NOTE: Remove units warning. In (.fits)-file 'day' unit contain, which doesn't exist
+# NOTE: Remove units warning. In (.fits)-file 'day' unit contain,
+# which doesn't exist
 warnings.simplefilter("ignore", category=u.UnitsWarning)
 
 __all__ = ["ReadoutFits"]
@@ -414,7 +415,7 @@ class ReadoutFits:
         """
         with fits.open(self.fits_file, "readonly") as hdul:
             if header not in hdul:
-                warn(f"Header {header} not found!")
+                warn(f"Header {header} not found!", HeaderNotFoundWarning)
                 return
             return hdul[header].header
 
