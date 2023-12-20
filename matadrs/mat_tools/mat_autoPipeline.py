@@ -32,7 +32,7 @@ import filecmp
 from multiprocessing.pool import Pool
 from astroquery.vizier import Vizier
 
-from libAutoPipeline import matisseRecipes, matisseCalib, matisseAction, matisseType
+from .libAutoPipeline import matisseRecipes, matisseCalib, matisseAction, matisseType
 
 
 def runEsorex(cmd):
