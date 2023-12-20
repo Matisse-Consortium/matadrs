@@ -19,152 +19,107 @@ in the LICENCE.md file.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 """
-import filecmp
-import glob
 import os
-import shutil
 import sys
-from multiprocessing.pool import Pool
-from typing import List
+import glob
+import shutil
 
 import numpy as np
 from astropy.io import fits
-from astroquery.vizier import Vizier
+from astropy.io.fits import getheader
 from tqdm import tqdm
+import filecmp
+from multiprocessing.pool import Pool
+from astroquery.vizier import Vizier
 
-from .libAutoPipeline import matisseRecipes, matisseCalib,\
-    matisseAction, matisseType
+from libAutoPipeline import matisseRecipes, matisseCalib, matisseAction, matisseType
 
 
-def run_esorex(cmd: List[str]) -> None:
-    """Runs the given esorex command.
-
-    Parameters
-    ----------
-    cmd: list of str
-        A list of strings that makes up the esorex command.
-    """
+def runEsorex(cmd):
     spl = cmd.split("%")
     cmd = spl[0]
     print(cmd)
+    #    resol = spl[1];
+    #    print(resol)
     sys.stdout.flush()
     item = cmd.split()
-    out = item[-1]+".log"
-    err = item[-1]+".err"
+    out = item[-1] + ".log"
+    err = item[-1] + ".err"
     val = item[-1].split(".")
     val = item[1].split("=")
-    os.system("cd "+val[1]+";"+cmd+" > "+out+" 2> "+err)
+    os.system("cd " + val[1] + ";" + cmd + " > " + out + " 2> " + err)
 
 
-# FIXME: Check if parameters are parsed correctly
-def removeDoubleParameter(cmd: str):
-    """Removes any parameters that have been given twice or more times.
-
-    Parameters
-    ----------
-    cmd : str
-        The esorex command.
-    """
-    listP = cmd.split(' ')
+def removeDoubleParameter(p):
+    listP = p.split(" ")
     paramName = []
-    paramsNew = ''
+    paramsNew = ""
     for elt in listP:
         idx = elt.find("=")
-        if (elt[0:idx] not in paramName and elt != '' and elt != '--'):
+        if elt[0:idx] not in paramName and elt != "":
             paramName.append(elt[0:idx])
             paramsNew = paramsNew + " " + elt
     return paramsNew
 
 
-def mat_autoPipeline(dirRaw="", dirResult="",
-                     dirCalib="", nbCore=0,
-                     resol=0, paramL="", paramN="",
-                     overwrite=0, maxIter=0, skipL=0,
-                     skipN=0, tplstartsel="",
-                     tplidsel="", spectralBinning=[]) -> None:
-    """Runs the esorex MATISSE pipeline command line script with
-    the correct settings.
-
-    Parameters
-    ----------
-    dirRaw : str, optional
-        The directory containing the raw files.
-    dirResult : str, optional
-        The directory to contain the reduced files.
-    dirCalib : str, optional
-        The directory containing the with the observation
-        associated calibration files.
-    nbCore : int, optional
-        The number of cores used for the reduction.
-    resol : int, optional
-        The resolution of the observation.
-    paramL : str, optional
-        A string containing the parameters for the command line script
-        for the L-band.
-    paramN : str, optional
-        A string containing the parameters for the command line script
-        for the N-band.
-    overwrite : int, optional
-        If toggled, the previous reduction is overwritten.
-    maxIter : int, optional
-        The number of iterations done within the reduction.
-    skipL : int, optional
-        If toggled, the L-band will be skipped.
-    skipN : int, optional
-        If toggled, the N-band will be skipped.
-    tplstartsel : str, optional
-        The time stamp start which is to be reduced.
-    tplidsel : str, optional
-        The time stamp which is to be reduced.
-    spectralBinning : list, optional
-        The spectral binning corresponding to the
-        spectral resolution of the observation.
-    """
-    v = Vizier(columns=["med-Lflux", "med-Mflux",
-               "med-Nflux"], catalog="II/361")
-    # NOTE: Print meaningful error messages if something is wrong in the command line
+def mat_autoPipeline(
+        dirRaw="", dirResult="",
+        dirCalib="", nbCore=0,
+        resol=0, paramL="",
+        paramN="", overwrite=0,
+        maxIter=0, skipL=0,
+        skipN=0, tplstartsel="",
+        tplidsel="", spectralBinning=""):
+    v = Vizier(columns=["med-Lflux", "med-Mflux", "med-Nflux"], catalog="II/361")
     print("------------------------------------------------------------------------")
     if dirRaw == "":
         print("ERROR: You have to specifiy a Raw Data Directory or a list of raw file")
         sys.exit(0)
     else:
-        print('%-40s' % ("Raw Data Directory or file list:",), dirRaw)
+        print("%-40s" % ("Raw Data Directory or file list:",), dirRaw)
     if dirCalib == "":
         dirCalib = dirRaw
-        print("Info: Calibration Directory not specified. We use the default directory "+dirCalib)
-    print('%-40s' % ("Calibration Directory:",), dirCalib)
+        print(
+            "Info: Calibration Directory not specified. We use the default directory "
+            + dirCalib
+        )
+    print("%-40s" % ("Calibration Directory:",), dirCalib)
     if dirResult == "":
         dirResult = os.getcwd()
         print("Info : Results Directory not specified. We use the current directory")
-    print('%-40s' % ("Results Directory:",), dirResult)
+    print("%-40s" % ("Results Directory:",), dirResult)
     if nbCore == 0:
         nbCore = 1
-        print("Info : Number of Cores not specified. We use "+str(nbCore)+" core")
-    print('%-40s' % ("Number of Cores:",), nbCore)
+        print("Info : Number of Cores not specified. We use " + str(nbCore) + " core")
+    print("%-40s" % ("Number of Cores:",), nbCore)
     if maxIter == 0:
         maxIter = 1
         print(
-            "Info : Maximum Number of Iteration not specified. We fix it to "+str(maxIter))
-    print('%-40s' % ("Maximum Number of Iteration:",), maxIter)
+            "Info : Maximum Number of Iteration not specified. We fix it to "
+            + str(maxIter)
+        )
+    print("%-40s" % ("Maximum Number of Iteration:",), maxIter)
 
     print("------------------------------------------------------------------------")
-    if not "[" in dirRaw:
-        listRaw = glob.glob(dirRaw+"/MATIS*.fits")
+    if not ("[" in dirRaw):
+        listRaw = glob.glob(dirRaw + "/MATIS*.fits")
         print("Raw directory given")
     else:
         print("List of raw files given")
         listRaw = eval(dirRaw)
-    if (dirCalib != ""):
-        listArchive = glob.glob(dirCalib+"/*.fits")
+    if dirCalib != "":
+        listArchive = glob.glob(dirCalib + "/*.fits")
     else:
         listArchive = []
-
-    # NOTE: Sort listRaw using template ID and template start
+    # print(listRaw)
+    # Sort listRaw using template ID and template start
     print("Sorting files according to constraints...")
     allhdr = []
-    for filename in tqdm(listRaw, unit=" files", unit_scale=False, desc="Working on files"):
+    for filename in tqdm(
+        listRaw, unit=" files", unit_scale=False, desc="Working on files"
+    ):
         try:
-            allhdr.append(fits.getheader(filename, 0))
+            allhdr.append(getheader(filename, 0))
         except Exception:
             print("\nWARNING: corrupt file!")
 
@@ -174,20 +129,20 @@ def mat_autoPipeline(dirRaw="", dirResult="",
     listGRA4MAT = []
     listhdrGRA4MAT = []
     for hdr, filename in zip(allhdr, listRaw):
-        chip = ''
-        if 'RMNREC' in hdr['HIERARCH ESO DPR TYPE']:
-            if 'GRAVITY' in hdr['HIERARCH ESO DEL FT SENSOR']:
+        chip = ""
+        if "RMNREC" in hdr["HIERARCH ESO DPR TYPE"]:
+            if "GRAVITY" in hdr["HIERARCH ESO DEL FT SENSOR"]:
                 listGRA4MAT.append(filename)
                 listhdrGRA4MAT.append(hdr)
 
-        if 'HIERARCH ESO TPL START' in hdr and 'HIERARCH ESO DET CHIP NAME' in hdr:
-            tplid = hdr['HIERARCH ESO TPL ID']
-            tplstart = hdr['HIERARCH ESO TPL START']
-            chip = hdr['HIERARCH ESO DET CHIP NAME']
+        if "HIERARCH ESO TPL START" in hdr and "HIERARCH ESO DET CHIP NAME" in hdr:
+            tplid = hdr["HIERARCH ESO TPL ID"]
+            tplstart = hdr["HIERARCH ESO TPL START"]
+            chip = hdr["HIERARCH ESO DET CHIP NAME"]
 
-        if skipL == 0 and chip == 'HAWAII-2RG':
+        if skipL == 0 and chip == "HAWAII-2RG":
             # Append low resolution stuff in the front of the list
-            disperser = hdr['HIERARCH ESO INS DIL NAME']
+            disperser = hdr["HIERARCH ESO INS DIL NAME"]
 
             if resol != "":
                 if disperser != resol:
@@ -195,7 +150,7 @@ def mat_autoPipeline(dirRaw="", dirResult="",
 
             # Go through all 4 cases. First case: tplid and tplstart given by user
             if tplidsel != "" and tplstartsel != "":
-                if (tplid == tplidsel and tplstart == tplstartsel):
+                if tplid == tplidsel and tplstart == tplstartsel:
                     listRawSorted.append(filename)
                     allhdrSorted.append(hdr)
                     listRes.append(disperser)
@@ -217,9 +172,9 @@ def mat_autoPipeline(dirRaw="", dirResult="",
                 allhdrSorted.append(hdr)
                 listRes.append(disperser)
 
-        if skipN == 0 and chip == 'AQUARIUS':
+        if skipN == 0 and chip == "AQUARIUS":
             # Append low resolution stuff in the front of the list
-            disperser = hdr['HIERARCH ESO INS DIN NAME']
+            disperser = hdr["HIERARCH ESO INS DIN NAME"]
 
             if resol != "":
                 if disperser != resol:
@@ -258,32 +213,35 @@ def mat_autoPipeline(dirRaw="", dirResult="",
     listIterNumber = []
     print("Determining the number of reduction blocks...")
 
-    for hdr, filename, _ in zip(allhdr, listRaw, listRes):
+    for hdr, filename, res in zip(allhdr, listRaw, listRes):
         try:
-            tplstart = hdr['HIERARCH ESO TPL START']
-            chipname = hdr['HIERARCH ESO DET CHIP NAME']
-        except Exception:
-            print("WARNING, "+filename+" is not a valid MATISSE fits file!")
+            tplstart = hdr["HIERARCH ESO TPL START"]
+            chipname = hdr["HIERARCH ESO DET CHIP NAME"]
+        except:
+            print("WARNING, " + filename + " is not a valid MATISSE fits file!")
             continue
         # Reduction blocks are defined by template start and detector name
-        temp = tplstart+"."+chipname
+        temp = tplstart + "." + chipname
         keyTplStart.append(temp)
 
     # Put LOW first, then MED then HIGH
     keyTplStart2 = sorted(set(keyTplStart))
     for idx2, ikey2 in enumerate(keyTplStart2):
+        # print(idx2)
+        # print(ikey2)
         idx = np.where([ikey == ikey2 for ikey in keyTplStart])
         idx = idx[0][0]
+        # print(idx)
         # put high res data at the end
-        if listRes[idx] == 'HIGH':
-            listRes[idx] = 'zHIGH'
-        keyTplStart2[idx2] = listRes[idx]+"%"+keyTplStart2[idx2]
+        if listRes[idx] == "HIGH":
+            listRes[idx] = "zHIGH"
+        keyTplStart2[idx2] = listRes[idx] + "%" + keyTplStart2[idx2]
     keyTplStart = sorted(set(keyTplStart2))
     keyTplStart = list([it.split("%")[1] for it in keyTplStart])
 
     for elt in keyTplStart:
         listIterNumber.append(0)
-    print("Found "+str(len(keyTplStart))+" reduction blocks.")
+    print("Found " + str(len(keyTplStart)) + " reduction blocks.")
 
     iterNumber = 0
     while True:
@@ -291,91 +249,97 @@ def mat_autoPipeline(dirRaw="", dirResult="",
         print("")
         print("Iteration ", iterNumber)
         print("-----------------------")
-        if (iterNumber > 1):
+        if iterNumber > 1:
             listIter = []
             print("listing stuff...")
-            for iter in range(iterNumber-1):
-                repIterPrev = dirResult+'/Iter'+str(iter+1)
-                listRepIter = [os.path.join(repIterPrev, f) for f in os.listdir(
-                    repIterPrev) if os.path.isdir(os.path.join(repIterPrev, f))]
+            for iter in range(iterNumber - 1):
+                repIterPrev = dirResult + "/Iter" + str(iter + 1)
+                listRepIter = [
+                    os.path.join(repIterPrev, f)
+                    for f in os.listdir(repIterPrev)
+                    if os.path.isdir(os.path.join(repIterPrev, f))
+                ]
                 print("listing files from previous iteration...")
                 for elt in listRepIter:
-                    listIter = listIter+[os.path.join(elt, f) for f in os.listdir(
-                        elt) if os.path.isfile(os.path.join(elt, f)) and f[-5:] == '.fits']
+                    listIter = listIter + [
+                        os.path.join(elt, f)
+                        for f in os.listdir(elt)
+                        if os.path.isfile(os.path.join(elt, f)) and f[-5:] == ".fits"
+                    ]
 
         print("listing reduction blocks...")
         listRedBlocks = []
-
         # Reduction Blocks List Initialization
         cpt = 0
         for elt in keyTplStart:
-            listRedBlocks.append({"action": " ", "recipes": " ", "param": " ", "input": [],
-                                  "calib": [], "status": 0, "tplstart": " ",  "iter": listIterNumber[cpt]})
+            listRedBlocks.append(
+                {
+                    "action": " ",
+                    "recipes": " ",
+                    "param": " ",
+                    "input": [],
+                    "calib": [],
+                    "status": 0,
+                    "tplstart": " ",
+                    "iter": listIterNumber[cpt],
+                }
+            )
             cpt += 1
-
         # Fill the list of raw data in the Reduction Blocks List
         print("listing files in the reduction blocks...")
         for hdr, filename in zip(allhdr, listRaw):
-            if ('RMNREC' in hdr['HIERARCH ESO DPR TYPE']):
-                print("WARNING, "+filename+" is a RMNREC file!")
+            if "RMNREC" in hdr["HIERARCH ESO DPR TYPE"]:
+                print("WARNING, " + filename + " is a RMNREC file!")
                 continue
             else:
                 try:
-                    chipname = hdr['HIERARCH ESO DET CHIP NAME']
-                    stri = hdr['HIERARCH ESO TPL START']+'.'+chipname
-                except Exception:
-                    print("WARNING, "+filename +
-                          " is not a valid MATISSE fits file!")
+                    chipname = hdr["HIERARCH ESO DET CHIP NAME"]
+                    stri = hdr["HIERARCH ESO TPL START"] + "." + chipname
+                except:
+                    print("WARNING, " + filename + " is not a valid MATISSE fits file!")
                     continue
             tag = matisseType(hdr)
-            listRedBlocks[keyTplStart.index(stri)]["input"].append([
-                filename, tag, hdr])
+            listRedBlocks[keyTplStart.index(stri)]["input"].append([filename, tag, hdr])
 
         # Fill the list of actions,recipes,params in the Reduction Blocks List
         print("listing actions in the reduction blocks...")
         for elt in listRedBlocks:
             hdr = elt["input"][0][2]
-            chip = hdr['HIERARCH ESO DET CHIP NAME']
-            keyTplStartCurrent = hdr['HIERARCH ESO TPL START']+'.'+chip
-            if chip == 'AQUARIUS':
-                resolution = hdr['HIERARCH ESO INS DIN NAME']
-            if chip == 'HAWAII-2RG':
-                resolution = hdr['HIERARCH ESO INS DIL NAME']
+            chip = hdr["HIERARCH ESO DET CHIP NAME"]
+            keyTplStartCurrent = hdr["HIERARCH ESO TPL START"] + "." + chip
+            if chip == "AQUARIUS":
+                resolution = hdr["HIERARCH ESO INS DIN NAME"]
+            if chip == "HAWAII-2RG":
+                resolution = hdr["HIERARCH ESO INS DIL NAME"]
 
             action = matisseAction(hdr, elt["input"][0][1])
-            if ('TELESCOP' in hdr):
-                tel = hdr['TELESCOP']
+            if "TELESCOP" in hdr:
+                tel = hdr["TELESCOP"]
             else:
                 tel = ""
-            recipes, param = matisseRecipes(action, hdr['HIERARCH ESO DET CHIP NAME'],
-                                            tel, resolution)
+            recipes, param = matisseRecipes(
+                action, hdr["HIERARCH ESO DET CHIP NAME"], tel, resolution
+            )
             elt["action"] = action
             elt["recipes"] = recipes
-
-            # NOTE: Chooses the action by the filetype that is given
             if action == "ACTION_MAT_RAW_ESTIMATES":
-                try:
-                    spectralBinningL, spectralBinningN = spectralBinning
-                except ValueError:
-                    spectralBinningL, spectralBinningN = "", ""
-
-                if (hdr['HIERARCH ESO DET CHIP NAME'] == "AQUARIUS"):
-                    if spectralBinningN:
-                        paramN += " --spectralBinning="+str(spectralBinningN)
+                if hdr["HIERARCH ESO DET CHIP NAME"] == "AQUARIUS":
+                    if spectralBinning != "":
+                        paramN += " --spectralBinning=" + spectralBinning
                     else:
                         paramN += " --spectralBinning=7"
 
-                    if (paramN == ""):
+                    if paramN == "":
                         elt["param"] = param
                     else:
                         elt["param"] = paramN + " " + param
                 else:
-                    if spectralBinningL:
-                        paramL += " --spectralBinning="+str(spectralBinningL)
+                    if spectralBinning != "":
+                        paramL += " --spectralBinning=" + spectralBinning
                     else:
                         paramL += " --spectralBinning=5"
 
-                    if (paramL == ""):
+                    if paramL == "":
                         elt["param"] = param
                     else:
                         elt["param"] = paramL + " " + param
@@ -383,40 +347,40 @@ def mat_autoPipeline(dirRaw="", dirResult="",
                 elt["param"] = param
             elt["tplstart"] = keyTplStartCurrent
 
-        # NOTE: Fill with GRA4MAT data
+            # Fill with GRA4MAT data
         print("Searching GRA4MAT data...")
         for elt in listRedBlocks:
             hdr = elt["input"][0][2]
-            keyTplStartCurrent = hdr['HIERARCH ESO TPL START']
+            keyTplStartCurrent = hdr["HIERARCH ESO TPL START"]
             for fileGV, hdrGV in zip(listGRA4MAT, listhdrGRA4MAT):
-                if (hdrGV['HIERARCH ESO TPL START'] == keyTplStartCurrent):
+                if hdrGV["HIERARCH ESO TPL START"] == keyTplStartCurrent:
                     elt["input"].append([fileGV, "RMNREC", hdrGV])
 
         # Fill the list of calib in the Reduction Blocks List from dirCalib
         print("listing calibrations in the reduction blocks...")
-        for elt in tqdm(listRedBlocks, unit=" block", unit_scale=False, desc="Working on"):
+        for elt in tqdm(
+            listRedBlocks, unit=" block", unit_scale=False, desc="Working on"
+        ):
             hdr = elt["input"][0][2]
-            calib, status = matisseCalib(
-                hdr, elt["action"], listArchive, elt['calib'])
+            calib, status = matisseCalib(hdr, elt["action"], listArchive, elt["calib"])
             elt["calib"] = calib
             elt["status"] = status
         print("done.")
 
         # Fill the list of calib in the Reduction Blocks List from dirResult Iter i-1
         print("listing calibrations from previous iteration in the reduction blocks...")
-        if (iterNumber > 1):
+        if iterNumber > 1:
             for elt in listRedBlocks:
                 hdr = elt["input"][0][2]
-                calib, status = matisseCalib(
-                    hdr, elt["action"], listIter, elt['calib'])
+                calib, status = matisseCalib(hdr, elt["action"], listIter, elt["calib"])
                 elt["calib"] = calib
                 elt["status"] = status
             print("done.")
 
         # Create the SOF files
         print("creating the sof files and directories...")
-        repIter = dirResult+"/Iter"+str(iterNumber)
-        if os.path.isdir(repIter):
+        repIter = dirResult + "/Iter" + str(iterNumber)
+        if os.path.isdir(repIter) == True:
             if overwrite == 1:
                 shutil.rmtree(repIter)
                 os.mkdir(repIter)
@@ -430,53 +394,60 @@ def mat_autoPipeline(dirRaw="", dirResult="",
         cpt = 0
         for elt in listRedBlocks:
             overwritei = overwrite
-            if (elt["status"] == 1):
+            if elt["status"] == 1:
                 cptStatusOne += 1
-                rbname = elt["recipes"]+"."+elt["tplstart"]
-                sofname = os.path.join(
-                    repIter, rbname+".sof").replace(':', ':')
-                outputDir = os.path.join(
-                    repIter, rbname+".rb").replace(':', '_')
+
+                filelist = os.listdir(repIter)
+                rbname = elt["recipes"] + "." + elt["tplstart"]
+                sofname = os.path.join(repIter, rbname + ".sof").replace(":", ":")
+                outputDir = os.path.join(repIter, rbname + ".rb").replace(":", "_")
 
                 if overwritei == 0:
                     print("\nTesting if last reduction went through...")
-                    if glob.glob(os.path.join(outputDir, "*_RAW_INT_*.fits")) or glob.glob(os.path.join(outputDir, "IM_BASIC.fits")):
+                    if glob.glob(
+                        os.path.join(outputDir, "*_RAW_INT_*.fits")
+                    ) or glob.glob(os.path.join(outputDir, "IM_BASIC.fits")):
                         print("Yes!")
                     else:
                         overwritei = 1
 
-                resol = 'no res'
+                resol = "no res"
                 if os.path.exists(sofname):
-                    print("sof file "+sofname+" already exists...")
+                    print("sof file " + sofname + " already exists...")
                     if overwritei:
                         print("WARNING: Overwriting existing files")
-                        fp = open(sofname, 'w')
-                        for frame, tag, hdr in elt['input']:
-                            fp.write(frame+" "+tag+"\n")
-                            resol = hdr['HIERARCH ESO INS DIL NAME']
-                        for frame, tag in elt['calib']:
-                            fp.write(frame+" "+tag+"\n")
+
+                        fp = open(sofname, "w")
+                        for frame, tag, hdr in elt["input"]:
+                            fp.write(frame + " " + tag + "\n")
+                            # print(frame, hdr['HIERARCH ESO INS DIL NAME'])
+                            resol = hdr["HIERARCH ESO INS DIL NAME"]
+                        for frame, tag in elt["calib"]:
+                            fp.write(frame + " " + tag + "\n")
                         fp.close()
                     else:
                         print(
-                            "WARNING: sof file exists. Skipping... (consider using --overwrite)")
+                            "WARNING: sof file exists. Skipping... (consider using --overwrite)"
+                        )
+                        # continue;
                 else:
-                    print("sof file "+sofname+" does not exist. Creating it...")
-                    fp = open(sofname, 'w')
-                    for frame, tag, hdr in elt['input']:
-                        fp.write(frame+" "+tag+"\n")
-                        resol = hdr['HIERARCH ESO INS DIL NAME']
-                    for frame, tag in elt['calib']:
-                        fp.write(frame+" "+tag+"\n")
+                    print("sof file " + sofname + " does not exist. Creating it...")
+                    fp = open(sofname, "w")
+                    for frame, tag, hdr in elt["input"]:
+                        fp.write(frame + " " + tag + "\n")
+                        # print(frame, hdr['HIERARCH ESO INS DIL NAME'])
+                        resol = hdr["HIERARCH ESO INS DIL NAME"]
+                    for frame, tag in elt["calib"]:
+                        fp.write(frame + " " + tag + "\n")
                     fp.close()
 
                 if os.path.exists(outputDir):
-                    print("outputDir "+outputDir+" already exists...")
+                    print("outputDir " + outputDir + " already exists...")
                     # Remove any previous logfile
                     print("Remove any previous logfile...")
                     try:
                         os.remove(os.path.join(outputDir, ".logfile"))
-                    except Exception:
+                    except:
                         print("Nothing to remove...")
                     if os.listdir(outputDir) == []:
                         print("outputDir is empty, continuing...")
@@ -486,28 +457,46 @@ def mat_autoPipeline(dirRaw="", dirResult="",
                             print("WARNING: Overwriting existing files")
                         else:
                             print(
-                                "WARNING: outputDir exists. Skipping... (consider using --overwrite)\n")
+                                "WARNING: outputDir exists. Skipping... (consider using --overwrite)\n"
+                            )
                             continue
                 else:
-                    print("outputDir "+outputDir +
-                          " does not exist. Creating it...\n")
+                    print(
+                        "outputDir " + outputDir + " does not exist. Creating it...\n"
+                    )
                     os.mkdir(outputDir)
 
-                # FIXME: Fix bug that if too many '/' are given errs. Make this more
-                # robust
-                listNewParams = removeDoubleParameter(
-                    elt['param'].replace("/", " --"))
-                cmd = "esorex --output-dir="+outputDir+" " + \
-                    elt['recipes']+" "+listNewParams+" "+sofname+"%"+resol
+                listNewParams = removeDoubleParameter(elt["param"].replace("/", " --"))
+
+                # cmd="esorex --output-dir="+outputDir+" "+elt['recipes']+" "+elt['param'].replace("/"," --")+" "+sofname+"%"+resol;
+                cmd = (
+                    "esorex --output-dir="
+                    + outputDir
+                    + " "
+                    + elt["recipes"]
+                    + " "
+                    + listNewParams
+                    + " "
+                    + sofname
+                    + "%"
+                    + resol
+                )
 
                 if iterNumber > 1:
-                    sofnamePrev = repIterPrev+"/" + \
-                        elt["recipes"]+"."+elt["tplstart"]+".sof"
+                    sofnamePrev = (
+                        repIterPrev
+                        + "/"
+                        + elt["recipes"]
+                        + "."
+                        + elt["tplstart"]
+                        + ".sof"
+                    )
                     if os.path.exists(sofnamePrev):
                         if filecmp.cmp(sofname, sofnamePrev):
                             print(
-                                "Reduction Blocks already processed during previous iteration")
-                            print("Remove directory : "+outputDir)
+                                "Reduction Blocks already processed during previous iteration"
+                            )
+                            print("Remove directory : " + outputDir)
                             shutil.rmtree(outputDir)
                         else:
                             listIterNumber[cpt] = iterNumber
@@ -527,38 +516,44 @@ def mat_autoPipeline(dirRaw="", dirResult="",
             else:
                 cptStatusZero += 1
             cpt += 1
-        print('%-40s' % ("Reduction Blocks to process:",), cptToProcess)
+        print("%-40s" % ("Reduction Blocks to process:",), cptToProcess)
 
         if listCmdEsorex != [] and iterNumber <= maxIter:
             # Create a process pool with a maximum of 10 worker processes
             pool = Pool(processes=nbCore)
             # Map our function to a data set - number 1 through 20
-            pool.map(run_esorex, listCmdEsorex)
+            pool.map(runEsorex, listCmdEsorex)
             pool.close()
             pool.join()
 
-        print('%-40s' % ("Reduction Blocks processed:",), cptStatusOne)
-        print('%-40s' % ("Reduction Blocks not processed:",), cptStatusZero)
+        print("%-40s" % ("Reduction Blocks processed:",), cptStatusOne)
+        print("%-40s" % ("Reduction Blocks not processed:",), cptStatusZero)
 
         # Add MDFC Fluxes to CALIB_RAW_INT and TARGET_RAW_INT
-        listOifitsFiles = glob.glob(repIter+"/*.rb/*_RAW_INT*.fits")
+        listOifitsFiles = glob.glob(repIter + "/*.rb/*_RAW_INT*.fits")
         for elt in listOifitsFiles:
-            hdu = fits.open(elt, mode='update')
-            targetname = hdu[0].header['ESO OBS TARG NAME']
+            hdu = fits.open(elt, mode="update")
+            targetname = hdu[0].header["ESO OBS TARG NAME"]
             try:
                 result = v.query_region(targetname, radius="20s")
                 fluxL = result[0][0][0]
                 fluxM = result[0][0][1]
                 fluxN = result[0][0][2]
-                hdu[0].header['HIERARCH PRO MDFC FLUX L'] = (
-                    fluxL, 'Flux (Jy) in L band from MDFC catalog')
-                hdu[0].header['HIERARCH PRO MDFC FLUX M'] = (
-                    fluxM, 'Flux (Jy) in M band from MDFC catalog')
-                hdu[0].header['HIERARCH PRO MDFC FLUX N'] = (
-                    fluxN, 'Flux (Jy) in N band from MDFC catalog')
+                hdu[0].header["HIERARCH PRO MDFC FLUX L"] = (
+                    fluxL,
+                    "Flux (Jy) in L band from MDFC catalog",
+                )
+                hdu[0].header["HIERARCH PRO MDFC FLUX M"] = (
+                    fluxM,
+                    "Flux (Jy) in M band from MDFC catalog",
+                )
+                hdu[0].header["HIERARCH PRO MDFC FLUX N"] = (
+                    fluxN,
+                    "Flux (Jy) in N band from MDFC catalog",
+                )
                 hdu.flush()
-            except Exception:
-                print("Object "+targetname+" not found in MDFC catalog")
+            except:
+                print("Object " + targetname + " not found in MDFC catalog")
             hdu.close()
 
         if listCmdEsorex == [] or iterNumber == maxIter:
@@ -570,13 +565,17 @@ def mat_autoPipeline(dirRaw="", dirResult="",
             print(" ")
             for elt in listRedBlocks:
                 if elt["status"] == 1:
-                    msg = "Processing done at iteration "+str(elt["iter"])
+                    msg = "Processing done at iteration " + str(elt["iter"])
                 else:
-                    if (elt["action"] == "NO-ACTION"):
+                    if elt["action"] == "NO-ACTION":
                         msg = "Data not taken into account by the Pipeline"
                     else:
                         msg = "Reduction Block not processed - Missing calibration"
-                tplstart, detector = elt["tplstart"].split('.')
-                print('%-24s' % (tplstart,), '%-14s' %
-                      (detector,), '%-30s' % (elt["action"],), msg)
+                tplstart, detector = elt["tplstart"].split(".")
+                print(
+                    "%-24s" % (tplstart,),
+                    "%-14s" % (detector,),
+                    "%-30s" % (elt["action"],),
+                    msg,
+                )
             break
