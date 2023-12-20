@@ -11,6 +11,7 @@ from astropy.time import Time
 from astropy.table import Table
 from astroquery.vizier import Vizier
 from astropy.coordinates import SkyCoord
+from tqdm import tqdm
 
 from ..mat_tools.libAutoPipeline import matisseType
 from ..mat_tools.mat_autoPipeline import mat_autoPipeline
@@ -310,7 +311,7 @@ def prepare_reduction(raw_dir: Path,
     for fits_file in raw_dir.glob("M.*"):
         shutil.move(fits_file, calib_dir / fits_file.name)
 
-    for fits_file in raw_dir.glob("*.fits"):
+    for fits_file in tqdm(raw_dir.glob("*.fits")):
         if any(cal_id in ReadoutFits(fits_file).object_id
                for cal_id in CALIBRATION_IDS):
             shutil.move(fits_file, calib_dir / fits_file.name)
