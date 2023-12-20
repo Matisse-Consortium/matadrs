@@ -307,7 +307,7 @@ def prepare_reduction(raw_dir: Path,
     if not calib_dir.exists():
         calib_dir.mkdir(parents=True)
 
-    cprint("Checking files to move calibration files"
+    cprint("Checking files to move calibration files "
            "into 'calib_files' folders...", "g")
     for fits_file in raw_dir.glob("M.*"):
         shutil.move(fits_file, calib_dir / fits_file.name)
