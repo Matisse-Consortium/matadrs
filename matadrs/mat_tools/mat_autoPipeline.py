@@ -96,6 +96,8 @@ def mat_autoPipeline(
     if dirResult is None:
         dirResult = str(Path.cwd())
         print("Info : Results Directory not specified. We use the current directory")
+    else:
+        dirResult = str(dirResult)
     print("%-40s" % ("Results Directory:",), dirResult)
     if nbCore == 0:
         nbCore = 1
