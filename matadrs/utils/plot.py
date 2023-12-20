@@ -124,9 +124,9 @@ class Plotter:
         if plot_name is not None:
             self.plot_name = plot_name
         elif isinstance(fits_files, List) and len(fits_files) > 1:
-            self.plot_name = "combined_fits"
+            self.plot_name = "combined_fits.pdf"
         else:
-            self.plot_name = f"{Path(fits_files).stem}"
+            self.plot_name = f"{Path(fits_files).stem}.pdf"
 
         self.color_grouping = "file"
 
