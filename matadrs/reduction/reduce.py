@@ -11,7 +11,6 @@ from astropy.time import Time
 from astropy.table import Table
 from astroquery.vizier import Vizier
 from astropy.coordinates import SkyCoord
-from tqdm import tqdm
 
 from ..mat_tools.libAutoPipeline import matisseType
 from ..mat_tools.mat_autoPipeline import mat_autoPipeline

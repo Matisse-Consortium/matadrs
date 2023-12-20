@@ -323,9 +323,13 @@ def mat_autoPipeline(
             elt["action"] = action
             elt["recipes"] = recipes
             if action == "ACTION_MAT_RAW_ESTIMATES":
+                try:
+                    spectralBinningL, spectralBinningN = spectralBinning
+                else:
+                    spectralBinningL, spectralBinningN = "", ""
                 if hdr["HIERARCH ESO DET CHIP NAME"] == "AQUARIUS":
                     if spectralBinning != "":
-                        paramN += " --spectralBinning=" + spectralBinning
+                        paramN += " --spectralBinning=" + spectralBinningN
                     else:
                         paramN += " --spectralBinning=7"
 
@@ -335,7 +339,7 @@ def mat_autoPipeline(
                         elt["param"] = paramN + " " + param
                 else:
                     if spectralBinning != "":
-                        paramL += " --spectralBinning=" + spectralBinning
+                        paramL += " --spectralBinning=" + spectralBinningL
                     else:
                         paramL += " --spectralBinning=5"
 
