@@ -609,7 +609,9 @@ delay line configuration.</p>
 </dd>
 <dt><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.mjd" title="matadrs.utils.readout.ReadoutFits.mjd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mjd</span></code></a></dt><dd><p>Fetches the observation’s modified julian date from the primary header.</p>
 </dd>
-<dt><a class="reference internal" href="#id11" title="matadrs.utils.readout.ReadoutFits.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></dt><dd><p>Fetches the object’s name from the primary header and if not found or not named in it tries it via Simbad by its coordinates.</p>
+<dt><a class="reference internal" href="#id11" title="matadrs.utils.readout.ReadoutFits.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></dt><dd><p>Fetches the target’s name from the primary header and if not found or not named in it tries it via Simbad by its coordinates.</p>
+</dd>
+<dt><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.object_id" title="matadrs.utils.readout.ReadoutFits.object_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object_id</span></code></a></dt><dd><p>Fetches the object’s name from the primary header.</p>
 </dd>
 <dt><a class="reference internal" href="#id12" title="matadrs.utils.readout.ReadoutFits.observation_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">observation_type</span></code></a></dt><dd><p>Fetches the type of the observation, i.e., if the object is a science target or calibrator.</p>
 </dd>
@@ -874,10 +876,16 @@ of (u, v)-coordinates.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="id11">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id11" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches the object’s name from the primary header and if not found or not named
+<dd><p>Fetches the target’s name from the primary header and if not found or not named
 in it tries it via Simbad by its coordinates.</p>
 <p class="rubric">Notes</p>
 <p>Fetching the name via simbad by its coordinates REQUIRES online access.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.object_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">object_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.object_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Fetches the object’s name from the primary header.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1074,6 +1082,7 @@ calibrator.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.merge_uv_coords()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.mjd"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.mjd</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id11"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.name</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.object_id"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.object_id</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.observation_type</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_array</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.oi_flux</span></code></a></li>
