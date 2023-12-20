@@ -101,8 +101,13 @@ class ReadoutFits:
             self.primary_header = hdul[0].header
 
     @property
+    def object_id(self) -> str:
+        """Fetches the object's name from the primary header."""
+        return self.primary_header["OBJECT"]
+
+    @property
     def name(self) -> str:
-        """Fetches the object's name from the primary header and if not found or not named
+        """Fetches the target's name from the primary header and if not found or not named
         in it tries it via Simbad by its coordinates.
 
         Notes
@@ -111,11 +116,10 @@ class ReadoutFits:
         """
         if self._name is None:
             try:
-                if "OBJECT" in self.primary_header:
-                    header_name = self.primary_header["OBJECT"]
-                else:
+                if "HIERARCH ESO OBS TARG NAME" in self.primary_header:
                     header_name = self.primary_header["HIERARCH ESO OBS TARG NAME"]
-
+                elif "OBJECT" in self.primary_header:
+                    header_name = self.object_id
             except KeyError:
                 header_name = None
             if (header_name in ["SKY", "STD", "STD,RMNREC"]) or (header_name is None):

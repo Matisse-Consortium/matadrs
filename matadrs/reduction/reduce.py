@@ -30,6 +30,8 @@ JSDC_CATALOG = CATALOG_DIR / "jsdc_v2_catalog_20170303.fits"
 ADDITIONAL_CATALOG = CATALOG_DIR / "supplementary_catalog_202207.fits"
 
 SPECTRAL_BINNING = {"low": [5, 7], "high_uts": [5, 38], "high_ats": [5, 98]}
+CALIBRATION_IDS = ["KAPPA", "LAMP", "BACKGROUND",
+                   "WAVE", "PINHOLE", "SLIT", "DARK", "FOIL"]
 
 
 def get_readout_for_tpl_match(raw_dir: Path, tpl_start: str) -> Path:
@@ -300,8 +302,11 @@ def prepare_reduction(raw_dir: Path,
         calib_dir.mkdir(parents=True)
 
     cprint("Moving calibration files into 'calib_files' folders...", "g")
-    for calibration_file in raw_dir.glob("M.*"):
-        shutil.move(calibration_file, calib_dir / calibration_file.name)
+    for fits_file in raw_dir.glob("*.fits"):
+        if fits_file.name.startswith("M.") or\
+                [cal_id in ReadoutFits(fits_file).object_id
+                 for cal_id in CALIBRATION_IDS]:
+            shutil.move(fits_file, calib_dir / fits_file.name)
 
 
 def cleanup_reduction(product_dir: Path,
