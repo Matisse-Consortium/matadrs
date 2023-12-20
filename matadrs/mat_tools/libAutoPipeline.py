@@ -1,4 +1,6 @@
-"""This file is part of the Matisse pipeline GUI series
+# -*- coding: utf-8 -*-
+"""
+This file is part of the Matisse pipeline GUI series
 Copyright (C) 2017- Observatoire de la Côte d'Azur
 
 Created in 2016
@@ -12,7 +14,7 @@ This software is a computer program whose purpose is to show oifits
 files from the MATISSE instrument.
 
 This software is governed by the CeCILL license under French law and
-abiding by the rules of distribution of free software.
+abiding by the rules of distribution of free software. 
 
 You can use, modify and/ or redistribute the software under the
 terms of the CeCILL license as circulated by CEA, CNRS and INRIA at
@@ -22,117 +24,72 @@ licence in the LICENCE.md file.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 """
-from warnings import warn
-from typing import Union, List
-
 from astropy.io import fits
 from astropy.io.fits import getheader
 
-from ..utils.options import OPTIONS
-
 
 class headerCache:
-    """This class is caching the keys contained in headers.
+    """"""
 
-    Attributes
-    ----------
-    cache : dict
-        The dictionary containing the header's values.
-    max_cache_size : int
-        The maximum size of the dictionary.
-        The default is 1000.
-    """
-
-    def __init__(self) -> None:
-        """The class's constructor."""
+    def __init__(self):
+        """Constructor"""
         self.cache = {}
-        self.max_cache_size = OPTIONS["reduce.cache.size"]
+        self.max_cache_size = 1000
 
-    @property
-    def size(self):
-        """Returns the size of the cache"""
-        return len(self.cache)
-
-    def __contains__(self, key: str) -> bool:
-        """Checks if the key is contained in the cache.
-
-        Parameters
-        ----------
-        key : str
-            The key to be checked for.
-
-        Returns
-        -------
-        key_contained : bool
-            Returns "True" or "False" depending on whether
-            or not the key is in the cache.
+    def __contains__(self, key):
+        """
+        Returns True or False depending on whether or not the key is in the 
+        cache
         """
         return key in self.cache
 
-    def update(self, key, value) -> None:
-        """Updates the value at a certain key at the cache.
+    def update(self, key, value):
+        self.cache[key] = {'value': value}
 
-        Parameters
-        ----------
-        key : str
-        value : Any
+    @property
+    def size(self):
         """
-        if key not in self.cache and self.max_cache_size < 1000:
-            self.cache[key] = {"value": value}
-        else:
-            warn("Cache is full, new value will not be added!")
+        Return the size of the cache
+        """
+        return len(self.cache)
 
 
-CACHE_HDR = headerCache()
+CACHE_HEADER = headerCache()
 
 
-def matisseCalib(header: str, action: str,
-                 listCalibFile: List[str],
-                 calibPrevious) -> List[Union[str, int]]:
-    """Adds the values of the given header to the
-    "CACHE_HDR".
+def matisseCalib(header,action,listCalibFile,calibPrevious):
+    global CACHE_HEADER
 
-    Parameters
-    ----------
-    header : str
-        The header
-    action : str
-        The mode used for the hybrid observation.
-    listCalibFile : list of str
-        The
-    calibPrevious
-    """
-    global CACHE_HDR
     keyDetReadCurname = header['HIERARCH ESO DET READ CURNAME']
-    keyDetChipName = header['HIERARCH ESO DET CHIP NAME']
-    keyDetSeq1Dit = header['HIERARCH ESO DET SEQ1 DIT']
-    keyDetSeq1Period = header['HIERARCH ESO DET SEQ1 PERIOD']
-    keyInsPilId = header['HIERARCH ESO INS PIL ID']
-    keyInsPinId = header['HIERARCH ESO INS PIN ID']
-    keyInsDilId = header['HIERARCH ESO INS DIL ID']
-    keyInsDinId = header['HIERARCH ESO INS DIN ID']
-    keyInsPolId = header['HIERARCH ESO INS POL ID']
-    keyInsFilId = header['HIERARCH ESO INS FIL ID']
-    keyInsPonId = header['HIERARCH ESO INS PON ID']
-    keyInsFinId = header['HIERARCH ESO INS FIN ID']
-    keyDetMtrh2 = header['HIERARCH ESO DET WIN MTRH2']
-    keyDetMtrs2 = header['HIERARCH ESO DET WIN MTRS2']
-    res = calibPrevious
+    keyDetChipName    = header['HIERARCH ESO DET CHIP NAME']
+    keyDetSeq1Dit     = header['HIERARCH ESO DET SEQ1 DIT']
+    keyDetSeq1Period  = header['HIERARCH ESO DET SEQ1 PERIOD']
+    keyInsPilId       = header['HIERARCH ESO INS PIL ID']
+    keyInsPinId       = header['HIERARCH ESO INS PIN ID']
+    keyInsDilId       = header['HIERARCH ESO INS DIL ID']
+    keyInsDinId       = header['HIERARCH ESO INS DIN ID']
+    keyInsPolId       = header['HIERARCH ESO INS POL ID']
+    keyInsFilId       = header['HIERARCH ESO INS FIL ID']
+    keyInsPonId       = header['HIERARCH ESO INS PON ID']
+    keyInsFinId       = header['HIERARCH ESO INS FIN ID']
+    keyDetMtrh2       = header['HIERARCH ESO DET WIN MTRH2']
+    keyDetMtrs2       = header['HIERARCH ESO DET WIN MTRS2']
 
-    if (action == "ACTION_MAT_CAL_DET_SLOW_SPEED" or
+    res = calibPrevious
+    if (action == "ACTION_MAT_CAL_DET_SLOW_SPEED" or 
         action == "ACTION_MAT_CAL_DET_FAST_SPEED" or
-        action == "ACTION_MAT_CAL_DET_LOW_GAIN"  or
+        action == "ACTION_MAT_CAL_DET_LOW_GAIN"   or
         action == "ACTION_MAT_CAL_DET_HIGH_GAIN"):
         return [res, 1]
 
     allhdr = []
     for elt in listCalibFile:
-        if elt not in CACHE_HDR:
+        if elt not in CACHE_HEADER:
             value = getheader(elt,0);
-            CACHE_HDR.update(elt,value)
-        allhdr.append(CACHE_HDR.cache[elt]['value'])
+            CACHE_HEADER.update(elt,value)
+        allhdr.append(CACHE_HEADER.cache[elt]['value'])
 
-    if (action == "ACTION_MAT_IM_BASIC" or
+    if (action == "ACTION_MAT_IM_BASIC"    or
         action == "ACTION_MAT_IM_EXTENDED" or
         action == "ACTION_MAT_IM_REM"):
         nbCalib = 0
@@ -141,194 +98,204 @@ def matisseCalib(header: str, action: str,
                 nbCalib += 1
 
         for hdr, elt in zip(allhdr, listCalibFile):
-            tagCalib = matisseType(hdr)
+            tagCalib=matisseType(hdr)
             if (tagCalib == "BADPIX"):
                 keyDetReadCurnameCalib = hdr['HIERARCH ESO DET READ CURNAME']
-                keyTplStartCalib = hdr['HIERARCH ESO TPL START']
-                keyDetChipNameCalib = hdr['HIERARCH ESO DET CHIP NAME']
+                keyTplStartCalib       = hdr['HIERARCH ESO TPL START']
+                keyDetChipNameCalib    = hdr['HIERARCH ESO DET CHIP NAME']
 
-            if (tagCalib == "BADPIX" and
+            if (tagCalib                == "BADPIX" and
                 (keyDetReadCurnameCalib == keyDetReadCurname and
-                 keyDetChipNameCalib == keyDetChipName)):
-                idx = -1
-                cpt = 0
+                 keyDetChipNameCalib    == keyDetChipName)):
+                idx=-1
+                cpt=0
                 for elt2 in res:
-                    if (elt2[1] == tagCalib):
-                        idx = cpt
-                    cpt += 1
+                    if (elt2[1]==tagCalib):
+                        idx=cpt
+                    cpt+=1
                 if (idx > -1):
-                    hdu = fits.open(res[idx][0])
-                    keyTplStartPrevious = hdu[0].header['HIERARCH ESO TPL START']
+                    hdu=fits.open(res[idx][0])
+                    keyTplStartPrevious=hdu[0].header['HIERARCH ESO TPL START']
                     hdu.close()
                     if (keyTplStartCalib >= keyTplStartPrevious):
                         del res[idx]
-                        res.append([elt, tagCalib])
+                        res.append([elt,tagCalib])
                 else:
-                    res.append([elt, tagCalib])
-                    nbCalib += 1
-        if (nbCalib == 1):
-            status = 1
+                    res.append([elt,tagCalib])
+                    nbCalib+=1
+        if (nbCalib==1):
+            status=1
         else:
-            status = 0
-        return [res, status]
+            status=0
+        return [res,status]
 
     if (action == "ACTION_MAT_EST_FLAT"):
         nbCalib = 0
         for elt in res:
-            if (elt[1] == "BADPIX" or
-                elt[1] == "FLATFIELD" or
+            if (elt[1] == "BADPIX"    or 
+                elt[1] == "FLATFIELD" or 
                 elt[1] == "NONLINEARITY"):
-                nbCalib += 1
-        for hdr, elt in zip(allhdr, listCalibFile):
+                nbCalib+=1
+        for hdr,elt in zip(allhdr,listCalibFile):
             tagCalib = matisseType(hdr)
-            if (tagCalib == "BADPIX" or
+            if (tagCalib == "BADPIX"       or
                 tagCalib == "NONLINEARITY" or
                 tagCalib == "FLATFIELD"):
                 keyDetReadCurnameCalib = hdr['HIERARCH ESO DET READ CURNAME']
-                keyDetChipNameCalib = hdr['HIERARCH ESO DET CHIP NAME']
-                keyDetSeq1DitCalib = hdr['HIERARCH ESO DET SEQ1 DIT']
-                keyTplStartCalib = hdr['HIERARCH ESO TPL START']
+                keyDetChipNameCalib    = hdr['HIERARCH ESO DET CHIP NAME']
+                keyDetSeq1DitCalib     = hdr['HIERARCH ESO DET SEQ1 DIT']
+                keyTplStartCalib       = hdr['HIERARCH ESO TPL START']
 
             if (tagCalib == "BADPIX" and
                 (keyDetReadCurnameCalib == keyDetReadCurname and
-                 keyDetChipNameCalib == keyDetChipName)):
+                 keyDetChipNameCalib    == keyDetChipName)):
                 idx = -1
-                cpt = 0
+                cpt =  0
                 for elt2 in res:
-                    if (elt2[1] == tagCalib):
+                    if (elt2[1]==tagCalib):
                         idx = cpt
                     cpt += 1
                 if (idx > -1):
                     hdu = fits.open(res[idx][0])
-                    keyTplStartPrevious = hdu[0].header['HIERARCH ESO TPL START']
+                    keyTplStartPrevious=hdu[0].header['HIERARCH ESO TPL START']
                     hdu.close()
                     if (keyTplStartCalib >= keyTplStartPrevious):
                         del res[idx]
-                        res.append([elt, tagCalib])
+                        res.append([elt,tagCalib])
                 else:
-                    res.append([elt, tagCalib])
-                    nbCalib += 1
-            if (tagCalib == "FLATFIELD" and
-                ((keyDetChipNameCalib == "AQUARIUS"  and
-                  keyDetChipName == "AQUARIUS"  and
+                    res.append([elt,tagCalib])
+                    nbCalib+=1
+            if (tagCalib                 == "FLATFIELD" and
+                ((keyDetChipNameCalib    == "AQUARIUS"  and
+                  keyDetChipName         == "AQUARIUS"  and
                   keyDetReadCurnameCalib == keyDetReadCurname and
-                  keyDetSeq1DitCalib == keyDetSeq1Dit) or
-                 (keyDetChipNameCalib == "HAWAII-2RG" and
-                  keyDetChipName == "HAWAII-2RG" and
-                  keyDetReadCurnameCalib == keyDetReadCurname))):
-                idx = -1
-                cpt = 0
+                  keyDetSeq1DitCalib     == keyDetSeq1Dit) or
+                 (keyDetChipNameCalib    == "HAWAII-2RG" and
+                  keyDetChipName         == "HAWAII-2RG" and
+                  keyDetReadCurnameCalib == keyDetReadCurname) )):
+
+
+#                  and
+#                  keyDetReadCurnameCalib == keyDetReadCurname and
+#                  keyDetSeq1DitCalib     == keyDetSeq1Dit))):
+                idx=-1
+                cpt=0
                 for elt2 in res:
-                    if (elt2[1] == tagCalib):
-                        idx = cpt
-                    cpt += 1
+                    if (elt2[1]==tagCalib):
+                        idx=cpt
+                    cpt+=1
                 if (idx > -1):
-                    hdu = fits.open(res[idx][0])
-                    keyTplStartPrevious = hdu[0].header['HIERARCH ESO TPL START']
+                    hdu=fits.open(res[idx][0])
+                    keyTplStartPrevious=hdu[0].header['HIERARCH ESO TPL START']
                     hdu.close()
                     if (keyTplStartCalib >= keyTplStartPrevious):
                         del res[idx]
-                        res.append([elt, tagCalib])
+                        res.append([elt,tagCalib])
                 else:
-                    res.append([elt, tagCalib])
-                    nbCalib += 1
-            if (tagCalib == "NONLINEARITY" and
-                ((keyDetChipNameCalib == "AQUARIUS" and
-                  keyDetChipName == "AQUARIUS" and
+                    res.append([elt,tagCalib])
+                    nbCalib+=1
+            if (tagCalib                 == "NONLINEARITY" and
+                ((keyDetChipNameCalib    == "AQUARIUS" and
+                  keyDetChipName         == "AQUARIUS" and
                   keyDetReadCurnameCalib == keyDetReadCurname and
-                  keyDetSeq1DitCalib == keyDetSeq1Dit) or
-                 (keyDetChipNameCalib == "HAWAII-2RG" and
-                  keyDetChipName == "HAWAII-2RG" and
-                  keyDetReadCurnameCalib == keyDetReadCurname))):
-                idx = -1
-                cpt = 0
+                  keyDetSeq1DitCalib     == keyDetSeq1Dit) or
+                 (keyDetChipNameCalib    == "HAWAII-2RG" and
+                  keyDetChipName         == "HAWAII-2RG" and
+                  keyDetReadCurnameCalib == keyDetReadCurname) )):
+
+
+#                  and
+#                  keyDetReadCurnameCalib == keyDetReadCurname and
+#                  keyDetSeq1DitCalib     == keyDetSeq1Dit))):
+                idx=-1
+                cpt=0
                 for elt2 in res:
-                    if (elt2[1] == tagCalib):
-                        idx = cpt
-                    cpt += 1
+                    if (elt2[1]==tagCalib):
+                        idx=cpt
+                    cpt+=1
                 if (idx > -1):
-                    hdu = fits.open(res[idx][0])
-                    keyTplStartPrevious = hdu[0].header['HIERARCH ESO TPL START']
+                    hdu=fits.open(res[idx][0])
+                    keyTplStartPrevious=hdu[0].header['HIERARCH ESO TPL START']
                     hdu.close()
                     if (keyTplStartCalib >= keyTplStartPrevious):
                         del res[idx]
-                        res.append([elt, tagCalib])
+                        res.append([elt,tagCalib])
                 else:
-                    res.append([elt, tagCalib])
-                    nbCalib += 1
-                idx = -1
-                cpt = 0
+                    res.append([elt,tagCalib])
+                    nbCalib+=1
+                idx=-1
+                cpt=0
                 for elt2 in res:
-                    if (elt2[1] == tagCalib):
-                        idx = cpt
-                    cpt += 1
+                    if (elt2[1]==tagCalib):
+                        idx=cpt
+                    cpt+=1
                 if (idx > -1):
-                    hdu = fits.open(res[idx][0])
-                    keyTplStartPrevious = hdu[0].header['HIERARCH ESO TPL START']
+                    hdu=fits.open(res[idx][0])
+                    keyTplStartPrevious=hdu[0].header['HIERARCH ESO TPL START']
                     hdu.close()
                     if (keyTplStartCalib >= keyTplStartPrevious):
                         del res[idx]
-                        res.append([elt, tagCalib])
+                        res.append([elt,tagCalib])
                 else:
-                    res.append([elt, tagCalib])
-                    nbCalib += 1
-        if (nbCalib == 3):
-            status = 1
+                    res.append([elt,tagCalib])
+                    nbCalib+=1
+        if (nbCalib==3):
+            status=1
         else:
-            status = 0
-        return [res, status]
+            status=0
+        return [res,status]
 
-    if (action == "ACTION_MAT_RAW_ESTIMATES"):
-        nbCalib = 0
+    if (action=="ACTION_MAT_RAW_ESTIMATES"):
+        nbCalib=0
         for elt in res:
-            if (elt[1] == "BADPIX" or
-                elt[1] == "OBS_FLATFIELD" or
-                elt[1] == "NONLINEARITY" or
-                elt[1] == "SHIFT_MAP" or
-                elt[1] == "KAPPA_MATRIX"):
-                nbCalib += 1
+            if (elt[1]=="BADPIX" or 
+                elt[1]=="OBS_FLATFIELD" or 
+                elt[1]=="NONLINEARITY" or 
+                elt[1]=="SHIFT_MAP" or
+                elt[1]=="KAPPA_MATRIX"):
+                nbCalib+=1
 
-        for hdr, elt in zip(allhdr, listCalibFile):
-            tagCalib = matisseType(hdr)
-            if (tagCalib == "BADPIX" or
-                tagCalib == "OBS_FLATFIELD" or
-                tagCalib == "NONLINEARITY" or
-                tagCalib == "SHIFT_MAP" or
-                tagCalib == "KAPPA_MATRIX"):
-                keyTplStartCalib = hdr['HIERARCH ESO TPL START']
+        for hdr,elt in zip(allhdr,listCalibFile):
+            tagCalib=matisseType(hdr)
+            if (tagCalib=="BADPIX" or 
+                tagCalib=="OBS_FLATFIELD" or
+                tagCalib=="NONLINEARITY" or
+                tagCalib=="SHIFT_MAP" or
+                tagCalib=="KAPPA_MATRIX"):
+                keyTplStartCalib       = hdr['HIERARCH ESO TPL START']
                 keyDetReadCurnameCalib = hdr['HIERARCH ESO DET READ CURNAME']
-                keyDetChipNameCalib = hdr['HIERARCH ESO DET CHIP NAME']
-                keyDetSeq1DitCalib = hdr['HIERARCH ESO DET SEQ1 DIT']
-                keyInsPilIdCalib = hdr['HIERARCH ESO INS PIL ID']
-                keyInsPinIdCalib = hdr['HIERARCH ESO INS PIN ID']
-                keyInsDilIdCalib = hdr['HIERARCH ESO INS DIL ID']
-                keyInsDinIdCalib = hdr['HIERARCH ESO INS DIN ID']
-                keyInsPolIdCalib = hdr['HIERARCH ESO INS POL ID']
-                keyInsFilIdCalib = hdr['HIERARCH ESO INS FIL ID']
-                keyInsPonIdCalib = hdr['HIERARCH ESO INS PON ID']
-                keyInsFinIdCalib = hdr['HIERARCH ESO INS FIN ID']
-                keyDetMtrh2Calib = hdr['HIERARCH ESO DET WIN MTRH2']
-                keyDetMtrs2Calib = hdr['HIERARCH ESO DET WIN MTRS2']
-            if (tagCalib == "BADPIX" and (keyDetReadCurnameCalib == keyDetReadCurname and keyDetChipNameCalib == keyDetChipName)):
-                idx = -1
-                cpt = 0
+                keyDetChipNameCalib    = hdr['HIERARCH ESO DET CHIP NAME']
+                keyDetSeq1DitCalib     = hdr['HIERARCH ESO DET SEQ1 DIT']
+                keyInsPilIdCalib       = hdr['HIERARCH ESO INS PIL ID']
+                keyInsPinIdCalib       = hdr['HIERARCH ESO INS PIN ID']
+                keyInsDilIdCalib       = hdr['HIERARCH ESO INS DIL ID']
+                keyInsDinIdCalib       = hdr['HIERARCH ESO INS DIN ID']
+                keyInsPolIdCalib       = hdr['HIERARCH ESO INS POL ID']
+                keyInsFilIdCalib       = hdr['HIERARCH ESO INS FIL ID']
+                keyInsPonIdCalib       = hdr['HIERARCH ESO INS PON ID']
+                keyInsFinIdCalib       = hdr['HIERARCH ESO INS FIN ID']
+                keyDetMtrh2Calib       = hdr['HIERARCH ESO DET WIN MTRH2']
+                keyDetMtrs2Calib       = hdr['HIERARCH ESO DET WIN MTRS2']
+            if (tagCalib=="BADPIX" and (keyDetReadCurnameCalib==keyDetReadCurname and keyDetChipNameCalib==keyDetChipName)):
+                idx=-1
+                cpt=0
                 for elt2 in res:
-                    if (elt2[1] == tagCalib):
-                        idx = cpt
-                    cpt += 1
+                    if (elt2[1]==tagCalib):
+                        idx=cpt
+                    cpt+=1
                 if (idx > -1):
-                    hdu = fits.open(res[idx][0])
-                    keyTplStartPrevious = hdu[0].header['HIERARCH ESO TPL START']
+                    hdu=fits.open(res[idx][0])
+                    keyTplStartPrevious=hdu[0].header['HIERARCH ESO TPL START']
                     hdu.close()
                     if (keyTplStartCalib >= keyTplStartPrevious):
                         del res[idx]
-                        res.append([elt, tagCalib])
+                        res.append([elt,tagCalib])
                 else:
-                    res.append([elt, tagCalib])
-                    nbCalib += 1
-            if (tagCalib == "OBS_FLATFIELD" and
-                (keyDetChipNameCalib ==keyDetChipName and keyDetReadCurnameCalib==keyDetReadCurname and
-                 (abs(keyDetSeq1DitCalib - keyDetSeq1Dit) < 0.001 or keyDetSeq1DitCalib==keyDetSeq1Period) and
+                    res.append([elt,tagCalib])
+                    nbCalib+=1
+            if (tagCalib=="OBS_FLATFIELD" and 
+                (keyDetChipNameCalib==keyDetChipName and keyDetReadCurnameCalib==keyDetReadCurname and 
+                 (abs(keyDetSeq1DitCalib - keyDetSeq1Dit) < 0.001 or keyDetSeq1DitCalib==keyDetSeq1Period) and 
                  ((keyInsPilId==keyInsPilIdCalib and keyInsDilId==keyInsDilIdCalib and keyDetChipName=="HAWAII-2RG" and keyDetReadCurname=="SCI-FAST-SPEED") or
                   (keyInsPilId==keyInsPilIdCalib and keyInsDilId==keyInsDilIdCalib and keyDetChipName=="HAWAII-2RG" and keyDetReadCurname=="SCI-SLOW-SPEED" and
                    keyDetMtrh2==keyDetMtrh2Calib and keyDetMtrs2==keyDetMtrs2Calib) or
@@ -349,12 +316,12 @@ def matisseCalib(header: str, action: str,
                 else:
                     res.append([elt,tagCalib])
                     nbCalib+=1
-            if (tagCalib=="NONLINEARITY" and
+            if (tagCalib=="NONLINEARITY" and 
                 ((keyDetChipNameCalib    =="AQUARIUS" and
                   keyDetChipName         =="AQUARIUS" and
                   keyDetReadCurnameCalib ==keyDetReadCurname and
                   (keyDetSeq1DitCalib    ==keyDetSeq1Dit or
-                   keyDetSeq1DitCalib    ==keyDetSeq1Period)) or
+                   keyDetSeq1DitCalib    ==keyDetSeq1Period)) or 
                  (keyDetChipNameCalib    =="HAWAII-2RG" and
                   keyDetChipName         =="HAWAII-2RG" and
                   keyDetReadCurnameCalib ==keyDetReadCurname))):
@@ -374,8 +341,8 @@ def matisseCalib(header: str, action: str,
                 else:
                     res.append([elt,tagCalib])
                     nbCalib+=1
-            if (tagCalib=="SHIFT_MAP" and
-                (keyDetChipNameCalib==keyDetChipName and
+            if (tagCalib=="SHIFT_MAP" and 
+                (keyDetChipNameCalib==keyDetChipName and 
                  ((keyInsDilId == keyInsDilIdCalib and
                    keyInsFilId == keyInsFilIdCalib and
                    keyDetChipName =="HAWAII-2RG" and keyInsDilId == "HIGH+") or
@@ -399,10 +366,10 @@ def matisseCalib(header: str, action: str,
                 else:
                     res.append([elt,tagCalib])
                     nbCalib+=1
-            if (tagCalib=="KAPPA_MATRIX" and
-                (keyDetChipNameCalib==keyDetChipName and
-                 ((keyInsPolId==keyInsPolIdCalib and keyInsDilId==keyInsDilIdCalib and keyDetChipName=="HAWAII-2RG") or
-#                 ((keyInsPolId==keyInsPolIdCalib and keyInsFilId==keyInsFilIdCalib and keyInsDilId==keyInsDilIdCalib and keyDetChipName=="HAWAII-2RG") or
+            if (tagCalib=="KAPPA_MATRIX" and 
+                (keyDetChipNameCalib==keyDetChipName and 
+                 ((keyInsPolId==keyInsPolIdCalib and keyInsDilId==keyInsDilIdCalib and keyDetChipName=="HAWAII-2RG") or 
+#                 ((keyInsPolId==keyInsPolIdCalib and keyInsFilId==keyInsFilIdCalib and keyInsDilId==keyInsDilIdCalib and keyDetChipName=="HAWAII-2RG") or 
                   (keyInsPonId==keyInsPonIdCalib and keyInsFinId==keyInsFinIdCalib and keyInsDinId==keyInsDinIdCalib and keyDetChipName=="AQUARIUS")))):
                 idx=-1
                 cpt=0
@@ -450,16 +417,16 @@ def matisseCalib(header: str, action: str,
     if (action=="ACTION_MAT_EST_KAPPA"):
         nbCalib=0
         for elt in res:
-            if (elt[1]=="BADPIX" or
-                elt[1]=="OBS_FLATFIELD" or
-                elt[1]=="NONLINEARITY" or
+            if (elt[1]=="BADPIX" or 
+                elt[1]=="OBS_FLATFIELD" or 
+                elt[1]=="NONLINEARITY" or 
                 elt[1]=="SHIFT_MAP"):
                 nbCalib+=1
         for hdr,elt in zip(allhdr,listCalibFile):
             tagCalib=matisseType(hdr)
             if (tagCalib=="BADPIX" or
                 tagCalib=="NONLINEARITY" or
-                tagCalib=="OBS_FLATFIELD" or
+                tagCalib=="OBS_FLATFIELD" or 
                 tagCalib=="SHIFT_MAP"):
                 keyDetReadCurnameCalib=hdr['HIERARCH ESO DET READ CURNAME']
                 keyDetChipNameCalib=hdr['HIERARCH ESO DET CHIP NAME']
@@ -473,7 +440,7 @@ def matisseCalib(header: str, action: str,
                 keyInsPonIdCalib   =hdr['HIERARCH ESO INS PON ID']
                 keyInsFinIdCalib   =hdr['HIERARCH ESO INS FIN ID']
                 keyTplStartCalib   =hdr['HIERARCH ESO TPL START']
-
+                
             if (tagCalib=="BADPIX" and (keyDetReadCurnameCalib==keyDetReadCurname and keyDetChipNameCalib==keyDetChipName)):
                 idx=-1
                 cpt=0
@@ -491,13 +458,13 @@ def matisseCalib(header: str, action: str,
                 else:
                     res.append([elt,tagCalib])
                     nbCalib+=1
-            if (tagCalib=="OBS_FLATFIELD" and
+            if (tagCalib=="OBS_FLATFIELD" and 
                 (keyDetChipNameCalib   == keyDetChipName and
-                 keyDetReadCurnameCalib== keyDetReadCurname and
-                 keyDetSeq1DitCalib    == keyDetSeq1Dit  and
+                 keyDetReadCurnameCalib== keyDetReadCurname and 
+                 keyDetSeq1DitCalib    == keyDetSeq1Dit  and 
                  ((keyInsPilIdCalib    == "PHOTO" and
                    keyInsDilId         == keyInsDilIdCalib and
-                   keyDetChipName      == "HAWAII-2RG") or
+                   keyDetChipName      == "HAWAII-2RG") or 
                   (keyInsPinIdCalib    == "PHOTO" and
                    keyInsDinId         == keyInsDinIdCalib and
                    keyDetChipName      == "AQUARIUS")))):
@@ -517,11 +484,11 @@ def matisseCalib(header: str, action: str,
                 else:
                     res.append([elt,tagCalib])
                     nbCalib+=1
-            if (tagCalib=="NONLINEARITY" and
+            if (tagCalib=="NONLINEARITY" and 
                 ((keyDetChipNameCalib    == "AQUARIUS" and
                   keyDetChipName         == "AQUARIUS" and
                   keyDetReadCurnameCalib == keyDetReadCurname and
-                  keyDetSeq1DitCalib     == keyDetSeq1Dit) or
+                  keyDetSeq1DitCalib     == keyDetSeq1Dit) or 
                  (keyDetChipNameCalib    == "HAWAII-2RG" and
                   keyDetChipName         == "HAWAII-2RG" and
                   keyDetReadCurnameCalib == keyDetReadCurname))):
@@ -541,10 +508,10 @@ def matisseCalib(header: str, action: str,
                 else:
                     res.append([elt,tagCalib])
                     nbCalib+=1
-            if (tagCalib=="SHIFT_MAP" and
-                (keyDetChipNameCalib==keyDetChipName and
+            if (tagCalib=="SHIFT_MAP" and 
+                (keyDetChipNameCalib==keyDetChipName and 
                  ((keyInsDilId    == keyInsDilIdCalib and
-                   keyDetChipName == "HAWAII-2RG" and keyInsDilId != "HIGH+") or
+                   keyDetChipName == "HAWAII-2RG" and keyInsDilId != "HIGH+") or 
                  (keyInsDilId    == keyInsDilIdCalib and
                    keyInsFilId    == keyInsFilIdCalib and
                    keyDetChipName == "HAWAII-2RG" and keyInsDilId == "HIGH+") or
@@ -575,8 +542,8 @@ def matisseCalib(header: str, action: str,
     if (action=="ACTION_MAT_EST_SHIFT"):
         nbCalib=0
         for elt in res:
-            if (elt[1]=="BADPIX" or
-                elt[1]=="OBS_FLATFIELD" or
+            if (elt[1]=="BADPIX" or 
+                elt[1]=="OBS_FLATFIELD" or 
                 elt[1]=="NONLINEARITY"):
                 nbCalib+=1
         for hdr,elt in zip(allhdr,listCalibFile):
@@ -613,13 +580,13 @@ def matisseCalib(header: str, action: str,
                 else:
                     res.append([elt,tagCalib])
                     nbCalib+=1
-            if (tagCalib=="OBS_FLATFIELD" and
+            if (tagCalib=="OBS_FLATFIELD" and 
                 (keyDetChipNameCalib    == keyDetChipName and
-                 keyDetReadCurnameCalib == keyDetReadCurname and
-                 keyDetSeq1DitCalib     == keyDetSeq1Dit  and
+                 keyDetReadCurnameCalib == keyDetReadCurname and 
+                 keyDetSeq1DitCalib     == keyDetSeq1Dit  and 
                  ((keyInsPilIdCalib     == "PHOTO" and
                    keyInsDilId          == keyInsDilIdCalib and
-                   keyDetChipName       == "HAWAII-2RG") or
+                   keyDetChipName       == "HAWAII-2RG") or 
                   (keyInsPinIdCalib     == "PHOTO" and
                    keyInsDinId          == keyInsDinIdCalib and
                    keyDetChipName       == "AQUARIUS")))):
@@ -639,11 +606,11 @@ def matisseCalib(header: str, action: str,
                 else:
                     res.append([elt,tagCalib])
                     nbCalib+=1
-            if (tagCalib=="NONLINEARITY" and
+            if (tagCalib=="NONLINEARITY" and 
                 ((keyDetChipNameCalib    == "AQUARIUS" and
                   keyDetChipName         == "AQUARIUS" and
                   keyDetReadCurnameCalib == keyDetReadCurname and
-                  keyDetSeq1DitCalib     == keyDetSeq1Dit) or
+                  keyDetSeq1DitCalib     == keyDetSeq1Dit) or 
                  (keyDetChipNameCalib    == "HAWAII-2RG" and
                   keyDetChipName         == "HAWAII-2RG" and
                   keyDetReadCurnameCalib == keyDetReadCurname))):
@@ -668,28 +635,12 @@ def matisseCalib(header: str, action: str,
         else:
             status=0
         return [res,status]
+
+
     return [res,0]
 
+def matisseRecipes(action, det, tel, resol):
 
-def matisseRecipes(action: str, det, tel, resol) -> List[str]:
-    """Gets the settings needed for the reduction from the
-    detector, telescopes, and observation mode used.
-
-    Parameters
-    ----------
-    action : str
-        The mode used for the hybrid observation.
-    det : str
-        The detector that has been used. Either "HAWAII" or
-        "AQUARIUS".
-    tel : str
-        Either "ATs" or "UTs".
-    resol : str
-        The resolution of the observation.
-
-    Returns
-    -------
-    """
     if (action=="ACTION_MAT_CAL_DET_SLOW_SPEED"):
         return ["mat_cal_det","--gain=2.73 --darklimit=100.0 --flatlimit=0.3 --max_nonlinear_range=36000.0 --max_abs_deviation=2000.0 --max_rel_deviation=0.01 --nltype=2"]
     if (action=="ACTION_MAT_CAL_DET_FAST_SPEED"):
@@ -707,17 +658,18 @@ def matisseRecipes(action: str, det, tel, resol) -> List[str]:
 
     if (action=="ACTION_MAT_RAW_ESTIMATES"):
         options = ""
-
+    
         if (det=="AQUARIUS"):
             options += "--useOpdMod=TRUE"
             if (tel=="ESO-VLTI-A1234"):
                 options += " --replaceTel=3"
-
+                
+            
         elif (det =="HAWAII-2RG"):
             options += "--useOpdMod=FALSE --tartyp=57 --compensate=[pb,nl,if,rb,bp,od] --hampelFilterKernel=10"
-
+                
         return ["mat_raw_estimates",options]
-
+    
     if (action=="ACTION_MAT_IM_BASIC"):
         return ["mat_im_basic",""]
     if (action=="ACTION_MAT_IM_EXTENDED"):
@@ -726,18 +678,8 @@ def matisseRecipes(action: str, det, tel, resol) -> List[str]:
         return ["mat_im_rem",""]
     return ["",""]
 
-def matisseAction(header: str, tag: str) -> str:
-    """
+def matisseAction(header,tag):
 
-    Parameters
-    ----------
-    header : str
-    tag : str
-
-    Returns
-    -------
-    action : str
-    """
     keyDetName        = header['HIERARCH ESO DET NAME']
     keyDetReadCurname = header['HIERARCH ESO DET READ CURNAME']
 
@@ -783,18 +725,7 @@ def matisseAction(header: str, tag: str) -> str:
         return "ACTION_MAT_IM_REM"
     return "NO-ACTION"
 
-def matisseType(header: str) -> str:
-    """
-
-    Parameters
-    ----------
-    header : str
-
-    Return
-    ------
-    res : str
-        The type of the (.fits)-file.
-    """
+def matisseType(header):
     res  = ""
     catg = None
     typ  = None
@@ -848,9 +779,9 @@ def matisseType(header: str) -> str:
         res="CALIB_SRC_RAW"
     elif ((catg=="SCIENCE" or catg=="TEST") and typ=="OBJECT" and tech=="INTERFEROMETRY") :
         res="TARGET_RAW"
-    elif (catg == "TEST" and typ == "STD" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "OBJECT" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "OBJECT,FLUX" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "STD" and tech == "INTERFEROMETRY") :
+    elif (catg == "TEST" and typ == "STD" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "OBJECT" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "OBJECT,FLUX" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "STD" and tech == "INTERFEROMETRY") : 
         res="CALIB_RAW"
-    elif (catg == "TEST" or catg=="CALIB" or catg=="SCIENCE") and typ == "SKY" and tech == "INTERFEROMETRY" :
+    elif (catg == "TEST" or catg=="CALIB" or catg=="SCIENCE") and typ == "SKY" and tech == "INTERFEROMETRY" : 
         res="SKY_RAW"
     else:
         res=catg
