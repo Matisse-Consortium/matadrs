@@ -1,7 +1,6 @@
 import pkg_resources
 import re
 import warnings
-from logging import warn
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -426,7 +425,8 @@ class ReadoutFits:
         """
         with fits.open(self.fits_file, "readonly") as hdul:
             if header not in hdul:
-                warn(f"Header {header} not found!", HeaderNotFoundWarning)
+                warnings.warn(f"Header {header} not found!",
+                              HeaderNotFoundWarning)
                 return
             return hdul[header].header
 
