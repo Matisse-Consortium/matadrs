@@ -344,12 +344,12 @@ def cleanup_reduction(product_dir: Path,
     if not mode_and_band_dir.exists():
         mode_and_band_dir.mkdir(parents=True)
 
-    reduced_dirs = [folder for folder in
-                    (product_dir / "Iter1").iterdir() if folder.is_dir()]
+    iter_dir = product_dir / "Iter1"
+    reduced_dirs = [folder for folder in iter_dir.iterdir() if folder.is_dir()]
     for reduced_folder in reduced_dirs:
         cprint(f"Moving folder '{reduced_folder.name}'...", "g")
         move(reduced_folder, mode_and_band_dir, overwrite)
-        shutil.rmtree(product_dir / "Iter1")
+        shutil.rmtree(iter_dir)
 
     reduced_dirs = [mode_and_band_dir / folder.name for folder in reduced_dirs]
     for reduced_folder in reduced_dirs:
