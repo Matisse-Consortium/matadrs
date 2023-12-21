@@ -344,17 +344,20 @@ def cleanup_reduction(product_dir: Path,
     if not mode_and_band_dir.exists():
         mode_and_band_dir.mkdir(parents=True)
 
-    for reduced_folder in product_dir.glob("Iter1/*.rb"):
+    reduced_dirs = [folder for folder in
+                    (product_dir / "Iter1").iterdir() if folder.is_dir()]
+    for reduced_folder in reduced_dirs:
         cprint(f"Moving folder '{reduced_folder.name}'...", "g")
         move(reduced_folder, mode_and_band_dir, overwrite)
+        shutil.rmtree(product_dir / "Iter1")
 
-    for reduced_folder in mode_and_band_dir.glob("*.rb"):
+    reduced_dirs = [mode_and_band_dir / folder.name for folder in reduced_dirs]
+    for reduced_folder in reduced_dirs:
         cprint(f"Plotting files of folder {reduced_folder.name}...", "g")
         for fits_file in get_fits_by_tag(reduced_folder, "RAW_INT"):
-            plot_fits = Plotter(
-                    fits_file,
-                    save_path=mode_and_band_dir / reduced_folder.name)
-            plot_fits.add_cphases().add_vis().add_vis2()
+            plot_fits = Plotter(fits_file, save_path=reduced_folder)
+            unwrap = True if "AQUARIUS" in str(fits_file) else False
+            plot_fits.add_cphases(unwrap=unwrap).add_vis().add_vis2()
             plot_fits.plot(save=True, error=True)
         if do_data_quality_plot and mode == "incoherent" and band == "lband":
             plot_data_quality(

@@ -123,7 +123,8 @@ def capitalise_to_index(string: str, index: int):
     return string[:index].capitalize() + string[index:].lower()
 
 
-def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False):
+def move(source_file: Path, destination: Path,
+         overwrite: Optional[bool] = False) -> None:
     """Moves source files/folders to the destination directory and overwrites them if
     toggled.
 
@@ -137,15 +138,18 @@ def move(source_file: Path, destination: Path, overwrite: Optional[bool] = False
         If this is toggled it will overwrite any existing files or directories with the
         same name.
     """
-    if (destination / source_file.name).exists():
+    new_file = destination / source_file.name
+    if new_file.exists():
         if overwrite:
             if source_file.is_dir():
+                shutil.rmtree(new_file)
                 shutil.copytree(source_file, destination / source_file.name,
                                 dirs_exist_ok=True)
                 shutil.rmtree(source_file)
             else:
+                new_file.unlink()
                 shutil.copy2(source_file, destination / source_file.name)
-                os.remove(source_file)
+                source_file.unlink()
         else:
             cprint(f"WARNING: '{source_file.name}' could not be moved, as it already"
                    " exists at the destination!")
