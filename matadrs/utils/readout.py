@@ -103,6 +103,16 @@ class ReadoutFits:
             self.primary_header = hdul[0].header
 
     @property
+    def band(self) -> str:
+        """Fetches the object's band from the detector used"""
+        chip = self.primary_header["HIERARCH ESO DET CHIP NAME"]
+        if "HAWAII" in chip:
+            return "lband"
+        elif "AQUARIUS" in chip:
+            return "nband"
+        return ""
+
+    @property
     def object_id(self) -> str:
         """Fetches the object's name from the primary header."""
         return self.primary_header["OBJECT"]

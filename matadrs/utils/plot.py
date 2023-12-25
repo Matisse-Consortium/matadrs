@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 from matplotlib.axes import Axes
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from .readout import ReadoutFits
 from .tools import unwrap_phases, calculate_uv_tracks, get_fits_by_tag
@@ -26,10 +27,9 @@ def plot_data_quality(
         return
     readout = ReadoutFits(fits_file[0])
 
-    date = readout.tpl_start.split("T")[0]
     dics = open_oi_dir(reduced_directory, choice_band_LM="L")
     res = readout.resolution.upper()
-    plot_kwargs = {"output_path": output_dir, "date": date,
+    plot_kwargs = {"output_path": output_dir, "date": readout.date,
                    "target": readout.name, "wlenRange": [3.2, 3.9],
                    "saveplots": True, "show": False, "plot_errorbars": False}
 
@@ -41,6 +41,93 @@ def plot_data_quality(
     show_vis_tf_vs_time(dics, **plot_kwargs)
 
 
+def plot_broken_axis(ax: Axes, x: np.ndarray,
+                     y: np.ndarray, yerr: np.ndarray,
+                     range1: Tuple[float, float],
+                     range2: Tuple[float, float],
+                     ax_left: Optional[Axes] = None,
+                     ax_right: Optional[Axes] = None,
+                     color: Optional[str] = None,
+                     ylims: Optional[Tuple[float, float]] = None,
+                     error: Optional[bool] = False,
+                     **kwargs):
+    """Plot two axes next to each other to display the L-band.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The original axis to be split.
+    x : np.ndarray
+        The x-coordinates of the data.
+    y : np.ndarray
+        The y-coordinates of the data.
+    yerr : np.ndarray
+        The y-error of the data.
+    range1 : tuple
+        The range of the first axis.
+    range2 : tuple
+        The range of the second axis.
+    ax_right : matplotlib.axes.Axes, optional
+        The left axis.
+    ax_right : matplotlib.axes.Axes, optional
+        The right axis.
+    color : str, optional
+        The color of the line.
+    ylims : tuple, optional
+        The limits of the y-axis.
+    label : str, optional
+        The label of the first axis.
+    error : bool, optional
+        If the error should be plotted.
+    """
+    x1 = x[(x >= range1[0]) & (x <= range1[1])]
+    y1 = y[(x >= range1[0]) & (x <= range1[1])]
+    yerr1 = yerr[(x >= range1[0]) & (x <= range1[1])]
+
+    x2 = x[(x >= range2[0]) & (x <= range2[1])]
+    y2 = y[(x >= range2[0]) & (x <= range2[1])]
+    yerr2 = yerr[(x >= range2[0]) & (x <= range2[1])]
+
+    if ax_left is None and ax_right is None:
+        ax_left = inset_axes(
+                ax, width="48%", height="100%", loc='center left')
+        ax_right = inset_axes(
+                ax, width="48%", height="100%", loc='center right')
+
+        ax_left.spines.right.set_visible(False)
+        ax_right.spines.left.set_visible(False)
+
+        ax_left.yaxis.tick_left()
+        ax_left.tick_params(labelright='off')
+        ax_right.yaxis.set_visible(False)
+
+        left_ticks = np.around(np.linspace(range1[0], range1[1], 5)[:-1], 1)
+        right_ticks = np.around(np.linspace(range2[0], range2[1], 5)[1:], 1)
+
+        ax_left.set_xticks(left_ticks)
+        ax_right.set_xticks(right_ticks)
+
+        ax_left.set_ylim(*ylims)
+        ax_right.set_ylim(*ylims)
+
+        ax_left.set_xlim(range1[0], range1[1])
+        ax_right.set_xlim(range2[0], range2[1])
+
+    ax_left.plot(x1, y1, color=color, **kwargs)
+    ax_right.plot(x2, y2, color=color, **kwargs)
+    if error:
+        ax_left.fill_between(x1, y1+yerr1, y1-yerr1,
+                             color=color, alpha=0.2)
+        ax_right.fill_between(x2, y2+yerr2, y2-yerr2,
+                              color=color, alpha=0.2)
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    return ax_left, ax_right
+
+
 @dataclass
 class PlotComponent:
     """Class containing the elements required for a plot
@@ -48,10 +135,11 @@ class PlotComponent:
 
     Parameters
     ----------
-    labels: list
-    x_values: list
-    y_values: list
-    y_errors: list
+    labels : list
+    x_values : list
+    y_values : list
+    y_errors : list
+    band : str
     """
     labels: List = None
     x_values: List = None
@@ -129,6 +217,9 @@ class Plotter:
             self.plot_name = f"{Path(fits_files).stem}.pdf"
 
         self.color_grouping = "file"
+        self.lband_bounds = (3.1, 3.9)
+        self.mband_bounds = (4.55, 4.9)
+        self.nband_bounds = (8.5, 12.5)
 
         self.readouts = list(map(ReadoutFits, self.fits_files))
         self.components = {}
@@ -149,11 +240,14 @@ class Plotter:
         """Sets the y-limits from the data with some margin"""
         try:
             if np.min(wavelength) >= 6:
-                indices = np.where((wavelength > 8.5) | (wavelength < 12.5))
+                indices = np.where((wavelength > self.nband_bounds[0])
+                                   | (wavelength < self.nband_bounds[1]))
             else:
-                indices_low = np.where((wavelength <= 4.8) & (wavelength >= 4.5))
-                indices_high = np.where((wavelength >= 3.) & (wavelength <= 3.8))
-                indices = np.hstack((indices_low, indices_high))
+                indices_high = np.where((wavelength >= self.mband_bounds[0])
+                                       & (wavelength <= self.mband_bounds[1]))
+                indices_low = np.where((wavelength >= self.lband_bounds[0])
+                                        & (wavelength <= self.lband_bounds[1]))
+                indices = np.hstack((indices_high, indices_low))
             ymin, ymax = data[:, indices].min(), data[:, indices].max()
         except ValueError:
             ymin, ymax = np.percentile(data, 10), np.percentile(data, 90)
@@ -162,13 +256,16 @@ class Plotter:
             return None, None
         return ymin-spacing, ymax+spacing
 
-    def plot_uv(self, ax: Axes, symbol: Optional[str] = "x",
-                airmass_lim: Optional[float] = 2.,
-                show_text: Optional[List] = False,
-                make_tracks: Optional[bool] = True,
-                show_legend: Optional[bool] = True,
-                color_grouping: Optional[str] = "file",
-                **kwargs) -> None:
+    def plot_uv(
+            self, ax: Axes, symbol: Optional[str] = "x",
+            airmass_lim: Optional[float] = 2.,
+            show_text: Optional[List] = False,
+            make_tracks: Optional[bool] = True,
+            show_legend: Optional[bool] = True,
+            legend_location: Optional[str] = OPTIONS["plot.legend.location"],
+            legend_size: Optional[int] = OPTIONS["plot.legend.fontsize"],
+            color_grouping: Optional[str] = "file",
+            **kwargs) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
 
         Parameters
@@ -184,6 +281,10 @@ class Plotter:
             If the tracks should be plotted.
         show_legend: bool, optional
             If the legend should be shown.
+        legend_location : str, optional
+            The location of the legend.
+        legend_size : int, optional
+            The size of the legend.
         color_grouping : str, optional
             The color grouping used for the uv-coords. If 'file' the
             colors are based on the different (.fits)-files. If 'instrument'
@@ -213,14 +314,14 @@ class Plotter:
                 sta_labels.append(sta_label)
 
             if color_grouping == "file":
-                color = OPTIONS["plot.colors"][index]
+                color = OPTIONS["plot.color"][index]
                 handles.append(mlines.Line2D(
                     [], [], color=color, marker="X",
                     linestyle="None", label=readout.date))
             elif color_grouping == "instrument":
                 if readout.instrument not in instruments:
                     instruments.append(readout.instrument)
-                color = OPTIONS["plot.colors"][instruments.index(readout.instrument)]
+                color = OPTIONS["plot.color"][instruments.index(readout.instrument)]
 
             for uv_index, (u_coords, v_coords) in enumerate(uv_coords):
                 ax.plot(u_coords, v_coords, symbol, color=color,
@@ -247,13 +348,14 @@ class Plotter:
         if color_grouping == "instrument":
             handles = []
             for index, instrument in enumerate(instruments):
-                color = OPTIONS["plot.colors"][index]
+                color = OPTIONS["plot.color"][index]
                 handles.append(mlines.Line2D(
                     [], [], color=color, marker="X",
                     linestyle="None", label=instrument.upper()))
 
         if show_legend:
-            ax.legend(handles=handles)
+            ax.legend(handles=handles,
+                      loc=legend_location, fontsize=legend_size)
 
         ax.set_xlim([uv_extent, -uv_extent])
         ax.set_ylim([-uv_extent, uv_extent])
@@ -376,7 +478,7 @@ class Plotter:
 
     def add_mosaic(self, **kwargs):
         """Combines multiple subplots to produce a mosaic plot."""
-        self.add_uv(**kwargs)
+        self.add_uv(**{k: v for k, v in kwargs.items() if k != "legend_size"})
         self.add_vis(**kwargs)
         self.add_vis2(**kwargs)
         self.add_flux(**kwargs)
@@ -384,44 +486,109 @@ class Plotter:
         self.add_cphases(**kwargs)
         return self
 
-    def plot_component(self, ax, name: str,
-                       component: Union[Callable, PlotComponent],
-                       sharex: Optional[bool] = False,
-                       share_legend: Optional[bool] = False,
-                       error: Optional[bool] = False,
-                       margin: Optional[float] = 0.05,
-                       **kwargs) -> None:
+    def plot_component(
+            self, ax: plt.Axes, name: str,
+            component: Union[Callable, PlotComponent],
+            sharex: Optional[bool] = False,
+            show_legend: Optional[bool] = True,
+            share_legend: Optional[bool] = False,
+            legend_location: Optional[str] = OPTIONS["plot.legend.location"],
+            legend_size: Optional[int] = OPTIONS["plot.legend.fontsize"],
+            error: Optional[bool] = False,
+            margin: Optional[float] = 0.05,
+            **kwargs) -> None:
         """Plots all the data of a single component.
 
         Parameters
         ----------
-        ax : matplotlib.axes
+        fig : matplotlib.figure
+            The figure to add the subplot to.
+        column : int
+            The column of the subplot grid.
+        row : int
+            The row of the subplot grid.
         name : str
+            The name of the component.
         component : callable or plotcomponent
-        no_xlabel : bool, optional
+            The component to plot.
+        sharex : bool, optional
+            If True, the x-axis will be shared.
+        show_legend : bool, optional
+            If True, the legend will be shown.
+        share_legend : bool, optional
+            If True, the legend will be shared.
+        legend_location : str, optional
+            The location of the legend.
+        legend_size : int, optional
+            The size of the legend.
         error : bool, optional
+            If True, the error bars will be plotted.
         margin : bool, optional
-        kwargs: dict
+            The margin around the plot.
+        kwargs : dict
         """
-        xlabel = r"$\lambda$ [$\mathrm{\mu}$m]"
+        xlabel = r"$\lambda$ ($\mathrm{\mu}$m)"
         for sub_component in component:
             if isinstance(sub_component, PlotComponent):
-                for label, y_value, y_error in zip(sub_component.labels,
-                                                   sub_component.y_values,
-                                                   sub_component.y_errors):
-                    ax.plot(sub_component.x_values, y_value, label=label)
-                    if error:
-                        ax.fill_between(sub_component.x_values,
-                                        y_value+y_error, y_value-y_error, alpha=0.2)
-                    ax.legend(fontsize="xx-small", loc="upper right", framealpha=0.5)
+                ax_left, ax_right, handles = None, None, []
                 ylims = self._set_y_limits(sub_component.x_values,
                                            sub_component.y_values,
                                            margin=margin)
-                ax.set_ylim(*ylims)
-                ax.set_xlabel(xlabel)
-                ax.set_ylabel(name)
+                for index, (label, y_value, y_error)\
+                        in enumerate(zip(sub_component.labels,
+                                         sub_component.y_values,
+                                         sub_component.y_errors)):
+                    color = OPTIONS["plot.color"][index]
+                    if self.readouts[0].band == "lband":
+                        ax_left, ax_right = plot_broken_axis(
+                                ax, sub_component.x_values,
+                                y_value, y_error, self.lband_bounds,
+                                self.mband_bounds, ax_left, ax_right,
+                                color=color, ylims=ylims, label=label, error=error)
+
+                        d = .015
+                        kwargs_diagonal = dict(transform=ax_left.transAxes,
+                                               color="k", clip_on=False)
+                        ax_left.plot((1-d, 1+d), (-d, +d), **kwargs_diagonal)
+                        ax_left.plot((1-d, 1+d), (1-d, 1+d), **kwargs_diagonal)
+
+                        kwargs_diagonal.update(transform=ax_right.transAxes)
+                        ax_right.plot((-d, +d), (1-d, 1+d), **kwargs_diagonal)
+                        ax_right.plot((-d, +d), (-d, +d), **kwargs_diagonal)
+
+                        ax.set_xlabel(xlabel, labelpad=20)
+                        ax_left.set_ylabel(name)
+
+                        handles.append(mlines.Line2D(
+                            [], [], color=color, label=label))
+
+                    else:
+                        ax.plot(sub_component.x_values, y_value, label=label)
+                        if error:
+                            ax.fill_between(sub_component.x_values,
+                                            y_value+y_error, y_value-y_error,
+                                            alpha=0.2)
+                        ax.set_ylim(*ylims)
+                        ax.set_xlabel(xlabel)
+                        ax.set_ylabel(name)
+
+                if show_legend:
+                    if handles:
+                        if "left" in OPTIONS["plot.legend.location"].lower():
+                            ax_legend = ax_left
+                        else:
+                            ax_legend = ax_right
+                        ax_legend.legend(fontsize=legend_size, handles=handles,
+                                         loc=legend_location, framealpha=0.5)
+                    else:
+                        ax.legend(fontsize=legend_size,
+                                  loc=legend_location, framealpha=0.5)
             else:
                 sub_component(ax, **kwargs)
+
+        kwargs_layout = {"pad": 3.0, "h_pad": 2.0, "w_pad": 4.0}\
+            if self.readouts[0].band == "lband" else {}
+        plt.tight_layout(**kwargs_layout)
 
     # TODO: Sharex, sharey and subplots should be added
     def plot(self, save: Optional[bool] = False,
@@ -452,13 +619,13 @@ class Plotter:
                 if self.num_components != 1 else 1
 
         to_px = 1/plt.rcParams["figure.dpi"]
-        fig, axarr = plt.subplots(
-                rows, columns, constrained_layout=True,
-                figsize=(512*to_px*columns, 512*to_px*rows))
+        size = OPTIONS["plot.size"]
+        _, axarr = plt.subplots(rows, columns, tight_layout=True,
+                                figsize=(size*to_px*columns, size*to_px*rows))
 
         if self.num_components != 1:
-            for ax, (name, component)\
-                    in zip(axarr.flatten(), self.components.items()):
+            for ax, (name, component) in zip(
+                    axarr.flatten(), self.components.items()):
                 self.plot_component(ax, name, component["values"],
                                     **component["kwargs"], **kwargs)
         else:
@@ -472,5 +639,4 @@ class Plotter:
                         format=Path(self.plot_name).suffix[1:])
         else:
             plt.show()
-        fig.tight_layout()
         plt.close()

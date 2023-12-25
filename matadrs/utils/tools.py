@@ -1,4 +1,3 @@
-import os
 import time
 import shutil
 from datetime import timedelta
@@ -7,11 +6,14 @@ from pathlib import Path
 from typing import Union, Optional, Callable, Tuple, List
 
 import astropy.units as u
+import matplotlib.pyplot as plt
 import numpy as np
 from astropy.coordinates import EarthLocation
 from astropy.io import fits
 from astropy.table import Table
 from scipy.interpolate import CubicSpline
+from matplotlib import colormaps as mcm
+from matplotlib.colors import ListedColormap
 
 
 __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
@@ -22,6 +24,24 @@ __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
 class HeaderNotFoundWarning(Warning):
     """This indicates that a header of a (.fits)-file was not found."""
     pass
+
+
+def convert_style_to_colormap(style: str) -> ListedColormap:
+    """Converts a style into a colormap."""
+    plt.style.use(style)
+    colormap = ListedColormap(
+            plt.rcParams["axes.prop_cycle"].by_key()["color"])
+    plt.style.use("default")
+    return colormap
+
+
+def get_colormap(colormap: str, ncolors: Optional[int] = 10) -> List[str]:
+    """Gets the colormap as a list from the matplotlib colormaps."""
+    try:
+        return [mcm.get_cmap(colormap)(i) for i in range(ncolors)]
+    except ValueError:
+        return [convert_style_to_colormap(colormap)(i)
+                for i in range(ncolors)]
 
 
 # TODO: Get a better error representation for the flux.
