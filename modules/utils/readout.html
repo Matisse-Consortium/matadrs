@@ -593,6 +593,8 @@ delay line configuration.</p>
 <dd class="field-odd"><dl class="simple">
 <dt><a class="reference internal" href="#id0" title="matadrs.utils.readout.ReadoutFits.array_configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array_configuration</span></code></a></dt><dd><p>Fetches the array’s configuration from the primary header.</p>
 </dd>
+<dt><a class="reference internal" href="#matadrs.utils.readout.ReadoutFits.band" title="matadrs.utils.readout.ReadoutFits.band"><code class="xref py py-obj docutils literal notranslate"><span class="pre">band</span></code></a></dt><dd><p>Fetches the object’s band from the detector used</p>
+</dd>
 <dt><a class="reference internal" href="#id1" title="matadrs.utils.readout.ReadoutFits.bcd_configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bcd_configuration</span></code></a></dt><dd><p>Fetches the BCD-configuration from the primary header.</p>
 </dd>
 <dt><a class="reference internal" href="#id2" title="matadrs.utils.readout.ReadoutFits.coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coords</span></code></a></dt><dd><p>Fetches both right ascension and declination from the primary header and wraps it via astropy’s Skycoord class.</p>
@@ -684,6 +686,12 @@ delay line configuration.</p>
 <dt class="sig sig-object py" id="id0">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">array_configuration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id0" title="Permalink to this definition">#</a></dt>
 <dd><p>Fetches the array’s configuration from the primary header.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.band">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">band</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.band" title="Permalink to this definition">#</a></dt>
+<dd><p>Fetches the object’s band from the detector used</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1072,6 +1080,7 @@ calibrator.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_baselines"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_baselines()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.get_delay_lines"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.get_delay_lines()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.array_configuration</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.band"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.band</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.bcd_configuration</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.coords</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.utils.readout.ReadoutFits.date"><code class="docutils literal notranslate"><span class="pre">ReadoutFits.date</span></code></a></li>
