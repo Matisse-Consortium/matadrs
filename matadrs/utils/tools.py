@@ -35,13 +35,17 @@ def convert_style_to_colormap(style: str) -> ListedColormap:
     return colormap
 
 
-def get_colormap(colormap: str, ncolors: Optional[int] = 10) -> List[str]:
-    """Gets the colormap as a list from the matplotlib colormaps."""
+def get_colormap(colormap: str) -> ListedColormap:
+    """Gets the colormap as the matplotlib colormaps or styles."""
     try:
-        return [mcm.get_cmap(colormap)(i) for i in range(ncolors)]
+        return mcm.get_cmap(colormap)
     except ValueError:
-        return [convert_style_to_colormap(colormap)(i)
-                for i in range(ncolors)]
+        return convert_style_to_colormap(colormap)
+
+
+def get_colorlist(colormap: str, ncolors: Optional[int] = 10) -> List[str]:
+    """Gets the colormap as a list from the matplotlib colormaps."""
+    return [get_colormap(colormap)(i) for i in range(ncolors)]
 
 
 # TODO: Get a better error representation for the flux.
