@@ -1,4 +1,4 @@
-from .tools import get_colormap
+from .tools import get_colorlist
 
 OPTIONS = {}
 
@@ -7,10 +7,10 @@ OPTIONS["average.method"] = "avg_oifits"
 OPTIONS["average.func"] = "robustmean"
 
 # NOTE: Plot
-OPTIONS["plot.colors.colormap"] = "seaborn-v0_8-colorblind"
-OPTIONS["plot.colors.number"] = 10
-OPTIONS["plot.color"] = get_colormap(OPTIONS["plot.colors.colormap"],
-                                     OPTIONS["plot.colors.number"])
+OPTIONS["plot.color.colormap"] = "seaborn-v0_8-colorblind"
+OPTIONS["plot.color.number"] = 10
+OPTIONS["plot.color"] = get_colorlist(OPTIONS["plot.color.colormap"],
+                                      OPTIONS["plot.color.number"])
 OPTIONS["plot.legend.fontsize"] = "small"
 OPTIONS["plot.legend.location"] = "upper right"
 OPTIONS["plot.linestyles"] = ["-", "--", "-.", ":"]
