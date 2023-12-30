@@ -563,11 +563,12 @@ class Plotter:
                             [], [], color=color, label=label))
 
                     else:
-                        ax.plot(sub_component.x_values, y_value, label=label)
+                        ax.plot(sub_component.x_values, y_value,
+                                label=label, color=color)
                         if error:
                             ax.fill_between(sub_component.x_values,
                                             y_value+y_error, y_value-y_error,
-                                            alpha=0.2)
+                                            color=color, alpha=0.2)
                         ax.set_ylim(*ylims)
                         ax.set_xlabel(xlabel)
                         ax.set_ylabel(name)
