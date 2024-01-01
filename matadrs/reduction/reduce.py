@@ -7,10 +7,11 @@ from typing import Optional, Tuple, List, Set
 import astropy.units as u
 import numpy as np
 import pkg_resources
-from astropy.time import Time
-from astropy.table import Table
-from astroquery.vizier import Vizier
 from astropy.coordinates import SkyCoord
+from astropy.table import Table
+from astropy.time import Time
+from astropy.io import fits
+from astroquery.vizier import Vizier
 from tqdm import tqdm
 
 from ..mat_tools.libAutoPipeline import matisseType
