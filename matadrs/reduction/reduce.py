@@ -316,8 +316,8 @@ def prepare_reduction(raw_dir: Path,
     # TODO: Make a good way to filter all the calibration files into
     # a folder directly
     for fits_file in tqdm(list(raw_dir.glob("*.fits"))):
-        header = fits.getheader(fits_file)
-        if "MATISSE_gen_cal" in header["HIERARCH ESO DET TPLID VAL"]:
+        header = fits.getheader(fits_file, 0)
+        if "MATISSE_gen_cal" in header["ESO DET TPLID VAL"]:
             shutil.move(fits_file, calib_dir / fits_file.name)
 
 
