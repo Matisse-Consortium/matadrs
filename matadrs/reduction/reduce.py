@@ -317,8 +317,11 @@ def prepare_reduction(raw_dir: Path,
     # a folder directly
     for fits_file in tqdm(list(raw_dir.glob("*.fits"))):
         header = fits.getheader(fits_file, 0)
-        if "MATISSE_gen_cal" in header["ESO DET TPL ID"]:
-            shutil.move(fits_file, calib_dir / fits_file.name)
+        for key in ["DET TPL ID", "DET TPLID VAL"]:
+            if key in header:
+                if "MATISSE_gen_cal" in header[key]:
+                    shutil.move(fits_file, calib_dir / fits_file.name)
+                    break
 
 
 def cleanup_reduction(product_dir: Path,
