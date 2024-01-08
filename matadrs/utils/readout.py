@@ -119,8 +119,8 @@ class ReadoutFits:
 
     @property
     def name(self) -> str:
-        """Fetches the target's name from the primary header and if not found or not named
-        in it tries it via Simbad by its coordinates.
+        """Fetches the target's name from the primary header and if not found
+        or not named in it tries it via Simbad by its coordinates.
 
         Notes
         -----
@@ -182,23 +182,24 @@ class ReadoutFits:
 
     @property
     def mjd(self) -> str:
-        """Fetches the observation's modified julian date from the primary header."""
+        """Fetches the observation's modified julian date from the
+        primary header."""
         if "MJD-OBS" in self.primary_header:
             return self.primary_header["MJD-OBS"]
         return None
 
     @property
     def coords(self) -> SkyCoord:
-        """Fetches both right ascension and declination from the primary header and wraps
-        it via astropy's Skycoord class."""
+        """Fetches both right ascension and declination from the primary
+        header and wraps it via astropy's Skycoord class."""
         if self._coords is None:
             self._coords = SkyCoord(self.ra*u.deg, self.dec*u.deg, frame="icrs")
         return self._coords
 
     @property
     def observation_type(self) -> str:
-        """Fetches the type of the observation, i.e., if the object is a science target or
-        calibrator."""
+        """Fetches the type of the observation, i.e., if the object is a
+        science target or calibrator."""
         if "SCI" in self.primary_header["HIERARCH ESO OBS NAME"]:
             return "science"
         else:
@@ -240,7 +241,8 @@ class ReadoutFits:
 
     @property
     def detector(self) -> str:
-        """Fetches the detector used for the observation from the primary header."""
+        """Fetches the detector used for the observation from the primary
+        header."""
         return self.primary_header["HIERARCH ESO DET NAME"]
 
     @property
@@ -386,8 +388,8 @@ class ReadoutFits:
         return self._oi_t3
 
     def is_calibrator(self) -> bool:
-        """Fetches the object's observation mode and returns true if it has been observed
-        in 'CALIB' mode.
+        """Fetches the object's observation mode and returns true if it has
+        been observed in 'CALIB' mode.
 
         Returns
         -------
@@ -446,7 +448,8 @@ class ReadoutFits:
         return str(unit) if unit is not None else "a.u."
 
     def get_table_for_fits(self, header: str) -> Table:
-        """Fetches a Card by its header and then reads its information into a Table.
+        """Fetches a Card by its header and then reads its information into a
+        Table.
 
         Parameters
         ----------
@@ -463,8 +466,8 @@ class ReadoutFits:
             return Table().read(hdul[header, self.gravity_index])
 
     def merge_uv_coords(self, table: Table) -> np.ndarray:
-        """Fetches the u- and v-coordinates from a Table and the merges them into a set
-        of (u, v)-coordinates.
+        """Fetches the u- and v-coordinates from a Table and the merges them
+        into a set of (u, v)-coordinates.
 
         Parameters
         ----------
@@ -478,7 +481,8 @@ class ReadoutFits:
         return np.array(list(zip(table["UCOORD"], table["VCOORD"])))
 
     def get_baselines(self, table: Table) -> np.ndarray:
-        """Fetches the u- and v-coordinates from a Table and calculates their baselines.
+        """Fetches the u- and v-coordinates from a Table and calculates
+        their baselines.
 
         Parameters
         ----------
@@ -502,8 +506,8 @@ class ReadoutFits:
         return [self.sta_to_tel[tel] for tel in self.oi_flux["STA_INDEX"]]
 
     def get_delay_lines(self, table: Table) -> List[str]:
-        """Fetches the station indices from a Table and returns the telescope's delay
-        line configuration.
+        """Fetches the station indices from a Table and returns the
+        telescope's delay line configuration.
 
         Parameters
         ----------

@@ -389,7 +389,7 @@ def mat_autoPipeline(
         # Create the SOF files
         print("creating the sof files and directories...")
         repIter = dirResult + "/Iter" + str(iterNumber)
-        if os.path.isdir(repIter) == True:
+        if os.path.isdir(repIter):
             if overwrite == 1:
                 shutil.rmtree(repIter)
                 os.mkdir(repIter)
