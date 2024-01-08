@@ -703,8 +703,8 @@ delay line configuration.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="id2">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coords</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SkyCoord</span></em><a class="headerlink" href="#id2" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches both right ascension and declination from the primary header and wraps
-it via astropy’s Skycoord class.</p>
+<dd><p>Fetches both right ascension and declination from the primary
+header and wraps it via astropy’s Skycoord class.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -722,13 +722,15 @@ it via astropy’s Skycoord class.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="id4">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">detector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id4" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches the detector used for the observation from the primary header.</p>
+<dd><p>Fetches the detector used for the observation from the primary
+header.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id5">
 <span class="sig-name descname"><span class="pre">get_baselines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Table</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_baselines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches the u- and v-coordinates from a Table and calculates their baselines.</p>
+<dd><p>Fetches the u- and v-coordinates from a Table and calculates
+their baselines.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>table</strong> (<em>Table</em>) – The Table to be read in.</p>
@@ -745,8 +747,8 @@ it via astropy’s Skycoord class.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="id6">
 <span class="sig-name descname"><span class="pre">get_delay_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Table</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_delay_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches the station indices from a Table and returns the telescope’s delay
-line configuration.</p>
+<dd><p>Fetches the station indices from a Table and returns the
+telescope’s delay line configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>table</strong> (<em>Table</em>) – The Table to be read in.</p>
@@ -780,7 +782,8 @@ line configuration.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="id7">
 <span class="sig-name descname"><span class="pre">get_table_for_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Table</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.get_table_for_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches a Card by its header and then reads its information into a Table.</p>
+<dd><p>Fetches a Card by its header and then reads its information into a
+Table.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>header</strong> (<em>str</em>) – The header which data is to be stored in a table.</p>
@@ -828,8 +831,8 @@ observations.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="id8">
 <span class="sig-name descname"><span class="pre">is_calibrator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.is_calibrator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches the object’s observation mode and returns true if it has been observed
-in ‘CALIB’ mode.</p>
+<dd><p>Fetches the object’s observation mode and returns true if it has
+been observed in ‘CALIB’ mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>observed_as_calibrator</strong></p>
@@ -868,8 +871,8 @@ To be passed in the format ‘x.y.z’</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="id10">
 <span class="sig-name descname"><span class="pre">merge_uv_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Table</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../../_modules/matadrs/utils/readout.html#ReadoutFits.merge_uv_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches the u- and v-coordinates from a Table and the merges them into a set
-of (u, v)-coordinates.</p>
+<dd><p>Fetches the u- and v-coordinates from a Table and the merges them
+into a set of (u, v)-coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>table</strong> (<em>Table</em>) – The Table to be read in.</p>
@@ -886,14 +889,15 @@ of (u, v)-coordinates.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="matadrs.utils.readout.ReadoutFits.mjd">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mjd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#matadrs.utils.readout.ReadoutFits.mjd" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches the observation’s modified julian date from the primary header.</p>
+<dd><p>Fetches the observation’s modified julian date from the
+primary header.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="id11">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id11" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches the target’s name from the primary header and if not found or not named
-in it tries it via Simbad by its coordinates.</p>
+<dd><p>Fetches the target’s name from the primary header and if not found
+or not named in it tries it via Simbad by its coordinates.</p>
 <p class="rubric">Notes</p>
 <p>Fetching the name via simbad by its coordinates REQUIRES online access.</p>
 </dd></dl>
@@ -907,8 +911,8 @@ in it tries it via Simbad by its coordinates.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="id12">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observation_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id12" title="Permalink to this definition">#</a></dt>
-<dd><p>Fetches the type of the observation, i.e., if the object is a science target or
-calibrator.</p>
+<dd><p>Fetches the type of the observation, i.e., if the object is a
+science target or calibrator.</p>
 </dd></dl>
 
 <dl class="py property">
