@@ -723,67 +723,81 @@ def matisseAction(header,tag):
         return "ACTION_MAT_IM_REM"
     return "NO-ACTION"
 
-def matisseType(header):
-    res  = ""
-    catg = None
-    typ  = None
-    tech = None
+
+def matisseType(header: fits.header.Header) -> str:
+    """Gets the type of the observation."""
+    catg, typ, tech = None, None, None
+
     try:
-        catg=header['HIERARCH ESO PRO CATG']
-    except:
+        catg = header['ESO PRO CATG']
+    except KeyError:
         try:
-            catg = header['HIERARCH ESO DPR CATG']
-            typ  = header['HIERARCH ESO DPR TYPE']
-            tech = header['HIERARCH ESO DPR TECH']
-        except:
+            catg = header['ESO DPR CATG']
+            typ = header['ESO DPR TYPE']
+            tech = header['ESO DPR TECH']
+        except KeyError:
             pass
-    if (catg  =="CALIB" and typ=="DARK,DETCAL" and tech=="IMAGE") or (catg == "CALIB" and typ == "DARK" and tech=="IMAGE,DETCHAR"):
-        res="DARK"
-    elif (catg=="CALIB" and typ=="FLAT,DETCAL" and tech=="IMAGE") or (catg == "CALIB" and typ == "FLAT" and tech=="IMAGE,DETCHAR"):
-        res="FLAT"
-    #elif (catg=="CALIB" and (typ=="DARK" or typ=="FLAT,OFF") and tech=="SPECTRUM") :
-    # Fix for when flat template is not run properly
-    elif ((catg=="CALIB" or catg =="TEST") and (typ=="DARK" or typ=="FLAT,OFF") and tech=="SPECTRUM") :
-        res="OBSDARK"
-    elif (catg=="CALIB" and (typ=="FLAT" or typ=="FLAT,BLACKBODY") and tech=="SPECTRUM") :
-        res="OBSFLAT"
-    elif (catg=="CALIB" and typ=="DARK,WAVE" and tech=="IMAGE") or (catg == "CALIB" and typ == "DARK" and tech == "IMAGE"):
-        res="DISTOR_HOTDARK"
-    elif (catg=="CALIB" and typ=="SOURCE,WAVE" and tech=="IMAGE") or (catg == "CALIB" and typ == "WAVE,LAMP,PINHOLE" and tech == "SPECTRUM"):
-        res="DISTOR_IMAGES"
-    elif (catg=="CALIB" and typ=="SOURCE,LAMP" and tech=="SPECTRUM") or (catg == "CALIB" and typ == "WAVE,LAMP,SLIT" and tech == "SPECTRUM"):
-        res="SPECTRA_HOTDARK"
-    elif (catg=="CALIB" and typ=="SOURCE,WAVE" and tech=="SPECTRUM") or (catg == "CALIB" and typ == "WAVE,LAMP,FOIL" and tech == "SPECTRUM"):
-        res="SPECTRA_IMAGES"
-    elif (catg=="CALIB" and typ=="DARK,FLUX" and tech=="IMAGE") or (catg == "CALIB" and typ == "KAPPA,BACKGROUND" and tech == "SPECTRUM"):
-        res="KAPPA_HOTDARK"
-    elif (catg=="CALIB" and typ=="SOURCE,FLUX" and tech=="IMAGE") or (catg == "CALIB" and typ == "KAPPA,LAMP" and tech == "SPECTRUM"):
-        res="KAPPA_SRC"
-    elif (catg=="SCIENCE" and typ=="OBJECT" and tech=="IMAGE") :
-        res="TARGET_RAW"
-    elif (catg=="CALIB" and typ=="OBJECT" and tech=="IMAGE") :
-        res="CALIB_RAW"
-    elif (catg=="CALIB" and typ=="DARK,IMB" and tech=="IMAGE") or (catg=="CALIB" and typ=="DARK" and tech=="IMAGE,BASIC"):
-        res="IM_COLD"
-    elif (catg=="CALIB" and typ=="FLAT,IME" and tech=="IMAGE") or (catg=="CALIB" and typ=="FLAT" and tech=="IMAGE,EXTENDED"):
-        res="IM_FLAT"
-    elif (catg=="CALIB" and typ=="DARK,IME" and tech=="IMAGE") or (catg=="CALIB" and typ=="DARK" and tech=="IMAGE,EXTENDED"):
-        res="IM_DARK"
-    elif (catg=="CALIB" and typ=="DARK,FLAT" and tech=="IMAGE") or (catg=="CALIB" and typ=="FLAT,LAMP" and tech=="IMAGE,REMANENCE"):
-        res="IM_PERIODIC"
-    elif (catg=="CALIB" and (typ=="DARK" or typ=="BACKGROUND") and tech=="INTERFEROMETRY") :
-        res="HOT_DARK"
-    elif (catg=="CALIB" and (typ=="LAMP" or typ=="SOURCE" or typ=="SOURCE,FLUX") and tech=="INTERFEROMETRY") :
-        res="CALIB_SRC_RAW"
-    elif ((catg=="SCIENCE" or catg=="TEST") and typ=="OBJECT" and tech=="INTERFEROMETRY") :
-        res="TARGET_RAW"
-    elif (catg == "TEST" and typ == "STD" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "OBJECT" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "OBJECT,FLUX" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "STD" and tech == "INTERFEROMETRY") : 
-        res="CALIB_RAW"
-    elif (catg == "TEST" or catg=="CALIB" or catg=="SCIENCE") and typ == "SKY" and tech == "INTERFEROMETRY" : 
-        res="SKY_RAW"
+
+    res = catg
+    if catg in ["TEST", "CALIB"]:
+        if (typ == "DARK,DETCAL" and tech == "IMAGE")\
+                or (typ == "DARK" and tech == "IMAGE,DETCHAR"):
+            res = "DARK"
+        elif (typ == "FLAT,DETCAL" and tech == "IMAGE")\
+                or (typ == "FLAT" and tech == "IMAGE,DETCHAR"):
+            res = "FLAT"
+        elif "FLAT" in typ and tech == "SPECTRUM":
+            res = "OBSFLAT"
+        elif (typ == "DARK,WAVE" and tech == "IMAGE")\
+                or (typ == "DARK" and tech == "IMAGE"):
+            res = "DISTOR_HOTDARK"
+        elif (typ == "SOURCE,WAVE" and tech == "IMAGE")\
+                or (typ == "WAVE,LAMP,PINHOLE" and tech == "SPECTRUM"):
+            res = "DISTOR_IMAGES"
+        elif (typ == "SOURCE,LAMP" and tech == "SPECTRUM")\
+                or (typ == "WAVE,LAMP,SLIT" and tech == "SPECTRUM"):
+            res = "SPECTRA_HOTDARK"
+        elif (typ == "SOURCE,WAVE" and tech == "SPECTRUM")\
+                or (typ == "WAVE,LAMP,FOIL" and tech == "SPECTRUM"):
+            res = "SPECTRA_IMAGES"
+        elif (typ == "DARK,FLUX" and tech == "IMAGE")\
+                or (typ == "KAPPA,BACKGROUND" and tech == "SPECTRUM"):
+            res = "KAPPA_HOTDARK"
+        elif (typ == "SOURCE,FLUX" and tech == "IMAGE")\
+                or (typ == "KAPPA,LAMP" and tech == "SPECTRUM"):
+            res = "KAPPA_SRC"
+        elif (typ == "OBJECT" and tech == "IMAGE"):
+            res = "CALIB_RAW"
+        elif (typ == "DARK,IMB" and tech == "IMAGE")\
+                or (typ == "DARK" and tech == "IMAGE,BASIC"):
+            res = "IM_COLD"
+        elif (typ == "FLAT,IME" and tech == "IMAGE")\
+                or (typ == "FLAT" and tech == "IMAGE,EXTENDED"):
+            res = "IM_FLAT"
+        elif (typ == "DARK,IME" and tech == "IMAGE")\
+                or (typ == "DARK" and tech == "IMAGE,EXTENDED"):
+            res = "IM_DARK"
+        elif (typ == "DARK,FLAT" and tech == "IMAGE")\
+                or (typ == "FLAT,LAMP" and tech == "IMAGE,REMANENCE"):
+            res = "IM_PERIODIC"
+        elif (typ in ["DARK", "BACKGROUND"] and tech == "INTERFEROMETRY"):
+            res = "HOT_DARK"
+        elif (typ in ["LAMP", "SOURCE", "SOURCE,FLUX"])\
+                and tech == "INTERFEROMETRY":
+            res = "CALIB_SRC_RAW"
+        elif (typ == "STD" and tech == "INTERFEROMETRY")\
+                or (typ == "OBJECT" and tech == "INTERFEROMETRY")\
+                or (typ == "OBJECT,FLUX" and tech == "INTERFEROMETRY")\
+                or (typ == "STD" and tech == "INTERFEROMETRY"):
+            res = "CALIB_RAW"
+        elif (typ == "DARK" or typ == "FLAT,OFF") and tech == "SPECTRUM":
+            res = "OBSDARK"
+    elif catg in ["TEST", "SCIENCE"]:
+        if typ == "OBJECT" and tech == "INTERFEROMETRY":
+            res = "TARGET_RAW"
+        elif typ == "OBJECT" and tech == "IMAGE":
+            res = "TARGET_RAW"
     else:
-        res=catg
+        if typ == "SKY" and tech == "INTERFEROMETRY":
+            res = "SKY_RAW"
     return res
-
-
-
