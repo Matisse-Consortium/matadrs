@@ -320,6 +320,7 @@ def prepare_reduction(raw_dir: Path,
         for value in ["OBJECT", "STD", "SKY"]:
             if value not in header["ESO DPR TYPE"]:
                 shutil.move(fits_file, calib_dir / fits_file.name)
+                break
 
 
 def cleanup_reduction(product_dir: Path,

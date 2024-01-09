@@ -206,13 +206,17 @@ class ReadoutFits:
             return self.primary_header["HIERARCH ESO DPR CATG"].lower()
 
     @property
+    def stations(self) -> str:
+        """Fetches the array's stations from the primary header."""
+        if "HIERARCH ESO ISS BASELINE" in self.primary_header:
+            return self.primary_header["HIERARCH ESO ISS BASELINE"]
+        else:
+            return self.primary_header["HIERARCH ESO OBS BASELINE"]
+
+    @property
     def array_configuration(self) -> str:
         """Fetches the array's configuration from the primary header."""
-        if "HIERARCH ESO ISS BASELINE" in self.primary_header:
-            array = self.primary_header["HIERARCH ESO ISS BASELINE"]
-        else:
-            array = self.primary_header["HIERARCH ESO OBS BASELINE"]
-        return "uts" if "UT" in array else "ats"
+        return "uts" if "UT" in self.stations.lower() else "ats"
 
     @property
     def bcd_configuration(self) -> str:
