@@ -317,10 +317,9 @@ def prepare_reduction(raw_dir: Path,
     # a folder directly
     for fits_file in tqdm(list(raw_dir.glob("*.fits"))):
         header = fits.getheader(fits_file, 0)
-        for value in ["OBJECT", "STD", "SKY"]:
-            if value not in header["ESO DPR TYPE"]:
-                shutil.move(fits_file, calib_dir / fits_file.name)
-                break
+        if not any(value in header["ESO DPR TYPE"]
+                   for value in ["OBJECT", "STD", "SKY"]):
+            shutil.move(fits_file, calib_dir / fits_file.name)
 
 
 def cleanup_reduction(product_dir: Path,
