@@ -35,7 +35,7 @@ def plot_data_quality(
 
     dics = filter_oi_list(
             dics, spectral_resolutions=[res],
-            DIT_range=[0.111, 11.], dates=[date], bands=["L"])
+            DIT_range=[0.111, 11.], dates=[readout.date], bands=["L"])
 
     show_seeing(dics, **plot_kwargs)
     show_vis_tf_vs_time(dics, **plot_kwargs)
