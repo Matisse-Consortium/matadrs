@@ -8,7 +8,7 @@ OPTIONS["average.func"] = "robustmean"
 
 # NOTE: Plot
 OPTIONS["plot.color.colormap"] = "seaborn-v0_8-colorblind"
-OPTIONS["plot.color.number"] = 10
+OPTIONS["plot.color.number"] = 100
 OPTIONS["plot.color"] = get_colorlist(OPTIONS["plot.color.colormap"],
                                       OPTIONS["plot.color.number"])
 OPTIONS["plot.legend.fontsize"] = "small"
