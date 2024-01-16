@@ -37,6 +37,7 @@ from .libAutoPipeline import matisseRecipes, matisseCalib, \
         matisseAction, matisseType
 
 
+
 def runEsorex(cmd):
     spl = cmd.split("%")
     cmd = spl[0]
@@ -76,7 +77,7 @@ def mat_autoPipeline(
         dirCalib: Path = None, nbCore: int = 0,
         resol="", paramL="", paramN="", overwrite=0,
         maxIter=0, skipL=0, skipN=0, tplstartsel="",
-        tplidsel="", spectralBinning="", try_K2N_cophasing=True) -> None:
+        tplidsel="", spectralBinning="", try_K2N_cophasing=True) -> int:
     v = Vizier(columns=["med-Lflux", "med-Mflux", "med-Nflux"], catalog="II/361")
 
     # Print meaningful error messages if something is wrong in the command line
@@ -226,7 +227,7 @@ def mat_autoPipeline(
         try:
             tplstart = hdr["HIERARCH ESO TPL START"]
             chipname = hdr["HIERARCH ESO DET CHIP NAME"]
-        except:
+        except Exception:
             print("WARNING, " + filename + " is not a valid MATISSE fits file!")
             continue
         # Reduction blocks are defined by template start and detector name
@@ -304,7 +305,7 @@ def mat_autoPipeline(
                 try:
                     chipname = hdr["HIERARCH ESO DET CHIP NAME"]
                     stri = hdr["HIERARCH ESO TPL START"] + "." + chipname
-                except:
+                except Exception:
                     print("WARNING, " + filename + " is not a valid MATISSE fits file!")
                     continue
             tag = matisseType(hdr)
@@ -456,7 +457,7 @@ def mat_autoPipeline(
                     print("Remove any previous logfile...")
                     try:
                         os.remove(os.path.join(outputDir, ".logfile"))
-                    except:
+                    except Exception:
                         print("Nothing to remove...")
                     if os.listdir(outputDir) == []:
                         print("outputDir is empty, continuing...")
@@ -483,16 +484,13 @@ def mat_autoPipeline(
                      if param.strip() not in ["", " "]])
 
                 cmd = f"esorex --output-dir={outputDir} {elt['recipes']} "\
-                        f"{listNewParams} {sofname}%{resol}"
+                    f"{listNewParams} {sofname}%{resol}"
 
                 if iterNumber > 1:
                     sofnamePrev = (
-                        repIterPrev
-                        + "/"
-                        + elt["recipes"]
-                        + "."
-                        + elt["tplstart"]
-                        + ".sof"
+                        repIterPrev + "/"
+                        + elt["recipes"] + "."
+                        + elt["tplstart"] + ".sof"
                     )
                     if os.path.exists(sofnamePrev):
                         if filecmp.cmp(sofname, sofnamePrev):
@@ -555,7 +553,7 @@ def mat_autoPipeline(
                     "Flux (Jy) in N band from MDFC catalog",
                 )
                 hdu.flush()
-            except:
+            except Exception:
                 print("Object " + targetname + " not found in MDFC catalog")
             hdu.close()
 
@@ -574,6 +572,7 @@ def mat_autoPipeline(
                         msg = "Data not taken into account by the Pipeline"
                     else:
                         msg = "Reduction Block not processed - Missing calibration"
+                        return -1
                 tplstart, detector = elt["tplstart"].split(".")
                 print(
                     "%-24s" % (tplstart,),
@@ -582,3 +581,4 @@ def mat_autoPipeline(
                     msg,
                 )
             break
+    return 0

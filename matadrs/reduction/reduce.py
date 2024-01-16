@@ -414,13 +414,18 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
     param_L, param_N = set_script_arguments(mode)
     spectral_binning = get_spectral_binning(raw_dir, tpl_start)
     prepare_catalogs(raw_dir, calib_dir, tpl_start)
-
     # NOTE: here resol="" is required for the code not to skip the reduction
-    mat_autoPipeline(dirRaw=raw_dir, dirResult=product_dir,
-                     dirCalib=calib_dir, tplstartsel=tpl_start,
-                     nbCore=ncores, paramL=param_L, paramN=param_N,
-                     overwrite=int(overwrite), maxIter=1, skipL=int(skip_L),
-                     skipN=int(skip_N), spectralBinning=spectral_binning)
+    reduction_kwargs = {"dirRaw": raw_dir, "dirResult": product_dir,
+                        "dirCalib": calib_dir, "tplstartsel": tpl_start,
+                        "nbCore": ncores, "paramL": param_L, "paramN": param_N,
+                        "overwrite": int(overwrite), "maxIter": 1,
+                        "skipL": int(skip_L), "skipN": int(skip_N),
+                        "spectral_binning": spectral_binning}
+
+    code = mat_autoPipeline(**reduction_kwargs)
+    if code == -1:
+        reduction_kwargs["maxIter"] = 5
+        mat_autoPipeline(**reduction_kwargs)
     cleanup_reduction(product_dir, mode, band, do_data_quality_plot, overwrite)
 
 
