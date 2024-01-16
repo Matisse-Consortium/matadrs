@@ -1,4 +1,6 @@
-"""This file is part of the Matisse pipeline GUI series
+# -*- coding: utf-8 -*-
+"""
+This file is part of the Matisse pipeline GUI series
 Copyright (C) 2017- Observatoire de la Côte d'Azur
 
 Created in 2016
@@ -22,41 +24,42 @@ licence in the LICENCE.md file.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 """
+
+import numpy as np
 from astropy.io import fits
 from astropy.io.fits import getheader
 
-
 class headerCache:
     """"""
-
+#----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
         self.cache = {}
         self.max_cache_size = 1000
-
+#----------------------------------------------------------------------
     def __contains__(self, key):
         """
         Returns True or False depending on whether or not the key is in the 
         cache
         """
         return key in self.cache
-
+#----------------------------------------------------------------------
     def update(self, key, value):
         self.cache[key] = {'value': value}
-
+#----------------------------------------------------------------------
     @property
     def size(self):
         """
         Return the size of the cache
         """
         return len(self.cache)
-
-
-CACHE_HEADER = headerCache()
-
+        
+cacheHdr = headerCache()
+    
 
 def matisseCalib(header,action,listCalibFile,calibPrevious):
-    global CACHE_HEADER
+    global cacheHdr
+    
     keyDetReadCurname = header['HIERARCH ESO DET READ CURNAME']
     keyDetChipName    = header['HIERARCH ESO DET CHIP NAME']
     keyDetSeq1Dit     = header['HIERARCH ESO DET SEQ1 DIT']
@@ -71,21 +74,22 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
     keyInsFinId       = header['HIERARCH ESO INS FIN ID']
     keyDetMtrh2       = header['HIERARCH ESO DET WIN MTRH2']
     keyDetMtrs2       = header['HIERARCH ESO DET WIN MTRS2']
-
+        
     res = calibPrevious
-    if (action == "ACTION_MAT_CAL_DET_SLOW_SPEED" or
+    
+    if (action == "ACTION_MAT_CAL_DET_SLOW_SPEED" or 
         action == "ACTION_MAT_CAL_DET_FAST_SPEED" or
         action == "ACTION_MAT_CAL_DET_LOW_GAIN"   or
         action == "ACTION_MAT_CAL_DET_HIGH_GAIN"):
-        return [res, 1]
+        return [res,1]
 
     allhdr        = []
     for elt in listCalibFile:
         #allhdr.append(getheader(elt,0))
-        if elt not in CACHE_HEADER:
+        if elt not in cacheHdr:
             value = getheader(elt,0);
-            CACHE_HEADER.update(elt,value)
-        allhdr.append(CACHE_HEADER.cache[elt]['value'])
+            cacheHdr.update(elt,value)
+        allhdr.append(cacheHdr.cache[elt]['value'])
 
     if (action == "ACTION_MAT_IM_BASIC"    or
         action == "ACTION_MAT_IM_EXTENDED" or
@@ -94,14 +98,15 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
         for elt in res:
             if (elt[1]   == "BADPIX"):
                 nbCalib+=1
-
+            
         for hdr,elt in zip(allhdr,listCalibFile):
+            
             tagCalib=matisseType(hdr)
             if (tagCalib == "BADPIX"):
                 keyDetReadCurnameCalib = hdr['HIERARCH ESO DET READ CURNAME']
                 keyTplStartCalib       = hdr['HIERARCH ESO TPL START']
                 keyDetChipNameCalib    = hdr['HIERARCH ESO DET CHIP NAME']
-
+                
             if (tagCalib                == "BADPIX" and
                 (keyDetReadCurnameCalib == keyDetReadCurname and
                  keyDetChipNameCalib    == keyDetChipName)):
@@ -246,16 +251,16 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
     if (action=="ACTION_MAT_RAW_ESTIMATES"):
         nbCalib=0
         for elt in res:
-            if (elt[1]=="BADPIX" or
-                elt[1]=="OBS_FLATFIELD" or
-                elt[1]=="NONLINEARITY" or
+            if (elt[1]=="BADPIX" or 
+                elt[1]=="OBS_FLATFIELD" or 
+                elt[1]=="NONLINEARITY" or 
                 elt[1]=="SHIFT_MAP" or
                 elt[1]=="KAPPA_MATRIX"):
                 nbCalib+=1
 
-        for hdr, elt in zip(allhdr,listCalibFile):
+        for hdr,elt in zip(allhdr,listCalibFile):
             tagCalib=matisseType(hdr)
-            if (tagCalib=="BADPIX" or
+            if (tagCalib=="BADPIX" or 
                 tagCalib=="OBS_FLATFIELD" or
                 tagCalib=="NONLINEARITY" or
                 tagCalib=="SHIFT_MAP" or
@@ -585,8 +590,8 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
                  ((keyInsPilIdCalib     == "PHOTO" and
                    keyInsDilId          == keyInsDilIdCalib and
                    keyDetChipName       == "HAWAII-2RG") or 
-                  (keyInsPinIdCalib     == "PHOTO" and
-                   keyInsDinId          == keyInsDinIdCalib and
+                  #(keyInsPinIdCalib     == "PHOTO" and
+                   (keyInsDinId          == keyInsDinIdCalib and
                    keyDetChipName       == "AQUARIUS")))):
                 idx=-1
                 cpt=0
@@ -723,81 +728,67 @@ def matisseAction(header,tag):
         return "ACTION_MAT_IM_REM"
     return "NO-ACTION"
 
-
-def matisseType(header: fits.header.Header) -> str:
-    """Gets the type of the observation."""
-    catg, typ, tech = None, None, None
-
+def matisseType(header):
+    res  = ""
+    catg = None
+    typ  = None
+    tech = None
     try:
-        catg = header['ESO PRO CATG']
-    except KeyError:
+        catg=header['HIERARCH ESO PRO CATG']
+    except:
         try:
-            catg = header['ESO DPR CATG']
-            typ = header['ESO DPR TYPE']
-            tech = header['ESO DPR TECH']
-        except KeyError:
+            catg = header['HIERARCH ESO DPR CATG']
+            typ  = header['HIERARCH ESO DPR TYPE']
+            tech = header['HIERARCH ESO DPR TECH']
+        except:
             pass
-
-    res = catg
-    if catg in ["TEST", "CALIB"]:
-        if (typ == "DARK,DETCAL" and tech == "IMAGE")\
-                or (typ == "DARK" and tech == "IMAGE,DETCHAR"):
-            res = "DARK"
-        elif (typ == "FLAT,DETCAL" and tech == "IMAGE")\
-                or (typ == "FLAT" and tech == "IMAGE,DETCHAR"):
-            res = "FLAT"
-        elif "FLAT" in typ and tech == "SPECTRUM":
-            res = "OBSFLAT"
-        elif (typ == "DARK,WAVE" and tech == "IMAGE")\
-                or (typ == "DARK" and tech == "IMAGE"):
-            res = "DISTOR_HOTDARK"
-        elif (typ == "SOURCE,WAVE" and tech == "IMAGE")\
-                or (typ == "WAVE,LAMP,PINHOLE" and tech == "SPECTRUM"):
-            res = "DISTOR_IMAGES"
-        elif (typ == "SOURCE,LAMP" and tech == "SPECTRUM")\
-                or (typ == "WAVE,LAMP,SLIT" and tech == "SPECTRUM"):
-            res = "SPECTRA_HOTDARK"
-        elif (typ == "SOURCE,WAVE" and tech == "SPECTRUM")\
-                or (typ == "WAVE,LAMP,FOIL" and tech == "SPECTRUM"):
-            res = "SPECTRA_IMAGES"
-        elif (typ == "DARK,FLUX" and tech == "IMAGE")\
-                or (typ == "KAPPA,BACKGROUND" and tech == "SPECTRUM"):
-            res = "KAPPA_HOTDARK"
-        elif (typ == "SOURCE,FLUX" and tech == "IMAGE")\
-                or (typ == "KAPPA,LAMP" and tech == "SPECTRUM"):
-            res = "KAPPA_SRC"
-        elif (typ == "OBJECT" and tech == "IMAGE"):
-            res = "CALIB_RAW"
-        elif (typ == "DARK,IMB" and tech == "IMAGE")\
-                or (typ == "DARK" and tech == "IMAGE,BASIC"):
-            res = "IM_COLD"
-        elif (typ == "FLAT,IME" and tech == "IMAGE")\
-                or (typ == "FLAT" and tech == "IMAGE,EXTENDED"):
-            res = "IM_FLAT"
-        elif (typ == "DARK,IME" and tech == "IMAGE")\
-                or (typ == "DARK" and tech == "IMAGE,EXTENDED"):
-            res = "IM_DARK"
-        elif (typ == "DARK,FLAT" and tech == "IMAGE")\
-                or (typ == "FLAT,LAMP" and tech == "IMAGE,REMANENCE"):
-            res = "IM_PERIODIC"
-        elif (typ in ["DARK", "BACKGROUND"] and tech == "INTERFEROMETRY"):
-            res = "HOT_DARK"
-        elif (typ in ["LAMP", "SOURCE", "SOURCE,FLUX"])\
-                and tech == "INTERFEROMETRY":
-            res = "CALIB_SRC_RAW"
-        elif (typ == "STD" and tech == "INTERFEROMETRY")\
-                or (typ == "OBJECT" and tech == "INTERFEROMETRY")\
-                or (typ == "OBJECT,FLUX" and tech == "INTERFEROMETRY")\
-                or (typ == "STD" and tech == "INTERFEROMETRY"):
-            res = "CALIB_RAW"
-        elif (typ == "DARK" or typ == "FLAT,OFF") and tech == "SPECTRUM":
-            res = "OBSDARK"
-    elif catg in ["TEST", "SCIENCE"]:
-        if typ == "OBJECT" and tech == "INTERFEROMETRY":
-            res = "TARGET_RAW"
-        elif typ == "OBJECT" and tech == "IMAGE":
-            res = "TARGET_RAW"
+    if (catg  =="CALIB" and typ=="DARK,DETCAL" and tech=="IMAGE") or (catg == "CALIB" and typ == "DARK" and tech=="IMAGE,DETCHAR"):
+        res="DARK"
+    elif (catg=="CALIB" and typ=="FLAT,DETCAL" and tech=="IMAGE") or (catg == "CALIB" and typ == "FLAT" and tech=="IMAGE,DETCHAR"):
+        res="FLAT"
+    #elif (catg=="CALIB" and (typ=="DARK" or typ=="FLAT,OFF") and tech=="SPECTRUM") :
+    # Fix for when flat template is not run properly
+    elif ((catg=="CALIB" or catg =="TEST") and (typ=="DARK" or typ=="FLAT,OFF") and tech=="SPECTRUM") :
+        res="OBSDARK"
+    elif (catg=="CALIB" and (typ=="FLAT" or typ=="FLAT,BLACKBODY") and tech=="SPECTRUM") :
+        res="OBSFLAT"
+    elif (catg=="CALIB" and typ=="DARK,WAVE" and tech=="IMAGE") or (catg == "CALIB" and typ == "DARK" and tech == "IMAGE"):
+        res="DISTOR_HOTDARK"
+    elif (catg=="CALIB" and typ=="SOURCE,WAVE" and tech=="IMAGE") or (catg == "CALIB" and typ == "WAVE,LAMP,PINHOLE" and tech == "SPECTRUM"):
+        res="DISTOR_IMAGES"
+    elif (catg=="CALIB" and typ=="SOURCE,LAMP" and tech=="SPECTRUM") or (catg == "CALIB" and typ == "WAVE,LAMP,SLIT" and tech == "SPECTRUM"):
+        res="SPECTRA_HOTDARK"
+    elif (catg=="CALIB" and typ=="SOURCE,WAVE" and tech=="SPECTRUM") or (catg == "CALIB" and typ == "WAVE,LAMP,FOIL" and tech == "SPECTRUM"):
+        res="SPECTRA_IMAGES"
+    elif (catg=="CALIB" and typ=="DARK,FLUX" and tech=="IMAGE") or (catg == "CALIB" and typ == "KAPPA,BACKGROUND" and tech == "SPECTRUM"):
+        res="KAPPA_HOTDARK"
+    elif (catg=="CALIB" and typ=="SOURCE,FLUX" and tech=="IMAGE") or (catg == "CALIB" and typ == "KAPPA,LAMP" and tech == "SPECTRUM"):
+        res="KAPPA_SRC"
+    elif (catg=="SCIENCE" and typ=="OBJECT" and tech=="IMAGE") :
+        res="TARGET_RAW"
+    elif (catg=="CALIB" and typ=="OBJECT" and tech=="IMAGE") :
+        res="CALIB_RAW"
+    elif (catg=="CALIB" and typ=="DARK,IMB" and tech=="IMAGE") or (catg=="CALIB" and typ=="DARK" and tech=="IMAGE,BASIC"):
+        res="IM_COLD"
+    elif (catg=="CALIB" and typ=="FLAT,IME" and tech=="IMAGE") or (catg=="CALIB" and typ=="FLAT" and tech=="IMAGE,EXTENDED"):
+        res="IM_FLAT"
+    elif (catg=="CALIB" and typ=="DARK,IME" and tech=="IMAGE") or (catg=="CALIB" and typ=="DARK" and tech=="IMAGE,EXTENDED"):
+        res="IM_DARK"
+    elif (catg=="CALIB" and typ=="DARK,FLAT" and tech=="IMAGE") or (catg=="CALIB" and typ=="FLAT,LAMP" and tech=="IMAGE,REMANENCE"):
+        res="IM_PERIODIC"
+    elif (catg=="CALIB" and (typ=="DARK" or typ=="BACKGROUND") and tech=="INTERFEROMETRY") :
+        res="HOT_DARK"
+    elif (catg=="CALIB" and (typ=="LAMP" or typ=="SOURCE" or typ=="SOURCE,FLUX") and tech=="INTERFEROMETRY") :
+        res="CALIB_SRC_RAW"
+    elif ((catg=="SCIENCE" or catg=="TEST") and typ=="OBJECT" and tech=="INTERFEROMETRY") :
+        res="TARGET_RAW"
+    elif (catg == "TEST" and typ == "STD" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "OBJECT" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "OBJECT,FLUX" and tech == "INTERFEROMETRY") or (catg == "CALIB" and typ == "STD" and tech == "INTERFEROMETRY") : 
+        res="CALIB_RAW"
+    elif (catg == "TEST" or catg=="CALIB" or catg=="SCIENCE") and typ == "SKY" and tech == "INTERFEROMETRY" : 
+        res="SKY_RAW"
     else:
-        if typ == "SKY" and tech == "INTERFEROMETRY":
-            res = "SKY_RAW"
+        res=catg
     return res
+
+
+
