@@ -9,7 +9,8 @@ from matplotlib.axes import Axes
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from .readout import ReadoutFits
-from .tools import unwrap_phases, calculate_uv_tracks, get_fits_by_tag
+from .tools import unwrap_phases, calculate_uv_tracks, get_fits_by_tag, \
+        get_colorlist
 from .options import OPTIONS
 from ..mat_tools.mat_show_atmo_param_v2 import show_seeing
 from ..mat_tools.mat_show_oifits_pbe_ama_short import open_oi_dir, \
@@ -292,6 +293,7 @@ class Plotter:
             ReadoutFits.instrument).
         """
         instruments, handles, uv_max = [], [], 0
+        colors = get_colorlist(OPTIONS["plot.color"])
         for index, readout in enumerate(self.readouts):
             uv_coords = readout.oi_vis2["UVCOORD"]
             if uv_max < (tmp_uv_max := uv_coords.max()):
@@ -314,14 +316,14 @@ class Plotter:
                 sta_labels.append(sta_label)
 
             if color_grouping == "file":
-                color = OPTIONS["plot.color"][index]
+                color = colors[index]
                 handles.append(mlines.Line2D(
                     [], [], color=color, marker="X",
                     linestyle="None", label=readout.date))
             elif color_grouping == "instrument":
                 if readout.instrument not in instruments:
                     instruments.append(readout.instrument)
-                color = OPTIONS["plot.color"][instruments.index(readout.instrument)]
+                color = colors[instruments.index(readout.instrument)]
 
             for uv_index, (u_coords, v_coords) in enumerate(uv_coords):
                 ax.plot(u_coords, v_coords, symbol, color=color,
@@ -348,7 +350,7 @@ class Plotter:
         if color_grouping == "instrument":
             handles = []
             for index, instrument in enumerate(instruments):
-                color = OPTIONS["plot.color"][index]
+                color = colors[index]
                 handles.append(mlines.Line2D(
                     [], [], color=color, marker="X",
                     linestyle="None", label=instrument.upper()))
@@ -528,6 +530,7 @@ class Plotter:
         kwargs : dict
         """
         xlabel = r"$\lambda$ ($\mathrm{\mu}$m)"
+        colors = get_colorlist(OPTIONS["plot.color"])
         for sub_component in component:
             if isinstance(sub_component, PlotComponent):
                 ax_left, ax_right, handles = None, None, []
@@ -538,7 +541,7 @@ class Plotter:
                         in enumerate(zip(sub_component.labels,
                                          sub_component.y_values,
                                          sub_component.y_errors)):
-                    color = OPTIONS["plot.color"][index]
+                    color = colors[index]
                     if self.readouts[0].band == "lband":
                         ax_left, ax_right = plot_broken_axis(
                                 ax, sub_component.x_values,
