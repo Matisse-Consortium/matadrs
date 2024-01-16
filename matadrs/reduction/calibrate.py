@@ -183,6 +183,7 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
     outfile = output_dir / "TARGET_BCD_CAL_T3PHI_INT.fits"
 
     # TODO: Exchange BCD-calibration with matallmergeoifits
+    # TODO: Check what needs to be changed if BCD result is not done.
     if band == "lband":
         for fits_files in fits_file_groups:
             if fits_files is not None:
@@ -191,11 +192,17 @@ def calibrate_bcd(directory: Path, band: str, output_dir: Path) -> None:
                 continue
 
             bcd = sort_fits_by_bcd_configuration(fits_files)
-            calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in,
-                      bcd.out_out, outfile, do_plot=False)
+            if sum(0 if not x else 1 for x in bcd) > 1:
+                calib_BCD(bcd.in_in, bcd.in_out, bcd.out_in,
+                          bcd.out_out, outfile, do_plot=False)
+            else:
+                warn("Not enough files. BCD calibration skipped!")
     else:
         bcd = sort_fits_by_bcd_configuration(fits_file_groups[0])
-        calib_BCD(bcd.in_in, None, None, bcd.out_out, outfile, do_plot=False)
+        if sum(0 if not x else 1 for x in bcd) > 1:
+            calib_BCD(bcd.in_in, None, None, bcd.out_out, outfile, do_plot=False)
+        else:
+            warn("Not enough files. BCD calibration skipped!")
 
 
 def calibrate_visibilities(targets: List[Path],

@@ -5,11 +5,12 @@ from matadrs.utils.options import OPTIONS
 
 
 # Specify the path to the directory containing the data
-data_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd142666")
+data_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/GTO/hd142527")
 
 # Specify the raw-directory, containing the raw data
-observation_dirs = data_dir / "raw" / "UTs"
-raw_dirs = sorted(observation_dirs.glob("2019*"), key=lambda x: x.name[-8:])
+# raw_dirs = [data_dir / "raw" / "UTS"]
+observation_dirs = data_dir / "raw" / "large"
+raw_dirs = sorted(observation_dirs.glob("*"), key=lambda x: x.name[-8:])
 
 # Specify the product-directory, to contain the product data/that contains reduced,
 # calibrated or averaged data, to be further processed
@@ -20,5 +21,5 @@ OPTIONS["average.method"] = "mat_tools"
 
 # Call the reduction_pipeline
 matadrs_pipeline(raw_dirs, product_dirs, overwrite=True,
-                 do_reduce=True, do_calibrate=False,
-                 do_average=False, do_merge=True, ncores=6)
+                 do_reduce=False, do_calibrate=True,
+                 do_average=False, do_merge=False, ncores=6)
