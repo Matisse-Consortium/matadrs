@@ -396,7 +396,7 @@ document.write(`
 <span id="matadrs-reduction-reduce-module"></span><h1>matadrs.reduction.reduce module<a class="headerlink" href="#module-matadrs.reduction.reduce" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="matadrs.reduction.reduce.cleanup_reduction">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">cleanup_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">product_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_data_quality_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/reduce.html#cleanup_reduction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.reduce.cleanup_reduction" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">cleanup_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">product_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_data_quality_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxIter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/reduce.html#cleanup_reduction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.reduce.cleanup_reduction" title="Permalink to this definition">#</a></dt>
 <dd><p>Moves the folders to their corresponding folders of structure
 “/mode/band” after the reduction has been finished and plots the
 (.fits)-files contained in them.</p>
@@ -409,109 +409,8 @@ document.write(`
 “nband” or “both”.</p></li>
 <li><p><strong>do_data_quality_plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – If toggled, plots the data quality of the incoherent L-band
 reduction.</p></li>
+<li><p><strong>maxIter</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If toggled, overwrites any files from previous reductions.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.reduce.get_catalog_match">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">get_catalog_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout:</span> <span class="pre">~matadrs.utils.readout.ReadoutFits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius:</span> <span class="pre">Unit(&quot;arcsec&quot;)</span> <span class="pre">=</span> <span class="pre">&lt;Quantity</span> <span class="pre">20.</span> <span class="pre">arcsec&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/reduce.html#get_catalog_match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.reduce.get_catalog_match" title="Permalink to this definition">#</a></dt>
-<dd><p>Checks if the given calibrator is contained in the ‘jsdc_v2’-catalog.
-If otherwise searches the local, supplementary calibrator databases
-instead.</p>
-<p>If nothing is found returns None.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>readout</strong> (<a class="reference internal" href="../utils/readout.html#matadrs.utils.readout.ReadoutFits" title="matadrs.utils.readout.ReadoutFits"><em>readout.ReadoutFits</em></a>) – A class wrapping a (.fits)-file, that reads out its information.</p></li>
-<li><p><strong>radius</strong> (<em>astropy.units.arcsec</em>) – The radius in which targets are queried from the catalog.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>catalog</strong> – The catalog in which the object has been found in.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pathlib.Path, optional</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.reduce.get_readout_for_tpl_match">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">get_readout_for_tpl_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tpl_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/reduce.html#get_readout_for_tpl_match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.reduce.get_readout_for_tpl_match" title="Permalink to this definition">#</a></dt>
-<dd><p>Gets the readout of a singular (.fits)-file matching the “tpl_start”
-(i.e, the starting time of the individual observations).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>raw_dir</strong> (<em>pathlib.Path</em>) – The directory containing the raw-files.</p></li>
-<li><p><strong>tpl_start</strong> (<em>str</em>) – The starting time of the observation.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>fits_file</strong> – A (.fits)-file matching the input “tpl_start”.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pathlib.Path</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.reduce.get_tpl_starts">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">get_tpl_starts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/reduce.html#get_tpl_starts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.reduce.get_tpl_starts" title="Permalink to this definition">#</a></dt>
-<dd><p>Iterates through all files and gets their “tpl_start”
-(i.e, the starting time of the individual observations).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>raw_dir</strong> (<em>pathlib.Path</em>) – The directory containing the raw-files.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>tpl_starts</strong> – The starting times of all the observations given by the raw-files.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>set of str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.reduce.in_catalog">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">in_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../utils/readout.html#matadrs.utils.readout.ReadoutFits" title="matadrs.utils.readout.ReadoutFits"><span class="pre">ReadoutFits</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Unit('arcsec')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/reduce.html#in_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.reduce.in_catalog" title="Permalink to this definition">#</a></dt>
-<dd><p>Checks if calibrator is in the given supplementary catalog.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>readout</strong> (<a class="reference internal" href="../utils/readout.html#matadrs.utils.readout.ReadoutFits" title="matadrs.utils.readout.ReadoutFits"><em>readout.ReadoutFits</em></a>) – A class wrapping a (.fits)-file, that reads out its information.</p></li>
-<li><p><strong>radius</strong> (<em>astropy.units.arcsec</em>) – The radius in which targets are queried from the catalog.</p></li>
-<li><p><strong>catlog</strong> (<em>pathlib.Path</em>) – The catalog which is to be queried from the catalog.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>catalog</strong> – The catalog in which the object has been found in.
-Returns None if object not found.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pathlib.Path, optional</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matadrs.reduction.reduce.prepare_catalogs">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">prepare_catalogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calib_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tpl_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/reduce.html#prepare_catalogs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.reduce.prepare_catalogs" title="Permalink to this definition">#</a></dt>
-<dd><p>Checks if the starting time given by “tpl_start” (i.e, the starting
-time of the individual observations) corresponds to the observation of
-a science target/calibrator and removes/prepares the un/needed catalogs.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>raw_dir</strong> (<em>pathlib.Path</em>) – The direcotry containing the raw observation files.</p></li>
-<li><p><strong>calib_dir</strong> (<em>pathlib.Path</em>) – The directory containing the with the observation
-associated calibration files.</p></li>
-<li><p><strong>tpl_start</strong> (<em>str</em>) – The starting time of the observation.</p></li>
 </ul>
 </dd>
 </dl>
@@ -537,7 +436,7 @@ associated calibration files.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="matadrs.reduction.reduce.reduce_mode_and_band">
-<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">reduce_mode_and_band</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calib_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tpl_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_data_quality_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/reduction/reduce.html#reduce_mode_and_band"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.reduce.reduce_mode_and_band" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">matadrs.reduction.reduce.</span></span><span class="sig-name descname"><span class="pre">reduce_mode_and_band</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calib_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_data_quality_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/reduction/reduce.html#reduce_mode_and_band"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.reduction.reduce.reduce_mode_and_band" title="Permalink to this definition">#</a></dt>
 <dd><p>Reduces either the L- and/or the N-band data for either the ‘coherent’ and/or
 ‘incoherent’ setting for a single iteration/epoch.</p>
 <p class="rubric">Notes</p>
@@ -576,7 +475,6 @@ reduction.</p></li>
 <li><p><strong>raw_dir</strong> (<em>pathlib.Path</em>) – The directory containing the raw observation files.</p></li>
 <li><p><strong>mode</strong> (<em>str</em>) – The mode in which the reduction is to be executed. Either ‘coherent’,
 ‘incoherent’ or ‘both’.</p></li>
-<li><p><strong>tpl_start</strong> (<em>str</em>) – The starting time of the observation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -648,11 +546,6 @@ rest of the arguments see the <cite>mat_autoPipeline</cite>-script.</p></li>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.reduce.cleanup_reduction"><code class="docutils literal notranslate"><span class="pre">cleanup_reduction()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.reduce.get_catalog_match"><code class="docutils literal notranslate"><span class="pre">get_catalog_match()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.reduce.get_readout_for_tpl_match"><code class="docutils literal notranslate"><span class="pre">get_readout_for_tpl_match()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.reduce.get_tpl_starts"><code class="docutils literal notranslate"><span class="pre">get_tpl_starts()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.reduce.in_catalog"><code class="docutils literal notranslate"><span class="pre">in_catalog()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.reduce.prepare_catalogs"><code class="docutils literal notranslate"><span class="pre">prepare_catalogs()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.reduce.prepare_reduction"><code class="docutils literal notranslate"><span class="pre">prepare_reduction()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.reduce.reduce_mode_and_band"><code class="docutils literal notranslate"><span class="pre">reduce_mode_and_band()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.reduction.reduce.set_script_arguments"><code class="docutils literal notranslate"><span class="pre">set_script_arguments()</span></code></a></li>
