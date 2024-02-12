@@ -35,10 +35,12 @@ import glob
 import shutil
 import subprocess
 import filecmp
-from libAutoPipeline import *
 from multiprocessing.pool import Pool
 from functools import partial
 from astroquery.vizier import Vizier
+
+from .libAutoPipeline import matisseRecipes, matisseCalib, matisseAction, \
+    matisseType
 
 #import pdb
 
@@ -75,8 +77,9 @@ def removeDoubleParameter(p):
 
 #------------------------------------------------------------------------------
 
-def mat_autoPipeline(dirRaw="",dirResult="",dirCalib="",nbCore=0,resol=0,paramL="",paramN="",overwrite=0,maxIter=0,skipL=0,skipN=0, tplstartsel="", tplidsel="", spectralBinning=""):
-
+def mat_autoPipeline(dirRaw="",dirResult="",dirCalib="",nbCore=0,resol=0,paramL="",
+                     paramN="",overwrite=0,maxIter=0,skipL=0,skipN=0, tplstartsel="",
+                     tplidsel="", spectral_binning=""):
     v = Vizier(columns=["med-Lflux","med-Mflux","med-Nflux"], catalog="II/361")
     # Print meaningful error messages if something is wrong in the command line
     print("------------------------------------------------------------------------")
@@ -212,7 +215,7 @@ def mat_autoPipeline(dirRaw="",dirResult="",dirCalib="",nbCore=0,resol=0,paramL=
     keyTplStart    = []
     listIterNumber = []
     print("Determining the number of reduction blocks...")
-    
+
     for hdr,filename,res in zip(allhdr,listRaw,listRes):
         try:
             tplstart = hdr['HIERARCH ESO TPL START']
@@ -304,8 +307,8 @@ def mat_autoPipeline(dirRaw="",dirResult="",dirCalib="",nbCore=0,resol=0,paramL=
             if action=="ACTION_MAT_RAW_ESTIMATES":
                 if (hdr['HIERARCH ESO DET CHIP NAME'] == "AQUARIUS"):
                     
-                    if spectralBinning != "":
-                        paramN += " --spectralBinning="+spectralBinning
+                    if spectral_binning != "":
+                        paramN += f" --spectralBinning={spectral_binning[1]}"
                     else:
                         paramN += " --spectralBinning=7"
                                         
@@ -314,8 +317,8 @@ def mat_autoPipeline(dirRaw="",dirResult="",dirCalib="",nbCore=0,resol=0,paramL=
                     else:
                         elt["param"]    = paramN + " " + param
                 else:                    
-                    if spectralBinning != "":
-                        paramL += " --spectralBinning="+spectralBinning
+                    if spectral_binning != "":
+                        paramL += f" --spectralBinning={spectral_binning[0]}"
                     else:
                         paramL += " --spectralBinning=5"
                         
@@ -438,11 +441,16 @@ def mat_autoPipeline(dirRaw="",dirResult="",dirCalib="",nbCore=0,resol=0,paramL=
                     print("outputDir "+outputDir+" does not exist. Creating it...\n")
                     os.mkdir(outputDir)
 
-                listNewParams=removeDoubleParameter(elt['param'].replace("/"," --"))
-                        
-                #cmd="esorex --output-dir="+outputDir+" "+elt['recipes']+" "+elt['param'].replace("/"," --")+" "+sofname+"%"+resol;
-                cmd="esorex --output-dir="+outputDir+" "+elt['recipes']+" "+listNewParams+" "+sofname+"%"+resol;
-  
+                listNewParams = removeDoubleParameter(elt["param"].replace("/", " --"))
+
+                # NOTE: This is done to avoid empty parameters
+                listNewParams = ' '.join(
+                    [f"--{param.strip()}" for param in listNewParams.split("--")
+                     if param.strip() not in ["", " "]])
+
+                cmd = f"esorex --output-dir={outputDir} {elt['recipes']} "\
+                    f"{listNewParams} {sofname}%{resol}"
+
                 if (iterNumber > 1):
                     sofnamePrev = repIterPrev+"/"+elt["recipes"]+"."+elt["tplstart"]+".sof"
                     if (os.path.exists(sofnamePrev)):
@@ -515,93 +523,9 @@ def mat_autoPipeline(dirRaw="",dirResult="",dirCalib="",nbCore=0,resol=0,paramL=
                         msg = "Data not taken into account by the Pipeline"
                     else:
                         msg = "Reduction Block not processed - Missing calibration"
+                        return -1
                 tplstart,detector = elt["tplstart"].split('.')
                 print('%-24s' % (tplstart,),'%-14s' % (detector,),'%-30s' % (elt["action"],),msg)
 
             break
-
-#------------------------------------------------------------------------------
-
-if __name__ == '__main__':
-    print("Starting...")
-
-    #--------------------------------------------------------------------------
-    parser = argparse.ArgumentParser(description='Automatic MATISSE pipeline implementation, allowing one to reduce entire nights of raw data into oifits files.')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('dirRaw', default="",  \
-    help='The path to the directory containing your raw data.')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--dirCalib', default="",  \
-    help='Calibration Map Path')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--dirResult', default="", \
-    help='Results Path (default is current directory)')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--nbCore', default=0,type=int, \
-    help='Number Of Cores (default 1)')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--tplID', default="",  \
-    help='template ID')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--tplSTART', default="",  \
-    help='template start')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--overwrite', default=0,  \
-    help='overwrite existing files', action='store_true')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--skipL', default=0,  \
-    help='skip L band data', action='store_true')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--skipN', default=0,  \
-    help='skip N band data', action='store_true')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--resol', default="",  \
-                        help='reduce only a given spectral resolution. Can be any of LOW, MED or HIGH')
-    #--------------------------------------------------------------------------
-    parser.add_argument('--spectralBinning', default="",  \
-                        help='Bin spectrally the data to improve SNR')
-    
-    #--------------------------------------------------------------------------
-    parser.add_argument('--maxIter', default=0,  \
-                        help='Maximum Number of Iteration (default 1)')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--paramN', default="/useOpdMod=TRUE",  \
-                        help='recipes parameters for N band (default /useOpdMod=TRUE for the UTs, and /replaceTel=3/useOpdMod=TRUE for the ATs)')
-
-    #--------------------------------------------------------------------------
-    parser.add_argument('--paramL', default="/tartyp=57/useOpdMod=FALSE",  \
-                        help='recipes parameters for LM band (default /tartyp=57/useOpdMod=FALSE/compensate=[pb,nl,if,rb,bp,od]/hampelFilterKernel=10)')
-
-    #--------------------------------------------------------------------------
-
-    try:
-        args = parser.parse_args()
-    except:
-        print("\n\033[93mRunning mat_autoPipeline.py --help to be kind with you:\033[0m\n")
-        parser.print_help()
-        print("\n     Example : python mat_autoPipeline.py /data/2018-05-19 --skipN --resol=LOW --nbCore=2 --paramN=/useOpdMod=TRUE/corrFlux=TRUE --paramL=/cumulBlock=TRUE")
-        sys.exit(0)
-
-    args.dirRaw = os.path.abspath(args.dirRaw)+"/"
-        
-    mat_autoPipeline(args.dirRaw,args.dirResult,args.dirCalib,args.nbCore,args.resol,args.paramL,args.paramN,args.overwrite,int(args.maxIter),args.skipL,args.skipN, args.tplSTART, args.tplID, args.spectralBinning)
-
-    
-
-
-
-
-
-
-
+    return 0

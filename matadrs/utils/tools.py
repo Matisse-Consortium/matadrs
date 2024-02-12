@@ -147,40 +147,6 @@ def capitalise_to_index(string: str, index: int):
     return string[:index].capitalize() + string[index:].lower()
 
 
-def move(source_file: Path, destination: Path,
-         overwrite: Optional[bool] = False) -> None:
-    """Moves source files/folders to the destination directory and overwrites them if
-    toggled.
-
-    Parameters
-    ----------
-    source_file : pathlib.Path
-        A file or directory to be moved.
-    destination : pathlib.Path
-        The destination directory of the source-file/-directory.
-    overwrite : bool, optional
-        If this is toggled it will overwrite any existing files or directories with the
-        same name.
-    """
-    new_file = destination / source_file.name
-    if new_file.exists():
-        if overwrite:
-            if source_file.is_dir():
-                shutil.rmtree(new_file)
-                shutil.copytree(source_file, destination / source_file.name,
-                                dirs_exist_ok=True)
-                shutil.rmtree(source_file)
-            else:
-                new_file.unlink()
-                shutil.copy2(source_file, destination / source_file.name)
-                source_file.unlink()
-        else:
-            cprint(f"WARNING: '{source_file.name}' could not be moved, as it already"
-                   " exists at the destination!")
-    else:
-        shutil.move(source_file, destination / source_file.name)
-
-
 def print_execution_time(func: Callable):
     """Prints the execution time of the input function."""
     @wraps(func)
@@ -221,11 +187,12 @@ def get_execution_modes(mode: Optional[str] = None,
     if mode is not None:
         if mode not in ["both", "coherent", "incoherent"]:
             raise IOError(f"No mode named '{mode}' exists!")
-        modes = ["coherent", "incoherent"] if "both" else [mode]
+        modes = ["coherent", "incoherent"] if mode == "both" else [mode]
+
     if band is not None:
         if band not in ["both", "lband", "nband"]:
             raise IOError(f"No band named '{band}' exists!")
-        bands = ["lband", "nband"] if "both" else [band]
+        bands = ["lband", "nband"] if band == "both" else [band]
     return modes, bands
 
 

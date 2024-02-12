@@ -591,7 +591,7 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
                    keyDetChipName       == "HAWAII-2RG") or 
                   #(keyInsPinIdCalib     == "PHOTO" and
                    keyInsDinId          == keyInsDinIdCalib and
-                   keyDetChipName       == "AQUARIUS")))):
+                   keyDetChipName       == "AQUARIUS"))):
                 idx=-1
                 cpt=0
                 for elt2 in res:

@@ -293,7 +293,7 @@ class Plotter:
             ReadoutFits.instrument).
         """
         instruments, handles, uv_max = [], [], 0
-        colors = get_colorlist(OPTIONS["plot.color"])
+        colors = get_colorlist(OPTIONS["plot.colormap"])
         for index, readout in enumerate(self.readouts):
             uv_coords = readout.oi_vis2["UVCOORD"]
             if uv_max < (tmp_uv_max := uv_coords.max()):
@@ -530,7 +530,7 @@ class Plotter:
         kwargs : dict
         """
         xlabel = r"$\lambda$ ($\mathrm{\mu}$m)"
-        colors = get_colorlist(OPTIONS["plot.color"])
+        colors = get_colorlist(OPTIONS["plot.colormap"])
         for sub_component in component:
             if isinstance(sub_component, PlotComponent):
                 ax_left, ax_right, handles = None, None, []

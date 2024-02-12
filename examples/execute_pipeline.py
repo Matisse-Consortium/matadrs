@@ -9,7 +9,7 @@ data_dir = Path("/data/beegfs/astro-storage/groups/matisse/scheuck/data/matisse/
 
 # Specify the raw-directory, containing the raw data
 # raw_dirs = [data_dir / "raw" / "UTS"]
-observation_dirs = data_dir / "raw" / "large"
+observation_dirs = data_dir / "raw" / "test"
 raw_dirs = sorted(observation_dirs.glob("*"), key=lambda x: x.name[-8:])
 
 # Specify the product-directory, to contain the product data/that contains reduced,
@@ -20,6 +20,6 @@ product_dirs = list(map(lambda x: Path(str(x).replace("raw", "product")), raw_di
 OPTIONS["average.method"] = "mat_tools"
 
 # Call the reduction_pipeline
-matadrs_pipeline(raw_dirs, product_dirs, overwrite=True,
-                 do_reduce=False, do_calibrate=True,
+matadrs_pipeline(raw_dirs, product_dirs, overwrite=True, band="nband",
+                 do_reduce=True, do_calibrate=False,
                  do_average=False, do_merge=False, ncores=6)
