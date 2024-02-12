@@ -56,7 +56,6 @@ class headerCache:
         
 cacheHdr = headerCache()
     
-
 def matisseCalib(header,action,listCalibFile,calibPrevious):
     global cacheHdr
     
@@ -591,7 +590,7 @@ def matisseCalib(header,action,listCalibFile,calibPrevious):
                    keyInsDilId          == keyInsDilIdCalib and
                    keyDetChipName       == "HAWAII-2RG") or 
                   #(keyInsPinIdCalib     == "PHOTO" and
-                   (keyInsDinId          == keyInsDinIdCalib and
+                   keyInsDinId          == keyInsDinIdCalib and
                    keyDetChipName       == "AQUARIUS")))):
                 idx=-1
                 cpt=0
