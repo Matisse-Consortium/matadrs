@@ -17,11 +17,11 @@ __all__ = ["set_script_arguments", "cleanup_reduction",
            "reduce_mode_and_band", "prepare_reduction"]
 
 
-CATALOG_DIR = Path(
-    pkg_resources.resource_filename("matadrs", "data/catalogues"))
-JSDC_V2_CATALOG = Vizier(catalog="II/346/jsdc_v2")
-JSDC_CATALOG = CATALOG_DIR / "jsdc_v2_catalog_20170303.fits"
-ADDITIONAL_CATALOG = CATALOG_DIR / "supplementary_catalog_202207.fits"
+# CATALOG_DIR = Path(
+#     pkg_resources.resource_filename("matadrs", "data/catalogues"))
+# JSDC_V2_CATALOG = Vizier(catalog="II/346/jsdc_v2")
+# JSDC_CATALOG = CATALOG_DIR / "jsdc_v2_catalog_20170303.fits"
+# ADDITIONAL_CATALOG = CATALOG_DIR / "supplementary_catalog_202207.fits"
 
 SPECTRAL_BINNING = {"low": [5, 7], "high_uts": [5, 38], "high_ats": [5, 98]}
 CALIBRATION_IDS = ["KAPPA", "LAMP", "BACKGROUND",

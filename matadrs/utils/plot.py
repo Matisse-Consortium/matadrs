@@ -530,7 +530,7 @@ class Plotter:
         kwargs : dict
         """
         xlabel = r"$\lambda$ ($\mathrm{\mu}$m)"
-        colors = get_colorlist(OPTIONS.plot.colormap)
+        colors = get_colorlist(OPTIONS.plot.color.colormap)
         for sub_component in component:
             if isinstance(sub_component, PlotComponent):
                 ax_left, ax_right, handles = None, None, []
@@ -622,7 +622,7 @@ class Plotter:
             rows = np.ceil(self.num_components/columns).astype(int)\
                 if self.num_components != 1 else 1
 
-        to_px = 1/plt.rcParams.figure.dpi
+        to_px = 1/plt.rcParams["figure.dpi"]
         size = OPTIONS.plot.size
         _, axarr = plt.subplots(rows, columns, tight_layout=True,
                                 figsize=(size*to_px*columns, size*to_px*rows))
