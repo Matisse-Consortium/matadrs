@@ -392,8 +392,92 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="matadrs-grep-getdata-eso-archive-module">
-<h1>matadrs.grep.getdata_ESO_archive module<a class="headerlink" href="#matadrs-grep-getdata-eso-archive-module" title="Permalink to this heading">#</a></h1>
+  <section id="module-matadrs.grep.getdata_ESO_archive">
+<span id="matadrs-grep-getdata-eso-archive-module"></span><h1>matadrs.grep.getdata_ESO_archive module<a class="headerlink" href="#module-matadrs.grep.getdata_ESO_archive" title="Permalink to this heading">#</a></h1>
+<p>2018.09.12     Mark Neeser</p>
+<blockquote>
+<div><p>This python script is an adaptation of a shell script to access the ESO science archive
+enabling the user to:</p>
+<ol class="arabic simple">
+<li><p>query the ESO archive</p></li>
+</ol>
+<blockquote>
+<div><dl class="simple">
+<dt>The input parameters include:</dt><dd><ul class="simple">
+<li><p>User Portal login and password (mandatory)</p></li>
+<li><dl class="simple">
+<dt>Archive options:</dt><dd><p>=&gt; target name [optional]
+=&gt; right ascension &amp; declination [optional]
+=&gt; programme id [optional]
+=&gt; instrument [optional]
+=&gt; start &amp; end dates [optional]
+=&gt; file Category (CALIB, SCIENCE, ACQUISITION, TECHNICAL, TEST, SIMULATION, or OTHER) [optional]
+=&gt; file Type (OBJECT, STD, ASTROMETRY, BIAS, DARK, FLAT, SKY, LAMP, DOME, …) [optional]
+=&gt; file Mode (DPR.TECH = IMAGE, SPECTRUM, MOS, IFU, …) [optional]
+=&gt; observation mode (DPR.TYPE = IMAGE, MOS, IFU, SPECTRUM, ECHELLE, MXU, POLARIMETRY, CORONOGRAPHY, INTERFEROMETRY) [optional]
+=&gt; maximum number of rows to be returned [optional]
+=&gt; download files (Y/N) [optional]</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Optionally submit the retrieved/selected files for data download with either:
+(a) only the selected files delivered
+(b) the selected files + associated raw calibrations
+(c) the selected files + associated processed calibrations</p></li>
+</ol>
+</div></blockquote>
+<dl class="simple">
+<dt>2018.10.18:    Adapted to work with both Python 2 and 3:</dt><dd><p>cp getdata_ESO_archive.py getdata_ESO_archive3.py
+futurize –stage1 -w getdata_ESO_archive3.py</p>
+</dd>
+</dl>
+<p>2018.12.04:    Changed initial archive query from using “wget” to using “requests.get”</p>
+<p>2018.12.05:    Added a -Mode search (i.e. IMAGE, SPECTRUM, MOS, IFU, etc.)</p>
+<p>Call:</p>
+<p>getdata_ESO_archive.py -User &lt;user_name&gt; -Password &lt;password&gt; -TargetName &lt;SIMBAD target name&gt; -RA &lt;”hh:mm:ss”&gt; -DEC &lt;”dd:mm:ss”&gt; -Box &lt;search box: “hh:mm:ss”&gt; -RunId &lt;run ID&gt; -Inst &lt;instrument name&gt; -StartDate &lt;start date&gt; -EndDate &lt;end date&gt; -Category &lt;file category: SCIENCE, CALIB, ACQUISITION&gt; -Type &lt;file type: OBJECT, STD, BIAS, etc.&gt; -Mode &lt;file mode: IMAGE, SPECTRUM, MOS, IFU, etc.&gt; -MaxRows &lt;max rows to retrieve&gt; -Download &lt;download files: Y/N&gt; -Deliver &lt;delivery_type: files, files_calib, files_master_calib&gt; &lt;optional: -verbose&gt; &lt;optional to create a record of your query: -record&gt;</p>
+<p>e.g.</p>
+<p>getdata_ESO_archive.py -User &lt;user_name&gt; -Password &lt;your_password&gt; -Inst FORS2 -StartDate ‘2013 01 01’ -EndDate ‘2013 04 01’ -Category SCIENCE -Mode IMAGE -MaxRows 30 -Download N -Deliver raw2raw</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.grep.getdata_ESO_archive.clean_up">
+<span class="sig-prename descclassname"><span class="pre">matadrs.grep.getdata_ESO_archive.</span></span><span class="sig-name descname"><span class="pre">clean_up</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace_extras</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matadrs/grep/getdata_ESO_archive.html#clean_up"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.grep.getdata_ESO_archive.clean_up" title="Permalink to this definition">#</a></dt>
+<dd><dl>
+<dt>Remove all occurrences of strip_chars and whitespace at the beginning</dt><dd><p>and end of each line, then perform string substitutions specified by
+the replace_extras dictionary (as well as normalizing all whitespace
+to a single space character), and then strip whitespace from the
+beginning and end.</p>
+<p>Any consecutive whitespace is normalized to a single space, but
+you can override these implicit substitutions in replace_extras.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">clean_up</span><span class="p">(</span><span class="s1">&#39; this is one test</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>!
+‘, replace_extras={’
+‘: ‘’, ‘one’: ‘1’})</p>
+<blockquote>
+<div><p>… ‘this is 1 test!’</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matadrs.grep.getdata_ESO_archive.query_archive">
+<span class="sig-prename descclassname"><span class="pre">matadrs.grep.getdata_ESO_archive.</span></span><span class="sig-name descname"><span class="pre">query_archive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/matadrs/grep/getdata_ESO_archive.html#query_archive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#matadrs.grep.getdata_ESO_archive.query_archive" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>record</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -436,6 +520,17 @@ document.write(`
             
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.grep.getdata_ESO_archive.clean_up"><code class="docutils literal notranslate"><span class="pre">clean_up()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matadrs.grep.getdata_ESO_archive.query_archive"><code class="docutils literal notranslate"><span class="pre">query_archive()</span></code></a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div class="tocsection sourcelink">
