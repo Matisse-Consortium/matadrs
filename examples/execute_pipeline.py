@@ -17,7 +17,7 @@ raw_dirs = sorted(observation_dirs.glob("*"), key=lambda x: x.name[-8:])
 product_dirs = list(map(lambda x: Path(str(x).replace("raw", "product")), raw_dirs))
 
 # Specify averaging pipeline
-OPTIONS["average.method"] = "mat_tools"
+# OPTIONS.average.method = "mat_tools"
 
 # Call the reduction_pipeline
 matadrs_pipeline(raw_dirs, product_dirs, overwrite=True, band="nband",

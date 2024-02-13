@@ -2,8 +2,9 @@ from types import SimpleNamespace
 
 
 # NOTE: Averaging
-average = SimpleNamespace(method="avg_oifits",
-                          func="robustmean")
+average = SimpleNamespace(
+    method="mat_tools",
+    func="robustmean")
 
 # NOTE: Plot
 color = SimpleNamespace(colormap="seaborn-v0_8-colorblind",
