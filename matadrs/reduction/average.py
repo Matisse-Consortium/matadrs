@@ -88,10 +88,10 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
         outfile_name = "TARGET_AVG_VIS"
 
     outfile_unchopped = output_dir / f"{outfile_name}_INT.fits"
-    if OPTIONS["average.method"] == "avg_oifits":
+    if OPTIONS.average.method == "avg_oifits":
         avg_oifits(unchopped_fits, outfile_unchopped,
                    headerval=HEADER_TO_REMOVE,
-                   avg_func=OPTIONS["average.func"])
+                   avg_func=OPTIONS.average.func)
     else:
         merged_file_unchopped = mat_mergeByTplStart(
                 fits_files=unchopped_fits,
@@ -100,9 +100,9 @@ def average_files(directory: Path, file_type: str, output_dir: Path) -> None:
 
     if chopped_fits is not None:
         outfile_chopped = output_dir / f"{outfile_name}_INT_CHOPPED.fits"
-        if OPTIONS["average.method"] == "avg_oifits":
+        if OPTIONS.average.method == "avg_oifits":
             avg_oifits(chopped_fits, outfile_chopped,
-                       headerval=HEADER_TO_REMOVE, avg_func=OPTIONS["average.func"])
+                       headerval=HEADER_TO_REMOVE, avg_func=OPTIONS.average.func)
         else:
             merged_file_chopped = mat_mergeByTplStart(
                     fits_files=chopped_fits, output_dir=str(output_dir), save=True)

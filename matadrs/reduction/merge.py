@@ -117,7 +117,7 @@ def execute_merge(output_dir: Path,
 
     if index is not None:
         out_file = out_file.parent / f"{out_file.stem}_00{index}.fits"
-    if OPTIONS["average.method"] != "mat_tools":
+    if OPTIONS.average.method != "mat_tools":
         if "HAWAII" in str(fluxes[0]):
             if bcd_visibilities is not None:
                 coherent_bcd_vis, incoherent_bcd_vis = bcd_visibilities

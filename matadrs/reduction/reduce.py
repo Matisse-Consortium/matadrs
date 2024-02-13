@@ -1,21 +1,8 @@
-import os
 import shutil
 import warnings
 from pathlib import Path
-from types import SimpleNamespace
-from typing import Optional, Tuple, List, Set
+from typing import Optional, Tuple, List
 
-import astropy.units as u
-import numpy as np
-import pkg_resources
-from astropy.coordinates import SkyCoord
-from astropy.table import Table
-from astropy.time import Time
-from astropy.io import fits
-from astroquery.vizier import Vizier
-from tqdm import tqdm
-
-from ..mat_tools.libAutoPipeline import matisseType
 from ..mat_tools.mat_autoPipeline import mat_autoPipeline
 from ..utils.plot import Plotter, plot_data_quality
 from ..utils.readout import ReadoutFits
@@ -171,9 +158,13 @@ def cleanup_reduction(product_dir: Path,
     iter_dir = product_dir / iter_dir
     reduced_dirs = [folder for folder in iter_dir.iterdir() if folder.is_dir()]
     for reduced_folder in reduced_dirs:
-        cprint(f"Copying folder '{reduced_folder.name}'...", "g")
-        shutil.copytree(reduced_folder, mode_and_band_dir / reduced_folder.name,
-                        dirs_exist_ok=True)
+        if overwrite:
+            cprint(f"Copying folder '{reduced_folder.name}'...", "g")
+            shutil.copytree(reduced_folder, mode_and_band_dir / reduced_folder.name,
+                            dirs_exist_ok=True)
+        else:
+            cprint(f"Folder '{reduced_folder.name}' was not copied as it exists already."
+                   " If you want to overwrite it set that keyword", "g")
 
     cprint(f"Removing old iterations...", "g")
     for index in range(1, 6):

@@ -1,17 +1,25 @@
-OPTIONS = {}
+from types import SimpleNamespace
+
 
 # NOTE: Averaging
-OPTIONS["average.method"] = "avg_oifits"
-OPTIONS["average.func"] = "robustmean"
+average = SimpleNamespace(method="avg_oifits",
+                          func="robustmean")
 
 # NOTE: Plot
-OPTIONS["plot.dpi"] = 300
-OPTIONS["plot.color.colormap"] = "seaborn-v0_8-colorblind"
-OPTIONS["plot.color.number"] = 100
-OPTIONS["plot.legend.fontsize"] = "small"
-OPTIONS["plot.legend.location"] = "upper right"
-OPTIONS["plot.linestyles"] = ["-", "--", "-.", ":"]
-OPTIONS["plot.size"] = 700
+color = SimpleNamespace(colormap="seaborn-v0_8-colorblind",
+                        number=100)
+legend = SimpleNamespace(fontsize="small",
+                         location="upper right")
 
-# NOTE: Reduction
-OPTIONS["reduce.cache.size"] = 1e4
+plot = SimpleNamespace(
+        color=color, dpi=300,
+        legend=legend,
+        linestyles=["-", "--", "-.", ":"],
+        size=700)
+
+OPTIONS = SimpleNamespace(
+        average=average,
+        color=color,
+        legend=legend,
+        plot=plot)
+

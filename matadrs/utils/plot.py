@@ -263,8 +263,8 @@ class Plotter:
             show_text: Optional[List] = False,
             make_tracks: Optional[bool] = True,
             show_legend: Optional[bool] = True,
-            legend_location: Optional[str] = OPTIONS["plot.legend.location"],
-            legend_size: Optional[int] = OPTIONS["plot.legend.fontsize"],
+            legend_location: Optional[str] = OPTIONS.plot.legend.location,
+            legend_size: Optional[int] = OPTIONS.plot.legend.fontsize,
             color_grouping: Optional[str] = "file",
             **kwargs) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
@@ -293,7 +293,7 @@ class Plotter:
             ReadoutFits.instrument).
         """
         instruments, handles, uv_max = [], [], 0
-        colors = get_colorlist(OPTIONS["plot.colormap"])
+        colors = get_colorlist(OPTIONS.plot.color.colormap)
         for index, readout in enumerate(self.readouts):
             uv_coords = readout.oi_vis2["UVCOORD"]
             if uv_max < (tmp_uv_max := uv_coords.max()):
@@ -494,8 +494,8 @@ class Plotter:
             sharex: Optional[bool] = False,
             show_legend: Optional[bool] = True,
             share_legend: Optional[bool] = False,
-            legend_location: Optional[str] = OPTIONS["plot.legend.location"],
-            legend_size: Optional[int] = OPTIONS["plot.legend.fontsize"],
+            legend_location: Optional[str] = OPTIONS.plot.legend.location,
+            legend_size: Optional[int] = OPTIONS.plot.legend.fontsize,
             error: Optional[bool] = False,
             margin: Optional[float] = 0.05,
             **kwargs) -> None:
@@ -530,7 +530,7 @@ class Plotter:
         kwargs : dict
         """
         xlabel = r"$\lambda$ ($\mathrm{\mu}$m)"
-        colors = get_colorlist(OPTIONS["plot.colormap"])
+        colors = get_colorlist(OPTIONS.plot.colormap)
         for sub_component in component:
             if isinstance(sub_component, PlotComponent):
                 ax_left, ax_right, handles = None, None, []
@@ -578,7 +578,7 @@ class Plotter:
 
                 if show_legend:
                     if handles:
-                        if "left" in OPTIONS["plot.legend.location"].lower():
+                        if "left" in OPTIONS.plot.legend.location.lower():
                             ax_legend = ax_left
                         else:
                             ax_legend = ax_right
@@ -622,8 +622,8 @@ class Plotter:
             rows = np.ceil(self.num_components/columns).astype(int)\
                 if self.num_components != 1 else 1
 
-        to_px = 1/plt.rcParams["figure.dpi"]
-        size = OPTIONS["plot.size"]
+        to_px = 1/plt.rcParams.figure.dpi
+        size = OPTIONS.plot.size
         _, axarr = plt.subplots(rows, columns, tight_layout=True,
                                 figsize=(size*to_px*columns, size*to_px*rows))
 
