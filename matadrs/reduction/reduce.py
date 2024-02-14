@@ -158,13 +158,9 @@ def cleanup_reduction(product_dir: Path,
     iter_dir = product_dir / iter_dir
     reduced_dirs = [folder for folder in iter_dir.iterdir() if folder.is_dir()]
     for reduced_folder in reduced_dirs:
-        if overwrite:
-            cprint(f"Copying folder '{reduced_folder.name}'...", "g")
-            shutil.copytree(reduced_folder, mode_and_band_dir / reduced_folder.name,
-                            dirs_exist_ok=True)
-        else:
-            cprint(f"Folder '{reduced_folder.name}' was not copied as it exists already."
-                   " If you want to overwrite it set that keyword", "g")
+        cprint(f"Copying folder '{reduced_folder.name}'...", "g")
+        shutil.copytree(reduced_folder, mode_and_band_dir / reduced_folder.name,
+                        dirs_exist_ok=overwrite)
 
     cprint(f"Removing old iterations...", "g")
     for index in range(1, 6):
@@ -237,6 +233,7 @@ def reduce_mode_and_band(raw_dir: Path, calib_dir: Path,
                         "skipL": int(skip_L), "skipN": int(skip_N),
                         "spectral_binning": spectral_binning}
 
+    # TODO: Add removing of old reduction
     code = mat_autoPipeline(**reduction_kwargs)
     if code == -1:
         reduction_kwargs["maxIter"] = 5
