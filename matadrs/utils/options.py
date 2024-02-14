@@ -7,10 +7,8 @@ average = SimpleNamespace(
     func="robustmean")
 
 # NOTE: Plot
-color = SimpleNamespace(colormap="seaborn-v0_8-colorblind",
-                        number=100)
-legend = SimpleNamespace(fontsize="small",
-                         location="upper right")
+color = SimpleNamespace(colormap="viridis", number=100)
+legend = SimpleNamespace(fontsize="small", location="upper right")
 
 plot = SimpleNamespace(
         color=color, dpi=300,
@@ -18,9 +16,9 @@ plot = SimpleNamespace(
         linestyles=["-", "--", "-.", ":"],
         size=700)
 
+# NOTE: All settings
 OPTIONS = SimpleNamespace(
         average=average,
         color=color,
         legend=legend,
         plot=plot)
-
