@@ -227,7 +227,7 @@ def calibrate_visibilities(targets: List[Path],
     cprint("Plotting visibility calibrated files...", "y")
     for fits_file in get_fits_by_tag(output_dir, "TARGET_CAL_INT"):
         plot_fits = Plotter(fits_file, save_path=output_dir)
-        plot_fits.add_cphases().add_vis().plot(save=True, error=True)
+        plot_fits.add_t3().add_vis().plot(save=True, error=True)
 
 
 def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
@@ -263,7 +263,7 @@ def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
                 do_airmass_correction=do_airmass)
         cprint(f"Plotting file '{output_file.name}'...", "y")
         plot_fits = Plotter(output_file, save_path=output_dir)
-        plot_fits.add_cphases().add_vis().add_vis2()
+        plot_fits.add_t3().add_vis().add_vis2()
         plot_fits.plot(save=True, error=True)
 
 

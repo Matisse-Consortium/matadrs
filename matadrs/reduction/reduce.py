@@ -173,7 +173,7 @@ def cleanup_reduction(product_dir: Path,
         for fits_file in get_fits_by_tag(reduced_folder, "RAW_INT"):
             plot_fits = Plotter(fits_file, save_path=reduced_folder)
             unwrap = True if "AQUARIUS" in str(fits_file) else False
-            plot_fits.add_cphases(unwrap=unwrap).add_vis().add_vis2()
+            plot_fits.add_t3(unwrap=unwrap).add_vis().add_vis2()
             plot_fits.plot(save=True, error=True)
 
         if do_data_quality_plot and mode == "incoherent" and band == "lband":

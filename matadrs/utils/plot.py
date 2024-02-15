@@ -405,6 +405,7 @@ class Plotter:
                     v_coords = readout.oi_vis2["UVCOORD"][:, 1]
                     pas = np.around(
                         (np.degrees(np.arctan2(v_coords, u_coords))-90)*-1, 2)
+
                     # TODO: Make the variables into mathrm
                     labels = [fr"{station_name} $B_p$={baseline} m $\phi={pa}^\circ$"
                               for station_name, baseline, pa in zip(station_names, baselines, pas)]
@@ -466,7 +467,7 @@ class Plotter:
         """Adds the squared visibilities as a subplot."""
         return self.make_component("vis2", **kwargs)
 
-    def add_cphases(self, **kwargs):
+    def add_t3(self, **kwargs):
         """Adds the closure phases as a subplot."""
         return self.make_component("cphases", **kwargs)
 
@@ -485,7 +486,7 @@ class Plotter:
         self.add_vis2(**kwargs)
         self.add_flux(**kwargs)
         self.add_diff_phases(**kwargs)
-        self.add_cphases(**kwargs)
+        self.add_t3(**kwargs)
         return self
 
     def plot_component(
