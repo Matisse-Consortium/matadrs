@@ -10,7 +10,7 @@ average = SimpleNamespace(
 # NOTE: Plot
 color = SimpleNamespace(
         colormap="seaborn-v0_8-colorblind",
-        number=100
+        number=35
         )
 
 legend = SimpleNamespace(

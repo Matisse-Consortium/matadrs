@@ -15,6 +15,8 @@ from scipy.interpolate import CubicSpline
 from matplotlib import colormaps as mcm
 from matplotlib.colors import ListedColormap
 
+from .options import OPTIONS
+
 
 __all__ = ["cprint", "capitalise_to_index", "move", "print_execution_time",
            "get_execution_modes", "split_fits", "get_fits_by_tag",
@@ -43,7 +45,8 @@ def get_colormap(colormap: str) -> ListedColormap:
         return convert_style_to_colormap(colormap)
 
 
-def get_colorlist(colormap: str, ncolors: Optional[int] = 10) -> List[str]:
+def get_colorlist(colormap: str,
+                  ncolors: Optional[int] = OPTIONS.color.number) -> List[str]:
     """Gets the colormap as a list from the matplotlib colormaps."""
     return [get_colormap(colormap)(i) for i in range(ncolors)]
 

@@ -542,7 +542,10 @@ class Plotter:
                         in enumerate(zip(sub_component.labels,
                                          sub_component.y_values,
                                          sub_component.y_errors)):
-                    color = colors[index]
+                    try:
+                        color = colors[index]
+                    except Exception:
+                        breakpoint()
                     if self.readouts[0].band == "lband":
                         ax_left, ax_right = plot_broken_axis(
                                 ax, sub_component.x_values,
