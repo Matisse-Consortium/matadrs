@@ -40,11 +40,16 @@
 
 Call:
 
-getdata_ESO_archive.py -User <user_name> -Password <password> -TargetName <SIMBAD target name> -RA <"hh:mm:ss"> -DEC <"dd:mm:ss"> -Box <search box: "hh:mm:ss"> -RunId <run ID> -Inst <instrument name> -StartDate <start date> -EndDate <end date> -Category <file category: SCIENCE, CALIB, ACQUISITION> -Type <file type: OBJECT, STD, BIAS, etc.> -Mode <file mode: IMAGE, SPECTRUM, MOS, IFU, etc.> -MaxRows <max rows to retrieve> -Download <download files: Y/N> -Deliver <delivery_type: files, files_calib, files_master_calib> <optional: -verbose> <optional to create a record of your query: -record>
+>>> getdata_ESO_archive.py -User <user_name> -Password <password> -TargetName <SIMBAD target name> -RA <"hh:mm:ss"> -DEC <"dd:mm:ss">
+    -Box <search box: "hh:mm:ss"> -RunId <run ID> -Inst <instrument name> -StartDate <start date> -EndDate <end date>
+    -Category <file category: SCIENCE, CALIB, ACQUISITION> -Type <file type: OBJECT, STD, BIAS, etc.> -Mode <file mode: IMAGE, SPECTRUM, MOS, IFU, etc.> 
+    -MaxRows <max rows to retrieve> -Download <download files: Y/N> -Deliver <delivery_type: files, files_calib, files_master_calib>
+    <optional: -verbose> <optional to create a record of your query: -record>
 
 e.g.
 
-getdata_ESO_archive.py -User <user_name> -Password <your_password> -Inst FORS2 -StartDate '2013 01 01' -EndDate '2013 04 01' -Category SCIENCE -Mode IMAGE -MaxRows 30 -Download N -Deliver raw2raw
+>>> getdata_ESO_archive.py -User <user_name> -Password <your_password> -Inst FORS2 -StartDate '2013 01 01' -EndDate '2013 04 01'
+    -Category SCIENCE -Mode IMAGE -MaxRows 30 -Download N -Deliver raw2raw
 """
 import os
 import sys
@@ -122,9 +127,21 @@ for option in sys.argv:
 
 
 def query_archive(
+        target: str,
+        ra: str, dec: str,
+        box_size: Optional[str] = "00:10:00",
+        run_id: Optional[str] = None,
         instrument: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        dpr_type: Optional[str] = None,
+        category: Optional[str] = None,
+        dpr_tech: Optional[str] = None,
+        max_rows: Optional[int] = None,
         user_name: Optional[str] = None,
         password: Optional[str] = None,
+        download: Optional[bool] = False,
+        download_type: Optional[str] = None,
         verbose: Optional[bool] = False,
         record: Optional[bool] = False) -> None:
     """
@@ -134,157 +151,16 @@ def query_archive(
     verbose : bool, optional
     record : bool, optional
     """
-    try:
-        i_target = sys.argv.index("-TargetName")
-    except ValueError:
-        i_target = None
-
-    try:
-        i_ra = sys.argv.index("-RA")
-    except ValueError:
-        i_ra = None
-
-    try:
-        i_dec = sys.argv.index("-DEC")
-    except ValueError:
-        i_dec = None
-
-    try:
-        i_box = sys.argv.index("-Box")
-    except ValueError:
-        i_box = None
-
-    try:
-        i_runid = sys.argv.index("-RunId")
-    except ValueError:
-        i_runid = None
-
-    try:
-        i_inst = sys.argv.index("-Inst")
-    except ValueError:
-        i_inst = None
-
-    try:
-        i_start = sys.argv.index("-StartDate")
-    except ValueError:
-        i_start = None
-
-    try:
-        i_end = sys.argv.index("-EndDate")
-    except ValueError:
-        i_end = None
-
-    try:
-        i_type = sys.argv.index("-Type")
-    except ValueError:
-        i_type = None
-
-    try:
-        i_cat = sys.argv.index("-Category")
-    except ValueError:
-        i_cat = None
-
-    try:
-        i_mode = sys.argv.index("-Mode")
-    except ValueError:
-        i_mode = None
-
-    try:
-        i_max = sys.argv.index("-MaxRows")
-    except ValueError:
-        i_max = None
-
-    try:
-        i_down = sys.argv.index("-Download")
-    except ValueError:
-        i_down = None
-
-    try:
-        i_downtype = sys.argv.index("-Deliver")
-    except ValueError:
-        i_downtype = None
-
-    # Assigning values to the command line input parameters:
-    user = sys.argv[i_user + 1]
-    passwd = sys.argv[i_psswd + 1]
-
-    if i_target is not None:
-        target = sys.argv[i_target + 1]
-    else:
-        target = ""
-
-    if i_ra is not None:
-        ra = sys.argv[i_ra + 1]
-    else:
-        ra = ""
-
-    if i_dec is not None:
-        dec = sys.argv[i_dec + 1]
-    else:
-        dec = ""
-
-    if i_box is not None:
-        box_size = sys.argv[i_box + 1]
-    else:
-        box_size = "00:10:00"
-
-    if i_runid is not None:
-        runid = sys.argv[i_runid + 1]
-    else:
-        runid = ""
-
-    if i_inst is not None:
-        inst = sys.argv[i_inst + 1].upper()  # instrument name must be capitalised
-    else:
-        inst = ""
-
-    if i_start is not None:
-        start = sys.argv[i_start + 1]
-    else:
-        start = ""
-
-    if i_end is not None:
-        end = sys.argv[i_end + 1]
-    else:
-        end = ""
-
-    if i_type is not None:
-        dpr_type = sys.argv[i_type + 1]
-    else:
-        dpr_type = ""
-
-    if i_mode is not None:
-        dpr_tech = sys.argv[i_mode + 1]
-    else:
-        dpr_tech = ""
-
-    if i_cat is not None:
-        catg = sys.argv[i_cat + 1]
-    else:
-        catg = ""
-
-    if i_max is not None:
-        maxr = sys.argv[i_max + 1]
-    else:
-        maxr = ""
-
-    if i_down is not None:
-        down = sys.argv[i_down + 1]
-        if (
-            down == "y"
-            or down == "Y"
-            or down == "yes"
-            or down == "Yes"
-            or down == "YES"
-            or down == "True"
-            or down == "true"
-            or down == "TRUE"
-        ):
-            down = True
-        else:
-            down = False
-    else:
-        down = False
+    target = ""
+    ra = ""
+    dec = ""
+    instrument = ""
+    start_date = ""
+    end_date = ""
+    dpr_type = ""
+    dpr_tech = ""
+    category = ""
+    max_rows = ""
 
     # Determine the file matching type:
     # if downtype matches any of these, only retreive matched raw files:
@@ -309,22 +185,19 @@ def query_archive(
         "files_mast_calib",
     ]
 
-    if i_downtype is not None:
-        downtype = sys.argv[i_downtype + 1]
-    else:
-        downtype = "files"
 
-    if downtype.lower() in files1:
-        downtype = "files"
+    download_type = "files"
+    if download_type.lower() in files1:
+        download_type = "files"
 
-    if downtype.lower() in files2:
-        downtype = "raw2raw"
+    if download_type.lower() in files2:
+        download_type = "raw2raw"
 
-    if downtype.lower() in files3:
-        downtype = "raw2master"
+    if download_type.lower() in files3:
+        download_type = "raw2master"
 
-    if downtype != "files" and downtype != "raw2raw" and downtype != "raw2master":
-        downtype = "files"
+    if download_type != "files" and download_type != "raw2raw" and download_type != "raw2master":
+        download_type = "files"
 
     print(" ")
     print(" ")
@@ -332,24 +205,24 @@ def query_archive(
     print(" ")
 
     if verbose:
-        print("User/Password: %s/%s" % (user, passwd))
+        print("User/Password: %s/%s" % (user_name, password))
 
     print("Target:        %s" % (target))
     print("RA/DEC:        %s/%s" % (ra, dec))
     print("Search box:    %s" % (box_size))
-    print("RunId:         %s" % (runid))
-    print("Instrument:    %s" % (inst))
-    print("Start Date:    %s" % (start))
-    print("End Date:      %s" % (end))
-    print("File Category: %s" % (catg))
+    print("RunId:         %s" % (run_id))
+    print("Instrument:    %s" % (instrument))
+    print("Start Date:    %s" % (start_date))
+    print("End Date:      %s" % (end_date))
+    print("File Category: %s" % (category))
     print("File Type:     %s" % (dpr_type))
     print("File Mode:     %s" % (dpr_tech))
-    print("MaxRows:       %s" % (maxr))
+    print("MaxRows:       %s" % (max_rows))
 
-    if downtype == "files":
+    if download_type == "files":
         print("Download Type: %s" % ("Only searched-for raw files will be downloaded"))
 
-    if downtype == "raw2raw":
+    if download_type == "raw2raw":
         print(
             "Download Type: %s"
             % (
@@ -357,7 +230,7 @@ def query_archive(
             )
         )
 
-    if downtype == "raw2master":
+    if download_type == "raw2master":
         print(
             "Download Type: %s"
             % (
@@ -384,20 +257,20 @@ def query_archive(
         "deg_or_hour": "hours",
         "format": "SexaHours",
         "tab_prog_id": "on",
-        "prog_id": runid,
+        "prog_id": run_id,
         "tab_instrument": "on",
-        "instrument": inst,
-        "stime": start,
+        "instrument": instrument,
+        "stime": start_date,
         "starttime": "0",
-        "etime": end,
+        "etime": end_date,
         "endtime": "24",
         "tab_dp_cat": "true",
-        "dp_cat": catg,
+        "dp_cat": category,
         "tab_dp_tech": "true",
         "dp_tech": dpr_tech,
         "tab_dp_type": "true",
         "dp_type": dpr_type,
-        "top": maxr,
+        "top": max_rows,
         "tab_rel_date": "0",
         "tab_filter_path": "0",
         "tab_exptime": "0",
@@ -435,7 +308,7 @@ def query_archive(
         print(
             this_prog,
             "[info] (a maximum limit of %i records were specified in the query ... more may exist)"
-            % (int(maxr)),
+            % (int(max_rows)),
         )
         print(" ")
 
@@ -480,11 +353,7 @@ def query_archive(
     n = 14
     all_out = [xxx[i * n : (i + 1) * n] for i in range((len(xxx) + n - 1) // n)]
 
-    dpr_catg = []
-    dpr_type = []
-    dpr_mode = []
-    files = []
-
+    dpr_catg, dpr_type, dpr_mode, files = [], [], [], []
     for i in range(1, Nquery + 1):
         dpr_catg.append(all_out[i][5])
         dpr_type.append(all_out[i][6])
@@ -495,8 +364,7 @@ def query_archive(
     dpr_mode = [x.replace('"', "") for x in dpr_mode]
 
     Nfiles = len(files)
-
-    if verbose == True:
+    if verbose:
         print(this_prog, "[info] the following query has been made to %s" % (url1))
         print(" ")
         print("Query Paramters:\n================\n", query_params)
@@ -520,15 +388,15 @@ def query_archive(
     #
     # ====================================================================================
 
-    if downtype == "files":
+    if download_type == "files":
         print("Only these files will be submitted to the archive")
         print(" ")
-    if downtype == "raw2raw":
+    if download_type == "raw2raw":
         print(
             "These files will be submitted to the archive and matched to their associated raw calibrations"
         )
         print(" ")
-    if downtype == "raw2master":
+    if download_type == "raw2master":
         print(
             "These files will be submitted to the archive and matched to their associated processed calibrations"
         )
@@ -552,24 +420,24 @@ def query_archive(
     #
     # ====================================================================================
 
-    url_sub = url2 + user + "/submission"
+    url_sub = url2 + user_name + "/submission"
 
     # only get the specific data files and update their headers:
-    if downtype == "files":
+    if download_type == "files":
         postdata = (
             "requestDescription=script&requestCommand=SELECTIVE_HOTFLY&dataset=%s"
             % (submit_files)
         )
 
     # get the specific data files + raw calibrations and update their headers:
-    if downtype == "raw2raw":
+    if download_type == "raw2raw":
         postdata = (
             "requestDescription=script&requestCommand=SELECTIVE_HOTFLY&requestCommand=CalSelectorRaw2Raw&dataset=%s"
             % (submit_files)
         )
 
     # get the specific data files + master calibrations and update their headers:
-    if downtype == "raw2master":
+    if download_type == "raw2master":
         postdata = (
             "requestDescription=script&requestCommand=SELECTIVE_HOTFLY&requestCommand=CalSelectorRaw2Master&dataset=%s"
             % (submit_files)
@@ -588,9 +456,9 @@ def query_archive(
         + '" '
         + '--header="Accept:text/plain" '
         + "--http-user="
-        + user
+        + user_name
         + " --http-password="
-        + passwd
+        + password
         + " "
         + url_sub
     )
@@ -612,7 +480,7 @@ def query_archive(
     # ========================================================
 
     netrc_path = os.getenv("HOME") + "/.netrc"
-    newline = "machine dataportal.eso.org login " + user + " password " + passwd + "\n"
+    newline = "machine dataportal.eso.org login " + user_name + " password " + password + "\n"
 
     is_file = os.path.isfile(netrc_path)  # does file exist?
 
@@ -653,7 +521,7 @@ def query_archive(
     #
     # ========================================================
 
-    url_state = url2 + user + "/" + reqnum + "/state"
+    url_state = url2 + user_name + "/" + reqnum + "/state"
 
     state_call = (
         "wget -q -O "
@@ -663,9 +531,9 @@ def query_archive(
         + user_agent
         + " --auth-no-challenge "
         + "--http-user="
-        + user
+        + user_name
         + " --http-password="
-        + passwd
+        + password
         + " "
         + url_state
     )
@@ -720,7 +588,7 @@ def query_archive(
     # and, if requested, download the data . . .
     #
     # ============================================================
-    url_down = url2 + user + "/" + reqnum + "/script"
+    url_down = url2 + user_name + "/" + reqnum + "/script"
     download_call = (
         "wget -q -O "
         + down_list
@@ -729,9 +597,9 @@ def query_archive(
         + user_agent
         + " --auth-no-challenge "
         + "--http-user="
-        + user
+        + user_name
         + " --http-password="
-        + passwd
+        + password
         + " "
         + url_down
     )
@@ -744,11 +612,11 @@ def query_archive(
 
     os.system("mv " + down_list + " " + down_dir)
 
-    if down:
+    if download:
         print(this_prog, "[info] downloading archive files in %s/" % (down_dir))
         print(" ")
         os.chdir(down_dir)
-        os.system("./" + down_list + " -u " + user)
+        os.system("./" + down_list + " -u " + user_name)
 
     else:
         print(
@@ -779,7 +647,7 @@ def query_archive(
 
     # Cleaning up:
     if not verbose:
-        if down:
+        if download:
             os.chdir("..")
 
         try:
@@ -821,71 +689,5 @@ if __name__ == "__main__":
     down_list = "download_" + ttime + ".sh"  # download shell file from ESO archive
     down_dir = "download_" + ttime  # download directory
 
-    try:
-        i_user = sys.argv.index("-User")
-    except ValueError:
-        try:
-            i_user = sys.argv.index("-user")
-        except ValueError:
-            print(this_prog, "[error] -User <user_name> parameter is missing.")
-            print(
-                'USAGE: getdata_ESO_archive.py -User <user_name> -Password <password> -TargetName <SIMBAD target name> -RA <"hh:mm:ss"> -DEC <"dd:mm:ss"> -Box <search box: "hh:mm:ss"> -RunId <run ID> -Inst <instrument name> -StartDate <start date> -EndDate <end date> -Category <file category: SCIENCE, CALIB, ACQUISITION> -Type <file type: OBJECT, STD, BIAS, etc.> -Mode <file mode: IMAGE, SPECTRUM, MOS, IFU, etc.> -MaxRows <max rows to retrieve> -Download <download files: Y/N> -Deliver <delivery_type: files, files_calib, files_master_calib> <optional: -verbose> <optional to create a record of your query: -record>'
-            )
-            print(" ")
-            # print('Note that the maximum number of rows returned by default is 100.')
-            print(
-                "The search radius around the target name and/or coordinates is, by default, 10 minutes."
-            )
-            print(
-                "The following example will download directly 32 files (16 fits, 16 nightlog files) onto your disk:"
-            )
-            print(
-                "getdata_ESO_archive.py -User <your username> -Passw <your password> -RunId "
-                "090.C-0733(A)"
-                " -Inst FORS2 -StartDate "
-                "2013 01 01"
-                " -EndDate "
-                "2013 04 01"
-                " -Category SCIENCE -MaxRows 30"
-            )
-            sys.exit()
-
-    try:
-        i_psswd = sys.argv.index("-Password")
-    except ValueError:
-        try:
-            i_psswd = sys.argv.index("-password")
-        except ValueError:
-            try:
-                i_psswd = sys.argv.index("-Passwd")
-            except ValueError:
-                try:
-                    i_psswd = sys.argv.index("-passwd")
-                except ValueError:
-                    print(
-                        this_prog,
-                        "[error] -Password <user_password> parameter is missing.",
-                    )
-                    print(this_prog, "[error] -User <user_name> parameter is missing.")
-                    print(
-                        'USAGE: getdata_ESO_archive.py -User <user_name> -Password <password> -TargetName <SIMBAD target name> -RA <"hh:mm:ss"> -DEC <"dd:mm:ss"> -Box <search box: "hh:mm:ss"> -RunId <run ID> -Inst <instrument name> -StartDate <start date> -EndDate <end date> -Category <file category: SCIENCE, CALIB, ACQUISITION> -Type <file type: OBJECT, STD, BIAS, etc.> -Mode <file mode: IMAGE, SPECTRUM, MOS, IFU, etc.> -MaxRows <max rows to retrieve> -Download <download files: Y/N> -Deliver <delivery_type: files, files_calib, files_master_calib> <optional: -verbose> <optional to create a record of your query: -record>'
-                    )
-                    print(" ")
-                    print(
-                        "The search radius around the target name and/or coordinates is, by default, 10 minutes."
-                    )
-                    print("wget must be installed on your machine.")
-                    print(
-                        "The following example will download directly 32 files (16 fits, 16 nightlog files) onto your disk:"
-                    )
-                    print(
-                        "getdata_ESO_archive.py -User <your username> -Passw <your password> -RunId "
-                        "090.C-0733(A)"
-                        " -Inst FORS2 -StartDate "
-                        "2013 01 01"
-                        " -EndDate "
-                        "2013 04 01"
-                        " -Category SCIENCE -MaxRows 30"
-                    )
-                    sys.exit()
+    query_archive("hd142527")
 
