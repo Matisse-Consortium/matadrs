@@ -14,6 +14,7 @@ def query_archive(
         user_name: str, instrument: str,
         target: str, nights: List[str],
         columns: Optional[List[str]] = [""],
+        store_password: Optional[bool] = True,
         remove_password: Optional[bool] = False,
         row_limit: Optional[int] = 1500,
         help: Optional[bool] = False,
@@ -47,7 +48,7 @@ def query_archive(
     """
     eso, server = Eso(), "astroquery:www.eso.org"
     eso.ROW_LIMIT = row_limit
-    eso.login(user_name, store_password=True)
+    eso.login(user_name, store_password=store_password)
     password = keyring.get_password(server, user_name)
     if password is None:
         password = getpass.getpass(f"Reenter password: ")
