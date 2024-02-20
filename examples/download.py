@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from matadrs.utils.tools import query_archive
+from matadrs.utils.query import query_archive
 
 
 query_archive("MbS", instrument="matisse",
