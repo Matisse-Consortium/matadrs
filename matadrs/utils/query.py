@@ -49,7 +49,12 @@ def query_archive(
     eso, server = Eso(), "astroquery:www.eso.org"
     eso.ROW_LIMIT = row_limit
     eso.login(user_name, store_password=store_password)
-    password = keyring.get_password(server, user_name)
+
+    try:
+        password = keyring.get_password(server, user_name)
+    except keyring.errors.KeyringError:
+        password = None
+
     if password is None:
         password = getpass.getpass(f"Reenter password: ")
 
