@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Callable, Tuple, List, Union, Optional
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 from matplotlib.axes import Axes
@@ -15,6 +16,9 @@ from .options import OPTIONS
 from ..mat_tools.mat_show_atmo_param_v2 import show_seeing
 from ..mat_tools.mat_show_oifits_pbe_ama_short import open_oi_dir, \
         filter_oi_list, show_vis_tf_vs_time
+
+
+matplotlib.use('Agg')
 
 
 def plot_data_quality(
