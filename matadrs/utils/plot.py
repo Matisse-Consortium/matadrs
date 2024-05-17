@@ -7,6 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from .readout import ReadoutFits
@@ -688,7 +689,9 @@ class Plotter:
              subplots: Optional[bool] = False,
              figsize: Optional[List[int]] = None,
              dpi: Optional[int] = 100,
-             sharex: Optional[bool] = False, **kwargs):
+             sharex: Optional[bool] = False,
+             rax: Optional[bool] = False,
+             **kwargs) -> Optional[Tuple[Figure, Axes]]:
         """Combines the individual components into one plot.
 
         The size and dimension of the plot is automatically determined
@@ -699,10 +702,21 @@ class Plotter:
             If toggled, saves the plot to the self.save_path file with the
             self.plot_name
         subplots : bool, optional
+            If True, the components will be plotted in subplots.
         sharex : bool, optional
+            If True, the x-axis will be shared.
         error : bool, optional
-        margin : bool, optional
+            If True, the error bars will be plotted.
+        rax : bool, optional
+            If True, then the figure and axes will be returned.
         kwargs: dict, optional
+
+        Returns
+        -------
+        matplotlib.figure.Figure, optional
+            The figure of the plot.
+        matplotlib.axes.Axes, optional
+            The axes of the plot.
         """
         if subplots:
             columns = self.num_components
@@ -715,8 +729,8 @@ class Plotter:
 
         to_px = 1/dpi
         size = figsize if figsize is not None else OPTIONS.plot.size
-        _, axarr = plt.subplots(rows, columns, tight_layout=True,
-                                figsize=(size*to_px*columns, size*to_px*rows))
+        fig, axarr = plt.subplots(rows, columns, tight_layout=True,
+                                  figsize=(size*to_px*columns, size*to_px*rows))
 
         if self.num_components != 1:
             for ax, (name, component) in zip(
@@ -728,6 +742,9 @@ class Plotter:
                 lambda x: x[0], zip(*self.components.items()))
             self.plot_component(axarr, name, component["values"],
                                 **component["kwargs"], **kwargs)
+
+        if rax:
+            return fig, axarr
 
         if save:
             plt.savefig(self.save_path / self.plot_name,
