@@ -126,11 +126,16 @@ class ReadoutFits:
     @property
     def band(self) -> str:
         """Fetches the object's band from the detector used"""
-        chip = self.primary_header["HIERARCH ESO DET CHIP NAME"]
-        if "HAWAII" in chip:
-            return "lband"
-        elif "AQUARIUS" in chip:
-            return "nband"
+        if self.fits_file.name.startswith("PIONIER"):
+            return "hband"
+        if self.fits_file.name.startswith("GRAVITY"):
+            return "kband"
+        if "HIERARCH ESO DET CHIP NAME" in self.primary_header:
+            chip = self.primary_header["HIERARCH ESO DET CHIP NAME"]
+            if "HAWAII" in chip:
+                return "lband"
+            elif "AQUARIUS" in chip:
+                return "nband"
         return ""
 
     @property
@@ -168,13 +173,13 @@ class ReadoutFits:
     @property
     def instrument(self) -> str:
         """Fetches the object's instrument from the primary header."""
+        instrument = ""
         if "instrume" not in self.primary_header:
             if self.fits_file.name.startswith("PION"):
-                return "pionier"
+                instrument = "pionier"
             elif self.fits_file.name.startswith("GRAV"):
-                return "GRAVITY"
-            return ""
-        return self.primary_header["instrume"].lower().strip()
+                instrument = "gravity"
+        return instrument if instrument else self.primary_header["instrume"].lower().strip()
 
     @property
     def instrument_mode(self) -> str:

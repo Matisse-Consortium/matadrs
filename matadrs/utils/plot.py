@@ -278,35 +278,48 @@ class Plotter:
             return None, None
         return ymin-spacing, ymax+spacing
 
-    def filter(self, keys: List[str], contains: List[str]):
+    def sort(self, by: str):
         """Filters the object's data by the given key.
 
         The key can be any of the properties of the ReadoutFits class
 
         Parameters
         ----------
-        key : str
+        by : str
+            The data to sort by.
+        """
+        self.readouts = sorted(self.readouts, key=lambda x: getattr(x, by.lower()))
+        return self
+
+    def filter(self, by: List[str], contains: List[str]):
+        """Filters the object's data by the given key.
+
+        The key can be any of the properties of the ReadoutFits class
+
+        Parameters
+        ----------
+        by : str
             The key to filter the data by.
         contains : str
             The string that the key should contain.
         """
-        keys = [keys] if not isinstance(keys, List) else keys
+        by = [by] if not isinstance(by, List) else by
         contains = [contains] if not isinstance(contains, List) else contains
 
-        for key, contain in zip(keys, contains):
+        for key, contain in zip(by, contains):
             self.readouts = [readout for readout in self.readouts if contain.lower() \
                 in getattr(readout, key.lower()).lower()]
         return self
 
     def plot_uv(
-            self, ax: Axes, symbol: Optional[str] = "x",
-            airmass_lim: Optional[float] = 2.,
-            show_text: Optional[List] = False,
-            make_tracks: Optional[bool] = True,
-            show_legend: Optional[bool] = True,
-            legend_location: Optional[str] = OPTIONS.plot.legend.location,
-            legend_size: Optional[int] = OPTIONS.plot.legend.fontsize,
-            color_grouping: Optional[str] = "file",
+        self, ax: Axes, symbol: Optional[str] = "x",
+        airmass_lim: Optional[float] = 2.,
+        show_text: Optional[List] = False,
+        make_tracks: Optional[bool] = True,
+        show_legend: Optional[bool] = True,
+        legend_location: Optional[str] = OPTIONS.plot.legend.location,
+        legend_size: Optional[int] = OPTIONS.plot.legend.fontsize,
+        color_by: Optional[str] = "file",
             **kwargs) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
 
@@ -327,7 +340,7 @@ class Plotter:
             The location of the legend.
         legend_size : int, optional
             The size of the legend.
-        color_grouping : str, optional
+        color_by : str, optional
             The color grouping used for the uv-coords. If 'file' the
             colors are based on the different (.fits)-files. If 'instrument'
             the colors are based on the different instruments (see
@@ -356,12 +369,12 @@ class Plotter:
                 baselines.append(baseline)
                 sta_labels.append(sta_label)
 
-            if color_grouping == "file":
+            if color_by == "file":
                 color = colors[index]
                 handles.append(mlines.Line2D(
                     [], [], color=color, marker="X",
-                    linestyle="None", label=readout.date))
-            elif color_grouping == "instrument":
+                    linestyle="None", label=readout.date[:-8]))
+            elif color_by == "instrument":
                 if readout.instrument not in instruments:
                     instruments.append(readout.instrument)
                 color = colors[instruments.index(readout.instrument)]
@@ -388,7 +401,7 @@ class Plotter:
         xlabel, ylabel = "$u$ (m) - South", "$v$ (m) - East"
         uv_extent = int(uv_max + uv_max*0.25)
 
-        if color_grouping == "instrument":
+        if color_by == "instrument":
             handles = []
             for index, instrument in enumerate(instruments):
                 color = colors[index]
@@ -664,7 +677,7 @@ class Plotter:
                         ax.legend(fontsize=legend_size,
                                   loc=legend_location, framealpha=0.5)
             else:
-                sub_component(ax, **kwargs)
+                sub_component(ax, color_by=color_by, **kwargs)
 
         kwargs_layout = {"pad": 3.0, "h_pad": 2.0, "w_pad": 4.0}\
             if self.readouts[0].band == "lband" else {}
