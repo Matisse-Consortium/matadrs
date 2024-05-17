@@ -9,7 +9,8 @@ average = SimpleNamespace(
 
 # NOTE: Plot
 color = SimpleNamespace(
-        colormap="seaborn-v0_8-colorblind",
+        # colormap="seaborn-v0_8-colorblind",
+        colormap="tab20",
         number=35
         )
 

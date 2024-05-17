@@ -398,6 +398,8 @@ class Plotter:
                 else:
                     sub_component.y_values = readout.oi_flux["FLUX"]
                     component_label = f"Flux ({readout.get_unit('oi_flux', 'flux')})"
+                # HACK: To get flux in Jansky, remove if solved
+                component_label = f"Flux (Jy)"
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
                 sub_component.labels = readout.get_telescopes()\
                     if len(sub_component.y_values) > 1 else ["Averaged"]
@@ -605,6 +607,8 @@ class Plotter:
     # TODO: Sharex, sharey and subplots should be added
     def plot(self, save: Optional[bool] = False,
              subplots: Optional[bool] = False,
+             figsize: Optional[List[int]] = None,
+             dpi: Optional[int] = 100,
              sharex: Optional[bool] = False, **kwargs):
         """Combines the individual components into one plot.
 
@@ -630,8 +634,8 @@ class Plotter:
             rows = np.ceil(self.num_components/columns).astype(int)\
                 if self.num_components != 1 else 1
 
-        to_px = 1/plt.rcParams["figure.dpi"]
-        size = OPTIONS.plot.size
+        to_px = 1/dpi
+        size = figsize if figsize is not None else OPTIONS.plot.size
         _, axarr = plt.subplots(rows, columns, tight_layout=True,
                                 figsize=(size*to_px*columns, size*to_px*rows))
 

@@ -1,8 +1,9 @@
 import pkg_resources
 import re
 import warnings
+from itertools import permutations
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import astropy.units as u
@@ -21,6 +22,26 @@ __all__ = ["ReadoutFits"]
 
 DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 GRAVITY_TO_INDEX = {"sc": 10, "ft": 20}
+ARRAY_CONFIGS = {}
+
+
+def add_array_config(dictionary: Dict, key: str, value: str) -> Dict:
+    """Adds all permutations of the configuration to the dictionary."""
+    perms = map(lambda x: "-".join(x), permutations(key.split("-")))
+    return {**dictionary, **{perm: value for perm in perms}}
+
+
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "A0-B2-D0-C1", "small")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "A1-B2-C1-D0", "small")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "K0-G2-D0-J3", "medium")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "D0-H0-G1-I1", "medium")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "D0-G2-J3-K0", "medium")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "A0-G1-J2-J3", "large")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "A0-G1-J2-K0", "large")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "A1-G1-K0-I1", "large")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "A1-G1-K0-J3", "large")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "A0-B5-J2-J6", "extended")
+ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "U1-U2-U3-U4", "UTs")
 
 
 class ReadoutFits:
@@ -126,6 +147,7 @@ class ReadoutFits:
         -----
         Fetching the name via simbad by its coordinates REQUIRES online access.
         """
+        header_name = None
         if self._name is None:
             try:
                 if "HIERARCH ESO OBS TARG NAME" in self.primary_header:
@@ -133,10 +155,11 @@ class ReadoutFits:
                 elif "OBJECT" in self.primary_header:
                     header_name = self.object_id
             except KeyError:
-                header_name = None
+                pass
+
             if (header_name in ["SKY", "STD", "STD,RMNREC"]) or (header_name is None):
-                objects = Simbad.query_region(self.coords,
-                                              radius=20*u.arcsec)["MAIN_ID"].data.tolist()
+                objects = Simbad.query_region(
+                    self.coords, radius=20*u.arcsec)["MAIN_ID"].data.tolist()
                 self._name = sorted(objects)[0]
             else:
                 self._name = header_name.lower()
@@ -145,15 +168,29 @@ class ReadoutFits:
     @property
     def instrument(self) -> str:
         """Fetches the object's instrument from the primary header."""
-        return self.primary_header["instrume"].lower()
+        if "instrume" not in self.primary_header:
+            if self.fits_file.name.startswith("PION"):
+                return "pionier"
+            elif self.fits_file.name.startswith("GRAV"):
+                return "GRAVITY"
+            return ""
+        return self.primary_header["instrume"].lower().strip()
 
     @property
-    def gravity_index(self) -> int:
+    def instrument_mode(self) -> str:
+        """Fetches the object's instrument mode from the primary header."""
+        if self.instrument == "matisse" and \
+            self.primary_header["HIERARCH ESO DEL FT SENSOR"].lower() == "gravity":
+            return "gra4mat"
+        return self.instrument
+
+    @property
+    def gravity_index(self) -> Optional[int]:
         """Returns the indices for either the fringe tracker or science
         observations."""
         if self.instrument == "gravity":
             return GRAVITY_TO_INDEX[self.gravity_method]
-        return None
+        return
 
     @property
     def simbad_query(self):
@@ -208,15 +245,19 @@ class ReadoutFits:
     @property
     def stations(self) -> str:
         """Fetches the array's stations from the primary header."""
-        if "HIERARCH ESO ISS BASELINE" in self.primary_header:
-            return self.primary_header["HIERARCH ESO ISS BASELINE"]
-        else:
-            return self.primary_header["HIERARCH ESO OBS BASELINE"]
+        if "HIERARCH ESO ISS CONF STATION1" in self.primary_header:
+            return "-".join([self.primary_header[f"HIERARCH ESO ISS CONF STATION{i}"] for i in range(1, 5)])
+        return ""
 
     @property
     def array_configuration(self) -> str:
         """Fetches the array's configuration from the primary header."""
-        return "uts" if "UT" in self.stations.lower() else "ats"
+        return "uts" if "u1" in self.stations.lower() else "ats"
+
+    @property
+    def array(self) -> str:
+        """Fetches the array's name from the primary header."""
+        return ARRAY_CONFIGS[self.stations] if self.stations in ARRAY_CONFIGS else "other"
 
     @property
     def bcd_configuration(self) -> str:
@@ -227,16 +268,21 @@ class ReadoutFits:
     @property
     def tpl_start(self) -> str:
         """Fetches the observation's start datetime from the primary header."""
-        return self.primary_header["HIERARCH ESO TPL START"]
+        if "HIERARCH ESO TPL START" in self.primary_header:
+            return self.primary_header["HIERARCH ESO TPL START"]
+        return ""
 
     @property
     def date(self) -> str:
         """Fetches the observation's date from the primary header."""
+        date = ""
         if "DATE-OBS" in self.primary_header:
-            return self.primary_header["DATE-OBS"].split("T")[0]
-        if "DATE" in self.primary_header:
-            return self.primary_header["DATE"].split("T")[0]
-        return self.tpl_start.split("T")[0]
+            date = self.primary_header["DATE-OBS"]
+        elif "DATE" in self.primary_header:
+            date = self.primary_header["DATE"]
+        else:
+            date = self.tpl_start
+        return date if date else re.findall(r"\d{4}-\d{2}-\d{2}", self.fits_file.name)[0]
 
     @property
     def pipeline_version(self) -> str:
@@ -252,12 +298,18 @@ class ReadoutFits:
     @property
     def seeing(self):
         """Fetches the seeing from the primary header."""
-        return self.primary_header["HIERARCH ESO ISS AMBI FWHM START"]
+        if "HIERARCH ESO ISS AMBI FWHM END" not in self.primary_header:
+            return None
+        return np.mean([self.primary_header["HIERARCH ESO ISS AMBI FWHM START"],
+                        self.primary_header["HIERARCH ESO ISS AMBI FWHM END"]])
 
     @property
-    def tau0(self):
+    def tau0(self) -> Optional[float]:
         """Fetches the tau0 from the primary header."""
-        return self.primary_header["HIERARCH ESO ISS AMBI TAU0 START"]
+        if "HIERARCH ESO ISS AMBI TAU0 END" not in self.primary_header:
+            return None
+        return np.mean([self.primary_header["HIERARCH ESO ISS AMBI TAU0 END"],
+                        self.primary_header["HIERARCH ESO ISS AMBI TAU0 START"]])
 
     @property
     def resolution(self) -> str:
@@ -400,6 +452,15 @@ class ReadoutFits:
         observed_as_calibrator : bool
         """
         return self.observation_type == "calib"
+
+    def get_calib_info(self) -> Tuple[str, str, str]:
+        """Fetches the object's name, time of observation, and limb-darkend diameter."""
+        cal_name, cal_ldd, cal_time = "", "", ""
+        if "HIERARCH ESO PRO CAL DB NAME" in self.primary_header:
+            cal_name = self.primary_header["HIERARCH ESO PRO CAL DB NAME"].strip()
+            cal_time = self.primary_header["HIERARCH ESO PRO CAL TPL START"].split("T")[1][:5]
+            cal_ldd = round(self.primary_header["HIERARCH ESO PRO CAL DB DIAM"], 1)
+        return cal_name, cal_time, cal_ldd
 
     def is_pip_version_greater_equal(self, version: str) -> bool:
         """Checks if the pipeline's version is greater than the
