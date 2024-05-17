@@ -55,6 +55,8 @@ def plot_broken_axis(ax: Axes, x: np.ndarray,
                      color: Optional[str] = None,
                      ylims: Optional[Tuple[float, float]] = None,
                      error: Optional[bool] = False,
+                     no_fill: Optional[bool] = False,
+                     no_fill_index: Optional[int] = None,
                      **kwargs):
     """Plot two axes next to each other to display the L-band.
 
@@ -84,6 +86,11 @@ def plot_broken_axis(ax: Axes, x: np.ndarray,
         The label of the first axis.
     error : bool, optional
         If the error should be plotted.
+    no_fill : bool, optional
+        If the fill between the errors should not be plotted and instead
+        be indicated by one errorbar.
+    no_fill_index : int, optional
+        The point where the sole errorbar should be plotted.
     """
     x1 = x[(x >= range1[0]) & (x <= range1[1])]
     y1 = y[(x >= range1[0]) & (x <= range1[1])]
@@ -121,10 +128,19 @@ def plot_broken_axis(ax: Axes, x: np.ndarray,
     ax_left.plot(x1, y1, color=color, **kwargs)
     ax_right.plot(x2, y2, color=color, **kwargs)
     if error:
-        ax_left.fill_between(x1, y1+yerr1, y1-yerr1,
-                             color=color, alpha=0.2)
-        ax_right.fill_between(x2, y2+yerr2, y2-yerr2,
-                              color=color, alpha=0.2)
+        if no_fill:
+            if no_fill_index is None:
+                no_fill_index = int(np.ceil(x1.shape[-1]*0.25))
+
+            ax_left.errorbar(
+                x1[no_fill_index], y1[no_fill_index],
+                yerr=yerr1[no_fill_index],
+                color=color, capsize=3)
+        else:
+            ax_left.fill_between(x1, y1+yerr1, y1-yerr1,
+                                color=color, alpha=0.2)
+            ax_right.fill_between(x2, y2+yerr2, y2-yerr2,
+                                color=color, alpha=0.2)
 
     ax.set_xticks([])
     ax.set_yticks([])
@@ -524,18 +540,21 @@ class Plotter:
         self.add_t3(**kwargs)
         return self
 
+    # TODO: Add different linestyles for different files and also different colorschemes
+    # or rather the option to choose
     def plot_component(
-            self, ax: plt.Axes, name: str,
-            component: Union[Callable, PlotComponent],
-            sharex: Optional[bool] = False,
-            show_legend: Optional[bool] = True,
-            share_legend: Optional[bool] = False,
-            legend_location: Optional[str] = OPTIONS.plot.legend.location,
-            legend_size: Optional[int] = OPTIONS.plot.legend.fontsize,
-            error: Optional[bool] = False,
-            no_fill: Optional[bool] = False,
-            margin: Optional[float] = 0.05,
-            **kwargs) -> None:
+        self, ax: plt.Axes, name: str,
+        component: Union[Callable, PlotComponent],
+        sharex: Optional[bool] = False,
+        show_legend: Optional[bool] = True,
+        share_legend: Optional[bool] = False,
+        legend_location: Optional[str] = OPTIONS.plot.legend.location,
+        legend_size: Optional[int] = OPTIONS.plot.legend.fontsize,
+        error: Optional[bool] = False,
+        no_fill: Optional[bool] = False,
+        margin: Optional[float] = 0.05,
+        color_by: Optional[str] = "file",
+        **kwargs) -> None:
         """Plots all the data of a single component.
 
         Parameters
@@ -567,30 +586,36 @@ class Plotter:
             instead be indicated by one errorbar.
         margin : bool, optional
             The margin around the plot.
+        color_by : str, optional
         kwargs : dict
         """
         xlabel = r"$\lambda$ ($\mathrm{\mu}$m)"
         colors = get_colorlist(OPTIONS.plot.color.colormap)
-        for sub_component in component:
+        offsets = np.linspace(20, 20+10*len(component), len(component)).astype(int)
+        for comp_index, sub_component in enumerate(component):
+            no_fill_index = offsets[comp_index]
             if isinstance(sub_component, PlotComponent):
                 ax_left, ax_right, handles = None, None, []
                 ylims = self._set_y_limits(sub_component.x_values,
                                            sub_component.y_values,
                                            margin=margin)
+                file_index = 0
+                if color_by == "file":
+                    file_index = comp_index*len(sub_component.labels)
+
                 for index, (label, y_value, y_error)\
                         in enumerate(zip(sub_component.labels,
                                          sub_component.y_values,
                                          sub_component.y_errors)):
-                    try:
-                        color = colors[index]
-                    except Exception:
-                        breakpoint()
+                    color = colors[file_index+index]
                     if self.readouts[0].band == "lband":
                         ax_left, ax_right = plot_broken_axis(
-                                ax, sub_component.x_values,
-                                y_value, y_error, self.lband_bounds,
-                                self.mband_bounds, ax_left, ax_right,
-                                color=color, ylims=ylims, label=label, error=error)
+                            ax, sub_component.x_values,
+                            y_value, y_error, self.lband_bounds,
+                            self.mband_bounds, ax_left, ax_right,
+                            color=color, ylims=ylims, label=label,
+                            error=error, no_fill=no_fill,
+                            no_fill_index=no_fill_index)
 
                         d = .015
                         kwargs_diagonal = dict(transform=ax_left.transAxes,
@@ -612,9 +637,17 @@ class Plotter:
                         ax.plot(sub_component.x_values, y_value,
                                 label=label, color=color)
                         if error:
-                            ax.fill_between(sub_component.x_values,
-                                            y_value+y_error, y_value-y_error,
-                                            color=color, alpha=0.2)
+                            if no_fill:
+                                ax.errorbar(
+                                    sub_component.x_values[no_fill_index],
+                                    y_value[no_fill_index],
+                                    yerr=y_error[no_fill_index],
+                                    color=color, capsize=3)
+                            else:
+                                ax.fill_between(sub_component.x_values,
+                                                y_value+y_error, y_value-y_error,
+                                                color=color, alpha=0.2)
+
                         ax.set_ylim(*ylims)
                         ax.set_xlabel(xlabel)
                         ax.set_ylabel(name)
