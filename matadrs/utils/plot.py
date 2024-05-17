@@ -226,7 +226,8 @@ class Plotter:
         self.mband_bounds = (4.55, 4.9)
         self.nband_bounds = (8.5, 12.5)
 
-        self.readouts = list(map(ReadoutFits, self.fits_files))
+        self.readouts_unfiltered = list(map(ReadoutFits, self.fits_files))
+        self.readouts = self.readouts_unfiltered.copy()
         self.components = {}
 
     def __str__(self):
@@ -260,6 +261,26 @@ class Plotter:
         if np.isnan(ymin) and np.isnan(ymax):
             return None, None
         return ymin-spacing, ymax+spacing
+
+    def filter(self, keys: List[str], contains: List[str]):
+        """Filters the object's data by the given key.
+
+        The key can be any of the properties of the ReadoutFits class
+
+        Parameters
+        ----------
+        key : str
+            The key to filter the data by.
+        contains : str
+            The string that the key should contain.
+        """
+        keys = [keys] if not isinstance(keys, List) else keys
+        contains = [contains] if not isinstance(contains, List) else contains
+
+        for key, contain in zip(keys, contains):
+            self.readouts = [readout for readout in self.readouts if contain.lower() \
+                in getattr(readout, key.lower()).lower()]
+        return self
 
     def plot_uv(
             self, ax: Axes, symbol: Optional[str] = "x",
@@ -369,7 +390,7 @@ class Plotter:
         ax.set_ylabel(ylabel)
 
     def make_component(self, data_name: str,
-                       legend_format: Optional[str] = "long",
+                       legend_format: Optional[str] = "verbose",
                        unwrap: Optional[bool] = False,
                        period: Optional[int] = 360, **kwargs):
         """Generates a pandas DataFrame that has all the plots' information
@@ -380,8 +401,8 @@ class Plotter:
             The name of the data to be plotted. Determines the legend- and plot
             labels.
         legend_format : str, optional
-            Sets the format of the legend: For all information set "long" and
-            for only station names set "short".
+            Sets the format of the legend: For all information set "verbose" and
+            for only station names set "short". Default is "verbose".
         unwrap : bool, optional
             If the phase should be unwrapped.
         period : int, optional
@@ -398,14 +419,20 @@ class Plotter:
                 else:
                     sub_component.y_values = readout.oi_flux["FLUX"]
                     component_label = f"Flux ({readout.get_unit('oi_flux', 'flux')})"
+
                 # HACK: To get flux in Jansky, remove if solved
                 component_label = f"Flux (Jy)"
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
-                sub_component.labels = readout.get_telescopes()\
-                    if len(sub_component.y_values) > 1 else ["Averaged"]
+
+                if legend_format == "verbose":
+                    labels = [f"{readout.instrument.upper()}/{readout.date.split('T')[0]}"]
+                else:
+                    labels = readout.get_telescopes() if len(sub_component.y_values) > 1 else ["Averaged"]
+                sub_component.labels = labels
+
             elif data_name in ["vis", "vis2", "diff", "corrflux"]:
                 station_names = readout.oi_vis2["DELAY_LINE"]
-                if legend_format == "long":
+                if legend_format == "verbose":
                     baselines = np.around(readout.oi_vis2["BASELINE"], 2)
                     u_coords = readout.oi_vis2["UVCOORD"][:, 0]
                     v_coords = readout.oi_vis2["UVCOORD"][:, 1]
@@ -418,6 +445,7 @@ class Plotter:
                 else:
                     labels = station_names
                 sub_component.labels = labels
+
                 if data_name == "vis":
                     unit = readout.get_unit('oi_vis', 'visamp')
                     sub_component.y_values = readout.oi_vis["VISAMP"]
@@ -441,12 +469,13 @@ class Plotter:
                     component_label = "Squared visibilities (a.u.)"
                 else:
                     raise KeyError("No data-type of that data name exists!")
+
             elif data_name == "cphases":
                 cphases = readout.oi_t3["T3PHI"]
                 cphases_err = readout.oi_t3["T3PHIERR"]
                 if unwrap:
-                    cphases, cphases_err = unwrap_phases(cphases,
-                                                         cphases_err, period)
+                    cphases, cphases_err = unwrap_phases(
+                        cphases, cphases_err, period)
                 sub_component.labels = readout.oi_t3["TRIANGLE"]
                 sub_component.y_values = cphases
                 sub_component.y_errors = cphases_err
@@ -504,6 +533,7 @@ class Plotter:
             legend_location: Optional[str] = OPTIONS.plot.legend.location,
             legend_size: Optional[int] = OPTIONS.plot.legend.fontsize,
             error: Optional[bool] = False,
+            no_fill: Optional[bool] = False,
             margin: Optional[float] = 0.05,
             **kwargs) -> None:
         """Plots all the data of a single component.
@@ -532,6 +562,9 @@ class Plotter:
             The size of the legend.
         error : bool, optional
             If True, the error bars will be plotted.
+        no_fill : bool, optional
+            If True, the fill between the errors will not be plotted and
+            instead be indicated by one errorbar.
         margin : bool, optional
             The margin around the plot.
         kwargs : dict

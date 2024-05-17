@@ -308,8 +308,8 @@ class ReadoutFits:
         """Fetches the tau0 from the primary header."""
         if "HIERARCH ESO ISS AMBI TAU0 END" not in self.primary_header:
             return None
-        return np.mean([self.primary_header["HIERARCH ESO ISS AMBI TAU0 END"],
-                        self.primary_header["HIERARCH ESO ISS AMBI TAU0 START"]])
+        return 1e3*np.mean([self.primary_header["HIERARCH ESO ISS AMBI TAU0 END"],
+                            self.primary_header["HIERARCH ESO ISS AMBI TAU0 START"]])
 
     @property
     def resolution(self) -> str:
@@ -325,8 +325,8 @@ class ReadoutFits:
     def sta_to_tel(self) -> Dict[int, str]:
         """Gets the telescope's station index to telescope name mapping."""
         if self._sta_to_tel is None:
-            self._sta_to_tel = dict(zip(self.oi_array["STA_INDEX"],
-                                        self.oi_array["STA_NAME"]))
+            self._sta_to_tel = dict(
+                zip(self.oi_array["STA_INDEX"], self.oi_array["STA_NAME"]))
         return self._sta_to_tel
 
     @property
@@ -429,12 +429,15 @@ class ReadoutFits:
             u1, u2 = self._oi_t3["U1COORD"], self._oi_t3["U2COORD"]
             v1, v2 = self._oi_t3["V1COORD"], self._oi_t3["V2COORD"]
             uv_coords = []
+
             # NOTE: After Jozsef: u3, v3 = -(u1+u2), -(v1+v2) -> Dropping the minus
             # better closure phases in modelling -> Check that!
             for u_coord, v_coord in zip(zip(u1, u2, u1+u2), zip(v1, v2, v1+v2)):
                 uv_coords.append(np.array(list(zip(u_coord, v_coord))))
             uv_coords = np.array(uv_coords)
-            baselines = [np.sqrt(uv_coord[:, 0]**2+uv_coord[:, 1]**2)\
+
+            # TODO: Check if the baselines are correctly arranged
+            baselines = [np.hypot(uv_coord[:, 0], uv_coord[:, 1])\
                     for uv_coord in uv_coords]
             self._oi_t3.add_columns([uv_coords,
                                      self.get_delay_lines(self._oi_t3), baselines],
