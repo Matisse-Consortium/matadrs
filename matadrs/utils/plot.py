@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from re import sub
 from typing import Callable, Tuple, List, Union, Optional
 
 import numpy as np
@@ -57,7 +58,7 @@ def plot_broken_axis(ax: Axes, x: np.ndarray,
                      ylims: Optional[Tuple[float, float]] = None,
                      error: Optional[bool] = False,
                      no_fill: Optional[bool] = False,
-                     no_fill_index: Optional[int] = None,
+                     err_percentile: Optional[float] = None,
                      **kwargs):
     """Plot two axes next to each other to display the L-band.
 
@@ -90,8 +91,8 @@ def plot_broken_axis(ax: Axes, x: np.ndarray,
     no_fill : bool, optional
         If the fill between the errors should not be plotted and instead
         be indicated by one errorbar.
-    no_fill_index : int, optional
-        The point where the sole errorbar should be plotted.
+    err_percentile : int, optional
+        The percentage at which point the sole errorbar will be plotted.
     """
     x1 = x[(x >= range1[0]) & (x <= range1[1])]
     y1 = y[(x >= range1[0]) & (x <= range1[1])]
@@ -130,18 +131,17 @@ def plot_broken_axis(ax: Axes, x: np.ndarray,
     ax_right.plot(x2, y2, color=color, **kwargs)
     if error:
         if no_fill:
-            if no_fill_index is None:
-                no_fill_index = int(np.ceil(x1.shape[-1]*0.25))
-
+            err_percentile = 0.25 if err_percentile is None else err_percentile
+            no_fill_index = int(np.ceil(x1.shape[-1]*err_percentile))
             ax_left.errorbar(
                 x1[no_fill_index], y1[no_fill_index],
                 yerr=yerr1[no_fill_index],
                 color=color, capsize=3)
         else:
             ax_left.fill_between(x1, y1+yerr1, y1-yerr1,
-                                color=color, alpha=0.2)
+                                 color=color, alpha=0.2)
             ax_right.fill_between(x2, y2+yerr2, y2-yerr2,
-                                color=color, alpha=0.2)
+                                  color=color, alpha=0.2)
 
     ax.set_xticks([])
     ax.set_yticks([])
@@ -568,7 +568,7 @@ class Plotter:
         no_fill: Optional[bool] = False,
         margin: Optional[float] = 0.05,
         color_by: Optional[str] = "file",
-        **kwargs) -> None:
+        **kwargs) -> Axes:
         """Plots all the data of a single component.
 
         Parameters
@@ -605,11 +605,12 @@ class Plotter:
         """
         xlabel = r"$\lambda$ ($\mathrm{\mu}$m)"
         colors = get_colorlist(OPTIONS.plot.color.colormap)
-        offsets = np.linspace(20, 20+10*len(component), len(component)).astype(int)
-        for comp_index, sub_component in enumerate(component):
-            no_fill_index = offsets[comp_index]
+
+        # TODO: Make it so that the offsets don't overshoot the lenght of the data
+        offset = 0.8/len(component)
+        ax_left, ax_right, handles = None, None, []
+        for comp_index, sub_component in enumerate(component, start=1):
             if isinstance(sub_component, PlotComponent):
-                ax_left, ax_right, handles = None, None, []
                 ylims = self._set_y_limits(sub_component.x_values,
                                            sub_component.y_values,
                                            margin=margin)
@@ -629,7 +630,7 @@ class Plotter:
                             self.mband_bounds, ax_left, ax_right,
                             color=color, ylims=ylims, label=label,
                             error=error, no_fill=no_fill,
-                            no_fill_index=no_fill_index)
+                            err_percentile=offset*comp_index)
 
                         d = .015
                         kwargs_diagonal = dict(transform=ax_left.transAxes,
@@ -652,10 +653,13 @@ class Plotter:
                                 label=label, color=color)
                         if error:
                             if no_fill:
+                                no_fill_index = int(
+                                    np.ceil(sub_component.x_values.shape[-1]*comp_index*offset))
+                                print(np.mean(y_error)/y_value.min())
                                 ax.errorbar(
                                     sub_component.x_values[no_fill_index],
                                     y_value[no_fill_index],
-                                    yerr=y_error[no_fill_index],
+                                    yerr=np.mean(y_error),
                                     color=color, capsize=3)
                             else:
                                 ax.fill_between(sub_component.x_values,
@@ -683,6 +687,7 @@ class Plotter:
         kwargs_layout = {"pad": 3.0, "h_pad": 2.0, "w_pad": 4.0}\
             if self.readouts[0].band == "lband" else {}
         plt.tight_layout(**kwargs_layout)
+        return ax_left
 
     # TODO: Sharex, sharey and subplots should be added
     def plot(self, save: Optional[bool] = False,
@@ -733,15 +738,15 @@ class Plotter:
                                   figsize=(size*to_px*columns, size*to_px*rows))
 
         if self.num_components != 1:
-            for ax, (name, component) in zip(
-                    axarr.flatten(), self.components.items()):
-                self.plot_component(ax, name, component["values"],
-                                    **component["kwargs"], **kwargs)
+            for index, (ax, (name, component)) in enumerate(zip(
+                    axarr.flatten(), self.components.items())):
+                axarr[index] = self.plot_component(
+                    ax, name, component["values"], **component["kwargs"], **kwargs)
         else:
             name, component = map(
                 lambda x: x[0], zip(*self.components.items()))
-            self.plot_component(axarr, name, component["values"],
-                                **component["kwargs"], **kwargs)
+            axarr = self.plot_component(
+                axarr, name, component["values"], **component["kwargs"], **kwargs)
 
         if rax:
             return fig, axarr
