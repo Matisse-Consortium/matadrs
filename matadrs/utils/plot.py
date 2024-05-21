@@ -672,7 +672,7 @@ class Plotter:
 
                 if show_legend:
                     if handles:
-                        if "left" in OPTIONS.plot.legend.location.lower():
+                        if "left" in legend_location:
                             ax_legend = ax_left
                         else:
                             ax_legend = ax_right
