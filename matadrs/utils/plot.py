@@ -135,8 +135,7 @@ def plot_broken_axis(ax: Axes, x: np.ndarray,
             no_fill_index = int(np.ceil(x1.shape[-1]*err_percentile))
             ax_left.errorbar(
                 x1[no_fill_index], y1[no_fill_index],
-                yerr=yerr1[no_fill_index],
-                color=color, capsize=3)
+                yerr=np.mean(yerr1), color=color, capsize=3)
         else:
             ax_left.fill_between(x1, y1+yerr1, y1-yerr1,
                                  color=color, alpha=0.2)
@@ -655,7 +654,6 @@ class Plotter:
                             if no_fill:
                                 no_fill_index = int(
                                     np.ceil(sub_component.x_values.shape[-1]*comp_index*offset))
-                                print(np.mean(y_error)/y_value.min())
                                 ax.errorbar(
                                     sub_component.x_values[no_fill_index],
                                     y_value[no_fill_index],
