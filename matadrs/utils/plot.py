@@ -1,4 +1,3 @@
-import re
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
@@ -21,7 +20,7 @@ from ..mat_tools.mat_show_oifits_pbe_ama_short import open_oi_dir, \
         filter_oi_list, show_vis_tf_vs_time
 
 
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 
 
 def plot_data_quality(
@@ -105,15 +104,15 @@ def plot_broken_axis(ax: Axes, x: np.ndarray,
 
     if ax_left is None and ax_right is None:
         ax_left = inset_axes(
-                ax, width="48%", height="100%", loc='center left')
+                ax, width="48%", height="100%", loc="center left")
         ax_right = inset_axes(
-                ax, width="48%", height="100%", loc='center right')
+                ax, width="48%", height="100%", loc="center right")
 
         ax_left.spines.right.set_visible(False)
         ax_right.spines.left.set_visible(False)
 
         ax_left.yaxis.tick_left()
-        ax_left.tick_params(labelright='off')
+        ax_left.tick_params(labelright="off")
         ax_right.yaxis.set_visible(False)
 
         left_ticks = np.around(np.linspace(range1[0], range1[1], 5)[:-1], 1)
@@ -455,7 +454,7 @@ class Plotter:
                     component_label = f"Flux ({readout.get_unit('oi_flux', 'flux')})"
 
                 # HACK: To get flux in Jansky, remove if solved
-                component_label = f"Flux (Jy)"
+                component_label = "Flux (Jy)"
                 sub_component.y_errors = readout.oi_flux["FLUXERR"]
 
                 if legend_format == "verbose":
@@ -608,7 +607,7 @@ class Plotter:
         kwargs : dict
         """
         xlabel = r"$\lambda$ ($\mathrm{\mu}$m)"
-        colors = get_colorlist(OPTIONS.plot.color.colormap, len(self.readouts) * 6 ** 2)
+        colors = get_colorlist(OPTIONS.plot.color.colormap, (len(self.readouts) * 6 + 1) ** 2)
 
         # TODO: Make it so that the offsets don't overshoot the lenght of the data
         # TODO: Check if this works still
@@ -621,13 +620,16 @@ class Plotter:
                                            margin=margin)
                 file_index = 0
                 if color_by == "file":
-                    file_index = comp_index*len(sub_component.labels)
+                    file_index = comp_index * len(sub_component.labels)
 
                 for index, (label, y_value, y_error)\
                         in enumerate(zip(sub_component.labels,
                                          sub_component.y_values,
                                          sub_component.y_errors)):
+                    # try:
                     color = colors[file_index+index]
+                    # except IndexError:
+                    #     breakpoint()
                     if self.readouts[0].band == "lband":
                         ax_left, ax_right = plot_broken_axis(
                             ax, sub_component.x_values,
@@ -743,6 +745,7 @@ class Plotter:
 
         if self.num_components != 1:
             if subplots:
+                # HACK: This is really a hacky way to do all of this. Maybe needs a rewrite eventually
                 for comp_index, (name, component) in enumerate(self.components.items()):
                     for index, sub_component in enumerate(component["values"]):
                         if isinstance(sub_component, PlotComponent):
