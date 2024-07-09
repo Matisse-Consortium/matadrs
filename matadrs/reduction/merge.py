@@ -241,10 +241,10 @@ def merging_pipeline(averaged_dir: Path) -> None:
     cprint("Plotting files...", "g")
     for fits_file in output_dir.glob("*.fits"):
         unwrap = "HAWAII" not in fits_file.name
-        plot_fits = Plotter(fits_file, save_path=output_dir)
+        plot_fits = Plotter(fits_file, save_dir=output_dir)
         plot_fits.add_mosaic(unwrap=unwrap).plot(save=True, error=True)
     for fits_file in (output_dir / "non_averaged").glob("*.fits"):
-        plot_fits = Plotter(fits_file, save_path=output_dir / "non_averaged")
+        plot_fits = Plotter(fits_file, save_dir=output_dir / "non_averaged")
         plot_fits.add_uv().add_vis()
         plot_fits.add_vis2().add_t3(unwrap=True)
         plot_fits.plot(save=True, error=True)

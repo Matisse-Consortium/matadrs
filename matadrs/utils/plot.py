@@ -1,6 +1,7 @@
+import re
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
-from re import sub
 from typing import Callable, Tuple, List, Union, Optional
 
 import numpy as np
@@ -220,15 +221,15 @@ class Plotter:
 
     def __init__(self, fits_files: Union[Path, List[Path]],
                  plot_name: Optional[str] = None,
-                 save_path: Optional[Path] = None) -> None:
+                 save_dir: Optional[Path] = None) -> None:
         """The class's constructor"""
         self.fits_files = [fits_files]\
             if not isinstance(fits_files, List) else fits_files
 
-        if save_path is None:
-            self.save_path = Path("").cwd()
+        if save_dir is None:
+            self.save_dir = Path("").cwd()
         else:
-            self.save_path = Path(save_path)
+            self.save_dir = Path(save_dir)
 
         if plot_name is not None:
             self.plot_name = plot_name
@@ -244,6 +245,7 @@ class Plotter:
 
         self.readouts_unfiltered = list(map(ReadoutFits, self.fits_files))
         self.readouts = self.readouts_unfiltered.copy()
+        self.sort("date")
         self.components = {}
 
     def __str__(self):
@@ -311,16 +313,18 @@ class Plotter:
                 in getattr(readout, key.lower()).lower()]
         return self
 
-    def plot_uv(
-        self, ax: Axes, symbol: Optional[str] = "x",
-        airmass_lim: Optional[float] = 2.,
-        show_text: Optional[List] = False,
-        make_tracks: Optional[bool] = True,
-        show_legend: Optional[bool] = True,
-        legend_location: Optional[str] = OPTIONS.plot.legend.location,
-        legend_size: Optional[int] = OPTIONS.plot.legend.fontsize,
-        color_by: Optional[str] = "file",
-            **kwargs) -> None:
+    def plot_uv(self, ax: Axes,
+                symbol: Optional[str] = "x",
+                airmass_lim: Optional[float] = 2.,
+                show_text: Optional[List] = False,
+                make_tracks: Optional[bool] = True,
+                show_legend: Optional[bool] = True,
+                legend_location: Optional[str] = OPTIONS.plot.legend.location,
+                legend_size: Optional[int] = OPTIONS.plot.legend.fontsize,
+                color_by: Optional[str] = "file",
+                uv_extent: Optional[int] = None,
+                readouts: Optional[ReadoutFits] = None,
+                **kwargs) -> None:
         """Plots the (u, v)-coordinates and their corresponding tracks
 
         Parameters
@@ -347,8 +351,9 @@ class Plotter:
             ReadoutFits.instrument).
         """
         instruments, handles, uv_max = [], [], 0
-        colors = get_colorlist(OPTIONS.plot.color.colormap)
-        for index, readout in enumerate(self.readouts):
+        readouts = self.readouts if readouts is None else readouts
+        colors = get_colorlist(OPTIONS.plot.color.colormap, len(readouts) * 6 + 1)
+        for index, readout in enumerate(readouts):
             uv_coords = readout.oi_vis2["UVCOORD"]
             if uv_max < (tmp_uv_max := uv_coords.max()):
                 uv_max = tmp_uv_max
@@ -399,7 +404,7 @@ class Plotter:
 
         # TODO: Implement check or calculation for the orientations
         xlabel, ylabel = "$u$ (m) - South", "$v$ (m) - East"
-        uv_extent = int(uv_max + uv_max*0.25)
+        uv_extent = int(uv_max + uv_max*0.25) if uv_extent is None else uv_extent
 
         if color_by == "instrument":
             handles = []
@@ -555,7 +560,7 @@ class Plotter:
 
     # TODO: Add different linestyles for different files and also different colorschemes
     # or rather the option to choose
-    def plot_component(
+    def plot_components(
         self, ax: plt.Axes, name: str,
         component: Union[Callable, PlotComponent],
         sharex: Optional[bool] = False,
@@ -603,9 +608,10 @@ class Plotter:
         kwargs : dict
         """
         xlabel = r"$\lambda$ ($\mathrm{\mu}$m)"
-        colors = get_colorlist(OPTIONS.plot.color.colormap)
+        colors = get_colorlist(OPTIONS.plot.color.colormap, len(self.readouts) * 6 ** 2)
 
         # TODO: Make it so that the offsets don't overshoot the lenght of the data
+        # TODO: Check if this works still
         offset = 0.8/len(component)
         ax_left, ax_right, handles = None, None, []
         for comp_index, sub_component in enumerate(component, start=1):
@@ -687,7 +693,7 @@ class Plotter:
         plt.tight_layout(**kwargs_layout)
         return ax_left
 
-    # TODO: Sharex, sharey and subplots should be added
+    # TODO: Sharex, sharey and should be added
     def plot(self, save: Optional[bool] = False,
              subplots: Optional[bool] = False,
              figsize: Optional[List[int]] = None,
@@ -723,7 +729,7 @@ class Plotter:
         """
         if subplots:
             columns = self.num_components
-            rows = len(list(self.components.values())[0])
+            rows = len(list(self.components.values())[0]["values"])
         else:
             columns = 1 if self.num_components == 1 else\
                 (3 if self.num_components >= 3 else 2)
@@ -736,21 +742,33 @@ class Plotter:
                                   figsize=(size*to_px*columns, size*to_px*rows))
 
         if self.num_components != 1:
-            for index, (ax, (name, component)) in enumerate(zip(
-                    axarr.flatten(), self.components.items())):
-                axarr[index] = self.plot_component(
-                    ax, name, component["values"], **component["kwargs"], **kwargs)
+            if subplots:
+                for comp_index, (name, component) in enumerate(self.components.items()):
+                    for index, sub_component in enumerate(component["values"]):
+                        if isinstance(sub_component, PlotComponent):
+                            sub_component = [sub_component]
+                        else:
+                            sub_component = [partial(sub_component, readouts=[self.readouts[index]])]
+                        axarr[index, comp_index] = self.plot_components(
+                            axarr[index, comp_index], name, sub_component,
+                            **component["kwargs"], **kwargs)
+            else:
+                for index, (ax, (name, component)) in enumerate(zip(
+                        axarr.flatten(), self.components.items())):
+                    axarr[index] = self.plot_components(
+                        ax, name, component["values"],
+                        **component["kwargs"], **kwargs)
         else:
             name, component = map(
                 lambda x: x[0], zip(*self.components.items()))
-            axarr = self.plot_component(
+            axarr = self.plot_components(
                 axarr, name, component["values"], **component["kwargs"], **kwargs)
 
         if rax:
             return fig, axarr
 
         if save:
-            plt.savefig(self.save_path / self.plot_name,
+            plt.savefig(self.save_dir / self.plot_name,
                         format=Path(self.plot_name).suffix[1:])
         else:
             plt.show()
