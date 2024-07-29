@@ -756,10 +756,10 @@ class Plotter:
                             axarr[index, comp_index], name, sub_component,
                             **component["kwargs"], **kwargs)
             else:
-                for index, (ax, (name, component)) in enumerate(zip(
-                        axarr.flatten(), self.components.items())):
-                    axarr[index] = self.plot_components(
-                        ax, name, component["values"],
+                for index, (name, component) in enumerate(self.components.items()):
+                    row, col = index // axarr.shape[1], index % axarr.shape[1]
+                    axarr[row, col] = self.plot_components(
+                        axarr[row, col], name, component["values"],
                         **component["kwargs"], **kwargs)
         else:
             name, component = map(
