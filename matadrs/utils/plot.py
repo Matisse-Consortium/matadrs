@@ -626,10 +626,8 @@ class Plotter:
                         in enumerate(zip(sub_component.labels,
                                          sub_component.y_values,
                                          sub_component.y_errors)):
-                    # try:
+
                     color = colors[file_index+index]
-                    # except IndexError:
-                    #     breakpoint()
                     if self.readouts[0].band == "lband":
                         ax_left, ax_right = plot_broken_axis(
                             ax, sub_component.x_values,

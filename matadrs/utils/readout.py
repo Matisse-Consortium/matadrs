@@ -370,12 +370,14 @@ class ReadoutFits:
                 self._oi_flux.add_columns(
                         [[nan_array], [nan_array], [np.nan]],
                         names=["FLUXDATA", "FLUXERR", "STA_INDEX"])
+
             if "FLUXDATA" in self._oi_flux.columns:
                 self._oi_flux.keep_columns(
                         ["FLUXDATA", "FLUXERR", "STA_INDEX"])
             else:
                 self._oi_flux.keep_columns(
                         ["FLUX", "FLUXERR", "STA_INDEX"])
+
         return self._oi_flux
 
     @property

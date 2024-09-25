@@ -11,7 +11,7 @@ average = SimpleNamespace(
 color = SimpleNamespace(
         # colormap="seaborn-v0_8-colorblind",
         colormap="tab20",
-        number=35
+        number=100
         )
 
 legend = SimpleNamespace(
