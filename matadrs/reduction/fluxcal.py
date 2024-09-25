@@ -71,7 +71,7 @@ try:
 except ImportError:
     warn("Skycalc_cli not found (is needed for proper function of this script).")
     user_input = input("Do you want to install skycalc_cli (y/n): ")
-    install = True if user_input.lower() in ["yes", "no"] else False
+    install = True if user_input.lower() in ["yes", "y"] else False
     if install:
         subprocess.check_call(['pip', 'install', 'skycalc_cli'])
 
