@@ -26,7 +26,7 @@ DATABASES = ["vBoekelDatabase.fits",
              "calib_spec_db_v10_supplement.fits",
              "calib_spec_db_supplement3.fits"]
 LBAND_DATABASES = list(map(lambda x: DATABASE_DIR / x, DATABASES))
-NBAND_DATABASES = LBAND_DATABASES[:]+[DATABASE_DIR / "vBoekelDatabase.fitsold"]
+NBAND_DATABASES = LBAND_DATABASES[:] + [DATABASE_DIR / "vBoekelDatabase.fitsold"]
 
 MODE_NAMES = {"coherent": "corrflux", "incoherent": "flux"}
 
@@ -225,9 +225,9 @@ def calibrate_visibilities(targets: List[Path],
                      "mat_cal_oifits", str(sof_file)],
                     stdout=subprocess.DEVNULL)
     cprint("Plotting visibility calibrated files...", "y")
-    for fits_file in get_fits_by_tag(output_dir, "TARGET_CAL_INT"):
-        plot_fits = Plotter(fits_file, save_dir=output_dir)
-        plot_fits.add_t3().add_vis().plot(save=True, error=True)
+    # for fits_file in get_fits_by_tag(output_dir, "TARGET_CAL_INT"):
+    #     plot_fits = Plotter(fits_file, save_dir=output_dir)
+    #     plot_fits.add_t3().add_vis().plot(save=True, error=True)
 
 
 def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
@@ -262,9 +262,9 @@ def calibrate_fluxes(targets: List[Path], calibrators: List[Path],
                 output_fig_dir=str(output_dir),
                 do_airmass_correction=do_airmass)
         cprint(f"Plotting file '{output_file.name}'...", "y")
-        plot_fits = Plotter(output_file, save_dir=output_dir)
-        plot_fits.add_t3().add_vis().add_vis2()
-        plot_fits.plot(save=True, error=True)
+        # plot_fits = Plotter(output_file, save_dir=output_dir)
+        # plot_fits.add_t3().add_vis().add_vis2()
+        # plot_fits.plot(save=True, error=True)
 
 
 # TODO: Find way to make this moving better than this -> Moves (.fits)-files
@@ -350,6 +350,7 @@ def calibrate_folders(reduced_dir: Path, mode: str,
             for rotated_directory in rotated_sub_directories:
                 if directory == rotated_directory:
                     continue
+
                 calibrate_files(reduced_dir, directory,
                                 rotated_directory, mode, band, overwrite)
     cprint(f"Finished calibration of {band} and {mode}", "lp")
@@ -358,7 +359,8 @@ def calibrate_folders(reduced_dir: Path, mode: str,
 
 # TODO: Remove redundant checks for science targets as well as SCI-SCI or CAL-CAL. Skip
 # cals as checker generally
-# TODO: Implement checking for overwriting. Right now overwriting is by default
+# TODO: Implement checking for overwriting. Right now overwriting is by default.
+# Also the overwriting is not working properly right now
 @print_execution_time
 def calibration_pipeline(reduced_dir: Path,
                          mode: Optional[str] = "both",
