@@ -547,8 +547,8 @@ class ReadoutFits:
                 1
             ][:5]
             cal_ldd = round(self.primary_header["HIERARCH ESO PRO CAL DB DIAM"], 1)
-            cal_tau0 = 1e3 * self.primary_header["HIERARCH ESO PRO CAL DB TAU0"]
-            cal_seeing = self.primary_header["HIERARCH ESO PRO CAL DB FWHM"]
+            cal_tau0 = 1e3 * self.primary_header["HIERARCH ESO PRO CAL TAU0"]
+            cal_seeing = self.primary_header["HIERARCH ESO PRO CAL FWHM"]
         return cal_name, cal_time, cal_ldd, cal_tau0, cal_seeing
 
     def is_pip_version_greater_equal(self, version: str) -> bool:
