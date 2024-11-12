@@ -540,7 +540,7 @@ class ReadoutFits:
 
     def get_calib_info(self) -> Tuple[str, str, str]:
         """Fetches the object's name, time of observation, and limb-darkend diameter."""
-        cal_name, cal_ldd, cal_time, cal_tau0, cal_seeing = "", "", "", 0, 0
+        cal_name, cal_ldd, cal_time, cal_tau0, cal_seeing = "", "", "", "", ""
         if "HIERARCH ESO PRO CAL DB NAME" in self.primary_header:
             cal_name = self.primary_header["HIERARCH ESO PRO CAL DB NAME"].strip()
             cal_time = self.primary_header["HIERARCH ESO PRO CAL TPL START"].split("T")[
