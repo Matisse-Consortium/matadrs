@@ -114,8 +114,7 @@ class ReadoutFits:
         self._simbad_query = None
         self.gravity_method = "ft"
 
-        headers = ["oi_array", "oi_wavelength", "oi_flux",
-                   "oi_t3", "oi_vis", "oi_vis2"]
+        headers = ["oi_array", "oi_wavelength", "oi_flux", "oi_t3", "oi_vis", "oi_vis2"]
         for header in headers:
             setattr(self, f"_{header}", None)
             setattr(self, f"{header}_hdr", self.get_header(header))
@@ -163,8 +162,9 @@ class ReadoutFits:
                 pass
 
             if (header_name in ["SKY", "STD", "STD,RMNREC"]) or (header_name is None):
-                objects = Simbad.query_region(
-                    self.coords, radius=20*u.arcsec)["MAIN_ID"].data.tolist()
+                objects = Simbad.query_region(self.coords, radius=20 * u.arcsec)[
+                    "MAIN_ID"
+                ].data.tolist()
                 self._name = sorted(objects)[0]
             else:
                 self._name = header_name.lower()
@@ -179,13 +179,19 @@ class ReadoutFits:
                 instrument = "pionier"
             elif self.fits_file.name.startswith("GRAV"):
                 instrument = "gravity"
-        return instrument if instrument else self.primary_header["instrume"].lower().strip()
+        return (
+            instrument
+            if instrument
+            else self.primary_header["instrume"].lower().strip()
+        )
 
     @property
     def instrument_mode(self) -> str:
         """Fetches the object's instrument mode from the primary header."""
-        if self.instrument == "matisse" and \
-            self.primary_header["HIERARCH ESO DEL FT SENSOR"].lower() == "gravity":
+        if (
+            self.instrument == "matisse"
+            and self.primary_header["HIERARCH ESO DEL FT SENSOR"].lower() == "gravity"
+        ):
             return "gra4mat"
         return self.instrument
 
@@ -235,7 +241,7 @@ class ReadoutFits:
         """Fetches both right ascension and declination from the primary
         header and wraps it via astropy's Skycoord class."""
         if self._coords is None:
-            self._coords = SkyCoord(self.ra*u.deg, self.dec*u.deg, frame="icrs")
+            self._coords = SkyCoord(self.ra * u.deg, self.dec * u.deg, frame="icrs")
         return self._coords
 
     @property
@@ -251,7 +257,12 @@ class ReadoutFits:
     def stations(self) -> str:
         """Fetches the array's stations from the primary header."""
         if "HIERARCH ESO ISS CONF STATION1" in self.primary_header:
-            return "-".join([self.primary_header[f"HIERARCH ESO ISS CONF STATION{i}"] for i in range(1, 5)])
+            return "-".join(
+                [
+                    self.primary_header[f"HIERARCH ESO ISS CONF STATION{i}"]
+                    for i in range(1, 5)
+                ]
+            )
         return ""
 
     @property
@@ -262,13 +273,19 @@ class ReadoutFits:
     @property
     def array(self) -> str:
         """Fetches the array's name from the primary header."""
-        return ARRAY_CONFIGS[self.stations] if self.stations in ARRAY_CONFIGS else "other"
+        return (
+            ARRAY_CONFIGS[self.stations] if self.stations in ARRAY_CONFIGS else "other"
+        )
 
     @property
     def bcd_configuration(self) -> str:
         """Fetches the BCD-configuration from the primary header."""
-        return "-".join([self.primary_header["HIERARCH ESO INS BCD1 ID"],
-                         self.primary_header["HIERARCH ESO INS BCD2 ID"]]).lower()
+        return "-".join(
+            [
+                self.primary_header["HIERARCH ESO INS BCD1 ID"],
+                self.primary_header["HIERARCH ESO INS BCD2 ID"],
+            ]
+        ).lower()
 
     @property
     def tpl_start(self) -> str:
@@ -287,7 +304,9 @@ class ReadoutFits:
             date = self.primary_header["DATE"]
         else:
             date = self.tpl_start
-        return date if date else re.findall(r"\d{4}-\d{2}-\d{2}", self.fits_file.name)[0]
+        return (
+            date if date else re.findall(r"\d{4}-\d{2}-\d{2}", self.fits_file.name)[0]
+        )
 
     @property
     def pipeline_version(self) -> str:
@@ -305,16 +324,24 @@ class ReadoutFits:
         """Fetches the seeing from the primary header."""
         if "HIERARCH ESO ISS AMBI FWHM END" not in self.primary_header:
             return None
-        return np.mean([self.primary_header["HIERARCH ESO ISS AMBI FWHM START"],
-                        self.primary_header["HIERARCH ESO ISS AMBI FWHM END"]])
+        return np.mean(
+            [
+                self.primary_header["HIERARCH ESO ISS AMBI FWHM START"],
+                self.primary_header["HIERARCH ESO ISS AMBI FWHM END"],
+            ]
+        )
 
     @property
     def tau0(self) -> Optional[float]:
         """Fetches the tau0 from the primary header."""
         if "HIERARCH ESO ISS AMBI TAU0 END" not in self.primary_header:
             return None
-        return 1e3*np.mean([self.primary_header["HIERARCH ESO ISS AMBI TAU0 END"],
-                            self.primary_header["HIERARCH ESO ISS AMBI TAU0 START"]])
+        return 1e3 * np.mean(
+            [
+                self.primary_header["HIERARCH ESO ISS AMBI TAU0 END"],
+                self.primary_header["HIERARCH ESO ISS AMBI TAU0 START"],
+            ]
+        )
 
     @property
     def resolution(self) -> str:
@@ -331,7 +358,8 @@ class ReadoutFits:
         """Gets the telescope's station index to telescope name mapping."""
         if self._sta_to_tel is None:
             self._sta_to_tel = dict(
-                zip(self.oi_array["STA_INDEX"], self.oi_array["STA_NAME"]))
+                zip(self.oi_array["STA_INDEX"], self.oi_array["STA_NAME"])
+            )
         return self._sta_to_tel
 
     @property
@@ -340,10 +368,14 @@ class ReadoutFits:
         if self._oi_wavelength is None:
             self._oi_wavelength = Table()
             wl = self.get_table_for_fits("oi_wavelength")["EFF_WAVE"]
-            self._oi_wavelength.add_column(self._oi_wavelength.Column(
-                [wl.data.astype(np.float64)], unit=wl.unit), name="EFF_WAVE")
+            self._oi_wavelength.add_column(
+                self._oi_wavelength.Column([wl.data.astype(np.float64)], unit=wl.unit),
+                name="EFF_WAVE",
+            )
             if self.oi_wavelength["EFF_WAVE"].unit is not u.m:
-                self.oi_wavelength["EFF_WAVE"] = self.oi_wavelength["EFF_WAVE"].value*u.m
+                self.oi_wavelength["EFF_WAVE"] = (
+                    self.oi_wavelength["EFF_WAVE"].value * u.m
+                )
             self._oi_wavelength["EFF_WAVE"] = self._oi_wavelength["EFF_WAVE"].to(u.um)
         return self._oi_wavelength
 
@@ -364,19 +396,17 @@ class ReadoutFits:
                 self._oi_flux = self.get_table_for_fits("oi_flux")
             except KeyError:
                 self._oi_flux = Table()
-                nan_array = self._oi_flux.Column(
-                        np.full(self.longest_entry, np.nan))
+                nan_array = self._oi_flux.Column(np.full(self.longest_entry, np.nan))
                 nan_array.unit = u.Jy
                 self._oi_flux.add_columns(
-                        [[nan_array], [nan_array], [np.nan]],
-                        names=["FLUXDATA", "FLUXERR", "STA_INDEX"])
+                    [[nan_array], [nan_array], [np.nan]],
+                    names=["FLUXDATA", "FLUXERR", "STA_INDEX"],
+                )
 
             if "FLUXDATA" in self._oi_flux.columns:
-                self._oi_flux.keep_columns(
-                        ["FLUXDATA", "FLUXERR", "STA_INDEX"])
+                self._oi_flux.keep_columns(["FLUXDATA", "FLUXERR", "STA_INDEX"])
             else:
-                self._oi_flux.keep_columns(
-                        ["FLUX", "FLUXERR", "STA_INDEX"])
+                self._oi_flux.keep_columns(["FLUX", "FLUXERR", "STA_INDEX"])
 
         return self._oi_flux
 
@@ -387,31 +417,60 @@ class ReadoutFits:
             try:
                 self._oi_vis = self.get_table_for_fits("oi_vis")
                 self._oi_vis.add_columns(
-                        [self.get_delay_lines(self._oi_vis),
-                         self.merge_uv_coords(self._oi_vis),
-                         self.get_baselines(self._oi_vis)],
-                        names=["DELAY_LINE", "UVCOORD", "BASELINE"])
+                    [
+                        self.get_delay_lines(self._oi_vis),
+                        self.merge_uv_coords(self._oi_vis),
+                        self.get_baselines(self._oi_vis),
+                    ],
+                    names=["DELAY_LINE", "UVCOORD", "BASELINE"],
+                )
             except KeyError:
                 self._oi_vis = Table()
-                nan_column = self._oi_vis.Column(
-                        np.full(self.longest_entry, np.nan))
+                nan_column = self._oi_vis.Column(np.full(self.longest_entry, np.nan))
                 nan_array = [nan_column for _ in range(6)]
                 nan_six = [(np.nan, np.nan) for _ in range(6)]
                 nan_str = ["" for _ in range(6)]
                 nan_base = [np.nan for _ in range(6)]
                 self._oi_vis.add_columns(
-                        [nan_array, nan_array, nan_six,
-                         nan_array, nan_array, nan_str,
-                         nan_base, nan_base, nan_array, nan_six],
-                        names=["VISAMP", "VISAMPERR", "UVCOORD",
-                               "VISPHI", "VISPHIERR",
-                               "DELAY_LINE", "BASELINE",
-                               "MJD", "FLAG", "STA_INDEX"])
+                    [
+                        nan_array,
+                        nan_array,
+                        nan_six,
+                        nan_array,
+                        nan_array,
+                        nan_str,
+                        nan_base,
+                        nan_base,
+                        nan_array,
+                        nan_six,
+                    ],
+                    names=[
+                        "VISAMP",
+                        "VISAMPERR",
+                        "UVCOORD",
+                        "VISPHI",
+                        "VISPHIERR",
+                        "DELAY_LINE",
+                        "BASELINE",
+                        "MJD",
+                        "FLAG",
+                        "STA_INDEX",
+                    ],
+                )
             self._oi_vis.keep_columns(
-                    ["VISAMP", "VISAMPERR", "UVCOORD",
-                     "VISPHI", "VISPHIERR",
-                     "DELAY_LINE", "BASELINE",
-                     "MJD", "FLAG", "STA_INDEX"])
+                [
+                    "VISAMP",
+                    "VISAMPERR",
+                    "UVCOORD",
+                    "VISPHI",
+                    "VISPHIERR",
+                    "DELAY_LINE",
+                    "BASELINE",
+                    "MJD",
+                    "FLAG",
+                    "STA_INDEX",
+                ]
+            )
         return self._oi_vis
 
     @property
@@ -419,13 +478,26 @@ class ReadoutFits:
         """Fetches the squared visibility table."""
         if self._oi_vis2 is None:
             self._oi_vis2 = self.get_table_for_fits("oi_vis2")
-            self._oi_vis2.add_columns([self.get_delay_lines(self._oi_vis2),
-                                       self.merge_uv_coords(self._oi_vis2),
-                                       self.get_baselines(self._oi_vis2)],
-                                      names=["DELAY_LINE", "UVCOORD", "BASELINE"])
-            self._oi_vis2.keep_columns(["VIS2DATA", "VIS2ERR",
-                                        "UVCOORD", "DELAY_LINE",
-                                        "BASELINE", "MJD", "FLAG", "STA_INDEX"])
+            self._oi_vis2.add_columns(
+                [
+                    self.get_delay_lines(self._oi_vis2),
+                    self.merge_uv_coords(self._oi_vis2),
+                    self.get_baselines(self._oi_vis2),
+                ],
+                names=["DELAY_LINE", "UVCOORD", "BASELINE"],
+            )
+            self._oi_vis2.keep_columns(
+                [
+                    "VIS2DATA",
+                    "VIS2ERR",
+                    "UVCOORD",
+                    "DELAY_LINE",
+                    "BASELINE",
+                    "MJD",
+                    "FLAG",
+                    "STA_INDEX",
+                ]
+            )
         return self._oi_vis2
 
     @property
@@ -439,18 +511,21 @@ class ReadoutFits:
 
             # NOTE: After Jozsef: u3, v3 = -(u1+u2), -(v1+v2) -> Dropping the minus
             # better closure phases in modelling -> Check that!
-            for u_coord, v_coord in zip(zip(u1, u2, u1+u2), zip(v1, v2, v1+v2)):
+            for u_coord, v_coord in zip(zip(u1, u2, u1 + u2), zip(v1, v2, v1 + v2)):
                 uv_coords.append(np.array(list(zip(u_coord, v_coord))))
             uv_coords = np.array(uv_coords)
 
             # TODO: Check if the baselines are correctly arranged
-            baselines = [np.hypot(uv_coord[:, 0], uv_coord[:, 1])\
-                    for uv_coord in uv_coords]
-            self._oi_t3.add_columns([uv_coords,
-                                     self.get_delay_lines(self._oi_t3), baselines],
-                                    names=["UVCOORD", "TRIANGLE", "BASELINE"])
-            self._oi_t3.keep_columns(["T3PHI", "T3PHIERR",
-                                      "UVCOORD", "TRIANGLE", "BASELINE"])
+            baselines = [
+                np.hypot(uv_coord[:, 0], uv_coord[:, 1]) for uv_coord in uv_coords
+            ]
+            self._oi_t3.add_columns(
+                [uv_coords, self.get_delay_lines(self._oi_t3), baselines],
+                names=["UVCOORD", "TRIANGLE", "BASELINE"],
+            )
+            self._oi_t3.keep_columns(
+                ["T3PHI", "T3PHIERR", "UVCOORD", "TRIANGLE", "BASELINE"]
+            )
         return self._oi_t3
 
     def is_calibrator(self) -> bool:
@@ -465,12 +540,16 @@ class ReadoutFits:
 
     def get_calib_info(self) -> Tuple[str, str, str]:
         """Fetches the object's name, time of observation, and limb-darkend diameter."""
-        cal_name, cal_ldd, cal_time = "", "", ""
+        cal_name, cal_ldd, cal_time, cal_tau0, cal_seeing = "", "", "", 0, 0
         if "HIERARCH ESO PRO CAL DB NAME" in self.primary_header:
             cal_name = self.primary_header["HIERARCH ESO PRO CAL DB NAME"].strip()
-            cal_time = self.primary_header["HIERARCH ESO PRO CAL TPL START"].split("T")[1][:5]
+            cal_time = self.primary_header["HIERARCH ESO PRO CAL TPL START"].split("T")[
+                1
+            ][:5]
             cal_ldd = round(self.primary_header["HIERARCH ESO PRO CAL DB DIAM"], 1)
-        return cal_name, cal_time, cal_ldd
+            cal_tau0 = 1e3 * self.primary_header["HIERARCH ESO PRO CAL DB TAU0"]
+            cal_seeing = self.primary_header["HIERARCH ESO PRO CAL DB FWHM"]
+        return cal_name, cal_time, cal_ldd, cal_tau0, cal_seeing
 
     def is_pip_version_greater_equal(self, version: str) -> bool:
         """Checks if the pipeline's version is greater than the
@@ -486,17 +565,18 @@ class ReadoutFits:
         -------
         greater : bool
         """
-        numbers_to_check = [int(num) for num
-                            in re.findall(r'\d+', version)]
-        numbers_reference = [int(num) for num
-                             in re.findall(r'\d+', self.pipeline_version)]
+        numbers_to_check = [int(num) for num in re.findall(r"\d+", version)]
+        numbers_reference = [
+            int(num) for num in re.findall(r"\d+", self.pipeline_version)
+        ]
 
         if len(numbers_to_check) >= 3 and len(numbers_reference) >= 3:
-            return all(numbers_reference[index] >= numbers_to_check[index]
-                       for index in range(3))
+            return all(
+                numbers_reference[index] >= numbers_to_check[index]
+                for index in range(3)
+            )
         else:
-            raise ValueError("Invalid version format."
-                             " Please use x.y.z format.")
+            raise ValueError("Invalid version format." " Please use x.y.z format.")
 
     def get_header(self, header: str) -> Optional[fits.Header]:
         """Fetches a Card's header by its header name.
@@ -512,8 +592,7 @@ class ReadoutFits:
         """
         with fits.open(self.fits_file, "readonly") as hdul:
             if header not in hdul:
-                warnings.warn(f"Header {header} not found!",
-                              HeaderNotFoundWarning)
+                warnings.warn(f"Header {header} not found!", HeaderNotFoundWarning)
                 return
             return hdul[header].header
 
@@ -568,7 +647,7 @@ class ReadoutFits:
         -------
         baselines  : numpy.ndarray
         """
-        return np.sqrt(table["UCOORD"]**2+table["VCOORD"]**2)
+        return np.sqrt(table["UCOORD"] ** 2 + table["VCOORD"] ** 2)
 
     def get_telescopes(self) -> List[str]:
         """Fetches the station indices from the 'oi_flux' table
@@ -593,6 +672,9 @@ class ReadoutFits:
         -------
         delay_lines : list of  str
         """
-        return ["-".join(list(map(self.sta_to_tel.get, station_index)))
-                if all([index in self.sta_to_tel for index in station_index]) else ""
-                for station_index in table["STA_INDEX"]]
+        return [
+            "-".join(list(map(self.sta_to_tel.get, station_index)))
+            if all([index in self.sta_to_tel for index in station_index])
+            else ""
+            for station_index in table["STA_INDEX"]
+        ]
