@@ -22,7 +22,6 @@ __all__ = ["ReadoutFits"]
 
 DATA_DIR = Path(pkg_resources.resource_filename("matadrs", "data"))
 GRAVITY_TO_INDEX = {"sc": 10, "ft": 20}
-ARRAY_CONFIGS = {}
 
 
 def add_array_config(dictionary: Dict, key: str, value: str) -> Dict:
@@ -30,7 +29,7 @@ def add_array_config(dictionary: Dict, key: str, value: str) -> Dict:
     perms = map(lambda x: "-".join(x), permutations(key.split("-")))
     return {**dictionary, **{perm: value for perm in perms}}
 
-
+ARRAY_CONFIGS = {}
 ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "A0-B2-D0-C1", "small")
 ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "A1-B2-C1-D0", "small")
 ARRAY_CONFIGS = add_array_config(ARRAY_CONFIGS, "K0-G2-D0-J3", "medium")
